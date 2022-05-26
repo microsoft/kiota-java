@@ -1,0 +1,2 @@
+rootProject.name = 'com-microsoft-kiota-http'
+include 'lib'
