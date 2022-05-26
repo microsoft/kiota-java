@@ -1,0 +1,2 @@
+rootProject.name = 'com-microsoft-kiota-serialization-json'
+include 'lib'
