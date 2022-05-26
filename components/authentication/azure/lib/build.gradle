@@ -6,7 +6,6 @@ plugins {
 
 archivesBaseName = 'kiota-authentication-azure'
 
-//TODO: fix dependencies
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
