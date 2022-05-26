@@ -1,0 +1,2 @@
+rootProject.name = 'com-microsoft-kiota-authentication'
+include 'lib'
