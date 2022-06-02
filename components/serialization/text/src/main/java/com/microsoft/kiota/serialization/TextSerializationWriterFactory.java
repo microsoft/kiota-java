@@ -4,14 +4,11 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import com.microsoft.kiota.serialization.SerializationWriter;
-import com.microsoft.kiota.serialization.SerializationWriterFactory;
-
-public class JsonSerializationWriterFactory implements SerializationWriterFactory {
+public class TextSerializationWriterFactory implements SerializationWriterFactory {
     public String getValidContentType() {
         return validContentType;
     }
-    private static final String validContentType = "application/json";
+    private static final String validContentType = "text/plain";
     @Override
     @Nonnull
     public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
@@ -21,6 +18,6 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
         } else if (!contentType.equals(validContentType)) {
             throw new IllegalArgumentException("expected a " + validContentType + " content type");
         }
-        return new JsonSerializationWriter();
+        return new TextSerializationWriter();
     }
 }
