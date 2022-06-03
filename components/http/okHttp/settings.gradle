@@ -1,1 +1,2 @@
 rootProject.name = 'com-microsoft-kiota-http'
+includeBuild '../../abstractions'
