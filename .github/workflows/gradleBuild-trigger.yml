@@ -1,4 +1,4 @@
-name: Gradle Build Projects
+name: Gradle Build Project Trigger
 
 on:
   pull_request:
@@ -11,42 +11,74 @@ on:
       - '**.md'
     workflow_dispatch:
 
-    jobs:
-      Build:
-        runs-on: ubuntu-latest
-        steps: 
-          - name: Checkout
-            uses: actions/checkout@v3
-          - name: Get Changed Files
-            id: changed-files
-            uses: tj-actions/changed-files@v22.2
-          - name: build-abstractions
-            if: contains(steps.changed-files.outputs.modified_files, '**components/abstractions/**')
-            uses: ./.github/workflows/gradleBuild-component.yml
-            with:
-              componentName: abstractions
-              componentPath: ./components/abstractions/
-          - name: build-authentication
-            if: contains(steps.changed-files.outputs.modified_files, '**components/authentication/azure/**')
-            uses: ./.github/workflows/gradleBuild-component.yml
-            with:
-              componentName: authentication-azure
-              componentPath: ./components/authentication/azure/           
-          - name: build-http-okHttp
-            if: contains(steps.changed-files.outputs.modified_files, '**components/http/okHttp/**')
-            uses: ./.github/workflows/gradleBuild-component.yml
-            with:
-              componentName: http-okHttp
-              componentPath: ./components/http/okHttp/
-          - name: build-serialization-json
-            if: contains(steps.changed-files.outputs.modified_files, '**components/serialization/json/**')
-            uses: ./.github/workflows/gradleBuild-component.yml
-            with:
-              componentName: serialization-json
-              componentPath: ./components/serialization/json/
-          - name: build-serialization-text  
-            if: contains(steps.changed-files.outputs.modified_files, '**components/serialization/text/**')
-            uses: ./.github/workflows/gradleBuild-component.yml
-            with:
-              componentName: serialization-text
-              componentPath: ./components/serialization/text/
+jobs:
+  checkPaths:
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          abstractions:
+            - 'components/abstractions/**'
+          authentication-azure:
+            - 'components/authentication/azure/**'
+          http-okHttp:
+            - 'components/http/okHttp/**'
+          serialization-json:
+            - 'components/serialization/json/**'
+          serialization-text:
+            - 'components/serialization/text/**'  
+    - name: checkSecrets
+      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties'
+    - name: checkSecrets2
+      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: '.\secring.gpg'
+       
+  buildAbstractions:
+    needs: checkPaths
+    if: ${{ needs.checkPaths.outputs.abstractions_count }} > 0
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: abstractions
+      workingDirectory: ./components/abstractions/
+
+  buildAuthentication:
+    needs: checkPaths
+    if: ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: authentication-azure
+      workingDirectory: ./components/authentication/azure/
+
+  buildOkHttp:
+    needs: checkPaths
+    if: ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: http-okHttp 
+      workingDirectory: ./components/http/okHttp/
+
+  buildSerializationJson:
+    needs: checkPaths
+    if: ${{ needs.checkPaths.outputs.serialization-json_count }} > 0
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: serialization-json
+      workingDirectory: ./components/serialization/json/
+
+  buildSerializationText:
+    needs: checkPaths
+    if: ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: serialization-text
+      workingDirectory: ./components/serialization/text/

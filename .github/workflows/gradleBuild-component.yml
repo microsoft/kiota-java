@@ -6,17 +6,16 @@ on:
       componentName:
         required: true
         type: string
-      componentPath: 
+      workingDirectory: 
         required: true
         type: string
          
-job:
+jobs:
   build_component:
-    name: Gradle Build Project 
-    runs on: ubuntu-latest
+    runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.componentPath }} 
+        working-directory: ${{ inputs.workingDirectory }} 
     steps:
       - uses: actions/checkout@v3
       - name: Setup JDK
@@ -28,11 +27,11 @@ job:
       - name: Detect Secrets
         uses: RobertFischer/detect-secrets-action@v2.0.0
       - name: Grant Execute Permission for Gradlew
-        run: chmod +x gradlew  
+        run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
       - name: Upload Unit Test Results
-        if: {{ always() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: Unit Tests
