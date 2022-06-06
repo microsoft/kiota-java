@@ -48,5 +48,3 @@ jobs:
         run: chmod +x gradlew
       - name: Publish
         run: ./gradlew $PREVIEW_TASK
-      
-  
