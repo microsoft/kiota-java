@@ -1,4 +1,4 @@
-name: Gradle Build Projects
+name: Gradle Build Project Trigger
 
 on:
   pull_request:
@@ -14,8 +14,6 @@ on:
 jobs:
   checkPaths:
     runs-on: ubuntu-latest
-    outputs:
-      abstractions: ${{ steps.filter.outputs.abstractions }}
     steps: 
     - uses: dorny/paths-filter@v2
       id: filter
@@ -30,8 +28,7 @@ jobs:
           serialization-json:
             - 'components/serialization/json/**'
           serialization-text:
-            - 'components/serialization/text/**'    
-    - run: echo ${{ steps.filter.outputs.abstractions_count }}      
+            - 'components/serialization/text/**'        
   
   buildAbstractions:
     needs: checkPaths
@@ -67,7 +64,7 @@ jobs:
 
   buildSerializationText:
     needs: checkPaths
-    if: ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 #these condtions need to be fixed
+    if: ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-text
