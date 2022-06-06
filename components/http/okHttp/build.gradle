@@ -10,7 +10,8 @@ plugins {
 java {
     modularity.inferModulePath = true
     withSourcesJar()
-    withJavadocJar()
+    //Prevent Javadoc from causing build failure
+    //withJavadocJar()
 }
 
 test {
