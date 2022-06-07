@@ -31,6 +31,19 @@ jobs:
             - 'components/serialization/json/**'
           serialization-text:
             - 'components/serialization/text/**' 
+    - uses: actions/checkout@v3
+    - name: Download file
+      run: components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties' 
+    - name: Download file
+      run: components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env: 
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: '.\secring.gpg'  
 
   buildAbstractions:
     needs: checkPaths
