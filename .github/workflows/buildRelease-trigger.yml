@@ -31,6 +31,12 @@ jobs:
             - 'components/serialization/json/**'
           serialization-text:
             - 'components/serialization/text/**' 
+    - name: checkSecrets
+      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties' 
 
   buildAbstractions:
     needs: checkPaths
