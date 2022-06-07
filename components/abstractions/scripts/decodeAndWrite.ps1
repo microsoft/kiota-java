@@ -18,8 +18,8 @@ Param(
     [string]$outputPath
 )
 
-echo: "encodedVal: $encodedValue"
-echo: "outPath: $outputPath"
+Write-Output "encodedVal: $encodedValue"
+Write-Output "outPath: $outputPath"
 
 if($outputPath -eq "" -or $null -eq $outputPath) {
     Write-Output "Value of Variable: outputPath is Null or Empty. Exiting."
