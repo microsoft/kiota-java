@@ -36,6 +36,13 @@ jobs:
       env:  
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
         OUTPUT_PATH: '.\local.properties'
+    - name: checkSecrets2
+      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.SECRING.GPG }}
+        OUTPUT_PATH: '.\secring.gpg'
+      
     
   buildAbstractions:
     needs: checkPaths
