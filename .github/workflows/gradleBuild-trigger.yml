@@ -15,6 +15,7 @@ jobs:
   checkPaths:
     runs-on: ubuntu-latest
     steps: 
+    - uses: actions/checkout@v3
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -28,8 +29,14 @@ jobs:
           serialization-json:
             - 'components/serialization/json/**'
           serialization-text:
-            - 'components/serialization/text/**'        
-  
+            - 'components/serialization/text/**'  
+    - name: checkSecrets
+      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties'
+    
   buildAbstractions:
     needs: checkPaths
     if: ${{ needs.checkPaths.outputs.abstractions_count }} > 0
