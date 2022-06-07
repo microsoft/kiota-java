@@ -32,6 +32,9 @@ jobs:
           serialization-text:
             - 'components/serialization/text/**' 
   
+  testBuildAbstractions:
+    uses: ./.github/workflows/testComponentRelease.yml
+
   buildAbstractions:
     needs: checkPaths
     if: ${{ needs.checkPaths.outputs.abstractions_count }} > 0
