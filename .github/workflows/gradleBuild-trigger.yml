@@ -50,7 +50,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: abstractions
-      componentPath: ./components/abstractions/
+      workingDirectory: ./components/abstractions/
 
   buildAuthentication:
     needs: checkPaths
@@ -58,7 +58,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: authentication-azure
-      componentPath: ./components/authentication/azure/
+      workingDirectory: ./components/authentication/azure/
 
   buildOkHttp:
     needs: checkPaths
@@ -66,7 +66,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: http-okHttp 
-      componentPath: ./components/http/okHttp/
+      workingDirectory: ./components/http/okHttp/
 
   buildSerializationJson:
     needs: checkPaths
@@ -74,7 +74,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-json
-      componentPath: ./components/serialization/json/
+      workingDirectory: ./components/serialization/json/
 
   buildSerializationText:
     needs: checkPaths
@@ -82,4 +82,4 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-text
-      componentPath: ./components/serialization/text/
+      workingDirectory: ./components/serialization/text/

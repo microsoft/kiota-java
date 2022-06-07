@@ -6,7 +6,7 @@ on:
       componentName:
         required: true
         type: string
-      componentPath: 
+      workingDirectory: 
         required: true
         type: string
          
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.componentPath }} 
+        working-directory: ${{ inputs.workingDirectory }} 
     steps:
       - uses: actions/checkout@v3
       - name: Setup JDK

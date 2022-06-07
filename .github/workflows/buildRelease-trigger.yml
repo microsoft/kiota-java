@@ -38,7 +38,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: abstractions
-      componentPath: ./components/abstractions/
+      workingDirectory: ./components/abstractions/
 
   buildAuthenticationAzure:
     needs: checkPaths
@@ -46,7 +46,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: authentication-azure
-      componentPath: ./components/authentication/azure/
+      workingDirectory: ./components/authentication/azure/
 
   buildOkHttp:
     needs: checkPaths
@@ -54,7 +54,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: http-okHttp 
-      componentPath: ./components/http/okHttp/
+      workingDirectory: ./components/http/okHttp/
 
   buildSerializationJson:
     needs: checkPaths
@@ -62,7 +62,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-json
-      componentPath: ./components/serialization/json/
+      workingDirectory: ./components/serialization/json/
 
   buildSerializationText:
     needs: checkPaths
@@ -70,7 +70,7 @@ jobs:
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-text
-      componentPath: ./components/serialization/text/
+      workingDirectory: ./components/serialization/text/
 
   publishAbstractions:
     needs: buildAbstractions
@@ -78,7 +78,8 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPath: ./components/abstractions/
+      componentPathPwsh: .\components\abstractions\
+      componentPathUbuntu: ./components/abstractions/
 
   publishAuthenticationAzure: 
     needs: buildAuthenticationAzure
@@ -86,7 +87,8 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPath: ./components/authentication/azure/
+      componentPathPwsh: .\components\authentication\azure\
+      componentPathUbuntu: ./components/authentication/azure/
 
   publishOkhttp:
     needs: buildOkHttp
@@ -94,7 +96,8 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPath: ./components/http/okHttp/
+      componentPathPwsh: .\components\http\okHttp\
+      componentPathUbuntu: ./components/http/okHttp/
   
   publishSerializationJson:
     needs: buildSerializationJson
@@ -102,7 +105,8 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPath: ./components/serialization/json/
+      componentPathPwsh: .\components\serialization\json\
+      componentPathUbuntu: ./components/serialization/json/
   
   publishSerializationText:
     needs: buildSerializationText
@@ -110,6 +114,7 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPath: ./components/serialization/text/
+      componentPathPwsh: .\components\serialization\text\
+      componentPathUbuntu: ./components/serialization/text/
 
     
