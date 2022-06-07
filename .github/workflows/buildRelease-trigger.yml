@@ -31,9 +31,6 @@ jobs:
             - 'components/serialization/json/**'
           serialization-text:
             - 'components/serialization/text/**' 
-  
-  testBuildAbstractions:
-    uses: ./.github/workflows/testComponentRelease.yml
 
   buildAbstractions:
     needs: checkPaths
