@@ -1,0 +1,38 @@
+name: Test Abstractions Release Component
+
+on: 
+  workflow_call:
+
+jobs: 
+  mavenSnapshot:
+    environment: 
+      name: maven_central_snapshot  
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v3
+      - name: Easy detect-secrets
+        uses: RobertFischer/detect-secrets-action@v2.0.0
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'adopt'
+          cache: gradle
+      - name: show directory
+        run: ls
+      - name: Download file
+        run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+        shell: pwsh
+        env:  
+          ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+          OUTPUT_PATH: '.\components\abstractions\local.properties' 
+      - name: Download file
+        run: |
+          echo "$ENCODED_VALUE"
+          .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+        shell: pwsh
+        env: 
+          ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+          OUTPUT_PATH: '.\components\abstractions\secring.gpg'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
