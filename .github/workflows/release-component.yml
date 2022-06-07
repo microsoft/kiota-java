@@ -13,6 +13,8 @@ on:
         required: true
         type: string
       componentPathUbuntu:
+        required: true
+        type: string
 
 jobs: 
   mavenSnapshot:
