@@ -17,7 +17,10 @@ jobs:
   mavenSnapshot:
     if: ${{ inputs.shouldPreview }} == 'true'
     environment: 
-      name: maven_central_snapshot    
+      name: maven_central_snapshot  
+    env: 
+      localProperties: ${{ secrets.LOCAL_PROPERTIES }}
+      secring: ${{ secrets.SECRING_GPG }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,18 +36,18 @@ jobs:
           distribution: 'adopt'
           cache: gradle
       - name: Download file
-        run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+        run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:localProperties -outputPath $env:OUTPUT_PATH
         shell: pwsh
         env:  
-          ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+   #       ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
           OUTPUT_PATH: '.\local.properties' 
       - name: Download file
         run: |
           echo "$ENCODED_VALUE"
-          .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+          .\scripts\decodeAndWrite.ps1 -encodedValue $env:secring -outputPath $env:OUTPUT_PATH
         shell: pwsh
         env: 
-          ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+   #       ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
           OUTPUT_PATH: '.\secring.gpg'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
