@@ -40,7 +40,7 @@ jobs:
       run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
       env:  
-        ENCODED_VALUE: ${{ secrets.SECRING.GPG }}
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
         OUTPUT_PATH: '.\secring.gpg'
       
     
