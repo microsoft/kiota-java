@@ -1,7 +1,7 @@
 name: Build and Publish Trigger
 
 on: 
-  pull_request:
+  push:
     branches: [dev, main]
     paths-ignore: 
       - '**.gradle/wrapper'
