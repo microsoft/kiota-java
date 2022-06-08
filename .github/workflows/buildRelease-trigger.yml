@@ -44,7 +44,7 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-        base: develop
+        base: main
         filters: |
           abstractions:
             - 'components/abstractions/**'
