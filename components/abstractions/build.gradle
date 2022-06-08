@@ -7,6 +7,9 @@ plugins {
     id 'signing'
 }
 
+group   = 'com.microsoft.kiota'
+version = '0.0.1'
+
 java {
     modularity.inferModulePath = true
     withSourcesJar()
@@ -23,6 +26,14 @@ sourceSets {
             exclude 'pom.xml'
         }
     }
+}
+
+//Prevent javadocs from failing build
+tasks.withType(Javadoc) {
+      failOnError false
+      options.addStringOption('Xdoclint:none', '-quiet')
+      options.addStringOption('encoding', 'UTF-8')
+      options.addStringOption('charSet', 'UTF-8')
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -142,8 +153,8 @@ def fixAscNames = { name ->
 
 compileJava {
   options.compilerArgs << "-parameters"
-  sourceCompatibility = 1.16
-  targetCompatibility = 1.16
+  sourceCompatibility = '17'
+  targetCompatibility = '17'
 }
 
 def getVersionCode() {

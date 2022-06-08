@@ -7,7 +7,5 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:31.1-jre'
-    //TODO
-    //This will NOT build for now, must release abstractions snapshot and update this once that is complete
-    //api 'com.microsoft.kiota:kiota-abstractions:1.0.36'
+    implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:0.0.1'
 }

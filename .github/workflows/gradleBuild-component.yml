@@ -1,0 +1,55 @@
+name: Build Component
+
+on: 
+  workflow_call:
+    inputs:
+      componentName:
+        required: true
+        type: string
+      workingDirectory: 
+        required: true
+        type: string
+         
+jobs:
+  build_component:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.workingDirectory }} 
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with: 
+          java-version: '17'
+          distribution: 'adopt'
+          cache: gradle
+      - name: Detect Secrets
+        uses: RobertFischer/detect-secrets-action@v2.0.0
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Upload Unit Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Unit Tests
+          path: |
+              build/reports/tests/test/**
+              build-test-results/**
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.componentName }}-drop
+          path: |
+            **/libs/*
+            build/generated-pom.xml
+            build/generated-pom.xml.asc
+            build.gradle
+            gradlew
+            gradlew.bat
+            settings.gradle
+            gradle.properties
+            **/gradle/**
+            Scripts/**
