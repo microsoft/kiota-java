@@ -9,19 +9,27 @@ on:
       shouldRelease: 
         required: false
         type: string
-      componentPathPwsh:
+      enviornment:
+        required: true
+        type: string        
+      workingDirectory:
         required: true
         type: string
-      componentPathUbuntu:
+    secrets:
+      LOCAL_PROPERTIES:
         required: true
-        type: string
+      SECRING_GPG:
+        required: true
 
 jobs: 
   mavenSnapshot:
     if: ${{ inputs.shouldPreview }} == 'true'
     environment: 
-      name: maven_central_snapshot  
+      name: ${{ inputs.enviornment }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.workingDirectory }} 
     steps: 
       - uses: actions/checkout@v3
       - name: Easy detect-secrets
@@ -33,22 +41,18 @@ jobs:
           distribution: 'adopt'
           cache: gradle
       - name: Download file
-        run: ${{ inputs.componentPathPwsh }}scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+        run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
         shell: pwsh
         env:  
           ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
           OUTPUT_PATH: '.\local.properties' 
       - name: Download file
-        run: ${{ inputs.componentPathPwsh }}scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+        run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
         shell: pwsh
         env: 
           ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
           OUTPUT_PATH: '.\secring.gpg'
       - name: Grant execute permission for gradlew
-        run: |
-            cd ${{ inputs.componentPathUbuntu }}
-            chmod +x gradlew
+        run: chmod +x gradlew
       #- name: Publish
-      #  run: |
-      #      cd ${{ componentPathUbuntu }}
-      #      gradlew $PREVIEW_TASK
+      #  run: ./gradlew $PREVIEW_TASK

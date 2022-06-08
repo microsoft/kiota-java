@@ -91,8 +91,11 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPathPwsh: .\components\abstractions\
-      componentPathUbuntu: ./components/abstractions/
+      enviornment: maven_central_snapshot
+      workingDirectory: ./components/abstractions/
+    secrets:
+      LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+      SECRING_GPG: ${{ secrets.SECRING_GPG }}
 
   publishAuthenticationAzure: 
     needs: buildAuthenticationAzure
@@ -100,8 +103,11 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPathPwsh: .\components\authentication\azure\
-      componentPathUbuntu: ./components/authentication/azure/
+      enviornment: maven_central_snapshot
+      workingDirectory: ./components/authentication/azure/
+    secrets:
+      LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+      SECRING_GPG: ${{ secrets.SECRING_GPG }}
 
   publishOkhttp:
     needs: buildOkHttp
@@ -109,8 +115,11 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPathPwsh: .\components\http\okHttp\
-      componentPathUbuntu: ./components/http/okHttp/
+      enviornment: maven_central_snapshot
+      workingDirectory: ./components/http/okHttp/
+    secrets:
+      LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+      SECRING_GPG: ${{ secrets.SECRING_GPG }}
   
   publishSerializationJson:
     needs: buildSerializationJson
@@ -118,16 +127,21 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPathPwsh: .\components\serialization\json\
-      componentPathUbuntu: ./components/serialization/json/
-  
+      enviornment: maven_central_snapshot
+      workingDirectory: ./components/serialization/json/
+    secrets:
+      LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+      SECRING_GPG: ${{ secrets.SECRING_GPG }}
+
   publishSerializationText:
     needs: buildSerializationText
     uses: ./.github/workflows/release-component.yml
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      componentPathPwsh: .\components\serialization\text\
-      componentPathUbuntu: ./components/serialization/text/
-
+      enviornment: maven_central_snapshot
+      workingDirectory: ./components/serialization/text/
+    secrets:
+      LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+      SECRING_GPG: ${{ secrets.SECRING_GPG }}
     
