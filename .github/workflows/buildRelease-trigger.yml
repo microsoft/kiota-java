@@ -55,7 +55,8 @@ jobs:
 
   buildAbstractions:
     #needs: checkPaths
-    if: ${{ github.event.inputs.abstractions }} #|| ( ${{ needs.checkPaths.outputs.abstractions_count }} > 0 )
+    if: github.event.inputs.abstractions 
+    #|| ( ${{ needs.checkPaths.outputs.abstractions_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: abstractions
@@ -63,7 +64,8 @@ jobs:
 
   buildAuthenticationAzure:
     #needs: checkPaths
-    if: ${{ github.event.inputs.auth-azure }} #|| ( ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0 )
+    if: github.event.inputs.auth-azure  
+    #|| ( ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: authentication-azure
@@ -71,7 +73,8 @@ jobs:
 
   buildOkHttp:
     #needs: checkPaths
-    if: ${{ github.event.inputs.http-okHttp }} #|| ( ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0 ) 
+    if: github.event.inputs.http-okHttp  
+    #|| ( ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0 ) 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: http-okHttp 
@@ -79,7 +82,8 @@ jobs:
 
   buildSerializationJson:
     #needs: checkPaths
-    if: ${{ github.event.inputs.serialization-json }} #|| ( ${{ needs.checkPaths.outputs.serialization-json_count }} > 0 )
+    if: github.event.inputs.serialization-json 
+    #|| ( ${{ needs.checkPaths.outputs.serialization-json_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-json
@@ -87,7 +91,8 @@ jobs:
 
   buildSerializationText:
     #needs: checkPaths
-    if: ${{ github.event.inputs.serialization-text }} #|| ( ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 )
+    if: github.event.inputs.serialization-text 
+    #|| ( ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-text
