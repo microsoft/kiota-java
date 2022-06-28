@@ -7,9 +7,6 @@ plugins {
     id 'signing'
 }
 
-group   = 'com.microsoft.kiota'
-version = '0.0.1'
-
 java {
     modularity.inferModulePath = true
     withSourcesJar()
