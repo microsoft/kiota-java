@@ -55,7 +55,7 @@ jobs:
 
   buildAbstractions:
     #needs: checkPaths
-    if: github.event.inputs.abstractions 
+    if: github.event.inputs.abstractions == true
     #|| ( ${{ needs.checkPaths.outputs.abstractions_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
@@ -64,7 +64,7 @@ jobs:
 
   buildAuthenticationAzure:
     #needs: checkPaths
-    if: github.event.inputs.auth-azure  
+    if: github.event.inputs.auth-azure == true
     #|| ( ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
@@ -73,7 +73,7 @@ jobs:
 
   buildOkHttp:
     #needs: checkPaths
-    if: github.event.inputs.http-okHttp  
+    if: github.event.inputs.http-okHttp == true
     #|| ( ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0 ) 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
@@ -82,7 +82,7 @@ jobs:
 
   buildSerializationJson:
     #needs: checkPaths
-    if: github.event.inputs.serialization-json 
+    if: github.event.inputs.serialization-json == true
     #|| ( ${{ needs.checkPaths.outputs.serialization-json_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
@@ -91,7 +91,7 @@ jobs:
 
   buildSerializationText:
     #needs: checkPaths
-    if: github.event.inputs.serialization-text 
+    if: github.event.inputs.serialization-text == true
     #|| ( ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
