@@ -13,25 +13,19 @@ on:
     inputs:
       abstractions:
         description: release abstractions
-        default: false
         type: boolean
       auth-azure:
         description: release azure-auth
-        default: false
         type: boolean
       http-okHttp:
         description: release http-okHttp
-        default: false
         type: boolean
       serialization-json: 
         description: release serialization-json
-        default: false
         type: boolean 
       serialization-text: 
         description: release serialization-text
-        default: false
         type: boolean
-        
   
 env: 
   PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
@@ -61,7 +55,7 @@ jobs:
 
   buildAbstractions:
     #needs: checkPaths
-    if: ( ${{ github.event.inputs.abstractions == 'true' }} ) #|| ( ${{ needs.checkPaths.outputs.abstractions_count }} > 0 )
+    if: ${{ github.event.inputs.abstractions }} #|| ( ${{ needs.checkPaths.outputs.abstractions_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: abstractions
@@ -69,7 +63,7 @@ jobs:
 
   buildAuthenticationAzure:
     #needs: checkPaths
-    if: ( ${{ github.event.inputs.auth-azure == 'true'}} ) #|| ( ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0 )
+    if: ${{ github.event.inputs.auth-azure }} #|| ( ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: authentication-azure
@@ -77,7 +71,7 @@ jobs:
 
   buildOkHttp:
     #needs: checkPaths
-    if: ( ${{ github.event.inputs.http-okHttp == 'true' }} ) #|| ( ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0 ) 
+    if: ${{ github.event.inputs.http-okHttp }} #|| ( ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0 ) 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: http-okHttp 
@@ -85,7 +79,7 @@ jobs:
 
   buildSerializationJson:
     #needs: checkPaths
-    if: ( ${{ github.event.inputs.serialization-json == 'true'}} ) #|| ( ${{ needs.checkPaths.outputs.serialization-json_count }} > 0 )
+    if: ${{ github.event.inputs.serialization-json }} #|| ( ${{ needs.checkPaths.outputs.serialization-json_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-json
@@ -93,7 +87,7 @@ jobs:
 
   buildSerializationText:
     #needs: checkPaths
-    if: ( ${{ github.event.inputs.serialization-text == 'true'}} ) #|| ( ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 )
+    if: ${{ github.event.inputs.serialization-text }} #|| ( ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 )
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-text
