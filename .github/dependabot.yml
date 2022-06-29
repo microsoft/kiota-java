@@ -21,7 +21,7 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: gradle
-  directory: "/components/http/okhttp"
+  directory: "/components/http/okHttp"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
