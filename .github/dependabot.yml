@@ -1,0 +1,32 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/components/abstractions"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/json"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/text"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/authentication/azure"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/http/okHttp"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
