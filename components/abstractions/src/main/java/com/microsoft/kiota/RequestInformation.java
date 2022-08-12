@@ -49,7 +49,7 @@ public class RequestInformation {
         } else {
             Objects.requireNonNull(urlTemplate);
             Objects.requireNonNull(queryParameters);
-            if(urlTemplate.toLowerCase().contains("{+baseurl}") && !pathParameters.containsKey("baseurl"))
+            if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase().contains("{+baseurl}"))
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
             var template = new URITemplate(urlTemplate)
