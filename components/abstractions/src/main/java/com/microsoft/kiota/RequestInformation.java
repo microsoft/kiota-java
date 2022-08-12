@@ -36,9 +36,10 @@ public class RequestInformation {
     private URI uri;
     /** Gets the URI of the request. 
      * @throws URISyntaxException
+     * @throws IllegalStateException
      */
     @Nullable
-    public URI getUri() throws URISyntaxException {
+    public URI getUri() throws URISyntaxException,IllegalStateException{
         if(uri != null) {
             return uri;
         } else if(pathParameters.containsKey(RAW_URL_KEY) &&
@@ -48,6 +49,9 @@ public class RequestInformation {
         } else {
             Objects.requireNonNull(urlTemplate);
             Objects.requireNonNull(queryParameters);
+            if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase().contains("{+baseurl}"))
+                throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
+
             var template = new URITemplate(urlTemplate)
                             .expandOnly(new HashMap<String, Object>(queryParameters) {{
                                 putAll(pathParameters);
