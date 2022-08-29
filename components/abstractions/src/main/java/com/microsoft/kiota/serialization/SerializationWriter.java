@@ -106,13 +106,13 @@ public interface SerializationWriter extends Closeable {
     /**
      * Writes the specified collection of primitive values to the stream with an optional given key.
      * @param key the key to write the value with.
-     * @param value the value to write to the stream.
+     * @param values the value to write to the stream.
      */
     <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nonnull final Iterable<T> values);
     /**
      * Writes the specified collection of object values to the stream with an optional given key.
      * @param key the key to write the value with.
-     * @param value the value to write to the stream.
+     * @param values the value to write to the stream.
      */
     <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nonnull final Iterable<T> values);
     /**
@@ -125,8 +125,9 @@ public interface SerializationWriter extends Closeable {
      * Writes the specified model object value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
+     * @param additionalValuesToMerge the additional values to merge to the main value when serializing an intersection wrapper.
      */
-    <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nonnull final T value);
+    <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nonnull final T value, @Nonnull final Parsable ...additionalValuesToMerge);
     /**
      * Gets the value of the serialized content.
      * @return the value of the serialized content.
@@ -136,7 +137,7 @@ public interface SerializationWriter extends Closeable {
     /**
      * Writes the specified enum set value to the stream with an optional given key.
      * @param key the key to write the value with.
-     * @param value the value to write to the stream.
+     * @param values the value to write to the stream.
      */
     <T extends Enum<T>> void writeEnumSetValue(@Nullable final String key, @Nullable final EnumSet<T> values);
     /**
