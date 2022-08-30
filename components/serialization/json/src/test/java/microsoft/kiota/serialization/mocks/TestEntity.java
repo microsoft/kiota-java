@@ -127,5 +127,8 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	public Map<String, Object> getAdditionalData() {
 		return _additionalData;
 	}
-	
+	@javax.annotation.Nonnull
+    public static TestEntity createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
+		return new TestEntity();
+	}
 }

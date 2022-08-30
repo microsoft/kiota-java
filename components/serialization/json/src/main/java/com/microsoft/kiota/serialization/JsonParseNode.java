@@ -43,7 +43,7 @@ public class JsonParseNode implements ParseNode {
                 this.setOnBeforeAssignFieldValues(onBefore);
                 this.setOnAfterAssignFieldValues(onAfter);
             }};
-        } else throw new RuntimeException("invalid state expected to have an object node");
+        } else return null;
     }
     public String getStringValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsString() : null;

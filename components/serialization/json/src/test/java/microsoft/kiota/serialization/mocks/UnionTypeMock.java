@@ -17,20 +17,43 @@ public class UnionTypeMock implements Parsable {
 	@javax.annotation.Nonnull
     public static UnionTypeMock createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
-        return new UnionTypeMock();
+        final UnionTypeMock result = new UnionTypeMock();
+        final ParseNode mappingValueNode = parseNode.getChildNode("@odata.type");
+        if (mappingValueNode != null) {
+            final String mappingValue = mappingValueNode.getStringValue();
+            if (mappingValue.equals("#microsoft.graph.testEntity")) {
+                result.setComposedType1(new TestEntity());
+            } else if (mappingValue.equals("#microsoft.graph.secondTestEntity")) {
+                result.setComposedType2(new SecondTestEntity());
+            }
+        } else if (parseNode.getStringValue() != null) {
+            result.setStringValue(parseNode.getStringValue());
+        } else if (parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue) != null) {
+            result.setComposedType3(parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue));
+        }
+        return result;
     }
 
     @Override
     public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
-        // TODO Auto-generated method stub
+        if (getComposedType1() != null)
+            return getComposedType1().getFieldDeserializers();
+        else if (getComposedType2() != null)
+            return getComposedType2().getFieldDeserializers();
         return new HashMap<>();
     }
 
     @Override
     public void serialize(SerializationWriter writer) {
         Objects.requireNonNull(writer);
-        // TODO Auto-generated method stub
-        
+        if(getComposedType1() != null)
+            writer.writeObjectValue(null, getComposedType1());
+        else if(getComposedType2() != null)
+            writer.writeObjectValue(null, getComposedType2());
+        else if(getStringValue() != null)
+            writer.writeStringValue(null, getStringValue());
+        else if(getComposedType3() != null)
+            writer.writeCollectionOfObjectValues(null, getComposedType3());
     }
 
     public TestEntity getComposedType1() {

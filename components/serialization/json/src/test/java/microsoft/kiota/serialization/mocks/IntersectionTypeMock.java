@@ -15,6 +15,11 @@ public class IntersectionTypeMock implements Parsable {
     private SecondTestEntity _composedType2;
     private String _stringValue;
     private java.util.List<TestEntity> _composedType3;
+	@javax.annotation.Nonnull
+    public static IntersectionTypeMock createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
+        Objects.requireNonNull(parseNode);
+        return new IntersectionTypeMock();
+    }
 
 	@Override
 	public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
