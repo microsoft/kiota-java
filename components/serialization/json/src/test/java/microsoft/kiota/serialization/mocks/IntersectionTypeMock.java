@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization.mocks;
 
 import com.microsoft.kiota.serialization.ParseNode;
+import com.microsoft.kiota.serialization.ParseNodeHelper;
 import com.microsoft.kiota.serialization.SerializationWriter;
 
 import java.util.HashMap;
@@ -18,20 +19,36 @@ public class IntersectionTypeMock implements Parsable {
 	@javax.annotation.Nonnull
     public static IntersectionTypeMock createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
-        return new IntersectionTypeMock();
+		final var result = new IntersectionTypeMock();
+		if (parseNode.getStringValue() != null) {
+			result.setStringValue(parseNode.getStringValue());
+		} else if (parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue) != null) {
+			result.setComposedType3(parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue));
+		} else {
+			result.setComposedType1(new TestEntity());
+			result.setComposedType2(new SecondTestEntity());
+		}
+        return result;
     }
 
 	@Override
 	public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
-		// TODO Auto-generated method stub
+		if (getComposedType1() != null || getComposedType2() != null) {
+			return ParseNodeHelper.mergeDeserializersForIntersectionWrapper(getComposedType1(), getComposedType2());
+		}
         return new HashMap<>();
 	}
 
 	@Override
 	public void serialize(SerializationWriter writer) {
         Objects.requireNonNull(writer);
-		// TODO Auto-generated method stub
-		
+		if(getStringValue() != null) {
+			writer.writeStringValue(null, getStringValue());
+		} else if(getComposedType3() != null) {
+			writer.writeCollectionOfObjectValues(null, getComposedType3());
+		} else {
+			writer.writeObjectValue(null, getComposedType1(), getComposedType2());
+		}
 	}
 	public TestEntity getComposedType1() {
         return _composedType1;

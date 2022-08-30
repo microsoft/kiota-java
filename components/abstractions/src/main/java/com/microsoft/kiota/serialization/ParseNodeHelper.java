@@ -20,7 +20,10 @@ public class ParseNodeHelper {
 		}
 		final Map<String, Consumer<ParseNode>> result = targets[0].getFieldDeserializers();
 		for(int i = 1; i < targets.length; i++) {
-			result.putAll(targets[i].getFieldDeserializers());
+			final var targetDeserializers = targets[i].getFieldDeserializers();
+			for(final var key : targetDeserializers.keySet()) {
+				result.putIfAbsent(key, targetDeserializers.get(key));
+			}
 		}
 		return result;
 	}

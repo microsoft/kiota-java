@@ -185,7 +185,7 @@ public class JsonParseNode implements ParseNode {
                 }
 
             });
-        } else throw new RuntimeException("invalid state expected to have an array node");
+        } else return null;
     }
     public <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum) {
         Objects.requireNonNull(targetEnum, "parameter targetEnum cannot be null");

@@ -242,7 +242,7 @@ public class JsonSerializationWriter implements SerializationWriter {
         }
     }
     public <T extends Parsable> void writeObjectValue(final String key, final T value, final Parsable ...additionalValuesToMerge) {
-        Objects.requireNonNull(value);
+        Objects.requireNonNull(additionalValuesToMerge);
         try {
             final var nonNullAdditionalValuesToMerge = Stream.of(additionalValuesToMerge).filter(Objects::nonNull).collect(Collectors.toList());
             if(value != null || nonNullAdditionalValuesToMerge.size() > 0) {
