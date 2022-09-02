@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.time.Period;
 import java.util.regex.Pattern;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -98,7 +99,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nonnull
-    public <ModelType extends Parsable> CompletableFuture<Iterable<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -111,7 +112,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         return CompletableFuture.completedStage(null);
                     }
                     final ParseNode rootNode = getRootParseNode(response);
-                    final Iterable<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
+                    final List<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
                     return CompletableFuture.completedStage(result);
                 } catch(ApiException ex) {
                     return CompletableFuture.failedFuture(ex);
@@ -223,7 +224,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             }
         });
     }
-    public <ModelType> CompletableFuture<Iterable<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
 
         return this.getHttpResponseMessage(requestInfo, null)
@@ -235,7 +236,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         return CompletableFuture.completedStage(null);
                     }
                     final ParseNode rootNode = getRootParseNode(response);
-                    final Iterable<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
+                    final List<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
                     return CompletableFuture.completedStage(result);
                 } catch(ApiException ex) {
                     return CompletableFuture.failedFuture(ex);
