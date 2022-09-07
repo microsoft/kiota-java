@@ -43,49 +43,59 @@ public class JsonParseNode implements ParseNode {
                 this.setOnBeforeAssignFieldValues(onBefore);
                 this.setOnAfterAssignFieldValues(onAfter);
             }};
-        } else throw new RuntimeException("invalid state expected to have an object node");
+        } else return null;
     }
     public String getStringValue() {
-        return currentNode.getAsString();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsString() : null;
     }
     public Boolean getBooleanValue() {
-        return currentNode.getAsBoolean();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsBoolean() : null;
     }
     public Byte getByteValue() {
-        return currentNode.getAsByte();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsByte() : null;
     }
     public Short getShortValue() {
-        return currentNode.getAsShort();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsShort() : null;
     }
     public BigDecimal getBigDecimalValue() {
-        return currentNode.getAsBigDecimal();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsBigDecimal() : null;
     }
     public Integer getIntegerValue() {
-        return currentNode.getAsInt();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsInt() : null;
     }
     public Float getFloatValue() {
-        return currentNode.getAsFloat();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsFloat() : null;
     }
     public Double getDoubleValue() {
-        return currentNode.getAsDouble();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsDouble() : null;
     }
     public Long getLongValue() {
-        return currentNode.getAsLong();
+        return currentNode.isJsonPrimitive() ? currentNode.getAsLong() : null;
     }
     public UUID getUUIDValue() {
-        return UUID.fromString(currentNode.getAsString());
+        final var stringValue = currentNode.getAsString();
+        if(stringValue == null) return null;
+        return UUID.fromString(stringValue);
     }
     public OffsetDateTime getOffsetDateTimeValue() {
-        return OffsetDateTime.parse(currentNode.getAsString());
+        final var stringValue = currentNode.getAsString();
+        if(stringValue == null) return null;
+        return OffsetDateTime.parse(stringValue);
     }
     public LocalDate getLocalDateValue() {
-        return LocalDate.parse(currentNode.getAsString());
+        final var stringValue = currentNode.getAsString();
+        if(stringValue == null) return null;
+        return LocalDate.parse(stringValue);
     }
     public LocalTime getLocalTimeValue() {
-        return LocalTime.parse(currentNode.getAsString());
+        final var stringValue = currentNode.getAsString();
+        if(stringValue == null) return null;
+        return LocalTime.parse(stringValue);
     }
     public Period getPeriodValue() {
-        return Period.parse(currentNode.getAsString());
+        final var stringValue = currentNode.getAsString();
+        if(stringValue == null) return null;
+        return Period.parse(stringValue);
     }
     public <T> List<T> getCollectionOfPrimitiveValues(final Class<T> targetClass) {
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
@@ -175,7 +185,7 @@ public class JsonParseNode implements ParseNode {
                 }
 
             });
-        } else throw new RuntimeException("invalid state expected to have an array node");
+        } else return null;
     }
     public <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum) {
         Objects.requireNonNull(targetEnum, "parameter targetEnum cannot be null");

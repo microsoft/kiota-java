@@ -20,9 +20,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nonnull;
@@ -238,22 +241,38 @@ public class JsonSerializationWriter implements SerializationWriter {
             throw new RuntimeException("could not serialize value", ex);
         }
     }
-    public <T extends Parsable> void writeObjectValue(final String key, final T value) {
+    public <T extends Parsable> void writeObjectValue(final String key, final T value, final Parsable ...additionalValuesToMerge) {
+        Objects.requireNonNull(additionalValuesToMerge);
         try {
-            if(value != null) {
+            final var nonNullAdditionalValuesToMerge = Stream.of(additionalValuesToMerge).filter(Objects::nonNull).collect(Collectors.toList());
+            if(value != null || nonNullAdditionalValuesToMerge.size() > 0) {
                 if(key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                if(onBeforeObjectSerialization != null) {
+                if(onBeforeObjectSerialization != null && value != null) {
                     onBeforeObjectSerialization.accept(value);
                 }
                 writer.beginObject();
-                if(onStartObjectSerialization != null) {
-                    onStartObjectSerialization.accept(value, this);
+                if(value != null) {
+                    if(onStartObjectSerialization != null) {
+                        onStartObjectSerialization.accept(value, this);
+                    }
+                    value.serialize(this);
                 }
-                value.serialize(this);
+                for(final var additionalValueToMerge : nonNullAdditionalValuesToMerge) {
+                    if(onBeforeObjectSerialization != null) {
+                        onBeforeObjectSerialization.accept(additionalValueToMerge);
+                    }
+                    if(onStartObjectSerialization != null) {
+                        onStartObjectSerialization.accept(additionalValueToMerge, this);
+                    }
+                    additionalValueToMerge.serialize(this);
+                    if(onAfterObjectSerialization != null) {
+                        onAfterObjectSerialization.accept(additionalValueToMerge);
+                    }
+                }
                 writer.endObject();
-                if(onAfterObjectSerialization != null) {
+                if(onAfterObjectSerialization != null && value != null) {
                     onAfterObjectSerialization.accept(value);
                 }
             }

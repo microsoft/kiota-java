@@ -113,7 +113,7 @@ public class TextSerializationWriter implements SerializationWriter {
     public <T extends Enum<T>> void writeCollectionOfEnumValues(@Nullable final String key, @Nullable final Iterable<T> values) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
-    public <T extends Parsable> void writeObjectValue(final String key, final T value) {
+    public <T extends Parsable> void writeObjectValue(final String key, final T value, final Parsable ...additionalValuesToMerge) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
     public <T extends Enum<T>> void writeEnumSetValue(@Nullable final String key, @Nullable final EnumSet<T> values) {
