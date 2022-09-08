@@ -1,10 +1,14 @@
 package com.microsoft.kiota.http;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.microsoft.kiota.authentication.AuthenticationProvider;
+import com.microsoft.kiota.serialization.Parsable;
+import com.microsoft.kiota.serialization.ParsableFactory;
+import com.microsoft.kiota.serialization.ParseNode;
+import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
 import java.util.concurrent.CompletableFuture;
@@ -12,6 +16,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
+import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -46,6 +51,75 @@ public class OkHttpRequestAdapterTest {
 			httpMethod = HttpMethod.GET;
 		}};
 		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null, null).get();
+		assertNotNull(response);
+	}
+	@ParameterizedTest
+	@ValueSource(ints = {200, 201, 202, 203, 204})
+	public void SendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
+		final var authenticationProviderMock = mock(AuthenticationProvider.class);
+		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		final var client = getMockClient(new Response.Builder()
+													.code(statusCode)
+													.message("OK")
+													.protocol(Protocol.HTTP_1_1)
+													.request(new Request.Builder().url("http://localhost").build())
+													.body(null)
+													.build());
+		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
+		final var requestInformation = new RequestInformation() {{
+			setUri(new URI("https://localhost"));
+			httpMethod = HttpMethod.GET;
+		}};
+		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null, null).get();
+		assertNull(response);
+	}
+	@ParameterizedTest
+	@ValueSource(ints = {200, 201, 202, 203, 204, 205})
+	public void SendReturnsNullOnNoContent(int statusCode) throws Exception {
+		final var authenticationProviderMock = mock(AuthenticationProvider.class);
+		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		final var client = getMockClient(new Response.Builder()
+													.code(statusCode)
+													.message("OK")
+													.protocol(Protocol.HTTP_1_1)
+													.request(new Request.Builder().url("http://localhost").build())
+													.body(null)
+													.build());
+		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
+		final var requestInformation = new RequestInformation() {{
+			setUri(new URI("https://localhost"));
+			httpMethod = HttpMethod.GET;
+		}};
+		final var mockEntity = mock(Parsable.class);
+		when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
+		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null, null).get();
+		assertNull(response);
+	}
+	@ParameterizedTest
+	@ValueSource(ints = {200, 201, 202, 203})
+	public void SendReturnsObjectOnContent(int statusCode) throws Exception {
+		final var authenticationProviderMock = mock(AuthenticationProvider.class);
+		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		final var client = getMockClient(new Response.Builder()
+													.code(statusCode)
+													.message("OK")
+													.protocol(Protocol.HTTP_1_1)
+													.request(new Request.Builder().url("http://localhost").build())
+													.body(ResponseBody.create("test".getBytes(), MediaType.parse("application/json")))
+													.build());
+		final var requestInformation = new RequestInformation() {{
+			setUri(new URI("https://localhost"));
+			httpMethod = HttpMethod.GET;
+		}};
+		final var mockEntity = mock(Parsable.class);
+		when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
+		final var mockParseNode = mock(ParseNode.class);
+		when(mockParseNode.getObjectValue(any(ParsableFactory.class))).thenReturn(mockEntity);
+		final var mockFactory = mock(ParseNodeFactory.class);
+		when(mockFactory.getParseNode(any(String.class), any(InputStream.class))).thenReturn(mockParseNode);
+		when(mockFactory.getValidContentType()).thenReturn("application/json");
+		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
+		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null, null).get();
 		assertNotNull(response);
 	}
 	public static OkHttpClient getMockClient(final Response response) throws IOException {

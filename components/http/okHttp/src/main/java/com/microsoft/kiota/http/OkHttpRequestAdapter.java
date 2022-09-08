@@ -106,12 +106,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
+                var closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
                         return CompletableFuture.completedStage(null);
                     }
                     final ParseNode rootNode = getRootParseNode(response);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return CompletableFuture.completedStage(null);
+                    }
                     final List<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
                     return CompletableFuture.completedStage(result);
                 } catch(ApiException ex) {
@@ -119,7 +124,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 } catch(IOException ex) {
                     return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
                 } finally {
-                    response.close();
+                    closeResponse(closeResponse, response);
                 }
             } else {
                 return responseHandler.handleResponseAsync(response, errorMappings);
@@ -134,12 +139,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
+                var closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
                         return CompletableFuture.completedStage(null);
                     }
                     final ParseNode rootNode = getRootParseNode(response);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return CompletableFuture.completedStage(null);
+                    }
                     final ModelType result = rootNode.getObjectValue(factory);
                     return CompletableFuture.completedStage(result);
                 } catch(ApiException ex) {
@@ -147,12 +157,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 } catch(IOException ex) {
                     return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
                 } finally {
-                    response.close();
+                    closeResponse(closeResponse, response);
                 }
             } else {
                 return responseHandler.handleResponseAsync(response, errorMappings);
             }
         });
+    }
+    private void closeResponse(boolean closeResponse, Response response) {
+        if(closeResponse && response.code() != 204) {
+            response.close();
+        }
     }
     private String getMediaTypeAndSubType(final MediaType mediaType) {
         return mediaType.type() + "/" + mediaType.subtype();
@@ -162,6 +177,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
+                var closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
@@ -172,6 +188,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     } else {
                         if(targetClass == InputStream.class) {
                             final ResponseBody body = response.body();
+                            if(body == null) {
+                                closeResponse = false;
+                                return CompletableFuture.completedStage(null);
+                            }
                             final InputStream rawInputStream = body.byteStream();
                             return CompletableFuture.completedStage((ModelType)rawInputStream);
                         }
@@ -217,7 +237,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 } catch(IOException ex) {
                     return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
                 } finally {
-                    response.close();
+                    closeResponse(closeResponse, response);
                 }
             } else {
                 return responseHandler.handleResponseAsync(response, errorMappings);
@@ -230,12 +250,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
+                var closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
                         return CompletableFuture.completedStage(null);
                     }
                     final ParseNode rootNode = getRootParseNode(response);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return CompletableFuture.completedStage(null);
+                    }
                     final List<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
                     return CompletableFuture.completedStage(result);
                 } catch(ApiException ex) {
@@ -243,7 +268,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 } catch(IOException ex) {
                     return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
                 } finally {
-                    response.close();
+                    closeResponse(closeResponse, response);
                 }
             } else {
                 return responseHandler.handleResponseAsync(response, errorMappings);
@@ -251,12 +276,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         });
     }
     private ParseNode getRootParseNode(final Response response) throws IOException {
-        try (final ResponseBody body = response.body()) {
-            try (final InputStream rawInputStream = body.byteStream()) {
-                final ParseNode rootNode = pNodeFactory.getParseNode(getMediaTypeAndSubType(body.contentType()), rawInputStream);
-                return rootNode;
-            }
+        final ResponseBody body = response.body(); // closing the response closes the body and stream https://square.github.io/okhttp/4.x/okhttp/okhttp3/-response-body/
+        if(body == null) {
+            return null;
         }
+        final InputStream rawInputStream = body.byteStream();
+        final ParseNode rootNode = pNodeFactory.getParseNode(getMediaTypeAndSubType(body.contentType()), rawInputStream);
+        return rootNode;
     }
     private boolean shouldReturnNull(final Response response) {
         final int statusCode = response.code();
@@ -278,8 +304,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                                     (statusCode >= 400 && statusCode < 500 ?
                                                         errorMappings.get("4XX") :
                                                         errorMappings.get("5XX"));
+        var closeResponse = true;
         try {
             final ParseNode rootNode = getRootParseNode(response);
+            if(rootNode == null) {
+                closeResponse = false;
+                throw new ApiException("service returned status code" + statusCode + " but no response body was found");
+            }
             final Parsable error = rootNode.getObjectValue(errorClass);
             if (error instanceof ApiException) {
                 throw (ApiException)error;
@@ -287,7 +318,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 throw new ApiException("unexpected error type " + error.getClass().getName());
             }
         } finally {
-            response.close();
+            closeResponse(closeResponse, response);
         }
     }
     private final static String claimsKey = "claims";
@@ -322,7 +353,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     return CompletableFuture.failedFuture(ex);
                 }
             }
-            response.close();
+            closeResponse(true, response);
             return this.getHttpResponseMessage(requestInfo, responseClaims);
         }
 
