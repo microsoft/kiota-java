@@ -7,6 +7,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -44,15 +45,29 @@ public class ParametersNameDecodingHandler implements Interceptor {
         if (query == null || query.isEmpty()) {
             return chain.proceed(request);
         }
-        final ArrayList<SimpleEntry<String, String>> symbolsToReplace = new ArrayList<SimpleEntry<String, String>>(nameOption.parametersToDecode.length);
-        for (final char charToReplace : nameOption.parametersToDecode) {
+        query = decodeQueryParameters(query, nameOption.parametersToDecode);
+        
+        final HttpUrl newUrl = originalUri.newBuilder().query(query).build();
+        return chain.proceed(request.newBuilder().url(newUrl).build());
+    }
+    /**
+     * INTERNAL Decodes the query parameters that are in the list of parameters to decode
+     * @param original the original query string
+     * @param charactersToDecode the list of characters to decode
+     * @return the decoded query string
+     */
+    @Nonnull
+    public static String decodeQueryParameters(@Nullable final String original, @Nonnull final char[] charactersToDecode) {
+        Objects.requireNonNull(charactersToDecode);
+        String decoded = original == null ? new String() : new String(original);
+        final ArrayList<SimpleEntry<String, String>> symbolsToReplace = new ArrayList<SimpleEntry<String, String>>(charactersToDecode.length);
+        for (final char charToReplace : charactersToDecode) {
             symbolsToReplace.add(new SimpleEntry<String,String>("%" + String.format("%x", (int)charToReplace), String.valueOf(charToReplace)));
         }
         for (final Entry<String, String> symbolToReplace : symbolsToReplace) {
-            query = query.replace(symbolToReplace.getKey(), symbolToReplace.getValue());
+            decoded = decoded.replace(symbolToReplace.getKey(), symbolToReplace.getValue());
         }
-        final HttpUrl newUrl = originalUri.newBuilder().query(query).build();
-        return chain.proceed(request.newBuilder().url(newUrl).build());
+        return decoded;
     }
     
 }
