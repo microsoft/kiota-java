@@ -1,0 +1,16 @@
+{
+	"recommendations": [
+		"editorconfig.editorconfig",
+		"github.copilot",
+		"github.vscode-pull-request-github",
+		"donjayamanne.githistory",
+		"waderyan.gitblame",
+		"streetsidesoftware.code-spell-checker",
+		"ms-vsliveshare.vsliveshare",
+		"esbenp.prettier-vscode",
+		"shengchen.vscode-checkstyle",
+		"vscjava.vscode-java-pack",
+		"vscjava.vscode-gradle",
+		"DavidAnson.vscode-markdownlint"
+	]
+}
