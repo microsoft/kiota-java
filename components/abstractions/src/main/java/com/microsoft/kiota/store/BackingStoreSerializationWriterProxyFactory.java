@@ -15,7 +15,7 @@ public class BackingStoreSerializationWriterProxyFactory extends SerializationWr
         (x) -> {
             if(x instanceof BackedModel) {
                 final BackedModel backedModel = (BackedModel)x;
-                final var backingStore = backedModel.getBackingStore();
+                final BackingStore backingStore = backedModel.getBackingStore();
                 if(backingStore != null) {
                     backingStore.setReturnOnlyChangedValues(true);
                 }
@@ -23,7 +23,7 @@ public class BackingStoreSerializationWriterProxyFactory extends SerializationWr
         },(x) -> {
             if(x instanceof BackedModel) {
                 final BackedModel backedModel = (BackedModel)x;
-                final var backingStore = backedModel.getBackingStore();
+                final BackingStore backingStore = backedModel.getBackingStore();
                 if(backingStore != null) {
                     backingStore.setReturnOnlyChangedValues(false);
                     backingStore.setIsInitializationCompleted(true);
@@ -32,10 +32,10 @@ public class BackingStoreSerializationWriterProxyFactory extends SerializationWr
         }, (x, y) -> {
             if(x instanceof BackedModel) {
                 final BackedModel backedModel = (BackedModel)x;
-                final var backingStore = backedModel.getBackingStore();
+                final BackingStore backingStore = backedModel.getBackingStore();
                 if(backingStore != null) {
-                    final var keys = backingStore.enumerateKeysForValuesChangedToNull();
-                    for(final var key : keys) {
+                    final Iterable<String> keys = backingStore.enumerateKeysForValuesChangedToNull();
+                    for(final String key : keys) {
                         y.writeNullValue(key);
                     }
                 }

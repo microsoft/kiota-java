@@ -3,7 +3,6 @@ package com.microsoft.kiota;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +12,7 @@ public class RequestInformationTest {
     public void ThrowsInvalidOperationExceptionWhenBaseUrlNotSet()
     {
         // Arrange as the request builders would
-        final var requestInfo = new RequestInformation();
+        final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.GET;
         requestInfo.urlTemplate = "{+baseurl}/users{?%24count}";
 
@@ -26,7 +25,7 @@ public class RequestInformationTest {
     public void BuildsUrlOnProvidedBaseUrl()
     {
         // Arrange as the request builders would
-        final var requestInfo = new RequestInformation();
+        final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.GET;
         requestInfo.urlTemplate = "{+baseurl}/users{?%24count}";
 
@@ -42,7 +41,7 @@ public class RequestInformationTest {
     public void SetsPathParametersOfDateTimeOffsetType()
     {
         // Arrange as the request builders would
-        final var requestInfo = new RequestInformation();
+        final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/getDirectRoutingCalls(fromDateTime='{fromDateTime}',toDateTime='{toDateTime}')";
 
@@ -63,7 +62,7 @@ public class RequestInformationTest {
     {
 
         // Arrange as the request builders would
-        final var requestInfo = new RequestInformation();
+        final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/users{?%24count}";
 

@@ -37,8 +37,8 @@ public class JsonParseNode implements ParseNode {
         Objects.requireNonNull(identifier, "identifier parameter is required");
         if(currentNode.isJsonObject()) {
             final JsonObject object = currentNode.getAsJsonObject();
-            final var onBefore = this.onBeforeAssignFieldValues;
-            final var onAfter = this.onAfterAssignFieldValues;
+            final Consumer<Parsable> onBefore = this.onBeforeAssignFieldValues;
+            final Consumer<Parsable> onAfter = this.onAfterAssignFieldValues;
             return new JsonParseNode(object.get(identifier)) {{
                 this.setOnBeforeAssignFieldValues(onBefore);
                 this.setOnAfterAssignFieldValues(onAfter);
@@ -73,27 +73,27 @@ public class JsonParseNode implements ParseNode {
         return currentNode.isJsonPrimitive() ? currentNode.getAsLong() : null;
     }
     public UUID getUUIDValue() {
-        final var stringValue = currentNode.getAsString();
+        final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return UUID.fromString(stringValue);
     }
     public OffsetDateTime getOffsetDateTimeValue() {
-        final var stringValue = currentNode.getAsString();
+        final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return OffsetDateTime.parse(stringValue);
     }
     public LocalDate getLocalDateValue() {
-        final var stringValue = currentNode.getAsString();
+        final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return LocalDate.parse(stringValue);
     }
     public LocalTime getLocalTimeValue() {
-        final var stringValue = currentNode.getAsString();
+        final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return LocalTime.parse(stringValue);
     }
     public Period getPeriodValue() {
-        final var stringValue = currentNode.getAsString();
+        final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return Period.parse(stringValue);
     }
@@ -102,7 +102,7 @@ public class JsonParseNode implements ParseNode {
         if(currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
-            final var _this = this;
+            final JsonParseNode _this = this;
             return Lists.newArrayList(new Iterable<T>() {
                 @Override
                 public Iterator<T> iterator() {
@@ -115,8 +115,8 @@ public class JsonParseNode implements ParseNode {
                         @SuppressWarnings("unchecked")
                         public T next() {
                             final JsonElement item = sourceIterator.next();
-                            final var onBefore = _this.getOnBeforeAssignFieldValues();
-                            final var onAfter = _this.getOnAfterAssignFieldValues();
+                            final Consumer<Parsable> onBefore = _this.getOnBeforeAssignFieldValues();
+                            final Consumer<Parsable> onAfter = _this.getOnAfterAssignFieldValues();
                             final JsonParseNode itemNode = new JsonParseNode(item) {{
                                 this.setOnBeforeAssignFieldValues(onBefore);
                                 this.setOnAfterAssignFieldValues(onAfter);
@@ -161,7 +161,7 @@ public class JsonParseNode implements ParseNode {
         if(currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
-            final var _this = this;
+            final JsonParseNode _this = this;
             return Lists.newArrayList(new Iterable<T>() {
                 @Override
                 public Iterator<T> iterator() {
@@ -173,8 +173,8 @@ public class JsonParseNode implements ParseNode {
                         @Override
                         public T next() {
                             final JsonElement item = sourceIterator.next();
-                            final var onBefore = _this.getOnBeforeAssignFieldValues();
-                            final var onAfter = _this.getOnAfterAssignFieldValues();
+                            final Consumer<Parsable> onBefore = _this.getOnBeforeAssignFieldValues();
+                            final Consumer<Parsable> onAfter = _this.getOnAfterAssignFieldValues();
                             final JsonParseNode itemNode = new JsonParseNode(item) {{
                                 this.setOnBeforeAssignFieldValues(onBefore);
                                 this.setOnAfterAssignFieldValues(onAfter);
@@ -192,7 +192,7 @@ public class JsonParseNode implements ParseNode {
         if(currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
-            final var _this = this;
+            final JsonParseNode _this = this;
             return Lists.newArrayList(new Iterable<T>() {
                 @Override
                 public Iterator<T> iterator() {
@@ -204,8 +204,8 @@ public class JsonParseNode implements ParseNode {
                         @Override
                         public T next() {
                             final JsonElement item = sourceIterator.next();
-                            final var onBefore = _this.getOnBeforeAssignFieldValues();
-                            final var onAfter = _this.getOnAfterAssignFieldValues();
+                            final Consumer<Parsable> onBefore = _this.getOnBeforeAssignFieldValues();
+                            final Consumer<Parsable> onAfter = _this.getOnAfterAssignFieldValues();
                             final JsonParseNode itemNode = new JsonParseNode(item) {{
                                 this.setOnBeforeAssignFieldValues(onBefore);
                                 this.setOnAfterAssignFieldValues(onAfter);
@@ -272,8 +272,8 @@ public class JsonParseNode implements ParseNode {
                 if(fieldValue.isJsonNull())
                     continue;
                 if(fieldDeserializer != null) {
-                    final var onBefore = this.onBeforeAssignFieldValues;
-                    final var onAfter = this.onAfterAssignFieldValues;
+                    final Consumer<Parsable> onBefore = this.onBeforeAssignFieldValues;
+                    final Consumer<Parsable> onAfter = this.onAfterAssignFieldValues;
                     fieldDeserializer.accept(new JsonParseNode(fieldValue) {{
                         this.setOnBeforeAssignFieldValues(onBefore);
                         this.setOnAfterAssignFieldValues(onAfter);
@@ -320,7 +320,7 @@ public class JsonParseNode implements ParseNode {
         this.onAfterAssignFieldValues = value;
     }
     public byte[] getByteArrayValue() {
-        final var base64 = this.getStringValue();
+        final String base64 = this.getStringValue();
         if(base64 == null || base64.isEmpty()) {
             return null;
         }

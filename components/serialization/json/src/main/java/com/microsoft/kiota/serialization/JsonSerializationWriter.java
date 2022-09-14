@@ -19,6 +19,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -244,7 +245,7 @@ public class JsonSerializationWriter implements SerializationWriter {
     public <T extends Parsable> void writeObjectValue(final String key, final T value, final Parsable ...additionalValuesToMerge) {
         Objects.requireNonNull(additionalValuesToMerge);
         try {
-            final var nonNullAdditionalValuesToMerge = Stream.of(additionalValuesToMerge).filter(Objects::nonNull).collect(Collectors.toList());
+            final List<Parsable> nonNullAdditionalValuesToMerge = Stream.of(additionalValuesToMerge).filter(Objects::nonNull).collect(Collectors.toList());
             if(value != null || nonNullAdditionalValuesToMerge.size() > 0) {
                 if(key != null && !key.isEmpty()) {
                     writer.name(key);
@@ -259,7 +260,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                     }
                     value.serialize(this);
                 }
-                for(final var additionalValueToMerge : nonNullAdditionalValuesToMerge) {
+                for(final Parsable additionalValueToMerge : nonNullAdditionalValuesToMerge) {
                     if(onBeforeObjectSerialization != null) {
                         onBeforeObjectSerialization.accept(additionalValueToMerge);
                     }
