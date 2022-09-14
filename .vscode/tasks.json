@@ -1,0 +1,84 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build:abstractions",
+            "command": "gradle",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build",
+                "-p",
+                "./components/abstractions/"
+            ]
+        },
+        {
+            "label": "build:serialization:json",
+            "command": "gradle",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build",
+                "-p",
+                "./components/serialization/json/"
+            ]
+        },
+        {
+            "label": "build:serialization:text",
+            "command": "gradle",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build",
+                "-p",
+                "./components/abstractions/text/"
+            ]
+        },
+        {
+            "label": "build:authentication",
+            "command": "gradle",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build",
+                "-p",
+                "./components/authentication/azure/"
+            ]
+        },
+        {
+            "label": "build:http",
+            "command": "gradle",
+            "type": "process",
+            "group": "build",
+            "args": [
+                "build",
+                "-p",
+                "./components/http/okHttp/"
+            ]
+        },
+        {
+            "group": "build",
+            "label": "build:implementations",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "build:serialization:json",
+                "build:serialization:text",
+                "build:authentication",
+                "build:http"
+            ],
+            "hide": true
+        },
+        {
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "label": "build:all",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build:abstractions",
+                "build:implementations"
+            ]
+        }
+    ]
+}
