@@ -12,5 +12,5 @@ dependencies {
     implementation 'com.google.guava:guava:31.1-jre'
     api 'com.squareup.okhttp3:okhttp:4.10.0'
 
-    api 'com.microsoft.kiota:microsoft-kiota-abstractions:0.0.3-SNAPSHOT'
+    api 'com.microsoft.kiota:microsoft-kiota-abstractions:0.0.4-SNAPSHOT'
 }
