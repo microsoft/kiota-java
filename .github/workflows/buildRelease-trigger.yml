@@ -14,7 +14,7 @@ on:
       abstractions:
         description: release abstractions
         type: boolean
-      auth-azure:
+      authentication-azure:
         description: release azure-auth
         type: boolean
       http-okHttp:
@@ -32,12 +32,16 @@ env:
 
 jobs:
   checkPaths:
-    if: ${{ github.event_name != 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    outputs:
+      abstractions: ${{ steps.filter.outputs.abstractions }}
+      authentication-azure: ${{ steps.filter.outputs.authentication-azure }}
+      http-okHttp: ${{ steps.filter.outputs.http-okHttp }}
+      serialization-json: ${{ steps.filter.serialization-json }}
+      serialization-text: ${{ steps.filter.serialization-text }}
     steps:
     - name: checkPaths
-      #if: ${{ github.event_name != 'workflow_dispatch' }}
-      uses: dorny/paths-filter@v2
+      uses: dorny/paths-filter@v2.10.2
       id: filter
       with:
         base: main
@@ -54,45 +58,40 @@ jobs:
             - 'components/serialization/text/**' 
 
   buildAbstractions:
-    #needs: checkPaths
-    if: github.event.inputs.abstractions == 'true'
-    #|| ( ${{ needs.checkPaths.outputs.abstractions_count }} > 0 )
+    needs: checkPaths
+    if: ${{ always() && (needs.checkPaths.outputs.abstractions == 'true' || github.event.inputs.abstractions == 'true') }} 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: abstractions
       workingDirectory: ./components/abstractions/
 
   buildAuthenticationAzure:
-    #needs: checkPaths
-    if: github.event.inputs.auth-azure == 'true'
-    #|| ( ${{ needs.checkPaths.outputs.authentication-azure_count }} > 0 )
+    needs: checkPaths
+    if: ${{ always() && (needs.checkPaths.outputs.authentication-azure == 'true' || github.event.inputs.authentication-azure == 'true') }} 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: authentication-azure
       workingDirectory: ./components/authentication/azure/
 
   buildOkHttp:
-    #needs: checkPaths
-    if: github.event.inputs.http-okHttp == 'true'
-    #|| ( ${{ needs.checkPaths.outputs.http-okHttp_count }} > 0 ) 
+    needs: checkPaths
+    if: ${{ always() && (needs.checkPaths.outputs.http-okHttp == 'true' || github.event.inputs.http-okHttp == 'true') }}
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: http-okHttp 
       workingDirectory: ./components/http/okHttp/
 
   buildSerializationJson:
-    #needs: checkPaths
-    if: github.event.inputs.serialization-json == 'true'
-    #|| ( ${{ needs.checkPaths.outputs.serialization-json_count }} > 0 )
+    needs: checkPaths
+    if: ${{ always() && (needs.checkPaths.outputs.serialization-json == 'true' || github.event.inputs.serialization-json == 'true') }}
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-json
       workingDirectory: ./components/serialization/json/
 
   buildSerializationText:
-    #needs: checkPaths
-    if: github.event.inputs.serialization-text == 'true'
-    #|| ( ${{ needs.checkPaths.outputs.serialization-text_count }} > 0 )
+    needs: checkPaths
+    if: ${{ always() && (needs.checkPaths.outputs.serialization-text == 'true' || github.event.inputs.serialization-text == 'true') }} 
     uses: ./.github/workflows/gradleBuild-component.yml
     with:
       componentName: serialization-text
