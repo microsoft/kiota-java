@@ -44,8 +44,8 @@ jobs:
       abstractions: ${{ steps.filter.outputs.abstractions }}
       authentication-azure: ${{ steps.filter.outputs.authentication-azure }}
       http-okHttp: ${{ steps.filter.outputs.http-okHttp }}
-      serialization-json: ${{ steps.filter.serialization-json }}
-      serialization-text: ${{ steps.filter.serialization-text }}
+      serialization-json: ${{ steps.filter.outputs.serialization-json }}
+      serialization-text: ${{ steps.filter.outputs.serialization-text }}
     steps: 
     - uses: actions/checkout@v3
     - uses: dorny/paths-filter@v2.10.2
