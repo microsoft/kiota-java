@@ -14,18 +14,28 @@ on:
       abstractions:
         description: release abstractions
         type: boolean
+        default: false
+        required: false
       authentication-azure:
         description: release azure-auth
         type: boolean
+        default: false
+        required: false
       http-okHttp:
         description: release http-okHttp
         type: boolean
+        default: false
+        required: false
       serialization-json: 
         description: release serialization-json
         type: boolean 
+        default: false
+        required: false
       serialization-text: 
         description: release serialization-text
         type: boolean
+        default: false
+        required: false
   
 env: 
   PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
@@ -40,6 +50,7 @@ jobs:
       serialization-json: ${{ steps.filter.serialization-json }}
       serialization-text: ${{ steps.filter.serialization-text }}
     steps:
+    - uses: actions/checkout@v3
     - name: checkPaths
       uses: dorny/paths-filter@v2.10.2
       id: filter

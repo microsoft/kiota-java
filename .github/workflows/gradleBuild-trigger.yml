@@ -14,18 +14,28 @@ on:
       abstractions:
         description: build abstractions
         type: boolean
+        default: false
+        required: false
       authentication-azure:
         description: build azure-auth
         type: boolean
+        default: false
+        required: false
       http-okHttp:
         description: build http-okHttp
         type: boolean
+        default: false
+        required: false
       serialization-json: 
         description: build serialization-json
         type: boolean 
+        default: false
+        required: false
       serialization-text: 
         description: build serialization-text
         type: boolean  
+        default: false
+        required: false
 
 jobs:
   checkPaths:
