@@ -14,18 +14,28 @@ on:
       abstractions:
         description: build abstractions
         type: boolean
+        default: false
+        required: false
       authentication-azure:
         description: build azure-auth
         type: boolean
+        default: false
+        required: false
       http-okHttp:
         description: build http-okHttp
         type: boolean
+        default: false
+        required: false
       serialization-json: 
         description: build serialization-json
         type: boolean 
+        default: false
+        required: false
       serialization-text: 
         description: build serialization-text
         type: boolean  
+        default: false
+        required: false
 
 jobs:
   checkPaths:
@@ -39,6 +49,7 @@ jobs:
     steps: 
     - uses: actions/checkout@v3
     - uses: dorny/paths-filter@v2.10.2
+      if: ${{ github.event.inputs.abstractions == 'false' && github.event.inputs.authentication-azure == 'false' && github.event.inputs.serialization-json == 'false' && github.event.inputs.serialization-text == 'false' && github.event.inputs.http-okHttp == 'false' }}
       id: filter
       with:
         filters: |
