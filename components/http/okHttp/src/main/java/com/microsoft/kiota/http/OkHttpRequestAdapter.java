@@ -446,7 +446,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getHttpResponseMessage").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             this.setBaseUrlForRequestInformation(requestInfo);
-            final Map<String, Object> additionalContext = new HashMap<>() {{
+            final Map<String, Object> additionalContext = new HashMap<String, Object>() {{
                 put("parent-span", span);
             }};
             if(claims != null && !claims.isEmpty()) {
