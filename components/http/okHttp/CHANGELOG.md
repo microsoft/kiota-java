@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.5] - 2022-09-15
+
+### Added
+
+- Added support for tracing through open telemetry
+
 ## [0.0.4] - 2022-09-08
 
 ### Added
