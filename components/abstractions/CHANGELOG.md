@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.4] - 2022-09-15
+
+### Changed
+
+- Lowered compatibility requirements to Java 8.
+
 ## [0.0.3] - 2022-09-02
 
 ### Added
