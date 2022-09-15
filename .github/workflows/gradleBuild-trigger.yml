@@ -49,7 +49,6 @@ jobs:
     steps: 
     - uses: actions/checkout@v3
     - uses: dorny/paths-filter@v2.10.2
-      if: ${{ github.event.inputs.abstractions == 'false' && github.event.inputs.authentication-azure == 'false' && github.event.inputs.serialization-json == 'false' && github.event.inputs.serialization-text == 'false' && github.event.inputs.http-okHttp == 'false' }}
       id: filter
       with:
         filters: |
