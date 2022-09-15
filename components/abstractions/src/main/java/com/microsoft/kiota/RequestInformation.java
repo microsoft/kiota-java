@@ -52,7 +52,7 @@ public class RequestInformation {
             if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase().contains("{+baseurl}"))
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
-            var template = new URITemplate(urlTemplate)
+            final URITemplate template = new URITemplate(urlTemplate)
                             .expandOnly(new HashMap<String, Object>(queryParameters) {{
                                 putAll(pathParameters);
                             }});
@@ -84,10 +84,10 @@ public class RequestInformation {
         final Field[] fields = parameters.getClass().getFields();
         for(final Field field : fields) {
             try {
-                final var value = field.get(parameters);
-                var name = field.getName();
+                final Object value = field.get(parameters);
+                String name = field.getName();
                 if (field.isAnnotationPresent(QueryParameter.class)) {
-                    final var annotationName = field.getAnnotation(QueryParameter.class).name();
+                    final String annotationName = field.getAnnotation(QueryParameter.class).name();
                     if(annotationName != null && !annotationName.isEmpty()) {
                         name = annotationName;
                     }

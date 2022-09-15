@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +107,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
-                var closeResponse = true;
+                boolean closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
@@ -139,7 +140,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
-                var closeResponse = true;
+                boolean closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
@@ -177,7 +178,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
-                var closeResponse = true;
+                boolean closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
@@ -250,7 +251,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return this.getHttpResponseMessage(requestInfo, null)
         .thenCompose(response -> {
             if(responseHandler == null) {
-                var closeResponse = true;
+                boolean closeResponse = true;
                 try {
                     this.throwFailedResponse(response, errorMappings);
                     if(this.shouldReturnNull(response)) {
@@ -304,7 +305,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                                     (statusCode >= 400 && statusCode < 500 ?
                                                         errorMappings.get("4XX") :
                                                         errorMappings.get("5XX"));
-        var closeResponse = true;
+        boolean closeResponse = true;
         try {
             final ParseNode rootNode = getRootParseNode(response);
             if(rootNode == null) {
@@ -335,7 +336,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 this.client.newCall(getRequestFromRequestInformation(requestInfo)).enqueue(wrapper);
                 return wrapper.future;
             } catch (URISyntaxException | MalformedURLException ex) {
-                var result = new CompletableFuture<Response>();
+                CompletableFuture<Response> result = new CompletableFuture<Response>();
                 result.completeExceptionally(ex);
                 return result;
             }
@@ -344,7 +345,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     private final static Pattern bearerPattern = Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
     private final static Pattern claimsPattern = Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
     private CompletableFuture<Response> retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nullable final String claims) {
-        final var responseClaims = this.getClaimsFromResponse(response, requestInfo, claims);
+        final String responseClaims = this.getClaimsFromResponse(response, requestInfo, claims);
         if (responseClaims != null && !responseClaims.isEmpty()) {
             if(requestInfo.content != null && requestInfo.content.markSupported()) {
                 try {
@@ -363,20 +364,20 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         if(response.code() == 401 &&
            (claims == null || claims.isEmpty()) && // we avoid infinite loops and retry only once
            (requestInfo.content == null || requestInfo.content.markSupported())) {
-               final var authenticateHeader = response.headers("WWW-Authenticate");
+               final List<String> authenticateHeader = response.headers("WWW-Authenticate");
                if(authenticateHeader != null && !authenticateHeader.isEmpty()) {
                     String rawHeaderValue = null;
-                    for(final var authenticateEntry: authenticateHeader) {
-                        final var matcher = bearerPattern.matcher(authenticateEntry);
+                    for(final String authenticateEntry: authenticateHeader) {
+                        final Matcher matcher = bearerPattern.matcher(authenticateEntry);
                         if(matcher.matches()) {
                             rawHeaderValue = authenticateEntry.replaceFirst("^Bearer\\s", "");
                             break;
                         }
                     }
                     if (rawHeaderValue != null) {
-                        final var parameters = rawHeaderValue.split(",");
-                        for(final var parameter: parameters) {
-                            final var matcher = claimsPattern.matcher(parameter);
+                        final String[] parameters = rawHeaderValue.split(",");
+                        for(final String parameter: parameters) {
+                            final Matcher matcher = claimsPattern.matcher(parameter);
                             if(matcher.matches()) {
                                 return matcher.group(1);
                             }

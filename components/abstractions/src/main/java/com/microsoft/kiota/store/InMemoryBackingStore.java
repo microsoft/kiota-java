@@ -21,8 +21,8 @@ public class InMemoryBackingStore implements BackingStore {
     public void setIsInitializationCompleted(final boolean value) {
         this.isInitializationCompleted = value;
         for(final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
-            final var wrapper = entry.getValue();
-            final var updatedValue = wrapper.setAt0(Boolean.valueOf(!value));
+            final Pair<Boolean, Object> wrapper = entry.getValue();
+            final Pair<Boolean, Object> updatedValue = wrapper.setAt0(Boolean.valueOf(!value));
             entry.setValue(updatedValue);
         }
     }

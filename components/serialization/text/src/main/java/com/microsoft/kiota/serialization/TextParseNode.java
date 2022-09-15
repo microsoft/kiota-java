@@ -124,7 +124,7 @@ public class TextParseNode implements ParseNode {
         this.onAfterAssignFieldValues = value;
     }
     public byte[] getByteArrayValue() {
-        final var base64 = this.getStringValue();
+        final String base64 = this.getStringValue();
         if(base64 == null || base64.isEmpty()) {
             return null;
         }

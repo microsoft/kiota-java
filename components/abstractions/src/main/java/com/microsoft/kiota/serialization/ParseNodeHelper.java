@@ -2,6 +2,7 @@ package com.microsoft.kiota.serialization;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -20,9 +21,9 @@ public class ParseNodeHelper {
 		}
 		final Map<String, Consumer<ParseNode>> result = targets[0].getFieldDeserializers();
 		for(int i = 1; i < targets.length; i++) {
-			final var targetDeserializers = targets[i].getFieldDeserializers();
-			for(final var key : targetDeserializers.keySet()) {
-				result.putIfAbsent(key, targetDeserializers.get(key));
+			final Map<String, Consumer<ParseNode>> targetDeserializers = targets[i].getFieldDeserializers();
+			for(final Entry<String, Consumer<ParseNode>> entry : targetDeserializers.entrySet()) {
+				result.putIfAbsent(entry.getKey(), entry.getValue());
 			}
 		}
 		return result;
