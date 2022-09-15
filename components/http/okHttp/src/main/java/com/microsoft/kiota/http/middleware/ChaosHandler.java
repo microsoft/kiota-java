@@ -12,6 +12,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+
 /**
  * DO NOT USE IN PRODUCTION
  * interceptor that randomly fails the responses for unit testing purposes
@@ -38,25 +41,47 @@ public class ChaosHandler implements Interceptor {
      */
     public static final int MSClientErrorCodeTooManyRequests = 429;
 
+    /** The key for the open telemetry event */
+    public static final String chaosHandlerTriggeredEventKey = "chaos_handler_triggered";
+
     @Override
     @Nonnull
     public Response intercept(@Nonnull final Chain chain) throws IOException {
         Request request = chain.request();
+        final Span span = ObservabilityHelper.getSpanForRequest(request, "ChaosHandler_Intercept");
+        Scope scope = null;
+        if (span != null) {
+            scope = span.makeCurrent();
+            span.setAttribute("com.microsoft.kiota.handler.chaos.enable", true);
+        }
 
-        final int dice = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
+        try {
+            final int dice = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
 
-        if(dice % failureRate == 0) {
-            return new Response
-                    .Builder()
-                    .request(request)
-                    .protocol(Protocol.HTTP_1_1)
-                    .code(MSClientErrorCodeTooManyRequests)
-                    .message("Too Many Requests")
-                    .addHeader(RETRY_AFTER, retryAfterValue)
-                    .body(ResponseBody.create(responseBody, MediaType.get("application/json")))
-                    .build();
-        } else {
-            return chain.proceed(request);
+            if(dice % failureRate == 0) {
+                span.addEvent(chaosHandlerTriggeredEventKey);
+                return new Response
+                        .Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(MSClientErrorCodeTooManyRequests)
+                        .message("Too Many Requests")
+                        .addHeader(RETRY_AFTER, retryAfterValue)
+                        .body(ResponseBody.create(responseBody, MediaType.get("application/json")))
+                        .build();
+            } else {
+                if (span != null) {
+                    request = request.newBuilder().tag(Span.class, span).build();
+                }
+                return chain.proceed(request);
+            }
+        } finally {
+            if (scope != null) {
+                scope.close();
+            }
+            if (span != null) {
+                span.end();
+            }
         }
     }
 

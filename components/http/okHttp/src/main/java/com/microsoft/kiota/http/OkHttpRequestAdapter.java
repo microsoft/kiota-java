@@ -595,6 +595,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 requestBuilder.tag(option.getType(), option);
             }
             requestBuilder.tag(obsOptions.getType(), obsOptions);
+            requestBuilder.tag(Span.class, parentSpan);
             final Request request = requestBuilder.build();
             final List<String> contentLengthHeader = request.headers().values("Content-Length");
             if(contentLengthHeader != null && contentLengthHeader.size() > 0) {
