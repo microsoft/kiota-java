@@ -30,6 +30,7 @@ public class ObservabilityOptions implements RequestOption {
     public <T extends RequestOption> Class<T> getType() {
 		return (Class<T>) ObservabilityOptions.class;
 	}
+	/** Gets the instrumentation name to use for tracing */
 	@Nonnull
 	public String GetTracerInstrumentationName() {
 		return "com.microsoft.kiota:microsoft-kiota-http-okHttp";

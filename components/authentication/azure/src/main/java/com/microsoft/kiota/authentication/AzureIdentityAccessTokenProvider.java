@@ -17,11 +17,17 @@ import com.azure.core.credential.TokenRequestContext;
 
 import com.microsoft.kiota.authentication.AccessTokenProvider;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.context.Context;
+
 /** Implementation of AccessTokenProvider that supports implementations of TokenCredential from Azure.Identity. */
 public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
     private final TokenCredential creds;
     private final List<String> _scopes;
     private final AllowedHostsValidator _hostValidator;
+    private final ObservabilityOptions _observabilityOptions;
     /**
      * Creates a new instance of AzureIdentityAccessTokenProvider.
      * @param tokenCredential The Azure.Identity.TokenCredential implementation to use.
@@ -29,6 +35,16 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
      * @param scopes The scopes to request access tokens for.
      */
     public AzureIdentityAccessTokenProvider(@Nonnull final TokenCredential tokenCredential, @Nonnull final String[] allowedHosts, @Nonnull final String... scopes) {
+        this(tokenCredential, allowedHosts, null, scopes);
+    }
+    /**
+     * Creates a new instance of AzureIdentityAccessTokenProvider.
+     * @param tokenCredential The Azure.Identity.TokenCredential implementation to use.
+     * @param allowedHosts The list of allowed hosts for which to request access tokens.
+     * @param observabilityOptions The observability options to use.
+     * @param scopes The scopes to request access tokens for.
+     */
+    public AzureIdentityAccessTokenProvider(@Nonnull final TokenCredential tokenCredential, @Nonnull final String[] allowedHosts, @Nullable final ObservabilityOptions observabilityOptions,  @Nonnull final String... scopes) {
         creds = Objects.requireNonNull(tokenCredential, "parameter tokenCredential cannot be null");
 
         if(scopes == null) {
@@ -43,31 +59,55 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         } else {
             _hostValidator = new AllowedHostsValidator(allowedHosts);
         }
+        if (observabilityOptions == null) {
+            _observabilityOptions = new ObservabilityOptions();
+        } else {
+            _observabilityOptions = observabilityOptions;
+        }
     }
     private final static String ClaimsKey = "claims";
+    private final static String parentSpanKey = "parent-span";
     @Nonnull
     public CompletableFuture<String> getAuthorizationToken(@Nonnull final URI uri, @Nullable final Map<String, Object> additionalAuthenticationContext) {
-        if(!_hostValidator.isUrlHostValid(uri)) {
-            return CompletableFuture.completedFuture("");
+        Span span;
+        if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(parentSpanKey) && additionalAuthenticationContext.get(parentSpanKey) instanceof Span) {
+            final Span parentSpan = (Span) additionalAuthenticationContext.get(parentSpanKey);
+            span = GlobalOpenTelemetry.getTracer(_observabilityOptions.GetTracerInstrumentationName()).spanBuilder("getAuthorizationToken").setParent(Context.current().with(parentSpan)).startSpan();
+        } else {
+            span = GlobalOpenTelemetry.getTracer(_observabilityOptions.GetTracerInstrumentationName()).spanBuilder("getAuthorizationToken").startSpan();
         }
-        if(!uri.getScheme().equalsIgnoreCase("https")) {
-            return CompletableFuture.failedFuture(new IllegalArgumentException("Only https is supported"));
-        }
+        try(final Scope scope = span.makeCurrent()) {
+            if(!_hostValidator.isUrlHostValid(uri)) {
+                span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
+                return CompletableFuture.completedFuture("");
+            }
+            if(!uri.getScheme().equalsIgnoreCase("https")) {
+                span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
+                final Exception result = new IllegalArgumentException("Only https is supported");
+                span.recordException(result);
+                return CompletableFuture.failedFuture(result);
+            }
+            span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", true);
 
-        String decodedClaim = null;
+            String decodedClaim = null;
 
-        if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(ClaimsKey) && additionalAuthenticationContext.get(ClaimsKey) instanceof String) {
-            final String rawClaim = (String) additionalAuthenticationContext.get(ClaimsKey);
-            decodedClaim = new String(Base64.getDecoder().decode(rawClaim));
-        }
+            if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(ClaimsKey) && additionalAuthenticationContext.get(ClaimsKey) instanceof String) {
+                final String rawClaim = (String) additionalAuthenticationContext.get(ClaimsKey);
+                decodedClaim = new String(Base64.getDecoder().decode(rawClaim));
+            }
+            span.setAttribute("com.microsoft.kiota.authentication.additional_claims_provided", decodedClaim != null && !decodedClaim.isEmpty());
 
-        final TokenRequestContext context = new TokenRequestContext() {{
-            this.setScopes(_scopes);
-        }};
-        if(decodedClaim != null && !decodedClaim.isEmpty()) {
-            context.setClaims(decodedClaim);
+            final TokenRequestContext context = new TokenRequestContext() {{
+                this.setScopes(_scopes);
+            }};
+            span.setAttribute("com.microsoft.kiota.authentication.scopes", String.join("|", _scopes));
+            if(decodedClaim != null && !decodedClaim.isEmpty()) {
+                context.setClaims(decodedClaim);
+            }
+            return this.creds.getToken(context).toFuture().thenApply(r -> r.getToken());
+        } finally {
+            span.end();
         }
-        return this.creds.getToken(context).toFuture().thenApply(r -> r.getToken());
     }
     @Nonnull
     public AllowedHostsValidator getAllowedHostsValidator() {
