@@ -17,6 +17,7 @@ jobs:
       run:
         working-directory: ${{ inputs.workingDirectory }} 
     steps:
+      - uses: actions/checkout@v3
       - name: Setup JDK
         uses: actions/setup-java@v3
         with: 
