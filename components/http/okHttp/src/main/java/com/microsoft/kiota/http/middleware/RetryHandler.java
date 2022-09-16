@@ -18,6 +18,10 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+
 /**
  * The middleware responsible for retrying requests when they fail because of transient issues
  */
@@ -188,25 +192,51 @@ public class RetryHandler implements Interceptor{
     @Nonnull
     public Response intercept(@Nonnull final Chain chain) throws IOException {
         Request request = chain.request();
-        Response response = chain.proceed(request);
-
-        // Use should retry pass along with this request
-        RetryHandlerOption retryOption = request.tag(RetryHandlerOption.class);
-        if(retryOption == null) { retryOption = mRetryOption; }
-
-        int executionCount = 1;
-        while(retryRequest(response, executionCount, request, retryOption)) {
-            request = request.newBuilder().addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount)).build();
-            executionCount++;
-            if(response != null) {
-                final ResponseBody body = response.body();
-                if(body != null)
-                    body.close();
-                response.close();
-            }
-            response = chain.proceed(request);
+        final Span span = ObservabilityHelper.getSpanForRequest(request, "RetryHandler_Intercept");
+        Scope scope = null;
+        if (span != null) {
+            scope = span.makeCurrent();
+            span.setAttribute("com.microsoft.kiota.handler.retry.enable", true);
         }
-        return response;
+        try {
+            if (span != null) {
+                request = request.newBuilder().tag(Span.class, span).build();
+            }
+            Response response = chain.proceed(request);
+
+            // Use should retry pass along with this request
+            RetryHandlerOption retryOption = request.tag(RetryHandlerOption.class);
+            if(retryOption == null) { retryOption = mRetryOption; }
+
+            int executionCount = 1;
+            while(retryRequest(response, executionCount, request, retryOption)) {
+                final Request.Builder builder = request.newBuilder().addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
+                if (span != null) {
+                    builder.tag(Span.class, span);
+                }
+                request = builder.build();
+                executionCount++;
+                if(response != null) {
+                    final ResponseBody body = response.body();
+                    if(body != null)
+                        body.close();
+                    response.close();
+                }
+                final Span retrySpan = ObservabilityHelper.getSpanForRequest(request, "RetryHandler_Intercept - attempt " + executionCount, span);
+                retrySpan.setAttribute("http.retry_count", executionCount);
+                retrySpan.setAttribute("http.status_code", response.code());
+                retrySpan.end();
+                response = chain.proceed(request);
+            }
+            return response;
+        } finally {
+            if (scope != null) {
+                scope.close();
+            }
+            if (span != null) {
+                span.end();
+            }
+        }
     }
 
 }

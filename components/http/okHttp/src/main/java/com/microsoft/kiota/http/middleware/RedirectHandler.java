@@ -19,6 +19,9 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+
 /**
  * Middleware that determines whether a redirect information should be followed or not, and follows it if necessary.
  */
@@ -118,17 +121,39 @@ public class RedirectHandler implements Interceptor{
         RedirectHandlerOption redirectOption = request.tag(RedirectHandlerOption.class);
         redirectOption = redirectOption != null ? redirectOption : this.mRedirectOption;
 
-        while(true) {
-            response = chain.proceed(request);
-            final boolean shouldRedirect = isRedirected(request, response, requestsCount, redirectOption)
-                    && redirectOption.shouldRedirect().shouldRedirect(response);
-            if(!shouldRedirect) break;
+        final Span span = ObservabilityHelper.getSpanForRequest(request, "RedirectHandler_Intercept");
+        Scope scope = null;
+        if (span != null) {
+            scope = span.makeCurrent();
+            span.setAttribute("com.microsoft.kiota.handler.redirect.enable", true);
+        }
+        try {
+            while(true) {
+                if (span != null) {
+                    request = request.newBuilder().tag(Span.class, span).build();
+                }
+                response = chain.proceed(request);
+                final boolean shouldRedirect = isRedirected(request, response, requestsCount, redirectOption)
+                        && redirectOption.shouldRedirect().shouldRedirect(response);
+                if(!shouldRedirect) break;
 
-            final Request followup = getRedirect(request, response);
-            if(followup != null) {
-                response.close();
-                request = followup;
-                requestsCount++;
+                final Request followup = getRedirect(request, response);
+                if(followup != null) {
+                    response.close();
+                    request = followup;
+                    requestsCount++;
+                    final Span redirectSpan = ObservabilityHelper.getSpanForRequest(request, "RedirectHandler_Intercept - redirect " + requestsCount, span);
+                    redirectSpan.setAttribute("com.microsoft.kiota.handler.redirect.count", requestsCount);
+                    redirectSpan.setAttribute("http.status_code", response.code());
+                    redirectSpan.end();
+                }
+            }
+        } finally {
+            if (scope != null) {
+                scope.close();
+            }
+            if (span != null) {
+                span.end();
             }
         }
         return response;

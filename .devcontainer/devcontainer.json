@@ -51,5 +51,8 @@
 	"features": {
 		"github-cli": "latest",
 		"powershell": "latest"
+	},
+	"containerEnv": {
+		"GRADLE_USER_HOME": "/home/vscode/.gradle"
 	}
 }

@@ -91,6 +91,7 @@ public class RetryHandlerOption implements RequestOption{
     }
 
     @Override
+	@SuppressWarnings("unchecked")
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RetryHandlerOption.class; 
     }
