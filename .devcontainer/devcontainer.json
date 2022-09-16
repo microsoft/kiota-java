@@ -53,6 +53,6 @@
 		"powershell": "latest"
 	},
 	"containerEnv": {
-		"GRADLE_USER_HOME": "$HOME/.gradle"
+		"GRADLE_USER_HOME": "/home/vscode/.gradle"
 	}
 }
