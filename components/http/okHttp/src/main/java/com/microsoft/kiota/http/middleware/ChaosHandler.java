@@ -42,7 +42,7 @@ public class ChaosHandler implements Interceptor {
     public static final int MSClientErrorCodeTooManyRequests = 429;
 
     /** The key for the open telemetry event */
-    public static final String chaosHandlerTriggeredEventKey = "chaos_handler_triggered";
+    public static final String chaosHandlerTriggeredEventKey = "com.microsoft.kiota.chaos_handler_triggered";
 
     @Override
     @Nonnull
