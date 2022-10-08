@@ -11,7 +11,7 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'io.opentelemetry:opentelemetry-api:1.18.0'
     implementation 'io.opentelemetry:opentelemetry-context:1.19.0'
-    implementation 'io.opentelemetry:opentelemetry-semconv:1.18.0-alpha'
+    implementation 'io.opentelemetry:opentelemetry-semconv:1.19.0-alpha'
     implementation 'com.google.guava:guava:31.1-jre'
     api 'com.squareup.okhttp3:okhttp:4.10.0'
 
