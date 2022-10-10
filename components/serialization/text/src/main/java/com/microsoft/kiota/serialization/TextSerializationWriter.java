@@ -37,7 +37,7 @@ public class TextSerializationWriter implements SerializationWriter {
     public TextSerializationWriter() {
         this.writer = new OutputStreamWriter(this.stream);
     }
-    public void writeStringValue(final String key, final String value) {
+    public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         if(key != null && !key.isEmpty())
             throw new UnsupportedOperationException(NoStructuredDataMessage);
         if(value != null && !value.isEmpty())
@@ -52,68 +52,68 @@ public class TextSerializationWriter implements SerializationWriter {
                 }
             }
     }
-    public void writeBooleanValue(final String key, final Boolean value) {
+    public void writeBooleanValue(@Nullable final String key, @Nullable final Boolean value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeShortValue(final String key, final Short value) {
+    public void writeShortValue(@Nullable final String key, @Nullable final Short value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeByteValue(final String key, final Byte value) {
+    public void writeByteValue(@Nullable final String key, @Nullable final Byte value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeBigDecimalValue(final String key, final BigDecimal value) {
+    public void writeBigDecimalValue(@Nullable final String key, @Nullable final BigDecimal value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeIntegerValue(final String key, final Integer value) {
+    public void writeIntegerValue(@Nullable final String key, @Nullable final Integer value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeFloatValue(final String key, final Float value) {
+    public void writeFloatValue(@Nullable final String key, @Nullable final Float value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeDoubleValue(final String key, final Double value) {
+    public void writeDoubleValue(@Nullable final String key, @Nullable final Double value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeLongValue(final String key, final Long value) {
+    public void writeLongValue(@Nullable final String key, @Nullable final Long value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeUUIDValue(final String key, final UUID value) {
+    public void writeUUIDValue(@Nullable final String key, @Nullable final UUID value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public void writeOffsetDateTimeValue(final String key, final OffsetDateTime value) {
+    public void writeOffsetDateTimeValue(@Nullable final String key, @Nullable final OffsetDateTime value) {
         if(value != null)
             writeStringValue(key, value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
     }
-    public void writeLocalDateValue(final String key, final LocalDate value) {
+    public void writeLocalDateValue(@Nullable final String key, @Nullable final LocalDate value) {
         if(value != null)
             writeStringValue(key, value.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
-    public void writeLocalTimeValue(final String key, final LocalTime value) {
+    public void writeLocalTimeValue(@Nullable final String key, @Nullable final LocalTime value) {
         if(value != null)
             writeStringValue(key, value.format(DateTimeFormatter.ISO_LOCAL_TIME));
     }
-    public void writePeriodValue(final String key, final Period value) {
+    public void writePeriodValue(@Nullable final String key, @Nullable final Period value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
-    public <T> void writeCollectionOfPrimitiveValues(final String key, final Iterable<T> values) {
+    public <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nullable final Iterable<T> values) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
-    public <T extends Parsable> void writeCollectionOfObjectValues(final String key, final Iterable<T> values) {
+    public <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nullable final Iterable<T> values) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
     public <T extends Enum<T>> void writeCollectionOfEnumValues(@Nullable final String key, @Nullable final Iterable<T> values) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
-    public <T extends Parsable> void writeObjectValue(final String key, final T value, final Parsable ...additionalValuesToMerge) {
+    public <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nullable final T value, @Nonnull final Parsable ...additionalValuesToMerge) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
     public <T extends Enum<T>> void writeEnumSetValue(@Nullable final String key, @Nullable final EnumSet<T> values) {
@@ -133,6 +133,7 @@ public class TextSerializationWriter implements SerializationWriter {
             return valued.getValue();
         } else return null;
     }
+    @Nonnull
     public InputStream getSerializedContent() {
         try {
             this.writer.flush();
@@ -149,25 +150,28 @@ public class TextSerializationWriter implements SerializationWriter {
     public void writeAdditionalData(@Nonnull final Map<String, Object> value) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
+    @Nullable
     public Consumer<Parsable> getOnBeforeObjectSerialization() {
         return this.onBeforeObjectSerialization;
     }
+    @Nullable
     public Consumer<Parsable> getOnAfterObjectSerialization() {
         return this.onAfterObjectSerialization;
     }
+    @Nullable
     public BiConsumer<Parsable, SerializationWriter> getOnStartObjectSerialization() {
         return this.onStartObjectSerialization;
     }
     private Consumer<Parsable> onBeforeObjectSerialization;
-    public void setOnBeforeObjectSerialization(final Consumer<Parsable> value) {
+    public void setOnBeforeObjectSerialization(@Nullable final Consumer<Parsable> value) {
         this.onBeforeObjectSerialization = value;
     }
     private Consumer<Parsable> onAfterObjectSerialization;
-    public void setOnAfterObjectSerialization(final Consumer<Parsable> value) {
+    public void setOnAfterObjectSerialization(@Nullable final Consumer<Parsable> value) {
         this.onAfterObjectSerialization = value;
     }
     private BiConsumer<Parsable, SerializationWriter> onStartObjectSerialization;
-    public void setOnStartObjectSerialization(final BiConsumer<Parsable, SerializationWriter> value) {
+    public void setOnStartObjectSerialization(@Nullable final BiConsumer<Parsable, SerializationWriter> value) {
         this.onStartObjectSerialization = value;
     }
     public void writeByteArrayValue(@Nullable final String key, @Nonnull final byte[] value) {
