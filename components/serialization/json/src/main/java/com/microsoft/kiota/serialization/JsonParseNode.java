@@ -33,7 +33,8 @@ public class JsonParseNode implements ParseNode {
     public JsonParseNode(@Nonnull final JsonElement node) {
         currentNode = Objects.requireNonNull(node, "parameter node cannot be null");
     }
-    public ParseNode getChildNode(final String identifier) {
+    @Nonnull
+    public ParseNode getChildNode(@Nonnull final String identifier) {
         Objects.requireNonNull(identifier, "identifier parameter is required");
         if(currentNode.isJsonObject()) {
             final JsonObject object = currentNode.getAsJsonObject();
@@ -45,61 +46,78 @@ public class JsonParseNode implements ParseNode {
             }};
         } else return null;
     }
+    @Nullable
     public String getStringValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsString() : null;
     }
+    @Nullable
     public Boolean getBooleanValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsBoolean() : null;
     }
+    @Nullable
     public Byte getByteValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsByte() : null;
     }
+    @Nullable
     public Short getShortValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsShort() : null;
     }
+    @Nullable
     public BigDecimal getBigDecimalValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsBigDecimal() : null;
     }
+    @Nullable
     public Integer getIntegerValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsInt() : null;
     }
+    @Nullable
     public Float getFloatValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsFloat() : null;
     }
+    @Nullable
     public Double getDoubleValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsDouble() : null;
     }
+    @Nullable
     public Long getLongValue() {
         return currentNode.isJsonPrimitive() ? currentNode.getAsLong() : null;
     }
+    @Nullable
     public UUID getUUIDValue() {
         final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return UUID.fromString(stringValue);
     }
+    @Nullable
     public OffsetDateTime getOffsetDateTimeValue() {
         final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return OffsetDateTime.parse(stringValue);
     }
+    @Nullable
     public LocalDate getLocalDateValue() {
         final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return LocalDate.parse(stringValue);
     }
+    @Nullable
     public LocalTime getLocalTimeValue() {
         final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return LocalTime.parse(stringValue);
     }
+    @Nullable
     public Period getPeriodValue() {
         final String stringValue = currentNode.getAsString();
         if(stringValue == null) return null;
         return Period.parse(stringValue);
     }
-    public <T> List<T> getCollectionOfPrimitiveValues(final Class<T> targetClass) {
+    @Nullable
+    public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
-        if(currentNode.isJsonArray()) {
+        if(currentNode.isJsonNull()) {
+            return null;
+        } else if(currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
@@ -156,9 +174,12 @@ public class JsonParseNode implements ParseNode {
             });
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
+    @Nullable
     public <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
-        if(currentNode.isJsonArray()) {
+        if(currentNode.isJsonNull()) {
+            return null;
+        } else if(currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
@@ -187,9 +208,12 @@ public class JsonParseNode implements ParseNode {
             });
         } else return null;
     }
+    @Nullable
     public <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum) {
         Objects.requireNonNull(targetEnum, "parameter targetEnum cannot be null");
-        if(currentNode.isJsonArray()) {
+        if(currentNode.isJsonNull()) {
+            return null;
+        } else if(currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
@@ -218,6 +242,7 @@ public class JsonParseNode implements ParseNode {
             });
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
+    @Nonnull
     public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
         final T item = factory.Create(this);
@@ -305,20 +330,23 @@ public class JsonParseNode implements ParseNode {
         else
             throw new RuntimeException("Could not get the value during deserialization, unknown primitive type");
     }
+    @Nullable
     public Consumer<Parsable> getOnBeforeAssignFieldValues() {
         return this.onBeforeAssignFieldValues;
     }
+    @Nullable
     public Consumer<Parsable> getOnAfterAssignFieldValues() {
         return this.onAfterAssignFieldValues;
     }
     private Consumer<Parsable> onBeforeAssignFieldValues;
-    public void setOnBeforeAssignFieldValues(final Consumer<Parsable> value) {
+    public void setOnBeforeAssignFieldValues(@Nullable final Consumer<Parsable> value) {
         this.onBeforeAssignFieldValues = value;
     }
     private Consumer<Parsable> onAfterAssignFieldValues;
-    public void setOnAfterAssignFieldValues(final Consumer<Parsable> value) {
+    public void setOnAfterAssignFieldValues(@Nullable final Consumer<Parsable> value) {
         this.onAfterAssignFieldValues = value;
     }
+    @Nullable
     public byte[] getByteArrayValue() {
         final String base64 = this.getStringValue();
         if(base64 == null || base64.isEmpty()) {
