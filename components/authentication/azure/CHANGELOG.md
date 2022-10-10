@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.3] - 2022-10-10
+
+### Added
+
+### Changed 
+
+- Return completeExceptionally instead of failedFuture for failed async calls. 
+- Compatibility for Android level 26. 
+
 ## [0.0.2] - 2022-09-15
 
 ### Added
