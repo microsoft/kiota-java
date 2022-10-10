@@ -19,7 +19,7 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
     private final Consumer<Parsable> _onAfter;
     /**
      * Creates a new proxy factory that wraps the specified concrete factory while composing the before and after callbacks.
-     * @param concreteFactory the concrete factory to wrap
+     * @param concrete the concrete factory to wrap
      * @param onBefore the callback to invoke before the deserialization of any model object.
      * @param onAfter the callback to invoke after the deserialization of any model object.
      */

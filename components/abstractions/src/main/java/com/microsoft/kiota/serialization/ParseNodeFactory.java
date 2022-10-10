@@ -15,7 +15,7 @@ public interface ParseNodeFactory {
     String getValidContentType();
     /**
      * Creates a {@link ParseNode} from the given {@link InputStream} and content type.
-     * @param inputStream the {@link InputStream} to read from.
+     * @param rawResponse the {@link InputStream} to read from.
      * @param contentType the content type of the {@link InputStream}.
      * @return a {@link ParseNode} that can deserialize the given {@link InputStream}.
      */

@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 /**
  * Defines the factory for creating parsable objects.
  * </summary>
- * @param T The type of the parsable object.
+ * @typeparam T The type of the parsable object.
  */
 @FunctionalInterface
 public interface ParsableFactory<T extends Parsable> {

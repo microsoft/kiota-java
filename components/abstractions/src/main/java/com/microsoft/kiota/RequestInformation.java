@@ -84,7 +84,7 @@ public class RequestInformation {
     private HashMap<String, Object> queryParameters = new HashMap<>();
     /**
      * Adds query parameters to the request based on the object passed in and its fields.
-     * @param object The object to add the query parameters from.
+     * @param parameters The object to add the query parameters from.
      */
     public void addQueryParameters(@Nullable final Object parameters) {
         if (parameters == null) return;
@@ -198,7 +198,7 @@ public class RequestInformation {
     }
     /**
      * Removes a request option from this request.
-     * @param option the request option to remove.
+     * @param options the request option to remove.
      */
     public void removeRequestOptions(@Nullable final RequestOption... options) {
         if(options == null || options.length == 0) return;

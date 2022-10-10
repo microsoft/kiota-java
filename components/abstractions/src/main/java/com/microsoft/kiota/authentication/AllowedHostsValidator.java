@@ -13,7 +13,7 @@ public class AllowedHostsValidator {
     private HashSet<String> validHosts;
     /**
      * Creates a new AllowedHostsValidator.
-     * @param validHosts The list of valid hosts.
+     * @param allowedHosts The list of valid hosts.
      */
     public AllowedHostsValidator(@Nonnull final String... allowedHosts) {
         final HashSet<String> value = new HashSet<>(allowedHosts.length);

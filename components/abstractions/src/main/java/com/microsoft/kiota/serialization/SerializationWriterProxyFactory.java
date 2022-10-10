@@ -19,10 +19,10 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
     private final BiConsumer<Parsable, SerializationWriter> _onStart;
     /**
      * Creates a new proxy factory that wraps the specified concrete factory while composing the before and after callbacks.
-     * @param concreteFactory the concrete factory to wrap
+     * @param concrete the concrete factory to wrap
      * @param onBeforeSerialization the callback to invoke before the serialization of any model object.
      * @param onAfterSerialization the callback to invoke after the serialization of any model object.
-     * @param onStartSerialization the callback to invoke when the serialization of a model object starts.
+     * @param onStartObjectSerialization the callback to invoke when the serialization of a model object starts.
      */
     public SerializationWriterProxyFactory(@Nonnull final SerializationWriterFactory concrete,
         @Nullable final Consumer<Parsable> onBeforeSerialization,
