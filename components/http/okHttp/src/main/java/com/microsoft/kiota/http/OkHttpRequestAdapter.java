@@ -120,7 +120,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -128,6 +128,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -164,6 +165,16 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
+    private ResponseHandler getResponseHandler(final RequestInformation requestInfo) {
+        final Collection<RequestOption> requestOptions = requestInfo.getRequestOptions();
+        for(final RequestOption rOption : requestOptions) {
+            if (rOption instanceof ResponseHandlerOption) {
+                final ResponseHandlerOption option = (ResponseHandlerOption)rOption;
+                return option.getResponseHandler();
+            }
+        }
+        return null;
+    }
     private final static Pattern queryParametersCleanupPattern = Pattern.compile("\\{\\?[^\\}]+}", Pattern.CASE_INSENSITIVE);
     private final char[] queryParametersToDecodeForTracing = {'-', '.', '~', '$'};
     private Span startSpan(@Nonnull final RequestInformation requestInfo, @Nonnull final String methodName) {
@@ -176,7 +187,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @Nonnull
     public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
     @Nullable
-    public <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -184,6 +195,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -236,11 +248,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return mediaType.type() + "/" + mediaType.subtype();
     }
     @Nullable
-    public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -324,13 +337,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
 
         final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {

@@ -50,7 +50,7 @@ public class OkHttpRequestAdapterTest {
 			setUri(new URI("https://localhost"));
 			httpMethod = HttpMethod.GET;
 		}};
-		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null, null).get();
+		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null).get();
 		assertNotNull(response);
 	}
 	@ParameterizedTest
@@ -70,7 +70,7 @@ public class OkHttpRequestAdapterTest {
 			setUri(new URI("https://localhost"));
 			httpMethod = HttpMethod.GET;
 		}};
-		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null, null).get();
+		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null).get();
 		assertNull(response);
 	}
 	@ParameterizedTest
@@ -92,7 +92,7 @@ public class OkHttpRequestAdapterTest {
 		}};
 		final var mockEntity = mock(Parsable.class);
 		when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
-		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null, null).get();
+		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null).get();
 		assertNull(response);
 	}
 	@ParameterizedTest
@@ -119,7 +119,7 @@ public class OkHttpRequestAdapterTest {
 		when(mockFactory.getParseNode(any(String.class), any(InputStream.class))).thenReturn(mockParseNode);
 		when(mockFactory.getValidContentType()).thenReturn("application/json");
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
-		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null, null).get();
+		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null).get();
 		assertNotNull(response);
 	}
 	public static OkHttpClient getMockClient(final Response response) throws IOException {
