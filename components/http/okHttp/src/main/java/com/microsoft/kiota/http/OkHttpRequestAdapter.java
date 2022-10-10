@@ -108,6 +108,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             obsOptions = observabilityOptions;
         }
     }
+    @Nonnull
     public SerializationWriterFactory getSerializationWriterFactory() {
         return sWriterFactory;
     }
@@ -118,7 +119,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             BackingStoreFactorySingleton.instance = backingStoreFactory;
         }
     }
-    @Nonnull
+    @Nullable
     public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
@@ -172,8 +173,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         span.setAttribute("http.uri_template", decodedUriTemplate);
         return span;
     }
-    public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
     @Nonnull
+    public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
+    @Nullable
     public <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
@@ -233,7 +235,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     private String getMediaTypeAndSubType(final MediaType mediaType) {
         return mediaType.type() + "/" + mediaType.subtype();
     }
-    @Nonnull
+    @Nullable
     public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
         try(final Scope scope = span.makeCurrent()) {
@@ -321,6 +323,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
+    @Nullable
     public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
 
@@ -382,7 +385,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         final int statusCode = response.code();
         return statusCode == 204;
     }
+    @Nonnull
     public static final String errorMappingFoundAttributeName = "com.microsoft.kiota.error_mapping_found";
+    @Nonnull
     public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
     private Response throwFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("throwFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
@@ -496,6 +501,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
     private final static Pattern bearerPattern = Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
     private final static Pattern claimsPattern = Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    @Nonnull
     public static final String authenticateChallengedEventKey = "com.microsoft.kiota.authenticate_challenge_received";
     private CompletableFuture<Response> retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("retryCAEResponseIfRequired").setParent(Context.current().with(parentSpan)).startSpan();
