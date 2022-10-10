@@ -34,6 +34,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
      * @param allowedHosts The list of allowed hosts for which to request access tokens.
      * @param scopes The scopes to request access tokens for.
      */
+    @SuppressWarnings("LambdaLast")
     public AzureIdentityAccessTokenProvider(@Nonnull final TokenCredential tokenCredential, @Nonnull final String[] allowedHosts, @Nonnull final String... scopes) {
         this(tokenCredential, allowedHosts, null, scopes);
     }
@@ -44,6 +45,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
      * @param observabilityOptions The observability options to use.
      * @param scopes The scopes to request access tokens for.
      */
+    @SuppressWarnings("LambdaLast")
     public AzureIdentityAccessTokenProvider(@Nonnull final TokenCredential tokenCredential, @Nonnull final String[] allowedHosts, @Nullable final ObservabilityOptions observabilityOptions,  @Nonnull final String... scopes) {
         creds = Objects.requireNonNull(tokenCredential, "parameter tokenCredential cannot be null");
 
@@ -85,7 +87,9 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
                 final Exception result = new IllegalArgumentException("Only https is supported");
                 span.recordException(result);
-                return CompletableFuture.failedFuture(result);
+                final CompletableFuture<String> resultFuture = new CompletableFuture<>();
+                resultFuture.completeExceptionally(result);
+                return resultFuture;
             }
             span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", true);
 
@@ -97,9 +101,8 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
             }
             span.setAttribute("com.microsoft.kiota.authentication.additional_claims_provided", decodedClaim != null && !decodedClaim.isEmpty());
 
-            final TokenRequestContext context = new TokenRequestContext() {{
-                this.setScopes(_scopes);
-            }};
+            final TokenRequestContext context = new TokenRequestContext();
+            context.setScopes(_scopes);
             span.setAttribute("com.microsoft.kiota.authentication.scopes", String.join("|", _scopes));
             if(decodedClaim != null && !decodedClaim.isEmpty()) {
                 context.setClaims(decodedClaim);
