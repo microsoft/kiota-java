@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class SerializationWriterProxyFactory implements SerializationWriterFactory {
+    @Nonnull
     public String getValidContentType() {
         return _concrete.getValidContentType();
     }
@@ -32,7 +33,8 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
         _onAfter = onAfterSerialization;
         _onStart = onStartObjectSerialization;
     }
-    public SerializationWriter getSerializationWriter(final String contentType) {
+    @Nonnull
+    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         final SerializationWriter writer = _concrete.getSerializationWriter(contentType);
         final Consumer<Parsable> originalBefore = writer.getOnBeforeObjectSerialization();
         final Consumer<Parsable> originalAfter = writer.getOnAfterObjectSerialization();

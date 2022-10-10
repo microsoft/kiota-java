@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -34,8 +35,10 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 /** This class represents an abstract HTTP request. */
 public class RequestInformation {
     /** The url template for the current request */
+    @Nullable
     public String urlTemplate;
     /** The path parameters for the current request */
+    @Nullable
     public HashMap<String, Object> pathParameters = new HashMap<>();
     private URI uri;
     /** Gets the URI of the request. 
@@ -53,7 +56,7 @@ public class RequestInformation {
         } else {
             Objects.requireNonNull(urlTemplate);
             Objects.requireNonNull(queryParameters);
-            if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase().contains("{+baseurl}"))
+            if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase(Locale.ROOT).contains("{+baseurl}"))
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
             final URITemplate template = new URITemplate(urlTemplate)
@@ -154,7 +157,7 @@ public class RequestInformation {
     public void addRequestHeader(@Nonnull final String key, @Nonnull final String value) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
-        headers.put(key.toLowerCase(), value);
+        headers.put(key.toLowerCase(Locale.ROOT), value);
     }
     /**
      * Removes a request header from the current request.
@@ -162,7 +165,7 @@ public class RequestInformation {
      */
     public void removeRequestHeader(@Nonnull final String key) {
         Objects.requireNonNull(key);
-        headers.remove(key.toLowerCase());
+        headers.remove(key.toLowerCase(Locale.ROOT));
     }
     /** 
      * Gets the request headers the for current request
@@ -181,6 +184,7 @@ public class RequestInformation {
      * Gets the request options for this request. Options are unique by type. If an option of the same type is added twice, the last one wins.
      * @return the request options for this request.
      */
+    @Nonnull
     public Collection<RequestOption> getRequestOptions() { return _requestOptions.values(); }
     /**
      * Adds request options to this request.

@@ -34,6 +34,7 @@ public interface RequestAdapter {
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return a {@link CompletableFuture} with the deserialized response model.
      */
+    @Nullable
     <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized response model collection.
@@ -44,6 +45,7 @@ public interface RequestAdapter {
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return a {@link CompletableFuture} with the deserialized response model collection.
      */
+    @Nullable
     <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized primitive response model.
@@ -54,6 +56,7 @@ public interface RequestAdapter {
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return a {@link CompletableFuture} with the deserialized primitive response model.
      */
+    @Nullable
     <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized primitive collection response model.
@@ -64,6 +67,7 @@ public interface RequestAdapter {
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return a {@link CompletableFuture} with the deserialized primitive collection response model.
      */
+    @Nullable
     <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Sets The base url for every request.

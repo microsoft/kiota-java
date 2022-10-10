@@ -14,7 +14,9 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public static final ParseNodeFactoryRegistry defaultInstance = new ParseNodeFactoryRegistry();
     /** List of factories that are registered by content type. */
-    public HashMap<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
+    @Nonnull
+    public final HashMap<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
+    @Nonnull
     public String getValidContentType() {
         throw new UnsupportedOperationException("The registry supports multiple content types. Get the registered factory instead.");
     }

@@ -177,5 +177,6 @@ public interface ParseNode {
      * Gets the byte array value of the node.
      * @return The byte array value of the node.
      */
+    @Nullable
     byte[] getByteArrayValue();
 }
