@@ -24,97 +24,97 @@ public interface SerializationWriter extends Closeable {
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeStringValue(@Nullable final String key, @Nonnull final String value);
+    void writeStringValue(@Nullable final String key, @Nullable final String value);
     /**
      * Writes the specified Boolean value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeBooleanValue(@Nullable final String key, @Nonnull final Boolean value);
+    void writeBooleanValue(@Nullable final String key, @Nullable final Boolean value);
     /**
      * Writes the specified Byte value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeByteValue(@Nullable final String key, @Nonnull final Byte value);
+    void writeByteValue(@Nullable final String key, @Nullable final Byte value);
     /**
      * Writes the specified Short value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeShortValue(@Nullable final String key, @Nonnull final Short value);
+    void writeShortValue(@Nullable final String key, @Nullable final Short value);
     /**
      * Writes the specified BigDecimal value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeBigDecimalValue(@Nullable final String key, @Nonnull final BigDecimal value);
+    void writeBigDecimalValue(@Nullable final String key, @Nullable final BigDecimal value);
     /**
      * Writes the specified Integer value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeIntegerValue(@Nullable final String key, @Nonnull final Integer value);
+    void writeIntegerValue(@Nullable final String key, @Nullable final Integer value);
     /**
      * Writes the specified Float value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeFloatValue(@Nullable final String key, @Nonnull final Float value);
+    void writeFloatValue(@Nullable final String key, @Nullable final Float value);
     /**
      * Writes the specified Double value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeDoubleValue(@Nullable final String key, @Nonnull final Double value);
+    void writeDoubleValue(@Nullable final String key, @Nullable final Double value);
     /**
      * Writes the specified Long value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeLongValue(@Nullable final String key, @Nonnull final Long value);
+    void writeLongValue(@Nullable final String key, @Nullable final Long value);
     /**
      * Writes the specified UUID value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeUUIDValue(@Nullable final String key, @Nonnull final UUID value);
+    void writeUUIDValue(@Nullable final String key, @Nullable final UUID value);
     /**
      * Writes the specified OffsetDateTime value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeOffsetDateTimeValue(@Nullable final String key, @Nonnull final OffsetDateTime value);
+    void writeOffsetDateTimeValue(@Nullable final String key, @Nullable final OffsetDateTime value);
     /**
      * Writes the specified LocalDate value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeLocalDateValue(@Nullable final String key, @Nonnull final LocalDate value);
+    void writeLocalDateValue(@Nullable final String key, @Nullable final LocalDate value);
     /**
      * Writes the specified LocalTime value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writeLocalTimeValue(@Nullable final String key, @Nonnull final LocalTime value);
+    void writeLocalTimeValue(@Nullable final String key, @Nullable final LocalTime value);
     /**
      * Writes the specified Period value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writePeriodValue(@Nullable final String key, @Nonnull final Period value);
+    void writePeriodValue(@Nullable final String key, @Nullable final Period value);
     /**
      * Writes the specified collection of primitive values to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param values the value to write to the stream.
      */
-    <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nonnull final Iterable<T> values);
+    <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nullable final Iterable<T> values);
     /**
      * Writes the specified collection of object values to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param values the value to write to the stream.
      */
-    <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nonnull final Iterable<T> values);
+    <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nullable final Iterable<T> values);
     /**
      * Writes the specified collection of enum values to the stream with an optional given key.
      * @param key the key to write the value with.
@@ -127,7 +127,7 @@ public interface SerializationWriter extends Closeable {
      * @param value the value to write to the stream.
      * @param additionalValuesToMerge the additional values to merge to the main value when serializing an intersection wrapper.
      */
-    <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nonnull final T value, @Nonnull final Parsable ...additionalValuesToMerge);
+    <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nullable final T value, @Nonnull final Parsable ...additionalValuesToMerge);
     /**
      * Gets the value of the serialized content.
      * @return the value of the serialized content.

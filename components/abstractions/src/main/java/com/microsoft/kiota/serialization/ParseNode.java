@@ -29,88 +29,88 @@ public interface ParseNode {
      * Gets the string value of the node.
      * @return the string value of the node.
      */
-    @Nonnull
+    @Nullable
     String getStringValue();
     /**
      * Gets the boolean value of the node.
      * @return the boolean value of the node.
      */
-    @Nonnull
+    @Nullable
     Boolean getBooleanValue();
     /**
      * Gets the byte value of the node.
      * @return the byte value of the node.
      */
-    @Nonnull
+    @Nullable
     Byte getByteValue();
     /**
      * Gets the short value of the node.
      * @return the short value of the node.
      */
-    @Nonnull
+    @Nullable
     Short getShortValue();
     /**
      * Gets the BigDecimal value of the node.
      * @return the BigDecimal value of the node.
      */
-    @Nonnull
+    @Nullable
     BigDecimal getBigDecimalValue();
     /**
      * Gets the Integer value of the node.
      * @return the Integer value of the node.
      */
-    @Nonnull
+    @Nullable
     Integer getIntegerValue();
     /**
      * Gets the Float value of the node.
      * @return the Float value of the node.
      */
-    @Nonnull
+    @Nullable
     Float getFloatValue();
     /**
      * Gets the Double value of the node.
      * @return the Double value of the node.
      */
-    @Nonnull
+    @Nullable
     Double getDoubleValue();
     /**
      * Gets the Long value of the node.
      * @return the Long value of the node.
      */
-    @Nonnull
+    @Nullable
     Long getLongValue();
     /**
      * Gets the UUID value of the node.
      * @return the UUID value of the node.
      */
-    @Nonnull
+    @Nullable
     UUID getUUIDValue();
     /**
      * Gets the OffsetDateTime value of the node.
      * @return the OffsetDateTime value of the node.
      */
-    @Nonnull
+    @Nullable
     OffsetDateTime getOffsetDateTimeValue();
 
     /**
      * Gets the LocalDate value of the node.
      * @return the LocalDate value of the node.
      */
-    @Nonnull
+    @Nullable
     LocalDate getLocalDateValue();
 
     /**
      * Gets the LocalTime value of the node.
      * @return the LocalTime value of the node.
      */
-    @Nonnull
+    @Nullable
     LocalTime getLocalTimeValue();
 
     /**
      * Gets the Period value of the node.
      * @return the Period value of the node.
      */
-    @Nonnull
+    @Nullable
     Period getPeriodValue();
 
     /**
@@ -129,14 +129,14 @@ public interface ParseNode {
      * Gets the collection of primitive values of the node.
      * @return the collection of primitive values of the node.
      */
-    @Nonnull
+    @Nullable
     <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass);
     /**
      * Gets the collection of object values of the node.
      * @param factory the factory to use to create the model object.
      * @return the collection of object values of the node.
      */
-    @Nonnull
+    @Nullable
     <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory);
     /**
      * Gets the collection of Enum values of the node.
