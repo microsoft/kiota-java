@@ -2,7 +2,6 @@
 
 - [ ] checkstyles
 - [ ] spotbugs
-- [ ] android api level linting
 - [ ] javadoc
 - [ ] cobertura
 
@@ -17,6 +16,6 @@
 1. In `build.gradle` in the `dependencies` section:
 
     ```Groovy
-    implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:0.0.6-SNAPSHOT'
+    implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:0.0.7-SNAPSHOT'
     ```
 
