@@ -15,10 +15,12 @@ import java.util.regex.Pattern;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,7 +45,6 @@ import com.microsoft.kiota.store.BackingStoreFactorySingleton;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -76,15 +77,19 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider){
         this(authenticationProvider, null, null, null, null);
     }
+    @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory) {
         this(authenticationProvider, parseNodeFactory, null, null, null);
     }
+    @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory) {
         this(authenticationProvider, parseNodeFactory, serializationWriterFactory, null, null);
     }
+    @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client) {
         this(authenticationProvider, parseNodeFactory, serializationWriterFactory, client, null);
     }
+    @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client, @Nullable final ObservabilityOptions observabilityOptions) {
         this.authProvider = Objects.requireNonNull(authenticationProvider, "parameter authenticationProvider cannot be null");
         if(client == null) {
@@ -136,25 +141,29 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     try {
                         this.throwFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         final ParseNode rootNode = getRootParseNode(response, span, span);
                         if (rootNode == null) {
                             closeResponse = false;
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getCollectionOfObjectValues").startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final List<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
                             setResponseType(result, span);
-                            return CompletableFuture.completedStage(result);
+                            return CompletableFuture.completedFuture(result);
                         } finally {
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
-                        return CompletableFuture.failedFuture(ex);
+                        return new CompletableFuture<List<ModelType>>(){{
+                            this.completeExceptionally(ex);
+                        }};
                     } catch(IOException ex) {
-                        return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
+                        return new CompletableFuture<List<ModelType>>(){{
+                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
+                        }};
                     } finally {
                         closeResponse(closeResponse, response);
                     }
@@ -203,27 +212,31 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     try {
                         this.throwFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         final ParseNode rootNode = getRootParseNode(response, span, span);
                         if (rootNode == null) {
                             closeResponse = false;
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final ModelType result = rootNode.getObjectValue(factory);
                             setResponseType(result, span);
-                            return CompletableFuture.completedStage(result);
+                            return CompletableFuture.completedFuture(result);
                         } finally {
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
                         span.recordException(ex);
-                        return CompletableFuture.failedFuture(ex);
+                        return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(ex);
+                        }};
                     } catch(IOException ex) {
                         span.recordException(ex);
-                        return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
+                        return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
+                        }};
                     } finally {
                         closeResponse(closeResponse, response);
                     }
@@ -261,24 +274,24 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     try {
                         this.throwFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         if(targetClass == Void.class) {
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         } else {
                             if(targetClass == InputStream.class) {
                                 final ResponseBody body = response.body();
                                 if(body == null) {
                                     closeResponse = false;
-                                    return CompletableFuture.completedStage(null);
+                                    return CompletableFuture.completedFuture(null);
                                 }
                                 final InputStream rawInputStream = body.byteStream();
-                                return CompletableFuture.completedStage((ModelType)rawInputStream);
+                                return CompletableFuture.completedFuture((ModelType)rawInputStream);
                             }
                             final ParseNode rootNode = getRootParseNode(response, span, span);
                             if (rootNode == null) {
                                 closeResponse = false;
-                                return CompletableFuture.completedStage(null);
+                                return CompletableFuture.completedFuture(null);
                             }
                             final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("get"+targetClass.getName()+"Value").setParent(Context.current().with(span)).startSpan();
                             try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
@@ -317,15 +330,19 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     throw new RuntimeException("unexpected payload type " + targetClass.getName());
                                 }
                                 setResponseType(result, span);
-                                return CompletableFuture.completedStage((ModelType)result);
+                                return CompletableFuture.completedFuture((ModelType)result);
                             } finally {
                                 deserializationSpan.end();
                             }
                         }
                     } catch(ApiException ex) {
-                        return CompletableFuture.failedFuture(ex);
+                        return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(ex);
+                        }};
                     } catch(IOException ex) {
-                        return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
+                        return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
+                        }};
                     } finally {
                         closeResponse(closeResponse, response);
                     }
@@ -352,25 +369,29 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     try {
                         this.throwFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         final ParseNode rootNode = getRootParseNode(response, span, span);
                         if (rootNode == null) {
                             closeResponse = false;
-                            return CompletableFuture.completedStage(null);
+                            return CompletableFuture.completedFuture(null);
                         }
                         final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getCollectionOfPrimitiveValues").setParent(Context.current().with(span)).startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final List<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
                             setResponseType(result, span);
-                            return CompletableFuture.completedStage(result);
+                            return CompletableFuture.completedFuture(result);
                         } finally {
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
-                        return CompletableFuture.failedFuture(ex);
+                        return new CompletableFuture<List<ModelType>>(){{
+                            this.completeExceptionally(ex);
+                        }};
                     } catch(IOException ex) {
-                        return CompletableFuture.failedFuture(new RuntimeException("failed to read the response body", ex));
+                        return new CompletableFuture<List<ModelType>>(){{
+                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
+                        }};
                     } finally {
                         closeResponse(closeResponse, response);
                     }
@@ -497,7 +518,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     spanForAttributes.setAttribute("http.response_content_type", contentTypeHeaderValue);
                 }
                 spanForAttributes.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, x.code());
-                spanForAttributes.setAttribute(SemanticAttributes.HTTP_FLAVOR, x.protocol().toString().toUpperCase());
+                spanForAttributes.setAttribute(SemanticAttributes.HTTP_FLAVOR, x.protocol().toString().toUpperCase(Locale.ROOT));
                 return x;
             })
             .thenCompose(x -> this.retryCAEResponseIfRequired(x, requestInfo, span, spanForAttributes, claims));
@@ -529,7 +550,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         requestInfo.content.reset();
                     } catch (IOException ex) {
                         spanForAttributes.recordException(ex);
-                        return CompletableFuture.failedFuture(ex);
+                        return new CompletableFuture<Response>(){{
+                            this.completeExceptionally(ex);
+                        }};
                     }
                 }
                 closeResponse(true, response);

@@ -8,7 +8,9 @@ public class ParametersNameDecodingOption implements RequestOption {
     /** Whether to decode the specified characters in the request query parameters names */
     public boolean enable = true;
     /** The list of characters to decode in the request query parameters names before executing the request */
+    @Nonnull
     public char[] parametersToDecode = {'-', '.', '~', '$'};
+    
     @SuppressWarnings("unchecked")
     @Override
     @Nonnull

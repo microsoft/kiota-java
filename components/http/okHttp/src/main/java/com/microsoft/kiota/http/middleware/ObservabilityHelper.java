@@ -23,18 +23,17 @@ class ObservabilityHelper {
 		Objects.requireNonNull(spanName, "parameter spanName cannot be null");
 		final ObservabilityOptions obsOptions = request.tag(ObservabilityOptions.class);
         Span span = null;
-        if (obsOptions != null) {
+		if (obsOptions != null) {
 			Span parentToUse = parentSpan;
 			if (parentToUse == null) {
-            	parentToUse = request.tag(Span.class);
+				parentToUse = request.tag(Span.class);
 			}
-            final SpanBuilder builder = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder(spanName);
-            if (parentToUse != null) {
-                builder.setParent(Context.current().with(parentToUse));
-            }
-            span = builder.startSpan();
-        }
+			final SpanBuilder builder = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder(spanName);
+			if (parentToUse != null) {
+				builder.setParent(Context.current().with(parentToUse));
+			}
+			span = builder.startSpan();
+		}
 		return span;
 	}
-	
 }

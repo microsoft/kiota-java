@@ -35,6 +35,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
      * {@inheritdoc}
      */
     @Override
+    @Nonnull
     public Response intercept(@Nonnull final Chain chain) throws IOException {
         Objects.requireNonNull(chain);
         final Request request = chain.request();
