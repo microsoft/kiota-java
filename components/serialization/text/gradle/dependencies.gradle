@@ -8,5 +8,5 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:31.1-jre' 
     
-    api 'com.microsoft.kiota:microsoft-kiota-abstractions:0.0.6-SNAPSHOT'
+    api 'com.microsoft.kiota:microsoft-kiota-abstractions:0.0.7-SNAPSHOT'
 }
