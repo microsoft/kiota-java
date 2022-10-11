@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** Provides a base class for implementing AuthenticationProvider for Bearer token scheme. */
 public class BaseBearerTokenAuthenticationProvider implements AuthenticationProvider {
@@ -18,7 +19,8 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
     private final AccessTokenProvider accessTokenProvider;
     private final static String authorizationHeaderKey = "Authorization";
     private final static String ClaimsKey = "claims";
-    public CompletableFuture<Void> authenticateRequest(final RequestInformation request, final Map<String, Object> additionalAuthenticationContext) {
+    @Nonnull
+    public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
         Objects.requireNonNull(request);
 
         if (request.getRequestHeaders().keySet().contains(authorizationHeaderKey) &&
@@ -32,7 +34,9 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
             try {
                 targetUri = request.getUri();
             } catch (URISyntaxException e) {
-                return CompletableFuture.failedFuture(e);
+                final CompletableFuture<Void> result = new CompletableFuture<>();
+                result.completeExceptionally(e);
+                return result;
             }
             return this.accessTokenProvider.getAuthorizationToken(targetUri, additionalAuthenticationContext)
                 .thenApply(token -> {

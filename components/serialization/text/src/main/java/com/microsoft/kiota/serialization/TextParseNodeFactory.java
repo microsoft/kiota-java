@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class TextParseNodeFactory implements ParseNodeFactory {
+    @Nonnull
     public String getValidContentType() {
         return validContentType;
     }

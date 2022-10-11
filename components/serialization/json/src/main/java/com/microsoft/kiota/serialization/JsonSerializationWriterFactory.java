@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 public class JsonSerializationWriterFactory implements SerializationWriterFactory {
+    @Nonnull
     public String getValidContentType() {
         return validContentType;
     }

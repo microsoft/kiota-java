@@ -14,6 +14,7 @@ public class RetryHandlerOption implements RequestOption{
     /**
      * Default retry evaluation, always retry.
      */
+    @Nonnull
     public static final IShouldRetry DEFAULT_SHOULD_RETRY = (delay, executionCount, request, response) -> true;
 
     private int mMaxRetries;
@@ -92,6 +93,7 @@ public class RetryHandlerOption implements RequestOption{
 
     @Override
 	@SuppressWarnings("unchecked")
+    @Nonnull
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RetryHandlerOption.class; 
     }

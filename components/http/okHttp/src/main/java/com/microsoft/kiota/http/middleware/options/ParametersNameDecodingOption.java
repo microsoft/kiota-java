@@ -1,5 +1,7 @@
 package com.microsoft.kiota.http.middleware.options;
 
+import javax.annotation.Nonnull;
+
 import com.microsoft.kiota.RequestOption;
 /** The ParametersEncodingOption request class */
 public class ParametersNameDecodingOption implements RequestOption {
@@ -9,6 +11,7 @@ public class ParametersNameDecodingOption implements RequestOption {
     public char[] parametersToDecode = {'-', '.', '~', '$'};
     @SuppressWarnings("unchecked")
     @Override
+    @Nonnull
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) ParametersNameDecodingOption.class; 
     }

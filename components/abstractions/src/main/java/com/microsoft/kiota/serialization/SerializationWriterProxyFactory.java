@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class SerializationWriterProxyFactory implements SerializationWriterFactory {
+    @Nonnull
     public String getValidContentType() {
         return _concrete.getValidContentType();
     }
@@ -18,10 +19,10 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
     private final BiConsumer<Parsable, SerializationWriter> _onStart;
     /**
      * Creates a new proxy factory that wraps the specified concrete factory while composing the before and after callbacks.
-     * @param concreteFactory the concrete factory to wrap
+     * @param concrete the concrete factory to wrap
      * @param onBeforeSerialization the callback to invoke before the serialization of any model object.
      * @param onAfterSerialization the callback to invoke after the serialization of any model object.
-     * @param onStartSerialization the callback to invoke when the serialization of a model object starts.
+     * @param onStartObjectSerialization the callback to invoke when the serialization of a model object starts.
      */
     public SerializationWriterProxyFactory(@Nonnull final SerializationWriterFactory concrete,
         @Nullable final Consumer<Parsable> onBeforeSerialization,
@@ -32,7 +33,8 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
         _onAfter = onAfterSerialization;
         _onStart = onStartObjectSerialization;
     }
-    public SerializationWriter getSerializationWriter(final String contentType) {
+    @Nonnull
+    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         final SerializationWriter writer = _concrete.getSerializationWriter(contentType);
         final Consumer<Parsable> originalBefore = writer.getOnBeforeObjectSerialization();
         final Consumer<Parsable> originalAfter = writer.getOnAfterObjectSerialization();

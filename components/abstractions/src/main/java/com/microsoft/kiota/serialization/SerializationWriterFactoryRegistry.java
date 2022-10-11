@@ -10,7 +10,9 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public final static SerializationWriterFactoryRegistry defaultInstance = new SerializationWriterFactoryRegistry();
     /** List of factories that are registered by content type. */
-    public HashMap<String, SerializationWriterFactory> contentTypeAssociatedFactories = new HashMap<>();
+    @Nonnull
+    public final HashMap<String, SerializationWriterFactory> contentTypeAssociatedFactories = new HashMap<>();
+    @Nonnull
     public String getValidContentType() {
         throw new UnsupportedOperationException("The registry supports multiple content types. Get the registered factory instead.");
     }

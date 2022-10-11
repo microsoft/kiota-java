@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
+    @Nonnull
     public String getValidContentType() {
         return _concrete.getValidContentType();
     }
@@ -18,7 +19,7 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
     private final Consumer<Parsable> _onAfter;
     /**
      * Creates a new proxy factory that wraps the specified concrete factory while composing the before and after callbacks.
-     * @param concreteFactory the concrete factory to wrap
+     * @param concrete the concrete factory to wrap
      * @param onBefore the callback to invoke before the deserialization of any model object.
      * @param onAfter the callback to invoke after the deserialization of any model object.
      */
@@ -28,8 +29,11 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
             _concrete = Objects.requireNonNull(concrete);
             _onBefore = onBefore;
             _onAfter = onAfter;
-        }
-    public ParseNode getParseNode(final String contentType, final InputStream rawResponse) {
+    }
+    @Nonnull
+    public ParseNode getParseNode(@Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
+        Objects.requireNonNull(contentType);
+        Objects.requireNonNull(rawResponse);
         final ParseNode node = _concrete.getParseNode(contentType, rawResponse);
         final Consumer<Parsable> originalOnBefore = node.getOnBeforeAssignFieldValues();
         final Consumer<Parsable> originalOnAfter = node.getOnAfterAssignFieldValues();

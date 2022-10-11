@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import com.microsoft.kiota.ApiClientBuilder;
 import com.microsoft.kiota.ApiException;
 import com.microsoft.kiota.RequestInformation;
 import com.microsoft.kiota.RequestOption;
+import com.microsoft.kiota.ResponseHandlerOption;
 import com.microsoft.kiota.ResponseHandler;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
@@ -108,6 +110,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             obsOptions = observabilityOptions;
         }
     }
+    @Nonnull
     public SerializationWriterFactory getSerializationWriterFactory() {
         return sWriterFactory;
     }
@@ -118,8 +121,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             BackingStoreFactorySingleton.instance = backingStoreFactory;
         }
     }
-    @Nonnull
-    public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    @Nullable
+    public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -127,6 +130,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -163,6 +167,16 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
+    private ResponseHandler getResponseHandler(final RequestInformation requestInfo) {
+        final Collection<RequestOption> requestOptions = requestInfo.getRequestOptions();
+        for(final RequestOption rOption : requestOptions) {
+            if (rOption instanceof ResponseHandlerOption) {
+                final ResponseHandlerOption option = (ResponseHandlerOption)rOption;
+                return option.getResponseHandler();
+            }
+        }
+        return null;
+    }
     private final static Pattern queryParametersCleanupPattern = Pattern.compile("\\{\\?[^\\}]+}", Pattern.CASE_INSENSITIVE);
     private final char[] queryParametersToDecodeForTracing = {'-', '.', '~', '$'};
     private Span startSpan(@Nonnull final RequestInformation requestInfo, @Nonnull final String methodName) {
@@ -172,9 +186,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         span.setAttribute("http.uri_template", decodedUriTemplate);
         return span;
     }
-    public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
     @Nonnull
-    public <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
+    @Nullable
+    public <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -182,6 +197,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -233,12 +249,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     private String getMediaTypeAndSubType(final MediaType mediaType) {
         return mediaType.type() + "/" + mediaType.subtype();
     }
-    @Nonnull
-    public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    @Nullable
+    public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -321,13 +338,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
-    public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final ResponseHandler responseHandler, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    @Nullable
+    public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
 
         final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
             .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
@@ -382,7 +401,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         final int statusCode = response.code();
         return statusCode == 204;
     }
+    @Nonnull
     public static final String errorMappingFoundAttributeName = "com.microsoft.kiota.error_mapping_found";
+    @Nonnull
     public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
     private Response throwFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("throwFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
@@ -496,6 +517,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
     private final static Pattern bearerPattern = Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
     private final static Pattern claimsPattern = Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    @Nonnull
     public static final String authenticateChallengedEventKey = "com.microsoft.kiota.authenticate_challenge_received";
     private CompletableFuture<Response> retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("retryCAEResponseIfRequired").setParent(Context.current().with(parentSpan)).startSpan();

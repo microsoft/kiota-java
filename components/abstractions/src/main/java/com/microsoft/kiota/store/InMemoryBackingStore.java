@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.microsoft.kiota.TriConsumer;
 
 import org.javatuples.Pair;
@@ -38,6 +41,7 @@ public class InMemoryBackingStore implements BackingStore {
     public void clear() {
         this.store.clear();
     }
+    @Nonnull
     public Map<String, Object> enumerate() {
         final Map<String, Object> result = new HashMap<>();
         for(final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
@@ -50,6 +54,7 @@ public class InMemoryBackingStore implements BackingStore {
         }
         return result;
     }
+    @Nonnull
     public Iterable<String> enumerateKeysForValuesChangedToNull() {
         final List<String> result = new ArrayList<>();
         for(final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
@@ -72,7 +77,8 @@ public class InMemoryBackingStore implements BackingStore {
         return null;
     }
     @SuppressWarnings("unchecked")
-    public <T> T get(final String key) {
+    @Nullable
+    public <T> T get(@Nonnull final String key) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> wrapper = this.store.get(key);
         final Object value = this.getValueFromWrapper(wrapper);
@@ -82,7 +88,7 @@ public class InMemoryBackingStore implements BackingStore {
             return null;
         }
     }
-    public <T> void set(final String key, final T value) {
+    public <T> void set(@Nonnull final String key, @Nullable final T value) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> valueToAdd = Pair.with(Boolean.valueOf(this.isInitializationCompleted), value);
         final Pair<Boolean, Object> oldValue = this.store.put(key, valueToAdd);
@@ -90,16 +96,17 @@ public class InMemoryBackingStore implements BackingStore {
             callback.accept(key, oldValue.getValue1(), value);
         }
     }
-    public void unsubscribe(final String subscriptionId) {
+    public void unsubscribe(@Nonnull final String subscriptionId) {
         Objects.requireNonNull(subscriptionId);
         this.subscriptionStore.remove(subscriptionId);
     }
-    public String subscribe(final TriConsumer<String, Object, Object> callback) {
+    @Nonnull
+    public String subscribe(@Nonnull final TriConsumer<String, Object, Object> callback) {
         final String subscriptionId = UUID.randomUUID().toString();
-        subscribe(callback, subscriptionId);
+        subscribe(subscriptionId, callback);
         return subscriptionId;
     }
-    public void subscribe(final TriConsumer<String, Object, Object> callback, final String subscriptionId) {
+    public void subscribe(@Nonnull final String subscriptionId, @Nonnull final TriConsumer<String, Object, Object> callback) {
         Objects.requireNonNull(callback);
         Objects.requireNonNull(subscriptionId);
         this.subscriptionStore.put(subscriptionId, callback);

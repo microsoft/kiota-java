@@ -1,7 +1,8 @@
 package com.microsoft.kiota.serialization;
 
-import java.lang.Enum;
+import javax.annotation.Nonnull;
 
 public interface ValuedEnum {
+    @Nonnull
     String getValue();
 }

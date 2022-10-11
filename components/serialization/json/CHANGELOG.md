@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.3] - 2022-10-10
+
+### Added
+
+### Changed 
+
+- Compatibility for Android level 26
+
 ## [0.0.2] - 2022-09-02
 
 ### Added

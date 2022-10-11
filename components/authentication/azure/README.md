@@ -18,6 +18,6 @@
 1. In `build.gradle` in the `dependencies` section:
 
     ```Groovy
-    implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:0.0.1-SNAPSHOT'
+    implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:0.0.3-SNAPSHOT'
     ```
 

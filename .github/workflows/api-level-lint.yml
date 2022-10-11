@@ -1,0 +1,131 @@
+name: "Checks the SDK only using APIs from the targeted API level"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-api-level-abstractions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 18
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2.0.9
+      - name: Add execution right to the script
+        run: chmod +x gradlew
+        working-directory: ./components/abstractions/android
+      - name: Build SDK with Android project configuration
+        id: lint
+        run: ./gradlew --no-daemon build
+        working-directory: ./components/abstractions/android
+      - name: Upload linting results
+        if: failure() && steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: ./components/abstractions/android/build/reports
+      
+  lint-api-level-http:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 18
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2.0.9
+      - name: Add execution right to the script
+        run: chmod +x gradlew
+        working-directory: ./components/http/okHttp/android
+      - name: Build SDK with Android project configuration
+        id: lint
+        run: ./gradlew --no-daemon build
+        working-directory: ./components/http/okHttp/android
+      - name: Upload linting results
+        if: failure() && steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: ./components/http/okHttp/android/build/reports
+
+  lint-api-level-authentication:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 18
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2.0.9
+      - name: Add execution right to the script
+        run: chmod +x gradlew
+        working-directory: ./components/authentication/azure/android
+      - name: Build SDK with Android project configuration
+        id: lint
+        run: ./gradlew --no-daemon build
+        working-directory: ./components/authentication/azure/android
+      - name: Upload linting results
+        if: failure() && steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: ./components/authentication/azure/android/build/reports
+
+  lint-api-level-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 18
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2.0.9
+      - name: Add execution right to the script
+        run: chmod +x gradlew
+        working-directory: ./components/serialization/json/android
+      - name: Build SDK with Android project configuration
+        id: lint
+        run: ./gradlew --no-daemon build
+        working-directory: ./components/serialization/json/android
+      - name: Upload linting results
+        if: failure() && steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: ./components/serialization/json/android/build/reports
+
+  lint-api-level-text:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 18
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2.0.9
+      - name: Add execution right to the script
+        run: chmod +x gradlew
+        working-directory: ./components/serialization/text/android
+      - name: Build SDK with Android project configuration
+        id: lint
+        run: ./gradlew --no-daemon build
+        working-directory: ./components/serialization/text/android
+      - name: Upload linting results
+        if: failure() && steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: ./components/serialization/text/android/build/reports

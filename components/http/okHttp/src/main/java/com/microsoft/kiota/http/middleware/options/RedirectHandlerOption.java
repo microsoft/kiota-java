@@ -24,6 +24,7 @@ public class RedirectHandlerOption implements RequestOption {
     /**
      * Default redirect evaluation, always follow redirect information.
      */
+    @Nonnull
     public static final IShouldRedirect DEFAULT_SHOULD_REDIRECT = response -> true;
 
     /**
@@ -63,6 +64,7 @@ public class RedirectHandlerOption implements RequestOption {
     }
 
     @Override
+    @Nonnull
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RedirectHandlerOption.class; 
     }
