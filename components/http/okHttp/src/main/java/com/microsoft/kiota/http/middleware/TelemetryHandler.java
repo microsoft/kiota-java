@@ -42,6 +42,7 @@ public class TelemetryHandler implements Interceptor{
      * @return
      * @throws IOException
      */
+    @Nonnull
     @Override
     public Response intercept(@Nonnull Chain chain) throws IOException {
         final Request request = chain.request();

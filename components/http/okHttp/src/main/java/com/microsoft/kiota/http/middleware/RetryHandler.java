@@ -184,6 +184,7 @@ public class RetryHandler implements Interceptor{
         return true;
     }
 
+    @Nonnull
     public RetryHandlerOption getRetryOptions(){
         return this.mRetryOption;
     }
