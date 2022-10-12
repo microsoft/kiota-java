@@ -264,6 +264,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
     @Nullable
     public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
         try(final Scope scope = span.makeCurrent()) {
             return this.getHttpResponseMessage(requestInfo, span, span, null)
@@ -341,6 +343,104 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         }};
                     } catch(IOException ex) {
                         return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
+                        }};
+                    } finally {
+                        closeResponse(closeResponse, response);
+                    }
+                } else {
+                    span.addEvent(eventResponseHandlerInvokedKey);
+                    return responseHandler.handleResponseAsync(response, errorMappings);
+                }
+            });
+        } finally {
+            span.end();
+        }
+    }
+    @Nullable
+    <ModelType extends Enum<ModelType>> CompletableFuture<ModelType> sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
+        final Span span = startSpan(requestInfo, "sendEnumAsync");
+        try(final Scope scope = span.makeCurrent()) {
+            return this.getHttpResponseMessage(requestInfo, span, span, null)
+            .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+                if(responseHandler == null) {
+                    boolean closeResponse = true;
+                    try {
+                        this.throwFailedResponse(response, span, errorMappings);
+                        if(this.shouldReturnNull(response)) {
+                            return CompletableFuture.completedFuture(null);
+                        }
+                        final ParseNode rootNode = getRootParseNode(response, span, span);
+                        if (rootNode == null) {
+                            closeResponse = false;
+                            return CompletableFuture.completedFuture(null);
+                        }
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getEnumValue").setParent(Context.current().with(span)).startSpan();
+                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                            final Object result = rootNode.getEnumValue(targetClass);
+                            setResponseType(result, span);
+                            return CompletableFuture.completedFuture((ModelType)result);
+                        } finally {
+                            deserializationSpan.end();
+                        }
+                    } catch(ApiException ex) {
+                        return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(ex);
+                        }};
+                    } catch(IOException ex) {
+                        return new CompletableFuture<ModelType>(){{
+                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
+                        }};
+                    } finally {
+                        closeResponse(closeResponse, response);
+                    }
+                } else {
+                    span.addEvent(eventResponseHandlerInvokedKey);
+                    return responseHandler.handleResponseAsync(response, errorMappings);
+                }
+            });
+        } finally {
+            span.end();
+        }
+    }
+    @Nullable
+    <ModelType extends Enum<ModelType>> CompletableFuture<List<ModelType>> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
+        final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
+        try(final Scope scope = span.makeCurrent()) {
+            return this.getHttpResponseMessage(requestInfo, span, span, null)
+            .thenCompose(response -> {
+                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+                if(responseHandler == null) {
+                    boolean closeResponse = true;
+                    try {
+                        this.throwFailedResponse(response, span, errorMappings);
+                        if(this.shouldReturnNull(response)) {
+                            return CompletableFuture.completedFuture(null);
+                        }
+                        final ParseNode rootNode = getRootParseNode(response, span, span);
+                        if (rootNode == null) {
+                            closeResponse = false;
+                            return CompletableFuture.completedFuture(null);
+                        }
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getCollectionOfEnumValues").setParent(Context.current().with(span)).startSpan();
+                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                            final Object result = rootNode.getCollectionOfEnumValues(targetClass);
+                            setResponseType(result, span);
+                            return CompletableFuture.completedFuture((List<ModelType>)result);
+                        } finally {
+                            deserializationSpan.end();
+                        }
+                    } catch(ApiException ex) {
+                        return new CompletableFuture<List<ModelType>>(){{
+                            this.completeExceptionally(ex);
+                        }};
+                    } catch(IOException ex) {
+                        return new CompletableFuture<List<ModelType>>(){{
                             this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
                         }};
                     } finally {
