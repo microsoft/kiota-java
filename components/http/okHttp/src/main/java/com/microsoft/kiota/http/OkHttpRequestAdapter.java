@@ -358,7 +358,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    <ModelType extends Enum<ModelType>> CompletableFuture<ModelType> sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Enum<ModelType>> CompletableFuture<ModelType> sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendEnumAsync");
@@ -407,7 +407,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    <ModelType extends Enum<ModelType>> CompletableFuture<List<ModelType>> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Enum<ModelType>> CompletableFuture<List<ModelType>> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
