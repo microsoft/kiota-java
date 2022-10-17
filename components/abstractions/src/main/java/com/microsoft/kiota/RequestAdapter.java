@@ -67,6 +67,28 @@ public interface RequestAdapter {
      */
     @Nullable
     <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+
+    /**
+     Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum value.
+     * @param requestInfo the request info to execute.
+     * @param targetClass the class of the response model to deserialize the response into.
+     * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param <ModelType> the type of the response model to deserialize the response into.
+     * @return a {@link CompletableFuture} with the deserialized primitive response model.
+     */
+    @Nullable
+    <ModelType extends Enum<ModelType>> CompletableFuture<ModelType> sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+
+    /**
+     Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum collection value.
+     * @param requestInfo the request info to execute.
+     * @param targetClass the class of the response model to deserialize the response into.
+     * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param <ModelType> the type of the response model to deserialize the response into.
+     * @return a {@link CompletableFuture} with the deserialized primitive response model.
+     */
+    @Nullable
+    <ModelType extends Enum<ModelType>> CompletableFuture<List<ModelType>> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Sets The base url for every request.
      * @param baseUrl The base url for every request.

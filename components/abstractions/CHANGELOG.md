@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.8] - 2022-10-11
+
+### Added
+
+- Added enum top level methods in request adapter interface.
+
 ## [0.0.7] - 2022-10-10
 
 ### Added
