@@ -19,7 +19,7 @@ jobs:
           distribution: 'adopt'
           java-version: 18
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.9
+        uses: android-actions/setup-android@v2.0.10
       - name: Add execution right to the script
         run: chmod +x gradlew
         working-directory: ./components/abstractions/android
@@ -43,7 +43,7 @@ jobs:
           distribution: 'adopt'
           java-version: 18
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.9
+        uses: android-actions/setup-android@v2.0.10
       - name: Add execution right to the script
         run: chmod +x gradlew
         working-directory: ./components/http/okHttp/android
@@ -67,7 +67,7 @@ jobs:
           distribution: 'adopt'
           java-version: 18
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.9
+        uses: android-actions/setup-android@v2.0.10
       - name: Add execution right to the script
         run: chmod +x gradlew
         working-directory: ./components/authentication/azure/android
@@ -91,7 +91,7 @@ jobs:
           distribution: 'adopt'
           java-version: 18
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.9
+        uses: android-actions/setup-android@v2.0.10
       - name: Add execution right to the script
         run: chmod +x gradlew
         working-directory: ./components/serialization/json/android
@@ -115,7 +115,7 @@ jobs:
           distribution: 'adopt'
           java-version: 18
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.9
+        uses: android-actions/setup-android@v2.0.10
       - name: Add execution right to the script
         run: chmod +x gradlew
         working-directory: ./components/serialization/text/android
