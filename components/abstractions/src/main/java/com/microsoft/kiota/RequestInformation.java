@@ -225,20 +225,39 @@ public class RequestInformation {
      * @param requestAdapter The adapter service to get the serialization writer from.
      * @param <T> the model type.
      */
-    public <T extends Parsable> void setContentFromParsable(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T... values) {
+    public <T extends Parsable> void setContentFromParsable(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T[] values) {
         final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.put(contentTypeHeader, contentType);
-                if(values.length == 1) {
+                if (values.length > 0) {
                     setRequestType(values[0], span);
-                    writer.writeObjectValue(null, values[0]);
-                } else {
-                    if (values.length > 0) {
-                        setRequestType(values[0], span);
-                    }
-                    writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
                 }
+                writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
+                this.content = writer.getSerializedContent();
+            } catch (IOException ex) {
+                final RuntimeException result = new RuntimeException("could not serialize payload", ex);
+                span.recordException(result);
+                throw result;
+            }
+        } finally {
+            span.end();
+        }
+    }
+    /**
+     * Sets the request body from a model with the specified content type.
+     * @param value the model.
+     * @param contentType the content type.
+     * @param requestAdapter The adapter service to get the serialization writer from.
+     * @param <T> the model type.
+     */
+    public <T extends Parsable> void setContentFromParsable(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T value) {
+        final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
+        try (final Scope scope = span.makeCurrent()) {
+            try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
+                headers.put(contentTypeHeader, contentType);
+                setRequestType(value, span);
+                writer.writeObjectValue(null, value);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException("could not serialize payload", ex);
@@ -250,18 +269,72 @@ public class RequestInformation {
         }
     }
     private void setRequestType(final Object result, final Span span) {
-        if (result != null) {
-            span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
-        }
+        if (result == null) return;
+        if (span == null) return;
+        span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
     }
-    private <T> SerializationWriter getSerializationWriter(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T... values)
+    private <T> SerializationWriter getSerializationWriter(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T value)
     {
         Objects.requireNonNull(requestAdapter);
-        Objects.requireNonNull(values);
+        Objects.requireNonNull(value);
         Objects.requireNonNull(contentType);
-        if(values.length == 0) throw new RuntimeException("values cannot be empty");
 
         return requestAdapter.getSerializationWriterFactory().getSerializationWriter(contentType);
+    }
+    /**
+     * Sets the request body from a scalar value with the specified content type.
+     * @param value the scalar values to serialize.
+     * @param contentType the content type.
+     * @param requestAdapter The adapter service to get the serialization writer from.
+     * @param <T> the model type.
+     */
+    public <T> void setContentFromScalar(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T value) {
+        final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
+        try (final Scope scope = span.makeCurrent()) {
+            try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
+                headers.put(contentTypeHeader, contentType);
+                setRequestType(value, span);
+                final Class<?> valueClass = value.getClass();
+                if(valueClass.equals(String.class))
+                    writer.writeStringValue(null, (String)value);
+                else if(valueClass.equals(Boolean.class))
+                    writer.writeBooleanValue(null, (Boolean)value);
+                else if(valueClass.equals(Byte.class))
+                    writer.writeByteValue(null, (Byte)value);
+                else if(valueClass.equals(Short.class))
+                    writer.writeShortValue(null, (Short)value);
+                else if(valueClass.equals(BigDecimal.class))
+                    writer.writeBigDecimalValue(null, (BigDecimal)value);
+                else if(valueClass.equals(Float.class))
+                    writer.writeFloatValue(null, (Float)value);
+                else if(valueClass.equals(Long.class))
+                    writer.writeLongValue(null, (Long)value);
+                else if(valueClass.equals(Integer.class))
+                    writer.writeIntegerValue(null, (Integer)value);
+                else if(valueClass.equals(UUID.class))
+                    writer.writeUUIDValue(null, (UUID)value);
+                else if(valueClass.equals(OffsetDateTime.class))
+                    writer.writeOffsetDateTimeValue(null, (OffsetDateTime)value);
+                else if(valueClass.equals(LocalDate.class))
+                    writer.writeLocalDateValue(null, (LocalDate)value);
+                else if(valueClass.equals(LocalTime.class))
+                    writer.writeLocalTimeValue(null, (LocalTime)value);
+                else if(valueClass.equals(Period.class))
+                    writer.writePeriodValue(null, (Period)value);
+                else {
+                    final RuntimeException result = new RuntimeException("unknown type to serialize " + valueClass.getName());
+                    span.recordException(result);
+                    throw result;
+                }
+                this.content = writer.getSerializedContent();
+            } catch (IOException ex) {
+                final RuntimeException result = new RuntimeException("could not serialize payload", ex);
+                span.recordException(result);
+                throw result;
+            }
+        } finally {
+            span.end();
+        }
     }
     /**
      * Sets the request body from a scalar value with the specified content type.
@@ -270,48 +343,14 @@ public class RequestInformation {
      * @param requestAdapter The adapter service to get the serialization writer from.
      * @param <T> the model type.
      */
-    public <T> void setContentFromScalar(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T... values) {
+    public <T> void setContentFromScalarCollection(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T[] values) {
         final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.put(contentTypeHeader, contentType);
-                if(values.length == 1) {
-                    final T value = values[0];
-                    setRequestType(value, span);
-                    final Class<?> valueClass = value.getClass();
-                    if(valueClass.equals(String.class))
-                        writer.writeStringValue(null, (String)value);
-                    else if(valueClass.equals(Boolean.class))
-                        writer.writeBooleanValue(null, (Boolean)value);
-                    else if(valueClass.equals(Byte.class))
-                        writer.writeByteValue(null, (Byte)value);
-                    else if(valueClass.equals(Short.class))
-                        writer.writeShortValue(null, (Short)value);
-                    else if(valueClass.equals(BigDecimal.class))
-                        writer.writeBigDecimalValue(null, (BigDecimal)value);
-                    else if(valueClass.equals(Float.class))
-                        writer.writeFloatValue(null, (Float)value);
-                    else if(valueClass.equals(Long.class))
-                        writer.writeLongValue(null, (Long)value);
-                    else if(valueClass.equals(Integer.class))
-                        writer.writeIntegerValue(null, (Integer)value);
-                    else if(valueClass.equals(UUID.class))
-                        writer.writeUUIDValue(null, (UUID)value);
-                    else if(valueClass.equals(OffsetDateTime.class))
-                        writer.writeOffsetDateTimeValue(null, (OffsetDateTime)value);
-                    else if(valueClass.equals(LocalDate.class))
-                        writer.writeLocalDateValue(null, (LocalDate)value);
-                    else if(valueClass.equals(LocalTime.class))
-                        writer.writeLocalTimeValue(null, (LocalTime)value);
-                    else if(valueClass.equals(Period.class))
-                        writer.writePeriodValue(null, (Period)value);
-                    else {
-                        final RuntimeException result = new RuntimeException("unknown type to serialize " + valueClass.getName());
-                        span.recordException(result);
-                        throw result;
-                    }
-                } else
-                    writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
+                if (values.length > 0)
+                    setRequestType(values[0], span);
+                writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException("could not serialize payload", ex);

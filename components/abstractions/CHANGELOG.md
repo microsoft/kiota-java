@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.10] - 2022-10-28
+
+### Changed
+
+- Fixed a bug where collections bodies with a single entry would not serialize properly.
+
 ## [0.0.9] - 2022-10-18
 
 ### Added
