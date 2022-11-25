@@ -139,7 +139,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
-                        this.throwFailedResponse(response, span, errorMappings);
+                        this.throwIfFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
                             return CompletableFuture.completedFuture(null);
                         }
@@ -210,7 +210,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
-                        this.throwFailedResponse(response, span, errorMappings);
+                        this.throwIfFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
                             return CompletableFuture.completedFuture(null);
                         }
@@ -274,7 +274,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
-                        this.throwFailedResponse(response, span, errorMappings);
+                        this.throwIfFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
                             return CompletableFuture.completedFuture(null);
                         }
@@ -369,7 +369,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
-                        this.throwFailedResponse(response, span, errorMappings);
+                        this.throwIfFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
                             return CompletableFuture.completedFuture(null);
                         }
@@ -418,7 +418,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
-                        this.throwFailedResponse(response, span, errorMappings);
+                        this.throwIfFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
                             return CompletableFuture.completedFuture(null);
                         }
@@ -467,7 +467,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(responseHandler == null) {
                     boolean closeResponse = true;
                     try {
-                        this.throwFailedResponse(response, span, errorMappings);
+                        this.throwIfFailedResponse(response, span, errorMappings);
                         if(this.shouldReturnNull(response)) {
                             return CompletableFuture.completedFuture(null);
                         }
@@ -526,8 +526,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     public static final String errorMappingFoundAttributeName = "com.microsoft.kiota.error_mapping_found";
     @Nonnull
     public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
-    private Response throwFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("throwFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
+    private Response throwIfFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("throwIfFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             if (response.isSuccessful()) return response;
             spanForAttributes.setStatus(StatusCode.ERROR);
