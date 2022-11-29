@@ -1,6 +1,7 @@
 package com.microsoft.kiota;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -14,8 +15,7 @@ public class TestEntity implements Parsable {
 	@Override
 	@Nonnull
 	public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
-		// TODO Auto-generated method stub
-		return null;
+		return new HashMap<String, Consumer<ParseNode>>();
 	}
 
 	@Override
