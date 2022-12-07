@@ -118,7 +118,6 @@ public class RequestInformation {
      */
     public void addQueryParameter(@Nonnull final String name, @Nullable final Object value) {
         Objects.requireNonNull(name);
-        Objects.requireNonNull(value);
         queryParameters.put(name, value);
     }
     /**
