@@ -8,9 +8,9 @@ import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
-public class RequestHeadersTest {
+class RequestHeadersTest {
 	@Test
-	public void Adds() {
+	void Adds() {
 		// Arrange
 		final RequestHeaders requestHeaders = new RequestHeaders();
 		assertTrue(requestHeaders.isEmpty());
@@ -24,7 +24,7 @@ public class RequestHeadersTest {
 		assertFalse(requestHeaders.isEmpty());
 	}
 	@Test
-	public void NormalizesKey() {
+	void NormalizesKey() {
 		// Arrange
 		final RequestHeaders requestHeaders = new RequestHeaders();
 		// Act
@@ -35,7 +35,7 @@ public class RequestHeadersTest {
 		assertEquals("value", requestHeaders.get("key").iterator().next());
 	}
 	@Test
-	public void Puts() {
+	void Puts() {
 		// Arrange
 		final RequestHeaders requestHeaders = new RequestHeaders();
 		assertTrue(requestHeaders.isEmpty());
@@ -51,7 +51,7 @@ public class RequestHeadersTest {
 		assertFalse(requestHeaders.isEmpty());
 	}
 	@Test
-	public void Removes() {
+	void Removes() {
 		// Arrange
 		final RequestHeaders requestHeaders = new RequestHeaders();
 		requestHeaders.add("key", "value");
@@ -63,7 +63,7 @@ public class RequestHeadersTest {
 		assertTrue(requestHeaders.isEmpty());
 	}
 	@Test
-	public void PutsAll() {
+	void PutsAll() {
 		// Arrange
 		final RequestHeaders requestHeaders = new RequestHeaders();
 		assertTrue(requestHeaders.isEmpty());

@@ -2,6 +2,7 @@ package com.microsoft.kiota;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -29,9 +30,9 @@ public class RequestHeaders implements Map<String, Set<String>> {
             final HashSet<String> values = headers.get(normalizedKey);
             values.add(value);
         } else {
-            headers.put(normalizedKey, new HashSet<String>() {{
-                add(value);
-            }});
+			final HashSet<String> values = new HashSet<>(1);
+			values.add(value);
+            headers.put(normalizedKey, values);
         }
     }
     private String normalizeKey(@Nonnull final String key) {
@@ -63,7 +64,7 @@ public class RequestHeaders implements Map<String, Set<String>> {
         if (key instanceof String) {
             return headers.get(normalizeKey((String)key));
         } else {
-            return null;
+            return Collections.emptySet();
         }
     }
     @Override
@@ -77,7 +78,7 @@ public class RequestHeaders implements Map<String, Set<String>> {
         if (key instanceof String) {
             return headers.remove(normalizeKey((String)key));
         } else {
-            return null;
+            return Collections.emptySet();
         }
     }
 	/**
