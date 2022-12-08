@@ -84,14 +84,16 @@ class RequestHeadersTest {
 		requestHeaders.add("key", "value2");
 		assertEquals(1, requestHeaders.size());
 		// Act
-		requestHeaders.remove("key", "value2");
+		assertTrue(requestHeaders.remove("key", "value2"));
+		assertFalse(requestHeaders.remove("key", "value2"));
 		// Assert
 		assertEquals(1, requestHeaders.size());
 		assertFalse(requestHeaders.isEmpty());
 		assertEquals(1, requestHeaders.get("key").size());
 		assertEquals("value", requestHeaders.get("key").iterator().next());
 
-		requestHeaders.remove("key", "value");
+		assertTrue(requestHeaders.remove("key", "value"));
+		assertFalse(requestHeaders.remove("key", "value"));
 		assertEquals(0, requestHeaders.size());
 		assertTrue(requestHeaders.isEmpty());
 	}
