@@ -102,10 +102,10 @@ public class RequestHeaders implements Map<String, Set<String>> {
 			final HashSet<String> values = headers.get(normalizedKey);
 			if(values.contains(value)) {
 				values.remove(value);
+				if (values.isEmpty()) {
+					headers.remove(normalizedKey);
+				}
 				return true;
-			}
-			if (values.isEmpty()) {
-				headers.remove(normalizedKey);
 			}
 		}
 		return false;
