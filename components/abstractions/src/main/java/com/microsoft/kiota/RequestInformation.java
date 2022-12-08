@@ -137,6 +137,7 @@ public class RequestInformation {
     public Map<String, Object> getQueryParameters() {
         return (Map<String, Object>) queryParameters.clone();
     }
+    /** The request headers */
     @Nonnull
     public final RequestHeaders headers = new RequestHeaders();
     /** The Request Body. */

@@ -11,6 +11,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+/**
+ * A class representing the headers of a request.
+ */
 public class RequestHeaders implements Map<String, Set<String>> {
     private final HashMap<String, HashSet<String>> headers = new HashMap<>();
     /**
@@ -77,6 +80,12 @@ public class RequestHeaders implements Map<String, Set<String>> {
             return null;
         }
     }
+	/**
+	 * Removes a value from a header
+	 * @param key the key of the header to remove the value from
+	 * @param value the value to remove
+	 * @return true if the value was removed, false otherwise
+	 */
     public boolean remove(String key, String value) { 
 		Objects.requireNonNull(key);
 		Objects.requireNonNull(value);
