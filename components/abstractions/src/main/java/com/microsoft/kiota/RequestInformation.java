@@ -172,9 +172,9 @@ public class RequestInformation {
         }
     }
     @Nonnull
-    private static String binaryContentType = "application/octet-stream";
+    private final static String binaryContentType = "application/octet-stream";
     @Nonnull
-    private static String contentTypeHeader = "Content-Type";
+    private final static String contentTypeHeader = "Content-Type";
     /**
      * Sets the request body to be a binary stream.
      * @param value the binary stream

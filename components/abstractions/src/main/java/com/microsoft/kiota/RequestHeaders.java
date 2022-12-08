@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * A class representing the headers of a request.
@@ -48,7 +49,8 @@ public class RequestHeaders implements Map<String, Set<String>> {
         return headers.isEmpty();
     }
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(@Nonnull final Object key) {
+		Objects.requireNonNull(key);
         if (key instanceof String) {
             return headers.containsKey(normalizeKey((String)key));
         } else {
@@ -56,11 +58,14 @@ public class RequestHeaders implements Map<String, Set<String>> {
         }
     }
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(@Nonnull final Object value) {
+		Objects.requireNonNull(value);
         return headers.containsValue(value);
     }
     @Override
-    public Set<String> get(Object key) {
+	@Nonnull
+    public Set<String> get(@Nonnull final Object key) {
+		Objects.requireNonNull(key);
         if (key instanceof String) {
             return headers.get(normalizeKey((String)key));
         } else {
@@ -68,13 +73,15 @@ public class RequestHeaders implements Map<String, Set<String>> {
         }
     }
     @Override
-    public Set<String> put(String key, Set<String> value) {
+	@Nonnull
+    public Set<String> put(@Nonnull final String key, @Nonnull final Set<String> value) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
-        return headers.put(normalizeKey(key), new HashSet<String>(value));
+        return headers.put(normalizeKey(key), new HashSet<>(value));
     }
     @Override
-    public Set<String> remove(Object key) {
+	@Nonnull
+    public Set<String> remove(@Nonnull final Object key) {
         if (key instanceof String) {
             return headers.remove(normalizeKey((String)key));
         } else {
@@ -87,7 +94,7 @@ public class RequestHeaders implements Map<String, Set<String>> {
 	 * @param value the value to remove
 	 * @return true if the value was removed, false otherwise
 	 */
-    public boolean remove(String key, String value) { 
+    public boolean remove(@Nonnull final String key, @Nonnull final String value) { 
 		Objects.requireNonNull(key);
 		Objects.requireNonNull(value);
 		final String normalizedKey = normalizeKey(key);
@@ -104,7 +111,7 @@ public class RequestHeaders implements Map<String, Set<String>> {
 		return false;
 	}
 	@Override
-    public void putAll(Map<? extends String, ? extends Set<String>> m) {
+    public void putAll(@Nullable final Map<? extends String, ? extends Set<String>> m) {
         if (m == null) {
             return;
         }
@@ -112,7 +119,7 @@ public class RequestHeaders implements Map<String, Set<String>> {
             final String key = entry.getKey();
             final Set<String> value = entry.getValue();
             if (key != null && value != null) {
-                headers.put(normalizeKey(key), new HashSet<String>(value));
+                headers.put(normalizeKey(key), new HashSet<>(value));
             }    
         }
     }
@@ -121,16 +128,19 @@ public class RequestHeaders implements Map<String, Set<String>> {
         headers.clear();
     }
     @Override
+	@Nonnull
     public Set<String> keySet() {
         return headers.keySet();
     }
     @Override
+	@Nonnull
     public Collection<Set<String>> values() {
-        return new ArrayList<Set<String>>(headers.values());
+        return new ArrayList<>(headers.values());
     }
     @Override
+	@Nonnull
     public Set<Entry<String, Set<String>>> entrySet() {
-        final HashSet<Entry<String, Set<String>>> result = new HashSet<Entry<String, Set<String>>>();
+        final HashSet<Entry<String, Set<String>>> result = new HashSet<>();
         for (final Entry<String, HashSet<String>> entry : headers.entrySet()) {
             result.add(new Entry<String, Set<String>>() {
                 @Override

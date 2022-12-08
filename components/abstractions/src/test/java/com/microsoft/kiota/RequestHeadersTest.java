@@ -78,4 +78,16 @@ class RequestHeadersTest {
 		assertTrue(requestHeaders.containsKey("key"));
 		assertFalse(requestHeaders.isEmpty());
 	}
+	@Test
+	void Clears() {
+		// Arrange
+		final RequestHeaders requestHeaders = new RequestHeaders();
+		requestHeaders.add("key", "value");
+		assertEquals(1, requestHeaders.size());
+		// Act
+		requestHeaders.clear();
+		// Assert
+		assertEquals(0, requestHeaders.size());
+		assertTrue(requestHeaders.isEmpty());
+	}
 }
