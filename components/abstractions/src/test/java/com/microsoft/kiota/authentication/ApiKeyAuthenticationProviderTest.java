@@ -7,6 +7,7 @@ import com.microsoft.kiota.RequestInformation;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URISyntaxException;
+import java.util.HashSet;
 
 public class ApiKeyAuthenticationProviderTest {
 	@Test
@@ -25,7 +26,7 @@ public class ApiKeyAuthenticationProviderTest {
 			urlTemplate = "https://localhost{?param1}";
 		}};
 		value.authenticateRequest(request, null).join();
-		assertNull(request.getRequestHeaders().get("param"));
+		assertNull(request.headers.get("param"));
 		assertEquals("https://localhost?param=key", request.getUri().toString());
 	}
 
@@ -37,7 +38,7 @@ public class ApiKeyAuthenticationProviderTest {
 		}};
 		request.addQueryParameter("param1", "value1");
 		value.authenticateRequest(request, null).join();
-		assertNull(request.getRequestHeaders().get("param"));
+		assertNull(request.headers.get("param"));
 		assertEquals("https://localhost?param1=value1&param=key", request.getUri().toString());
 	}
 	@Test
@@ -47,7 +48,7 @@ public class ApiKeyAuthenticationProviderTest {
 			urlTemplate = "https://localhost{?param1}";
 		}};
 		value.authenticateRequest(request, null).join();
-		assertEquals("key", request.getRequestHeaders().get("param"));
+		assertEquals(new HashSet<String>() {{ add("key"); }}, request.headers.get("param"));
 		assertEquals("https://localhost", request.getUri().toString());
 	}
 }
