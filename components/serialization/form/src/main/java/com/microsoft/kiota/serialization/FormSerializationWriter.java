@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 public class FormSerializationWriter implements SerializationWriter {
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private final OutputStreamWriter writer;
+    private final String encoding  = StandardCharsets.UTF_8.name();
     private boolean written;
     private int depth = 0;
     /** Instantiates a new FormSerializationWriter. */
@@ -47,7 +48,7 @@ public class FormSerializationWriter implements SerializationWriter {
                 writer.write("&");
             else
                 written = true;
-            writer.write(key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8));
+            writer.write(key + "=" + URLEncoder.encode(value, encoding));
         } catch (IOException ex) {
             throw new RuntimeException("could not serialize value", ex);
         }

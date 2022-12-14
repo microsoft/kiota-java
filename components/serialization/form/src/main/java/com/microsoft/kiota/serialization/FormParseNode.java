@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +13,7 @@ import java.util.Base64;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -23,6 +25,7 @@ import javax.annotation.Nullable;
 /** ParseNode implementation for URI form encoded payloads */
 public class FormParseNode implements ParseNode {
     private final String rawStringValue;
+    private final String encoding  = StandardCharsets.UTF_8.name();
     private final HashMap<String, String> fields = new HashMap<>();
     /**
      * Initializes a new instance of the {@link FormParseNode} class.
@@ -61,13 +64,17 @@ public class FormParseNode implements ParseNode {
     }
     @Nullable
     public String getStringValue() {
-        final String decoded = URLDecoder.decode(rawStringValue, StandardCharsets.UTF_8);
-        if (decoded.equalsIgnoreCase("null")) return null;
-        return decoded;
+        try {
+            final String decoded = URLDecoder.decode(rawStringValue, encoding);
+            if (decoded.equalsIgnoreCase("null")) return null;
+            return decoded;
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
     @Nullable
     public Boolean getBooleanValue() {
-        switch(getStringValue().toLowerCase()) { //boolean parse returns false for any value that is not true
+        switch(getStringValue().toLowerCase(Locale.ROOT)) { //boolean parse returns false for any value that is not true
             case "true":
             case "1":
                 return true;
