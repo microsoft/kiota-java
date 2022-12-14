@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.11] - 2022-12-15
+
+### Added
+
+- Added support for multi-valued request headers
+
 ## [0.0.10] - 2022-10-28
 
 ### Changed

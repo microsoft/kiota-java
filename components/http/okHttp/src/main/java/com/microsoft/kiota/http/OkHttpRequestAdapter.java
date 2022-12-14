@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -715,11 +716,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 new RequestBody() {
                     @Override
                     public MediaType contentType() {
-                        final Map<String, String> requestHeaders = requestInfo.getRequestHeaders();
-                        final String contentType = requestHeaders.containsKey(contentTypeHeaderKey) ? requestHeaders.get(contentTypeHeaderKey) : "";
-                        if(contentType.isEmpty()) {
+                        final Set<String> contentTypes = requestInfo.headers.containsKey(contentTypeHeaderKey) ? requestInfo.headers.get(contentTypeHeaderKey) : Set.of();
+                        if(contentTypes.isEmpty()) {
                             return null;
                         } else {
+                            final String contentType = contentTypes.toArray(new String[]{})[0];
                             spanForAttributes.setAttribute("http.request_content_type", contentType);
                             return MediaType.parse(contentType);
                         }
@@ -734,8 +735,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             final Request.Builder requestBuilder = new Request.Builder()
                                                 .url(requestURL)
                                                 .method(requestInfo.httpMethod.toString(), body);
-            for (final Map.Entry<String,String> header : requestInfo.getRequestHeaders().entrySet()) {
-                requestBuilder.addHeader(header.getKey(), header.getValue());
+            for (final Map.Entry<String,Set<String>> headerEntry : requestInfo.headers.entrySet()) {
+                for(final String headerValue : headerEntry.getValue()) {
+                    requestBuilder.addHeader(headerEntry.getKey(), headerValue);
+                }
             }
 
             for(final RequestOption option : requestInfo.getRequestOptions()) {

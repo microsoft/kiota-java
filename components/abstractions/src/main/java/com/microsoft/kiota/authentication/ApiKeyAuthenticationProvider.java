@@ -77,7 +77,7 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
 
             switch(location) {
                 case HEADER:
-                    request.addRequestHeader(paramName, apiKey);
+                    request.headers.add(paramName, apiKey);
                     break;
                 case QUERY_PARAMETER:
                     request.setUri(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), uri.getQuery() == null ? paramName + "=" + apiKey : uri.getQuery() + "&" + paramName + "=" + apiKey, uri.getFragment()));

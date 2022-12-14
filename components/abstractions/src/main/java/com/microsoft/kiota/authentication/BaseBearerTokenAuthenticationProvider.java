@@ -23,13 +23,13 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
     public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
         Objects.requireNonNull(request);
 
-        if (request.getRequestHeaders().keySet().contains(authorizationHeaderKey) &&
+        if (request.headers.containsKey(authorizationHeaderKey) &&
             additionalAuthenticationContext != null &&
             additionalAuthenticationContext.containsKey(ClaimsKey))
         {
-            request.removeRequestHeader(authorizationHeaderKey);
+            request.headers.remove(authorizationHeaderKey);
         }
-        if(!request.getRequestHeaders().keySet().contains(authorizationHeaderKey)) {
+        if(!request.headers.containsKey(authorizationHeaderKey)) {
             final URI targetUri;
             try {
                 targetUri = request.getUri();
@@ -42,7 +42,7 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
                 .thenApply(token -> {
                     if(token != null && !token.isEmpty()) { 
                     // Not an error, just no need to authenticate as we might have been given an external URL from the main API (large file upload, etc.)
-                        request.addRequestHeader(authorizationHeaderKey, "Bearer " + token);
+                        request.headers.add(authorizationHeaderKey, "Bearer " + token);
                     }
                     return null;
                 });

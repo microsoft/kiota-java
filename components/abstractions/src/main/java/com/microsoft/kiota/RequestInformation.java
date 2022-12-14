@@ -137,54 +137,20 @@ public class RequestInformation {
     public Map<String, Object> getQueryParameters() {
         return (Map<String, Object>) queryParameters.clone();
     }
-    private HashMap<String, String> headers = new HashMap<>();
-    /**
-     * Adds headers to the current request.
-     * @param headersToAdd headers to add to the current request.
-     */
-    public void addRequestHeaders(@Nullable final Map<String, String> headersToAdd) {
-        if (headersToAdd == null || headersToAdd.isEmpty()) return;
-        headersToAdd.entrySet()
-                    .stream()
-                    .forEach(entry -> this.addRequestHeader(entry.getKey(), entry.getValue()));
-    }
-    /**
-     * Adds a header to the current request.
-     * @param key the key of the header to add.
-     * @param value the value of the header to add.
-     */
-    public void addRequestHeader(@Nonnull final String key, @Nonnull final String value) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(value);
-        headers.put(key.toLowerCase(Locale.ROOT), value);
-    }
-    /**
-     * Removes a request header from the current request.
-     * @param key the key of the header to remove.
-     */
-    public void removeRequestHeader(@Nonnull final String key) {
-        Objects.requireNonNull(key);
-        headers.remove(key.toLowerCase(Locale.ROOT));
-    }
-    /** 
-     * Gets the request headers the for current request
-     * @return the request headers for the current request.
-     */
+    /** The request headers */
     @Nonnull
-    @SuppressWarnings("unchecked")
-    public Map<String, String> getRequestHeaders() {
-        return (Map<String, String>) headers.clone();
-    }
+    public final RequestHeaders headers = new RequestHeaders();
     /** The Request Body. */
     @Nullable
     public InputStream content;
-    private HashMap<String, RequestOption> _requestOptions = new HashMap<>();
+    @Nonnull
+    private final HashMap<String, RequestOption> requestOptions = new HashMap<>();
     /**
      * Gets the request options for this request. Options are unique by type. If an option of the same type is added twice, the last one wins.
      * @return the request options for this request.
      */
     @Nonnull
-    public Collection<RequestOption> getRequestOptions() { return _requestOptions.values(); }
+    public Collection<RequestOption> getRequestOptions() { return requestOptions.values(); }
     /**
      * Adds request options to this request.
      * @param options the request options to add.
@@ -192,7 +158,7 @@ public class RequestInformation {
     public void addRequestOptions(@Nullable final Collection<RequestOption> options) { 
         if(options == null || options.isEmpty()) return;
         for(final RequestOption option : options) {
-            _requestOptions.put(option.getClass().getCanonicalName(), option);
+            requestOptions.put(option.getClass().getCanonicalName(), option);
         }
     }
     /**
@@ -202,11 +168,13 @@ public class RequestInformation {
     public void removeRequestOptions(@Nullable final RequestOption... options) {
         if(options == null || options.length == 0) return;
         for(final RequestOption option : options) {
-            _requestOptions.remove(option.getClass().getCanonicalName());
+            requestOptions.remove(option.getClass().getCanonicalName());
         }
     }
-    private static String binaryContentType = "application/octet-stream";
-    private static String contentTypeHeader = "Content-Type";
+    @Nonnull
+    private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
+    @Nonnull
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
     /**
      * Sets the request body to be a binary stream.
      * @param value the binary stream
@@ -214,7 +182,7 @@ public class RequestInformation {
     public void setStreamContent(@Nonnull final InputStream value) {
         Objects.requireNonNull(value);
         this.content = value;
-        headers.put(contentTypeHeader, binaryContentType);
+        headers.add(CONTENT_TYPE_HEADER, BINARY_CONTENT_TYPE);
     }
     private static final String observabilityTracerName = "com.microsoft.kiota";
     /**
@@ -228,7 +196,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
-                headers.put(contentTypeHeader, contentType);
+                headers.add(CONTENT_TYPE_HEADER, contentType);
                 if (values.length > 0) {
                     setRequestType(values[0], span);
                 }
@@ -254,7 +222,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
-                headers.put(contentTypeHeader, contentType);
+                headers.add(CONTENT_TYPE_HEADER, contentType);
                 setRequestType(value, span);
                 writer.writeObjectValue(null, value);
                 this.content = writer.getSerializedContent();
@@ -291,7 +259,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
-                headers.put(contentTypeHeader, contentType);
+                headers.add(CONTENT_TYPE_HEADER, contentType);
                 setRequestType(value, span);
                 final Class<?> valueClass = value.getClass();
                 if(valueClass.equals(String.class))
@@ -346,7 +314,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
-                headers.put(contentTypeHeader, contentType);
+                headers.add(CONTENT_TYPE_HEADER, contentType);
                 if (values.length > 0)
                     setRequestType(values[0], span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
