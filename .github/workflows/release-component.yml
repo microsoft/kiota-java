@@ -9,7 +9,7 @@ on:
       shouldRelease: 
         required: false
         type: string
-      enviornment:
+      environment:
         required: true
         type: string        
       workingDirectory:
@@ -28,7 +28,7 @@ jobs:
   mavenSnapshot:
     if: ${{ inputs.shouldPreview }} == 'true'
     environment: 
-      name: ${{ inputs.enviornment }}
+      name: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     defaults:
       run:

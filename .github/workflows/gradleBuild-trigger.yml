@@ -63,3 +63,10 @@ jobs:
     with:
       componentName: serialization-text
       workingDirectory: ./components/serialization/text/
+  
+  buildSerializationForm:
+    needs: checkPaths
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: serialization-form
+      workingDirectory: ./components/serialization/form/

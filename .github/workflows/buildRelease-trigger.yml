@@ -36,6 +36,11 @@ on:
         type: boolean
         default: false
         required: false
+      serialization-form: 
+        description: release serialization-form
+        type: boolean
+        default: false
+        required: false
   
 env: 
   PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
@@ -49,6 +54,7 @@ jobs:
       http-okHttp: ${{ steps.filter.outputs.http-okHttp }}
       serialization-json: ${{ steps.filter.outputs.serialization-json }}
       serialization-text: ${{ steps.filter.outputs.serialization-text }}
+      serialization-form: ${{ steps.filter.outputs.serialization-form }}
     steps:
     - uses: actions/checkout@v3
     - name: checkPaths
@@ -66,7 +72,9 @@ jobs:
           serialization-json:
             - 'components/serialization/json/**'
           serialization-text:
-            - 'components/serialization/text/**' 
+            - 'components/serialization/text/**'
+          serialization-form:
+            - 'components/serialization/form/**'
 
   buildAbstractions:
     needs: checkPaths
@@ -108,13 +116,21 @@ jobs:
       componentName: serialization-text
       workingDirectory: ./components/serialization/text/
 
+  buildSerializationForm:
+    needs: checkPaths
+    if: ${{ always() && (needs.checkPaths.outputs.serialization-form == 'true' || github.event.inputs.serialization-form == 'true') }} 
+    uses: ./.github/workflows/gradleBuild-component.yml
+    with:
+      componentName: serialization-form
+      workingDirectory: ./components/serialization/form/
+
   publishAbstractions:
     needs: buildAbstractions
     uses: ./.github/workflows/release-component.yml
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      enviornment: maven_central_snapshot
+      environment: maven_central_snapshot
       workingDirectory: ./components/abstractions/
     secrets:
       LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
@@ -126,7 +142,7 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      enviornment: maven_central_snapshot
+      environment: maven_central_snapshot
       workingDirectory: ./components/authentication/azure/
     secrets:
       LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
@@ -138,7 +154,7 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      enviornment: maven_central_snapshot
+      environment: maven_central_snapshot
       workingDirectory: ./components/http/okHttp/
     secrets:
       LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
@@ -150,7 +166,7 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      enviornment: maven_central_snapshot
+      environment: maven_central_snapshot
       workingDirectory: ./components/serialization/json/
     secrets:
       LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
@@ -162,8 +178,20 @@ jobs:
     with:
       shouldPreview: ${{ github.ref == 'refs/heads/main' }}
       #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
-      enviornment: maven_central_snapshot
+      environment: maven_central_snapshot
       workingDirectory: ./components/serialization/text/
+    secrets:
+      LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+      SECRING_GPG: ${{ secrets.SECRING_GPG }}
+  
+  publishSerializationForm:
+    needs: buildSerializationForm
+    uses: ./.github/workflows/release-component.yml
+    with:
+      shouldPreview: ${{ github.ref == 'refs/heads/main' }}
+      #shouldRelease: ${{ github.ref == 'refs/heads/main' }}
+      environment: maven_central_snapshot
+      workingDirectory: ./components/serialization/form/
     secrets:
       LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
       SECRING_GPG: ${{ secrets.SECRING_GPG }}
