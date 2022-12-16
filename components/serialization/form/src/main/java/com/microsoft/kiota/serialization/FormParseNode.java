@@ -47,7 +47,11 @@ public class FormParseNode implements ParseNode {
     }
     private String sanitizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
-        return key.trim();
+        try {
+            return URLDecoder.decode(key, encoding).trim();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Unsupported encoding", e);
+        }
     }
     @Nonnull
     public ParseNode getChildNode(@Nonnull final String identifier) {

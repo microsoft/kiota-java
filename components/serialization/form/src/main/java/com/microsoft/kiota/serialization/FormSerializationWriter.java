@@ -48,7 +48,7 @@ public class FormSerializationWriter implements SerializationWriter {
                 writer.write("&");
             else
                 written = true;
-            writer.write(key + "=" + URLEncoder.encode(value, encoding));
+            writer.write(URLEncoder.encode(key, encoding) + "=" + URLEncoder.encode(value, encoding));
         } catch (IOException ex) {
             throw new RuntimeException("could not serialize value", ex);
         }
