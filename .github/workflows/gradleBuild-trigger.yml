@@ -17,13 +17,13 @@ jobs:
     steps: 
     - uses: actions/checkout@v3
     - name: checkSecrets
-      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
       env:  
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
         OUTPUT_PATH: '.\local.properties'
     - name: checkSecrets2
-      run: .\components\abstractions\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
       env:  
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
