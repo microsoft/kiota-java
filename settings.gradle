@@ -1,0 +1,19 @@
+rootProject.name = 'kiota-java'
+
+include ':components:abstractions'
+include ':components:serialization:form'
+include ':components:serialization:json'
+include ':components:serialization:text'
+include ':components:authentication:azure'
+include ':components:http:okHttp'
+
+if (System.getenv("ANDROID_HOME") != null) {
+  include ':components:abstractions:android'
+  include ':components:serialization:form:android'
+  include ':components:serialization:json:android'
+  include ':components:serialization:text:android'
+  include ':components:authentication:azure:android'
+  include ':components:http:okHttp:android'
+} else {
+  logger.warn('ANDROID_HOME environment variable not found, skipping andorid modules')
+}

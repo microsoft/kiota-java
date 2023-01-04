@@ -30,9 +30,6 @@ jobs:
     environment: 
       name: ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ inputs.workingDirectory }} 
     steps: 
       - uses: actions/checkout@v3
       - name: Easy detect-secrets
@@ -40,7 +37,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: 18
+          java-version: 17
           distribution: 'adopt'
           cache: gradle
       - name: Download file
@@ -55,7 +52,5 @@ jobs:
         env: 
           ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
           OUTPUT_PATH: '.\secring.gpg'
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
       - name: Publish
-        run: ./gradlew $PREVIEW_TASK
+        run: ./gradlew $PREVIEW_TASK -p ${{ inputs.workingDirectory }}
