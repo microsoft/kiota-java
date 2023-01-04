@@ -32,7 +32,7 @@ jobs:
           name: Unit Tests
           path: |
               components/**/build/reports/tests/test/**
-              components/**build-test-results/**
+              components/**/build-test-results/**
       # TODO: not sure what to do with the next step
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3
