@@ -37,14 +37,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.componentName }}-drop
-          path: |
-            **/libs/*
-            build/generated-pom.xml
-            build/generated-pom.xml.asc
-            build.gradle
-            gradlew
-            gradlew.bat
-            settings.gradle
-            gradle.properties
-            **/gradle/**
-            Scripts/**
+          path: ./**/build/libs/*
