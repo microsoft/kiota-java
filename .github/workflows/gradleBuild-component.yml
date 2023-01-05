@@ -37,4 +37,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.componentName }}-drop
-          path: ./**/build/libs/*
+          path: ./**/build/*
