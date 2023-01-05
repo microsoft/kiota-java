@@ -1,0 +1,14 @@
+rootProject.name = 'kiota-java'
+
+String suffix = ""
+if (Boolean.parseBoolean(settings['android'])) {
+  logger.info('Building Android compatibility projects')
+  suffix = ":android"
+}
+
+include ':components:abstractions' + suffix
+include ':components:serialization:form' + suffix
+include ':components:serialization:json' + suffix
+include ':components:serialization:text' + suffix
+include ':components:authentication:azure' + suffix
+include ':components:http:okHttp' + suffix
