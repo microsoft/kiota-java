@@ -46,6 +46,8 @@ public class TelemetryHandler implements Interceptor{
      * @throws IOException
      */
     @Override
+	@SuppressWarnings("UnknownNullness")
+    @Nonnull
     public Response intercept(Chain chain) throws IOException {
 		Objects.requireNonNull(chain, "parameter chain cannot be null");
         final Request request = chain.request();
