@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2023-01-05
 
 ### Added
 
@@ -16,12 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Prevent empty values from showing up in query parameters values.
+- restructure to use gradle multi-modules
+- using a single version for all of the components
 
 ## [0.0.11] - 2022-12-15
 
 ### Added
 
 - Added support for multi-valued request headers
+- [serialization/form] Initial release of the library
 
 ## [0.0.10] - 2022-10-28
 
@@ -34,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added API key authentication provider.
+- [http/okHttp] Updated reference to abstractions for multi-valued header support.
 
 ## [0.0.8] - 2022-10-11
 
@@ -59,6 +63,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for tracing through open telemetry
 
 ## [0.0.4] - 2022-09-15
+
+### Added
+
+- [http/okHttp] Added support for additional status codes
 
 ### Changed
 
