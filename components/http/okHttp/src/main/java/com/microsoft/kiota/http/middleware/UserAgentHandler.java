@@ -12,6 +12,9 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+
 /** Adds the current library version as a product to the user agent header */
 public class UserAgentHandler implements Interceptor {
 	@Nonnull
@@ -45,14 +48,29 @@ public class UserAgentHandler implements Interceptor {
 
 		if (!userAgentHandlerOption.getEnabled()) return chain.proceed(request);
 
-		String currentValue = request.headers().get(USER_AGENT_HEADER_NAME);
-		final String valueToAppend = String.format("%s/%s", userAgentHandlerOption.getProductName(), userAgentHandlerOption.getProductVersion());
+		final Span span = ObservabilityHelper.getSpanForRequest(request, "UserAgentHandler_Intercept");
+        Scope scope = null;
+        if (span != null) {
+            scope = span.makeCurrent();
+            span.setAttribute("com.microsoft.kiota.handler.useragent.enable", true);
+        }
 		final Request.Builder builder = request.newBuilder();
-		if (currentValue == null || currentValue.isEmpty()) {
-			builder.header(USER_AGENT_HEADER_NAME, valueToAppend);
-		} else if (!currentValue.contains(valueToAppend)) {
-			builder.header(USER_AGENT_HEADER_NAME, String.format("%s %s", currentValue, valueToAppend));
-		}
+        try {
+			String currentValue = request.headers().get(USER_AGENT_HEADER_NAME);
+			final String valueToAppend = String.format("%s/%s", userAgentHandlerOption.getProductName(), userAgentHandlerOption.getProductVersion());
+			if (currentValue == null || currentValue.isEmpty()) {
+				builder.header(USER_AGENT_HEADER_NAME, valueToAppend);
+			} else if (!currentValue.contains(valueToAppend)) {
+				builder.header(USER_AGENT_HEADER_NAME, String.format("%s %s", currentValue, valueToAppend));
+			}
+		} finally {
+            if (scope != null) {
+                scope.close();
+            }
+            if (span != null) {
+                span.end();
+            }
+        }
 		return chain.proceed(builder.build());
 	}
 	
