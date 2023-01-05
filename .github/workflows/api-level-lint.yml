@@ -23,7 +23,7 @@ jobs:
         uses: android-actions/setup-android@v2.0.10
       - name: Build SDK with Android project configuration
         id: lint
-        run: ./gradlew --no-daemon build
+        run: ./gradlew --no-daemon build -Pandroid=true
       - name: Upload linting results
         if: failure() && steps.lint.outcome == 'failure'
         uses: actions/upload-artifact@v3
