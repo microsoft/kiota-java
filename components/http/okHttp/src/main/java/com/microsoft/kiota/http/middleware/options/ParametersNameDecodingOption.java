@@ -11,6 +11,7 @@ public class ParametersNameDecodingOption implements RequestOption {
     @Nonnull
     public char[] parametersToDecode = {'-', '.', '~', '$'};
     
+	/* @inheritdoc */
     @SuppressWarnings("unchecked")
     @Override
     @Nonnull

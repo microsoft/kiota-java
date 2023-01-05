@@ -20,8 +20,10 @@ public class TelemetryHandlerOption implements RequestOption {
     @Nullable
     public Function<Request, Request> TelemetryConfigurator = (request) -> request;
 
+	/* @inheritdoc */
     @Override
     @Nonnull
+	@SuppressWarnings("unchecked")
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) TelemetryHandlerOption.class; 
     }

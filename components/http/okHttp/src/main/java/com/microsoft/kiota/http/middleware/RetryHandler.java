@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ import io.opentelemetry.context.Scope;
  */
 public class RetryHandler implements Interceptor{
 
+    @Nonnull
     private RetryHandlerOption mRetryOption;
 
     /**
@@ -61,9 +63,10 @@ public class RetryHandler implements Interceptor{
      * @param retryOption Create Retry handler using retry option
      */
     public RetryHandler(@Nullable final RetryHandlerOption retryOption) {
-        this.mRetryOption = retryOption;
-        if(this.mRetryOption == null) {
+        if (retryOption == null) {
             this.mRetryOption = new RetryHandlerOption();
+        } else {
+            this.mRetryOption = retryOption;
         }
     }
     /**
@@ -73,7 +76,7 @@ public class RetryHandler implements Interceptor{
         this(null);
     }
 
-    boolean retryRequest(Response response, int executionCount, Request request, RetryHandlerOption retryOption) {
+    boolean retryRequest(@Nonnull final Response response, int executionCount, @Nonnull final Request request, @Nonnull final RetryHandlerOption retryOption) {
 
         // Should retry option
         // Use should retry common for all requests
@@ -191,8 +194,12 @@ public class RetryHandler implements Interceptor{
 
     @Override
     @Nonnull
-    public Response intercept(@Nonnull final Chain chain) throws IOException {
+    public Response intercept(final Chain chain) throws IOException {
+        Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
+        if (request == null) {
+            throw new IllegalArgumentException("request cannot be null");
+        }
         final Span span = ObservabilityHelper.getSpanForRequest(request, "RetryHandler_Intercept");
         Scope scope = null;
         if (span != null) {
@@ -204,6 +211,8 @@ public class RetryHandler implements Interceptor{
                 request = request.newBuilder().tag(Span.class, span).build();
             }
             Response response = chain.proceed(request);
+            if (response == null)
+                throw new RuntimeException("unable to get a response from the chain");
 
             // Use should retry pass along with this request
             RetryHandlerOption retryOption = request.tag(RetryHandlerOption.class);
@@ -216,18 +225,21 @@ public class RetryHandler implements Interceptor{
                     builder.tag(Span.class, span);
                 }
                 request = builder.build();
-                executionCount++;
-                if(response != null) {
-                    final ResponseBody body = response.body();
-                    if(body != null)
-                        body.close();
-                    response.close();
+                if (request == null) {
+                    throw new IllegalArgumentException("request cannot be null");
                 }
+                executionCount++;
+                final ResponseBody body = response.body();
+                if(body != null)
+                    body.close();
+                response.close();
                 final Span retrySpan = ObservabilityHelper.getSpanForRequest(request, "RetryHandler_Intercept - attempt " + executionCount, span);
                 retrySpan.setAttribute("http.retry_count", executionCount);
                 retrySpan.setAttribute("http.status_code", response.code());
                 retrySpan.end();
                 response = chain.proceed(request);
+                if (response == null)
+                    throw new RuntimeException("unable to get a response from the chain");
             }
             return response;
         } finally {

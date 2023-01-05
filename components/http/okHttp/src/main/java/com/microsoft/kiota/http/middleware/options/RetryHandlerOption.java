@@ -10,7 +10,8 @@ import javax.annotation.Nonnull;
  * The options to be passed to the retry middleware.
  */
 public class RetryHandlerOption implements RequestOption{
-    private IShouldRetry mShouldretry;
+    @Nonnull
+    private final IShouldRetry mShouldRetry;
     /**
      * Default retry evaluation, always retry.
      */
@@ -64,7 +65,7 @@ public class RetryHandlerOption implements RequestOption{
         if(maxRetries < 0)
             throw new IllegalArgumentException("Max retries cannot be negative");
 
-        this.mShouldretry = shouldRetry == null ? DEFAULT_SHOULD_RETRY : shouldRetry;
+        this.mShouldRetry = shouldRetry == null ? DEFAULT_SHOULD_RETRY : shouldRetry;
         this.mMaxRetries = maxRetries;
         this.mDelay = delay;
     }
@@ -74,7 +75,7 @@ public class RetryHandlerOption implements RequestOption{
      */
     @Nonnull
     public IShouldRetry shouldRetry() {
-        return mShouldretry;
+        return mShouldRetry;
     }
 
     /**
@@ -91,6 +92,7 @@ public class RetryHandlerOption implements RequestOption{
         return mDelay;
     }
 
+    /* @inheritdoc */
     @Override
 	@SuppressWarnings("unchecked")
     @Nonnull

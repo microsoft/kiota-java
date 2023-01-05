@@ -16,11 +16,11 @@ public class RedirectHandlerOption implements RequestOption {
      */
     public static final int DEFAULT_MAX_REDIRECTS = 5;
     /**
-     * The absolute maxium number of redirects that can be followed
+     * The absolute maximum number of redirects that can be followed
      */
     public static final int MAX_REDIRECTS = 20;
-
-    private IShouldRedirect shouldRedirect;
+    @Nonnull
+    private final IShouldRedirect shouldRedirect;
     /**
      * Default redirect evaluation, always follow redirect information.
      */
@@ -63,6 +63,8 @@ public class RedirectHandlerOption implements RequestOption {
         return this.shouldRedirect;
     }
 
+	/* @inheritdoc */
+    @SuppressWarnings("unchecked")
     @Override
     @Nonnull
     public <T extends RequestOption> Class<T> getType() {
