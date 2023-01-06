@@ -2,19 +2,9 @@ name: Gradle Build and Publish
 
 on:
   workflow_dispatch:
-    inputs:
-      shouldPreview:
-        required: true
-        type: string
-      shouldRelease: 
-        required: false
-        type: string
-      environment:
-        required: true
-        type: string        
-      workingDirectory:
-        required: true
-        type: string
+  push:
+    tags: ['v*']
+    branches: ['main']
 
 env:
   PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
