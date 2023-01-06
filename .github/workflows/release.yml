@@ -38,7 +38,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
     - name: Publish Preview
-      if: ${{ inputs.shouldPreview }} == 'true'
+      if: github.ref == 'refs/heads/main'
       run: ./gradlew --no-daemon $PREVIEW_TASK
     - name: Publish Release
       if: contains(github.ref, 'refs/tags/v')
