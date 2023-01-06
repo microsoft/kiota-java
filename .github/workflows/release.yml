@@ -1,0 +1,81 @@
+name: Gradle Build and Publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+    branches: ['main']
+
+env:
+  PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
+  PUBLISH_TASK: publishMavenCentralReleasePublicationToSonatypeRepository
+
+jobs:
+  release-to-maven-central-snapshot:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: maven_central_snapshot
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with: 
+        java-version: 17
+        distribution: 'adopt'
+        cache: gradle
+    - name: Detect Secrets
+      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties' 
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env: 
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: '.\secring.gpg'
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon build
+    - name: Publish Preview
+      run: ./gradlew --no-daemon $PREVIEW_TASK
+  release-to-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with: 
+        java-version: 17
+        distribution: 'adopt'
+        cache: gradle
+    - name: Detect Secrets
+      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties' 
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env: 
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: '.\secring.gpg'
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon build
+    - name: Publish Release
+      run: ./gradlew --no-daemon $PUBLISH_TASK
+    - name: Release
+      uses: anton-yurchenko/git-release@v5.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DRAFT_RELEASE: "false"
+        PRE_RELEASE: "false"
+        CHANGELOG_FILE: "CHANGELOG.md"
+        ALLOW_EMPTY_CHANGELOG: "true"

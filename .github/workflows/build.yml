@@ -1,0 +1,49 @@
+name: Gradle Build And Test
+
+on:
+  push:
+    branches: [dev, main]
+    paths-ignore: 
+      - '**.gradle/wrapper'
+      - '**.gitignore'
+      - 'LICENSE'
+      - 'THIRD PARTY NOTICES'
+      - '**.md'
+  pull_request:
+    branches: [dev, main]
+    paths-ignore:
+      - '**.gradle/wrapper'
+      - '**.gitignore'
+      - 'LICENSE'
+      - 'THIRD PARTY NOTICES'
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v3
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with: 
+        java-version: 17
+        distribution: 'adopt'
+        cache: gradle
+    - name: Detect Secrets
+      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon build
+    - name: Upload Unit Test Results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: Unit Tests
+        path: |
+            components/**/build/reports/tests/test/**
+            components/**/build-test-results/**
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.componentName }}-drop
+        path: ./**/build/*
