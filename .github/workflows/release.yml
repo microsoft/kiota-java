@@ -1,0 +1,55 @@
+name: Build and Publish Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      shouldPreview:
+        required: true
+        type: string
+      shouldRelease: 
+        required: false
+        type: string
+      environment:
+        required: true
+        type: string        
+      workingDirectory:
+        required: true
+        type: string
+
+env:
+  PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
+  PUBLISH_TASK: publishMavenCentralReleasePublicationToSonatypeRepository
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with: 
+        java-version: 17
+        distribution: 'adopt'
+        cache: gradle
+    - name: Detect Secrets
+      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:  
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: '.\local.properties' 
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env: 
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: '.\secring.gpg'
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon build
+    - name: Publish Preview
+      if: ${{ inputs.shouldPreview }} == 'true'
+      run: ./gradlew --no-daemon $PREVIEW_TASK
+    - name: Publish Release
+      if: ${{ inputs.shouldRelease }} == 'true'
+      run: ./gradlew --no-daemon $PUBLISH_TASK
