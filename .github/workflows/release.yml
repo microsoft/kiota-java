@@ -30,19 +30,21 @@ jobs:
       shell: pwsh
       env:  
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
-        OUTPUT_PATH: '.\local.properties'
+        OUTPUT_PATH: 'local.properties'
       working-directory: ./
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
       env: 
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
-        OUTPUT_PATH: '.\secring.gpg'
+        OUTPUT_PATH: 'secring.gpg'
       working-directory: ./
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
+      working-directory: ./
     - name: Publish Preview
       run: ./gradlew --no-daemon $PREVIEW_TASK
+      working-directory: ./
   release-to-maven-central:
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
@@ -62,19 +64,21 @@ jobs:
       shell: pwsh
       env:  
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
-        OUTPUT_PATH: '.\local.properties' 
+        OUTPUT_PATH: 'local.properties' 
       working-directory: ./
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
       env: 
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
-        OUTPUT_PATH: '.\secring.gpg'
+        OUTPUT_PATH: 'secring.gpg'
       working-directory: ./
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
+      working-directory: ./
     - name: Publish Release
       run: ./gradlew --no-daemon $PUBLISH_TASK
+      working-directory: ./
     - name: Release
       uses: anton-yurchenko/git-release@v5.0
       env:
