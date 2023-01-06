@@ -35,6 +35,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
     - name: Upload Unit Test Results
+      if: ${{ always() }}
       uses: actions/upload-artifact@v3
       with:
         name: Unit Tests
