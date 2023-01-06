@@ -1,4 +1,4 @@
-name: Gradle Build Project Trigger
+name: Gradle Build And Test
 
 on:
   push:
