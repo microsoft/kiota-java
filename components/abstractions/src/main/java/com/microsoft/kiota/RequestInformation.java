@@ -102,7 +102,7 @@ public class RequestInformation {
                 if(value != null) {
                     if(value.getClass().isArray()) {
                         queryParameters.put(name, Arrays.asList((Object[])value));
-                    } else {
+                    } else if(!value.toString().isEmpty()){
                         queryParameters.put(name, value);
                     }
                 }

@@ -69,6 +69,48 @@ public class RequestInformationTest {
     }
 
     @Test
+    public void DoesNotSetQueryParametersParametersIfEmptyString()
+    {
+
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/users{?%24search}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.search = "";
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        assertEquals("", queryParameters.search);
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertFalse(uriResult.toString().contains("search"));
+        
+    }
+
+    @Test
+    public void DoesNotSetQueryParametersParametersIfEmptyCollection()
+    {
+
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/users{?%24select}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.select = new String[]{};
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        assertTrue(queryParameters.select.length == 0);
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertFalse(uriResult.toString().contains("select"));
+    }
+
+    @Test
     public void SetsPathParametersOfBooleanType()
     {
 
@@ -149,4 +191,18 @@ public class RequestInformationTest {
         verify(writerMock, times(1)).writeStringValue(any(), anyString());
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
+}
+
+
+/// <summary>The messages in a mailbox or folder. Read-only. Nullable.</summary>
+class GetQueryParameters
+{
+    /// <summary>Select properties to be returned</summary>\
+    @QueryParameter(name ="%24select")
+    @javax.annotation.Nullable
+    public String[] select;
+    /// <summary>Search items by search phrases</summary>
+    @QueryParameter(name ="%24search")
+    @javax.annotation.Nullable
+    public String search;
 }

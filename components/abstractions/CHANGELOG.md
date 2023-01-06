@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.0.12] - 2023-01-06
+
+### Changed
+
+- Prevent empty values from showing up in query parameters values.
+
 ## [0.0.11] - 2022-12-15
 
 ### Added
