@@ -158,10 +158,12 @@ publishing {
             name = 'sonatypeSnapshot'
             
             credentials {
-                Properties properties = new Properties()
-                properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                username = properties.getProperty('sonatypeUsername')
-                password = properties.getProperty('sonatypePassword')
+    			if (project.rootProject.file('local.properties').exists()) {
+        			Properties properties = new Properties()
+        			properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        			username = properties.getProperty('sonatypeUsername')
+        			password = properties.getProperty('sonatypePassword')
+    			}
             }
         }
         
