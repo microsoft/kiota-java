@@ -1,4 +1,4 @@
-name: Build and Publish Trigger
+name: Gradle Build and Publish
 
 on:
   workflow_dispatch:
