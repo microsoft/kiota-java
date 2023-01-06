@@ -29,4 +29,5 @@ if($encodedValue -eq "" -or $null -eq $encodedValue) {
 
 $decodedValue = [System.Convert]::FromBase64String($encodedValue)
 $targetFullPath = Join-Path $PWD -ChildPath $outputPath
+Write-Information "Writing decoded value to file: $targetFullPath"
 [System.IO.File]::WriteAllBytes($targetFullPath, $decodedValue)

@@ -33,12 +33,12 @@ jobs:
         OUTPUT_PATH: '.\local.properties'
     - name: Copy local.properties to sub projects
       run: |
-        cp .\local.properties ./components/abstractions/
-        cp .\local.properties ./components/serialization/form/
-        cp .\local.properties ./components/serialization/json/
-        cp .\local.properties ./components/serialization/text/
-        cp .\local.properties ./components/authentication/azure/
-        cp .\local.properties ./components/http/okHttp/
+        cp ./local.properties ./components/abstractions/
+        cp ./local.properties ./components/serialization/form/
+        cp ./local.properties ./components/serialization/json/
+        cp ./local.properties ./components/serialization/text/
+        cp ./local.properties ./components/authentication/azure/
+        cp ./local.properties ./components/http/okHttp/
       shell: pwsh
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -48,12 +48,12 @@ jobs:
         OUTPUT_PATH: '.\secring.gpg'
     - name: Copy secring.gpg to sub projects
       run: |
-        cp .\secring.gpg ./components/abstractions/
-        cp .\secring.gpg ./components/serialization/form/
-        cp .\secring.gpg ./components/serialization/json/
-        cp .\secring.gpg ./components/serialization/text/
-        cp .\secring.gpg ./components/authentication/azure/
-        cp .\secring.gpg ./components/http/okHttp/
+        cp ./secring.gpg ./components/abstractions/
+        cp ./secring.gpg ./components/serialization/form/
+        cp ./secring.gpg ./components/serialization/json/
+        cp ./secring.gpg ./components/serialization/text/
+        cp ./secring.gpg ./components/authentication/azure/
+        cp ./secring.gpg ./components/http/okHttp/
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
     - name: Publish Preview
@@ -80,12 +80,12 @@ jobs:
         OUTPUT_PATH: '.\local.properties'
     - name: Copy local.properties to sub projects
       run: |
-        cp .\local.properties ./components/abstractions/
-        cp .\local.properties ./components/serialization/form/
-        cp .\local.properties ./components/serialization/json/
-        cp .\local.properties ./components/serialization/text/
-        cp .\local.properties ./components/authentication/azure/
-        cp .\local.properties ./components/http/okHttp/
+        cp ./local.properties ./components/abstractions/
+        cp ./local.properties ./components/serialization/form/
+        cp ./local.properties ./components/serialization/json/
+        cp ./local.properties ./components/serialization/text/
+        cp ./local.properties ./components/authentication/azure/
+        cp ./local.properties ./components/http/okHttp/
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
@@ -94,12 +94,12 @@ jobs:
         OUTPUT_PATH: '.\secring.gpg'
     - name: Copy secring.gpg to sub projects
       run: |
-        cp .\secring.gpg ./components/abstractions/
-        cp .\secring.gpg ./components/serialization/form/
-        cp .\secring.gpg ./components/serialization/json/
-        cp .\secring.gpg ./components/serialization/text/
-        cp .\secring.gpg ./components/authentication/azure/
-        cp .\secring.gpg ./components/http/okHttp/
+        cp ./secring.gpg ./components/abstractions/
+        cp ./secring.gpg ./components/serialization/form/
+        cp ./secring.gpg ./components/serialization/json/
+        cp ./secring.gpg ./components/serialization/text/
+        cp ./secring.gpg ./components/authentication/azure/
+        cp ./secring.gpg ./components/http/okHttp/
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
     - name: Publish Release
