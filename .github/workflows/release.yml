@@ -41,5 +41,5 @@ jobs:
       if: ${{ inputs.shouldPreview }} == 'true'
       run: ./gradlew --no-daemon $PREVIEW_TASK
     - name: Publish Release
-      if: ${{ inputs.shouldRelease }} == 'true'
+      if: contains(github.ref, 'refs/tags/v')
       run: ./gradlew --no-daemon $PUBLISH_TASK
