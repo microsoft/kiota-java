@@ -1,6 +1,14 @@
 name: Gradle Build Project Trigger
 
 on:
+  push:
+    branches: [dev, main]
+    paths-ignore: 
+      - '**.gradle/wrapper'
+      - '**.gitignore'
+      - 'LICENSE'
+      - 'THIRD PARTY NOTICES'
+      - '**.md'
   pull_request:
     branches: [dev, main]
     paths-ignore:
