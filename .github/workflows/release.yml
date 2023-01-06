@@ -44,6 +44,7 @@ jobs:
       if: contains(github.ref, 'refs/tags/v')
       run: ./gradlew --no-daemon $PUBLISH_TASK
     - name: Release
+      if: contains(github.ref, 'refs/tags/v')
       uses: anton-yurchenko/git-release@v5.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
