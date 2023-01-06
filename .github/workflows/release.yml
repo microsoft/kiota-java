@@ -13,6 +13,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env: maven_central
     steps:
     - uses: actions/checkout@v3
     - name: Setup JDK
