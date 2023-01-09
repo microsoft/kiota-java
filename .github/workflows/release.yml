@@ -8,7 +8,7 @@ on:
 
 env:
   PREVIEW_TASK: publishMavenPublicationToSonatypeSnapshotRepository
-  PUBLISH_TASK: publishmavenPublicationToSonatypeRepository
+  PUBLISH_TASK: publishMavenPublicationToSonatypeRepository
 
 jobs:
   release-to-maven-central-snapshot:
