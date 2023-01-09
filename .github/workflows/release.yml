@@ -7,7 +7,7 @@ on:
     branches: ['main']
 
 env:
-  PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
+  PREVIEW_TASK: publishMavenPublicationToSonatypeSnapshotRepository
   PUBLISH_TASK: publishmavenPublicationToSonatypeRepository
 
 jobs:
