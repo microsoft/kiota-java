@@ -9,5 +9,5 @@ dependencies {
     implementation 'com.google.guava:guava:31.1-jre'
     api 'com.google.code.gson:gson:2.10.1'
 
-    api 'com.microsoft.kiota:microsoft-kiota-abstractions:0.0.8-SNAPSHOT'
+    api project(':components:abstractions')
 }
