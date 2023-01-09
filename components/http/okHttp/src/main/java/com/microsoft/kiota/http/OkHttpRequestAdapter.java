@@ -700,14 +700,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
-    public <RequestType> CompletableFuture<RequestType> convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) {
+    @Nonnull
+    public <T> CompletableFuture<T> convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
         try(final Scope scope = span.makeCurrent()) {
             return this.authProvider.authenticateRequest(requestInfo, null)
                 .thenApply(x -> {
                     try {
-                        return (RequestType) getRequestFromRequestInformation(requestInfo, span, span);
+                        return (T) getRequestFromRequestInformation(requestInfo, span, span);
                     } catch (MalformedURLException | URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
