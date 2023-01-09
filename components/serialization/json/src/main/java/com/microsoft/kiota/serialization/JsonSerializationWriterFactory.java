@@ -4,12 +4,17 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+/** Creates new Json serialization writers. */
 public class JsonSerializationWriterFactory implements SerializationWriterFactory {
+    /** Creates a new factory */
+    public JsonSerializationWriterFactory() {}
+    /** {@inheritDoc} */
     @Nonnull
     public String getValidContentType() {
         return validContentType;
     }
     private static final String validContentType = "application/json";
+    /** {@inheritDoc} */
     @Override
     @Nonnull
     public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
