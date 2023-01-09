@@ -126,7 +126,7 @@ publishing {
                 def pomFile = file("${project.buildDir}/libs/microsoft-kiota-abstractions.pom")
                 writeTo(pomFile)
             }
-
+            alias true
         }
         Snapshot(MavenPublication) {
         	customizePom(pom)
@@ -138,6 +138,7 @@ publishing {
         		def pomFile = file("${project.buildDir}/generated-pom.xml")
         		writeTo(pomFile)
         	}
+            alias true
 		}
 		
 		mavenCentralRelease(MavenPublication) {
@@ -150,6 +151,7 @@ publishing {
         		def pomFile = file("${project.buildDir}/generated-pom.xml")
         		writeTo(pomFile)
         	}
+            alias false
 		}
     }
 	repositories {
