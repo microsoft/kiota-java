@@ -43,7 +43,7 @@ jobs:
       run: ./gradlew --no-daemon build
       working-directory: ./
     - name: Publish Preview
-      run: ./gradlew --no-daemon $PREVIEW_TASK -PmavenCentralSnapshotArtifactSuffix=-SNAPSHOT
+      run: ./gradlew --no-daemon $PREVIEW_TASK
       working-directory: ./
   release-to-maven-central:
     if: contains(github.ref, 'refs/tags/v')
@@ -77,7 +77,7 @@ jobs:
       run: ./gradlew --no-daemon build
       working-directory: ./
     - name: Publish Release
-      run: ./gradlew --no-daemon $PUBLISH_TASK
+      run: ./gradlew --no-daemon $PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
       working-directory: ./
     - name: Release
       uses: anton-yurchenko/git-release@v5.0
