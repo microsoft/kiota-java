@@ -7,8 +7,8 @@ on:
     branches: ['main']
 
 env:
-  PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
-  PUBLISH_TASK: publishMavenCentralReleasePublicationToSonatypeRepository
+  PREVIEW_TASK: publishMavenPublicationToSonatypeSnapshotRepository
+  PUBLISH_TASK: publishMavenPublicationToSonatypeRepository
 
 jobs:
   release-to-maven-central-snapshot:
@@ -77,7 +77,7 @@ jobs:
       run: ./gradlew --no-daemon build
       working-directory: ./
     - name: Publish Release
-      run: ./gradlew --no-daemon $PUBLISH_TASK
+      run: ./gradlew --no-daemon $PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
       working-directory: ./
     - name: Release
       uses: anton-yurchenko/git-release@v5.0
