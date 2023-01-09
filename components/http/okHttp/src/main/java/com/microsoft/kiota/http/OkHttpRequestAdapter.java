@@ -698,6 +698,24 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         Objects.requireNonNull(requestInfo);
         requestInfo.pathParameters.put("baseurl", getBaseUrl());
     }
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    public <RequestType> CompletableFuture<RequestType> convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) {
+        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+        final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
+        try(final Scope scope = span.makeCurrent()) {
+            return this.authProvider.authenticateRequest(requestInfo, null)
+                .thenApply(x -> {
+                    try {
+                        return (RequestType) getRequestFromRequestInformation(requestInfo, span, span);
+                    } catch (MalformedURLException | URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        } finally {
+            span.end();
+        }
+    }
     private Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
