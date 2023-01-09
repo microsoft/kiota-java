@@ -45,7 +45,7 @@ def pomConfig = {
 }
 
 //Publishing tasks-
-//Maven Central Snapshot: publishSnapshotPublicationToMavenRepository
+//Maven Central Snapshot: publishMavenPublicationToMavenRepository
 //Maven Central Release: publishmavenPublicationToMaven2Repository
 
 tasks.jar {
