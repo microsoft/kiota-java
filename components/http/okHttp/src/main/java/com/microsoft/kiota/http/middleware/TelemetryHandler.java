@@ -1,6 +1,8 @@
 package com.microsoft.kiota.http.middleware;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,8 +17,8 @@ import okhttp3.Response;
  * TelemetryHandler implementation using OkHttp3
  */
 public class TelemetryHandler implements Interceptor{
-
-    private TelemetryHandlerOption _telemetryHandlerOption;
+    @Nonnull
+    private final TelemetryHandlerOption _telemetryHandlerOption;
 
     /**
      * TelemetryHandler no param constructor
@@ -32,8 +34,9 @@ public class TelemetryHandler implements Interceptor{
     public TelemetryHandler(@Nullable TelemetryHandlerOption telemetryHandlerOption) {
         if (telemetryHandlerOption == null) {
             this._telemetryHandlerOption = new TelemetryHandlerOption();
+        } else {
+            this._telemetryHandlerOption = telemetryHandlerOption;
         }
-        this._telemetryHandlerOption = telemetryHandlerOption;
     }
 
     /**
@@ -42,21 +45,24 @@ public class TelemetryHandler implements Interceptor{
      * @return
      * @throws IOException
      */
-    @Nonnull
     @Override
-    public Response intercept(@Nonnull Chain chain) throws IOException {
+	@SuppressWarnings("UnknownNullness")
+    @Nonnull
+    public Response intercept(Chain chain) throws IOException {
+		Objects.requireNonNull(chain, "parameter chain cannot be null");
         final Request request = chain.request();
 
         TelemetryHandlerOption telemetryHandlerOption = request.tag(TelemetryHandlerOption.class);
         if(telemetryHandlerOption == null) { telemetryHandlerOption = this._telemetryHandlerOption; }
 
         //Simply forward request if TelemetryConfigurator is set to null intentionally.
-        if(telemetryHandlerOption == null || telemetryHandlerOption.TelemetryConfigurator == null) {
+        final Function<Request, Request> telemetryConfigurator = telemetryHandlerOption.TelemetryConfigurator;
+        if(telemetryConfigurator == null) {
             return chain.proceed(request);
         }
 
         //Use the TelemetryConfigurator set by the user to enrich the request as desired.
-        Request enrichedRequest = telemetryHandlerOption.TelemetryConfigurator.apply(request);
+        Request enrichedRequest = telemetryConfigurator.apply(request);
         return chain.proceed(enrichedRequest);
     }
     

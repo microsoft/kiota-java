@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.microsoft.kiota.http.ObservabilityOptions;
 import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
 
 import okhttp3.HttpUrl;
@@ -36,7 +35,8 @@ public class ParametersNameDecodingHandler implements Interceptor {
      */
     @Override
     @Nonnull
-    public Response intercept(@Nonnull final Chain chain) throws IOException {
+	@SuppressWarnings("UnknownNullness")
+    public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain);
         final Request request = chain.request();
         ParametersNameDecodingOption nameOption = request.tag(ParametersNameDecodingOption.class);
