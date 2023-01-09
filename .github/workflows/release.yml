@@ -8,7 +8,7 @@ on:
 
 env:
   PREVIEW_TASK: publishSnapshotPublicationToSonatypeSnapshotRepository
-  PUBLISH_TASK: publishMavenCentralReleasePublicationToSonatypeRepository
+  PUBLISH_TASK: publishmavenPublicationToSonatypeRepository
 
 jobs:
   release-to-maven-central-snapshot:
@@ -43,7 +43,7 @@ jobs:
       run: ./gradlew --no-daemon build
       working-directory: ./
     - name: Publish Preview
-      run: ./gradlew --no-daemon $PREVIEW_TASK
+      run: ./gradlew --no-daemon $PREVIEW_TASK -PmavenCentralSnapshotArtifactSuffix=-SNAPSHOT
       working-directory: ./
   release-to-maven-central:
     if: contains(github.ref, 'refs/tags/v')

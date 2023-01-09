@@ -46,7 +46,7 @@ def pomConfig = {
 
 //Publishing tasks-
 //Maven Central Snapshot: publishSnapshotPublicationToMavenRepository
-//Maven Central Release: publishMavenCentralReleasePublicationToMaven2Repository
+//Maven Central Release: publishmavenPublicationToMaven2Repository
 
 tasks.jar {
     manifest {
@@ -57,39 +57,11 @@ tasks.jar {
 publishing {
 
     publications {
-
-        maven(MavenPublication) {
-            groupId project.property('mavenGroupId')
-            artifactId project.property('mavenArtifactId')
-            version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenArtifactSuffix}"
-            from components.java
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', 'Microsoft Kiota Azure-Authentication for Java')
-                root.appendNode('url', 'https://github.com/microsoft/kiota-java')
-                root.children().last() + pomConfig
-                def pomFile = file("${project.buildDir}/libs/microsoft-kiota-authentication-azure.pom")
-                writeTo(pomFile)
-            }
-
-        }
-        Snapshot(MavenPublication) {
+		maven(MavenPublication) {
         	customizePom(pom)
         	groupId project.property('mavenGroupId')
         	artifactId project.property('mavenArtifactId')
         	version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
-        	from components.java
-        	pom.withXml {
-        		def pomFile = file("${project.buildDir}/generated-pom.xml")
-        		writeTo(pomFile)
-        	}
-		}
-		
-		mavenCentralRelease(MavenPublication) {
-        	customizePom(pom)
-        	groupId project.property('mavenGroupId')
-        	artifactId project.property('mavenArtifactId')
-        	version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}"
         	from components.java
         	pom.withXml {
         		def pomFile = file("${project.buildDir}/generated-pom.xml")
@@ -129,7 +101,7 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.mavenCentralRelease
+    sign publishing.publications.maven
 }
 tasks.withType(Sign)*.enabled = mavenCentralPublishingEnabled.toBoolean()
 
@@ -214,7 +186,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 }
 
 model {
-    tasks.generatePomFileForMavenCentralReleasePublication {
+    tasks.generatePomFileForMavenPublication {
         destination = file("${project.buildDir}/generated-pom.xml")
     }
 }
