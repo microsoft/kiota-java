@@ -100,4 +100,12 @@ public interface RequestAdapter {
      */
     @Nonnull
     String getBaseUrl();
+    /**
+     * Converts the given RequestInformation into a native HTTP request.
+     * @param <T> the type of the native HTTP request.
+     * @param requestInfo the request info to convert.
+     * @return the native HTTP request.
+     */
+    @Nonnull
+    <T> CompletableFuture<T> convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo);
 }

@@ -34,9 +34,11 @@ import javax.annotation.Nullable;
 
 import com.google.gson.stream.JsonWriter;
 
+/** Serialization writer implementation for JSON */
 public class JsonSerializationWriter implements SerializationWriter {
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private final JsonWriter writer;
+    /** Creates a new instance of a json serialization writer */
     public JsonSerializationWriter() {
         this.writer = new JsonWriter(new OutputStreamWriter(this.stream));
     }
