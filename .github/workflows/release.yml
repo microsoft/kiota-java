@@ -39,6 +39,16 @@ jobs:
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
         OUTPUT_PATH: 'secring.gpg'
       working-directory: ./
+    - name: Copy secring
+      run: |
+        cp secring.gpg components/abstractions/ -Verbose
+        cp secring.gpg components/authentication/azure/ -Verbose
+        cp secring.gpg components/serialization/form/ -Verbose
+        cp secring.gpg components/serialization/text/ -Verbose
+        cp secring.gpg components/serialization/json/ -Verbose
+        cp secring.gpg components/http/okHttp/ -Verbose
+      shell: pwsh
+      working-directory: ./
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
       working-directory: ./
@@ -72,6 +82,16 @@ jobs:
       env: 
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
         OUTPUT_PATH: 'secring.gpg'
+      working-directory: ./
+    - name: Copy secring
+      run: |
+        cp secring.gpg components/abstractions/ -Verbose
+        cp secring.gpg components/authentication/azure/ -Verbose
+        cp secring.gpg components/serialization/form/ -Verbose
+        cp secring.gpg components/serialization/text/ -Verbose
+        cp secring.gpg components/serialization/json/ -Verbose
+        cp secring.gpg components/http/okHttp/ -Verbose
+      shell: pwsh
       working-directory: ./
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
