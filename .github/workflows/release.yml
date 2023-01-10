@@ -41,12 +41,12 @@ jobs:
       working-directory: ./
     - name: Copy secring
       run: |
-        cp secring.gpg components/abstractions/ -Verbose
-        cp secring.gpg components/authentication/azure/ -Verbose
-        cp secring.gpg components/serialization/form/ -Verbose
-        cp secring.gpg components/serialization/text/ -Verbose
-        cp secring.gpg components/serialization/json/ -Verbose
-        cp secring.gpg components/http/okHttp/ -Verbose
+        Copy-Item secring.gpg components/abstractions/ -Verbose
+        Copy-Item secring.gpg components/authentication/azure/ -Verbose
+        Copy-Item secring.gpg components/serialization/form/ -Verbose
+        Copy-Item secring.gpg components/serialization/text/ -Verbose
+        Copy-Item secring.gpg components/serialization/json/ -Verbose
+        Copy-Item secring.gpg components/http/okHttp/ -Verbose
       shell: pwsh
       working-directory: ./
     - name: Build with Gradle
@@ -85,12 +85,12 @@ jobs:
       working-directory: ./
     - name: Copy secring
       run: |
-        cp secring.gpg components/abstractions/ -Verbose
-        cp secring.gpg components/authentication/azure/ -Verbose
-        cp secring.gpg components/serialization/form/ -Verbose
-        cp secring.gpg components/serialization/text/ -Verbose
-        cp secring.gpg components/serialization/json/ -Verbose
-        cp secring.gpg components/http/okHttp/ -Verbose
+        Copy-Item secring.gpg components/abstractions/ -Verbose
+        Copy-Item secring.gpg components/authentication/azure/ -Verbose
+        Copy-Item secring.gpg components/serialization/form/ -Verbose
+        Copy-Item secring.gpg components/serialization/text/ -Verbose
+        Copy-Item secring.gpg components/serialization/json/ -Verbose
+        Copy-Item secring.gpg components/http/okHttp/ -Verbose
       shell: pwsh
       working-directory: ./
     - name: Build with Gradle
