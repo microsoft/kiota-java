@@ -10,15 +10,16 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class UnionWrapperParseTests {
-	private final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
-	private final JsonSerializationWriterFactory _serializationWriterFactory = new JsonSerializationWriterFactory();
-	private final String contentType = "application/json";
+	private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
+	private static final JsonSerializationWriterFactory _serializationWriterFactory = new JsonSerializationWriterFactory();
+	private static final String contentType = "application/json";
 	@Test
-	public void ParsesUnionTypeComplexProperty1() {
+	public void ParsesUnionTypeComplexProperty1() throws UnsupportedEncodingException {
 		final var initialString = "{\"@odata.type\":\"#microsoft.graph.testEntity\",\"officeLocation\":\"Montreal\", \"id\": \"opaque\"}";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(UnionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);
@@ -30,9 +31,9 @@ public class UnionWrapperParseTests {
 		assertEquals("opaque", result.getComposedType1().getId());
 	}
 	@Test
-	public void ParsesUnionTypeComplexProperty2() {
+	public void ParsesUnionTypeComplexProperty2() throws UnsupportedEncodingException {
 		final var initialString = "{\"@odata.type\":\"#microsoft.graph.secondTestEntity\",\"officeLocation\":\"Montreal\", \"id\": 10}";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(UnionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);
@@ -43,9 +44,9 @@ public class UnionWrapperParseTests {
 		assertEquals(10, result.getComposedType2().getId());
 	}
 	@Test
-	public void ParsesUnionTypeComplexProperty3() {
+	public void ParsesUnionTypeComplexProperty3() throws UnsupportedEncodingException {
 		final var initialString = "[{\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Ottawa\", \"id\": \"11\"}, {\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Montreal\", \"id\": \"10\"}]";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(UnionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);
@@ -57,9 +58,9 @@ public class UnionWrapperParseTests {
 		assertEquals("11", result.getComposedType3().get(0).getId());
 	}
 	@Test
-	public void ParsesUnionTypeStringValue() {
+	public void ParsesUnionTypeStringValue() throws UnsupportedEncodingException {
 		final var initialString = "\"officeLocation\"";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(UnionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);

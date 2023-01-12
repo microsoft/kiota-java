@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -38,7 +39,11 @@ public class FormSerializationWriter implements SerializationWriter {
     private int depth = 0;
     /** Instantiates a new FormSerializationWriter. */
     public FormSerializationWriter() {
-        this.writer = new OutputStreamWriter(this.stream);
+        try {
+            this.writer = new OutputStreamWriter(this.stream, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("could not create writer", e);
+        }
     }
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         if(value == null || key == null || key.isEmpty())
@@ -113,14 +118,14 @@ public class FormSerializationWriter implements SerializationWriter {
     }
     public <T extends Enum<T>> void writeCollectionOfEnumValues(@Nullable final String key, @Nullable final Iterable<T> values) {
         if(values != null) { //empty array is meaningful
-            String value = "";
+            final StringBuffer buffer = new StringBuffer();
             int writtenValuesCount = -1;
             for (final T t : values) {
                 if(++writtenValuesCount > 0)
-                    value += ",";
-                value += getStringValueFromValuedEnum(t);
+                    buffer.append(",");
+                buffer.append(getStringValueFromValuedEnum(t));
             }
-            writeStringValue(key, value);
+            writeStringValue(key, buffer.toString());
         }
     }
     public <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nullable final T value, @Nonnull final Parsable ...additionalValuesToMerge) {

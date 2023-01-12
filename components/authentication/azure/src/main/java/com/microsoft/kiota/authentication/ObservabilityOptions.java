@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 public class ObservabilityOptions {
 	@Nonnull
 	/** Gets the instrumentation name to use for tracing */
-	public String GetTracerInstrumentationName() {
+	public String getTracerInstrumentationName() {
 		return "com.microsoft.kiota.authentication:microsoft-kiota-authentication-azure";
 	}
 }

@@ -13,5 +13,5 @@ public interface ParsableFactory<T extends Parsable> {
      * @param parseNode The node to parse use to get the discriminator value from the payload.
      * @return The parsable object.
      */
-    T Create(@Nonnull final ParseNode parseNode);
+    T create(@Nonnull final ParseNode parseNode);
 }

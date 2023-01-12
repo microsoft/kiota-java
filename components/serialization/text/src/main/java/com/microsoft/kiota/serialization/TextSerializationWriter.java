@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -37,7 +38,11 @@ public class TextSerializationWriter implements SerializationWriter {
      * Initializes a new instance of the {@link TextSerializationWriter} class.
      */
     public TextSerializationWriter() {
-        this.writer = new OutputStreamWriter(this.stream);
+        try {
+            this.writer = new OutputStreamWriter(this.stream, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         if(key != null && !key.isEmpty())

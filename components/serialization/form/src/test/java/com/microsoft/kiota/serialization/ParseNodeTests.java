@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 
 public class ParseNodeTests {
-	private final String testUserForm = "displayName=Megan+Bowen&" +
+	private static final String testUserForm = "displayName=Megan+Bowen&" +
                                         "numbers=one,two,thirtytwo&" +
                                         "givenName=Megan&" +
                                         "accountEnabled=true&" +

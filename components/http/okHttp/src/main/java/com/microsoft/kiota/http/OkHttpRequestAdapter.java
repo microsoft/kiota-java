@@ -63,11 +63,17 @@ import io.opentelemetry.context.Context;
 /** RequestAdapter implementation for OkHttp */
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
     private final static String contentTypeHeaderKey = "Content-Type";
+    @Nonnull
     private final OkHttpClient client;
+    @Nonnull
     private final AuthenticationProvider authProvider;
+    @Nonnull
     private final ObservabilityOptions obsOptions;
+    @Nonnull
     private ParseNodeFactory pNodeFactory;
+    @Nonnull
     private SerializationWriterFactory sWriterFactory;
+    @Nonnull
     private String baseUrl = "";
     public void setBaseUrl(@Nonnull final String baseUrl) {
         this.baseUrl = Objects.requireNonNull(baseUrl);
@@ -125,7 +131,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client, @Nullable final ObservabilityOptions observabilityOptions) {
         this.authProvider = Objects.requireNonNull(authenticationProvider, "parameter authenticationProvider cannot be null");
         if(client == null) {
-            this.client = KiotaClientFactory.Create().build();
+            this.client = KiotaClientFactory.create().build();
         } else {
             this.client = client;
         }
@@ -180,7 +186,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             closeResponse = false;
                             return CompletableFuture.completedFuture(null);
                         }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getCollectionOfObjectValues").startSpan();
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfObjectValues").startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final List<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
                             setResponseType(result, span);
@@ -223,7 +229,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     private Span startSpan(@Nonnull final RequestInformation requestInfo, @Nonnull final String methodName) {
         final String decodedUriTemplate = ParametersNameDecodingHandler.decodeQueryParameters(requestInfo.urlTemplate, queryParametersToDecodeForTracing);
         final String cleanedUriTemplate = queryParametersCleanupPattern.matcher(decodedUriTemplate).replaceAll("");
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder(methodName + " - " + cleanedUriTemplate).startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder(methodName + " - " + cleanedUriTemplate).startSpan();
         span.setAttribute("http.uri_template", decodedUriTemplate);
         return span;
     }
@@ -252,7 +258,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             closeResponse = false;
                             return CompletableFuture.completedFuture(null);
                         }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final ModelType result = rootNode.getObjectValue(factory);
                             setResponseType(result, span);
@@ -292,7 +298,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             response.close();
         }
     }
-    private String getMediaTypeAndSubType(final MediaType mediaType) {
+    @Nonnull
+    private String getMediaTypeAndSubType(@Nonnull final MediaType mediaType) {
         return mediaType.type() + "/" + mediaType.subtype();
     }
     @Nullable
@@ -328,7 +335,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 closeResponse = false;
                                 return CompletableFuture.completedFuture(null);
                             }
-                            final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("get"+targetClass.getName()+"Value").setParent(Context.current().with(span)).startSpan();
+                            final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("get"+targetClass.getName()+"Value").setParent(Context.current().with(span)).startSpan();
                             try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                                 Object result;
                                 if(targetClass == Boolean.class) {
@@ -411,7 +418,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             closeResponse = false;
                             return CompletableFuture.completedFuture(null);
                         }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getEnumValue").setParent(Context.current().with(span)).startSpan();
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getEnumValue").setParent(Context.current().with(span)).startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final Object result = rootNode.getEnumValue(targetClass);
                             setResponseType(result, span);
@@ -460,7 +467,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             closeResponse = false;
                             return CompletableFuture.completedFuture(null);
                         }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getCollectionOfEnumValues").setParent(Context.current().with(span)).startSpan();
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfEnumValues").setParent(Context.current().with(span)).startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final Object result = rootNode.getCollectionOfEnumValues(targetClass);
                             setResponseType(result, span);
@@ -509,7 +516,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             closeResponse = false;
                             return CompletableFuture.completedFuture(null);
                         }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getCollectionOfPrimitiveValues").setParent(Context.current().with(span)).startSpan();
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfPrimitiveValues").setParent(Context.current().with(span)).startSpan();
                         try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                             final List<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
                             setResponseType(result, span);
@@ -537,16 +544,20 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
+    @Nullable
     private ParseNode getRootParseNode(final Response response, final Span parentSpan, final Span spanForAttributes) throws IOException {
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getRootParseNode").setParent(Context.current().with(parentSpan)).startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRootParseNode").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             final ResponseBody body = response.body(); // closing the response closes the body and stream https://square.github.io/okhttp/4.x/okhttp/okhttp3/-response-body/
             if(body == null) {
                 return null;
             }
             final InputStream rawInputStream = body.byteStream();
-            final ParseNode rootNode = pNodeFactory.getParseNode(getMediaTypeAndSubType(body.contentType()), rawInputStream);
-            return rootNode;
+            final MediaType contentType = body.contentType();
+            if(contentType == null) {
+                return null;
+            }
+            return pNodeFactory.getParseNode(getMediaTypeAndSubType(contentType), rawInputStream);
         } finally {
             span.end();
         }
@@ -562,7 +573,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @Nonnull
     public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
     private Response throwIfFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("throwIfFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("throwIfFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             if (response.isSuccessful()) return response;
             spanForAttributes.setStatus(StatusCode.ERROR);
@@ -596,7 +607,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     throw result;
                 }
                 spanForAttributes.setAttribute(errorBodyFoundAttributeName, true);
-                final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
+                final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
                 try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                     final Parsable error = rootNode.getObjectValue(errorClass);
                     ApiException result;
@@ -620,7 +631,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     private final static String claimsKey = "claims";
     private CompletableFuture<Response> getHttpResponseMessage(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getHttpResponseMessage").setParent(Context.current().with(parentSpan)).startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getHttpResponseMessage").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             this.setBaseUrlForRequestInformation(requestInfo);
             final Map<String, Object> additionalContext = new HashMap<String, Object>() {{
@@ -677,7 +688,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @Nonnull
     public static final String authenticateChallengedEventKey = "com.microsoft.kiota.authenticate_challenge_received";
     private CompletableFuture<Response> retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("retryCAEResponseIfRequired").setParent(Context.current().with(parentSpan)).startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("retryCAEResponseIfRequired").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             final String responseClaims = this.getClaimsFromResponse(response, requestInfo, claims);
             if (responseClaims != null && !responseClaims.isEmpty()) {
@@ -753,7 +764,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     private Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
-        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             spanForAttributes.setAttribute(SemanticAttributes.HTTP_METHOD, requestInfo.httpMethod.toString());
             final URL requestURL = requestInfo.getUri().toURL();
@@ -794,11 +805,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     requestBuilder.addHeader(headerEntry.getKey(), headerValue);
                 }
             }
-
+            boolean obsOptionsPresent = false;
             for(final RequestOption option : requestInfo.getRequestOptions()) {
+                if(option.getType() == obsOptions.getType()) {
+                    obsOptionsPresent = true;
+                }
                 requestBuilder.tag(option.getType(), option);
             }
-            if (requestBuilder.tag(obsOptions.getType()) == null) {
+            if (!obsOptionsPresent) {
                 requestBuilder.tag(obsOptions.getType(), obsOptions);
             }
             requestBuilder.tag(Span.class, parentSpan);

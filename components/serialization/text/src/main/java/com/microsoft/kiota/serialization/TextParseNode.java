@@ -3,6 +3,7 @@ package com.microsoft.kiota.serialization;
 import com.google.common.collect.Lists;
 
 import java.lang.UnsupportedOperationException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -37,7 +38,7 @@ public class TextParseNode implements ParseNode {
         Objects.requireNonNull(rawText, "parameter node cannot be null");
         text = rawText.startsWith("\"") && rawText.endsWith("\"") ? rawText.substring(1, rawText.length() - 2) : rawText;
     }
-    @Nonnull
+    @Nullable
     public ParseNode getChildNode(@Nonnull final String identifier) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
@@ -109,7 +110,7 @@ public class TextParseNode implements ParseNode {
     public <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
-    @Nullable
+    @Nonnull
     public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         throw new UnsupportedOperationException(NoStructuredDataMessage);
     }
@@ -125,7 +126,7 @@ public class TextParseNode implements ParseNode {
     private <T extends Enum<T>> T getEnumValueInt(@Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
         try {
             return (T)targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
-        } catch (Exception ex) {
+        } catch (SecurityException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
             return null;
         }
     }

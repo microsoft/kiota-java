@@ -93,10 +93,9 @@ public class RetryHandler implements Interceptor{
         // Payloads with forward only streams will be have the responses returned
         // without any retry attempt.
         shouldRetry =
-                retryOption != null
+                    shouldRetryCallback != null
                         && executionCount <= retryOption.maxRetries()
                         && checkStatus(statusCode) && isBuffered(request)
-                        && shouldRetryCallback != null
                         && shouldRetryCallback.shouldRetry(retryOption.delay(), executionCount, request, response);
 
         if(shouldRetry) {
@@ -125,7 +124,7 @@ public class RetryHandler implements Interceptor{
             if(retryDelay == -1) {
                 retryDelay = tryParseDateHeader(retryAfterHeader);
             }
-        } else if( retryAfterHeader == null || retryDelay == -1) {
+        } else if(retryDelay == -1) {
             retryDelay = exponentialBackOffDelay(delay, executionCount);
         }
         return (long)Math.min(retryDelay, RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);

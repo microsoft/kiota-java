@@ -20,7 +20,7 @@ public class TelemetryHandlerOption implements RequestOption {
     * A delegate which can be called to configure the Request with desired telemetry values.
     */
     @Nullable
-    public Function<Request, Request> TelemetryConfigurator = (request) -> request;
+    public Function<Request, Request> telemetryConfigurator = (request) -> request;
 
 	/* @inheritdoc */
     @Override

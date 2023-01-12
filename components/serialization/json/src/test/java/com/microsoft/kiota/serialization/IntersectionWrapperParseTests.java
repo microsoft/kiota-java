@@ -10,15 +10,16 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class IntersectionWrapperParseTests {
-	private final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
-	private final JsonSerializationWriterFactory _serializationWriterFactory = new JsonSerializationWriterFactory();
-	private final String contentType = "application/json";
+	private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
+	private static final JsonSerializationWriterFactory _serializationWriterFactory = new JsonSerializationWriterFactory();
+	private static final String contentType = "application/json";
 	@Test
-	public void ParsesIntersectionTypeComplexProperty1() {
+	public void ParsesIntersectionTypeComplexProperty1() throws UnsupportedEncodingException {
 		final var initialString = "{\"displayName\":\"McGill\",\"officeLocation\":\"Montreal\", \"id\": \"opaque\"}";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(IntersectionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);
@@ -30,9 +31,9 @@ public class IntersectionWrapperParseTests {
 		assertEquals("McGill", result.getComposedType2().getDisplayName());
 	}
 	@Test
-	public void ParsesIntersectionTypeComplexProperty2() {
+	public void ParsesIntersectionTypeComplexProperty2() throws UnsupportedEncodingException {
 		final var initialString = "{\"displayName\":\"McGill\",\"officeLocation\":\"Montreal\", \"id\": 10}";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(IntersectionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);
@@ -45,9 +46,9 @@ public class IntersectionWrapperParseTests {
 		assertEquals("McGill", result.getComposedType2().getDisplayName());
 	}
 	@Test
-	public void ParsesIntersectionTypeComplexProperty3() {
+	public void ParsesIntersectionTypeComplexProperty3() throws UnsupportedEncodingException {
 		final var initialString = "[{\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Ottawa\", \"id\": \"11\"}, {\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Montreal\", \"id\": \"10\"}]";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(IntersectionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);
@@ -59,9 +60,9 @@ public class IntersectionWrapperParseTests {
 		assertEquals("Ottawa", result.getComposedType3().get(0).getOfficeLocation());
 	}
 	@Test
-	public void ParsesIntersectionTypeStringValue() {
+	public void ParsesIntersectionTypeStringValue() throws UnsupportedEncodingException {
 		final var initialString = "\"officeLocation\"";
-		final var rawResponse = new ByteArrayInputStream(initialString.getBytes());
+		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
 		final var result = parseNode.getObjectValue(IntersectionTypeMock::createFromDiscriminatorValue);
 		assertNotNull(result);

@@ -38,7 +38,7 @@ public class ObservabilityOptions implements RequestOption {
 	 * @return the instrumentation name to use for tracing
 	 */
 	@Nonnull
-	public String GetTracerInstrumentationName() {
+	public String getTracerInstrumentationName() {
 		return "com.microsoft.kiota:microsoft-kiota-http-okHttp";
 	}
 }

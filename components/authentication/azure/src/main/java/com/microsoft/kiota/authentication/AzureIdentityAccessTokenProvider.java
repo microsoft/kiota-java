@@ -1,5 +1,6 @@
 package com.microsoft.kiota.authentication;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -74,9 +75,9 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         Span span;
         if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(parentSpanKey) && additionalAuthenticationContext.get(parentSpanKey) instanceof Span) {
             final Span parentSpan = (Span) additionalAuthenticationContext.get(parentSpanKey);
-            span = GlobalOpenTelemetry.getTracer(_observabilityOptions.GetTracerInstrumentationName()).spanBuilder("getAuthorizationToken").setParent(Context.current().with(parentSpan)).startSpan();
+            span = GlobalOpenTelemetry.getTracer(_observabilityOptions.getTracerInstrumentationName()).spanBuilder("getAuthorizationToken").setParent(Context.current().with(parentSpan)).startSpan();
         } else {
-            span = GlobalOpenTelemetry.getTracer(_observabilityOptions.GetTracerInstrumentationName()).spanBuilder("getAuthorizationToken").startSpan();
+            span = GlobalOpenTelemetry.getTracer(_observabilityOptions.getTracerInstrumentationName()).spanBuilder("getAuthorizationToken").startSpan();
         }
         try(final Scope scope = span.makeCurrent()) {
             if(!_hostValidator.isUrlHostValid(uri)) {
@@ -97,7 +98,11 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
 
             if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(ClaimsKey) && additionalAuthenticationContext.get(ClaimsKey) instanceof String) {
                 final String rawClaim = (String) additionalAuthenticationContext.get(ClaimsKey);
-                decodedClaim = new String(Base64.getDecoder().decode(rawClaim));
+                try {
+                    decodedClaim = new String(Base64.getDecoder().decode(rawClaim), "UTF-8");
+                } catch (final UnsupportedEncodingException e) {
+                    span.recordException(e);
+                }
             }
             span.setAttribute("com.microsoft.kiota.authentication.additional_claims_provided", decodedClaim != null && !decodedClaim.isEmpty());
 

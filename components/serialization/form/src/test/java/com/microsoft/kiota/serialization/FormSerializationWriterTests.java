@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -19,7 +20,7 @@ import com.microsoft.kiota.serialization.mocks.TestEntity;
 
 public class FormSerializationWriterTests {
 	@Test
-	public void writesSampleObjectValue() throws IOException {
+	public void writesSampleObjectValue() throws IOException, UnsupportedEncodingException {
 		final var testEntity = new TestEntity() {{
 			setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
 			setWorkDuration(Period.parse("P1M"));
@@ -33,7 +34,7 @@ public class FormSerializationWriterTests {
 		try (final var serializationWriter = new FormSerializationWriter()) {
 			serializationWriter.writeObjectValue(null, testEntity);
 			try(final var content = serializationWriter.getSerializedContent()) {
-				try(final var contentReader = new BufferedReader(new InputStreamReader(content))) {
+				try(final var contentReader = new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
 					String result = contentReader.lines().collect(Collectors.joining("\n"));
 					final var expectedString =    "id=48d31887-5fad-4d73-a9f5-3c356e68a038&" +
 														"birthDay=2017-09-04&" + // Serializes dates

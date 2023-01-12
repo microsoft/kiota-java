@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -40,7 +41,11 @@ public class JsonSerializationWriter implements SerializationWriter {
     private final JsonWriter writer;
     /** Creates a new instance of a json serialization writer */
     public JsonSerializationWriter() {
-        this.writer = new JsonWriter(new OutputStreamWriter(this.stream));
+        try {
+            this.writer = new JsonWriter(new OutputStreamWriter(this.stream, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("could not create json writer", e);
+        }
     }
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         if(value != null)
