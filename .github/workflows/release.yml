@@ -96,8 +96,23 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
       working-directory: ./
-    - name: Publish Release
-      run: ./gradlew --no-daemon $PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+    - name: Publish Release abstractions #publishing all components at once often results in split staging repos which fails to release
+      run: ./gradlew --no-daemon :components:abstractions:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release serialization form
+      run: ./gradlew --no-daemon :components:serialization:form:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release serialization json
+      run: ./gradlew --no-daemon :components:serialization:json:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release serialization text
+      run: ./gradlew --no-daemon :components:serialization:text:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release authentication azure
+      run: ./gradlew --no-daemon :components:authentication:azure:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release okHttp
+      run: ./gradlew --no-daemon :components:http:okHttp:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
       working-directory: ./
     - name: Release
       uses: anton-yurchenko/git-release@v5.0
