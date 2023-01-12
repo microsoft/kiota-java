@@ -116,18 +116,24 @@ public interface ParseNode {
     /**
      * Gets the Enum value of the node.
      * @return the Enum value of the node.
+     * @param targetEnum the class of the enum.
+     * @param <T> the type of the enum.
      */
     @Nullable
     <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum);
     /**
      * Gets the EnumSet value of the node.
      * @return the EnumSet value of the node.
+     * @param targetEnum the class of the enum.
+     * @param <T> the type of the enum.
      */
     @Nullable
     <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum);
     /**
      * Gets the collection of primitive values of the node.
      * @return the collection of primitive values of the node.
+     * @param targetClass the class of the class.
+     * @param <T> the type of the primitive.
      */
     @Nullable
     <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass);
@@ -135,12 +141,15 @@ public interface ParseNode {
      * Gets the collection of object values of the node.
      * @param factory the factory to use to create the model object.
      * @return the collection of object values of the node.
+     * @param <T> the type of the model object.
      */
     @Nullable
     <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory);
     /**
      * Gets the collection of Enum values of the node.
      * @return the collection of Enum values of the node.
+     * @param <T> the type of the enum.
+     * @param targetEnum the class of the enum
      */
     @Nullable
     <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum);
@@ -148,6 +157,7 @@ public interface ParseNode {
      * Gets the model object value of the node.
      * @param factory the factory to use to create the model object.
      * @return the model object value of the node.
+     * @param <T> the type of the model object.
      */
     @Nonnull
     <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory);

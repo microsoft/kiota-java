@@ -5,7 +5,6 @@ import com.microsoft.kiota.serialization.ValuedEnum;
 import com.microsoft.kiota.serialization.Parsable;
 
 import java.lang.Enum;
-import java.lang.reflect.Field;
 import java.lang.UnsupportedOperationException;
 import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
@@ -21,7 +20,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
@@ -29,11 +27,15 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/** Serialization writer implementation for text/plain */
 public class TextSerializationWriter implements SerializationWriter {
     private final static String NoStructuredDataMessage = "text does not support structured data";
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private final OutputStreamWriter writer;
     private boolean written;
+    /**
+     * Initializes a new instance of the {@link TextSerializationWriter} class.
+     */
     public TextSerializationWriter() {
         this.writer = new OutputStreamWriter(this.stream);
     }

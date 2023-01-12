@@ -17,6 +17,10 @@ import javax.annotation.Nullable;
  * A class representing the headers of a request.
  */
 public class RequestHeaders implements Map<String, Set<String>> {
+    /** Default constructor */
+    public RequestHeaders() {
+        super();
+    }
     private final HashMap<String, HashSet<String>> headers = new HashMap<>();
     /**
      * Adds a header to the current request.
@@ -40,14 +44,17 @@ public class RequestHeaders implements Map<String, Set<String>> {
         Objects.requireNonNull(key);
         return key.toLowerCase(Locale.ROOT);
     }
+    /** {@inheritDoc} */
     @Override
     public int size() {
         return headers.size();
     }
+    /** {@inheritDoc} */
     @Override
     public boolean isEmpty() {
         return headers.isEmpty();
     }
+    /** {@inheritDoc} */
     @Override
     public boolean containsKey(@Nonnull final Object key) {
         Objects.requireNonNull(key);
@@ -57,11 +64,13 @@ public class RequestHeaders implements Map<String, Set<String>> {
             return false;
         }
     }
+    /** {@inheritDoc} */
     @Override
     public boolean containsValue(@Nonnull final Object value) {
         Objects.requireNonNull(value);
         return headers.containsValue(value);
     }
+    /** {@inheritDoc} */
     @Override
     @Nonnull
     public Set<String> get(@Nonnull final Object key) {
@@ -72,6 +81,7 @@ public class RequestHeaders implements Map<String, Set<String>> {
             return Collections.emptySet();
         }
     }
+    /** {@inheritDoc} */
     @Override
     @Nonnull
     public Set<String> put(@Nonnull final String key, @Nonnull final Set<String> value) {
@@ -79,9 +89,11 @@ public class RequestHeaders implements Map<String, Set<String>> {
         Objects.requireNonNull(value);
         return headers.put(normalizeKey(key), new HashSet<>(value));
     }
+    /** {@inheritDoc} */
     @Override
     @Nonnull
     public Set<String> remove(@Nonnull final Object key) {
+        Objects.requireNonNull(key);
         if (key instanceof String) {
             return headers.remove(normalizeKey((String)key));
         } else {

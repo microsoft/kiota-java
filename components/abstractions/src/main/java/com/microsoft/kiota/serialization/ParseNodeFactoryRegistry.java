@@ -11,6 +11,8 @@ import javax.annotation.Nonnull;
  * This factory holds a list of all the registered factories for the various types of nodes.
  */
 public class ParseNodeFactoryRegistry implements ParseNodeFactory {
+    /** Default constructor for the registry. */
+    public ParseNodeFactoryRegistry() {}
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public static final ParseNodeFactoryRegistry defaultInstance = new ParseNodeFactoryRegistry();
     /** List of factories that are registered by content type. */

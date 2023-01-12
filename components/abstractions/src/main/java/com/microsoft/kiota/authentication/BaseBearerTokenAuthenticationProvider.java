@@ -13,6 +13,10 @@ import javax.annotation.Nullable;
 
 /** Provides a base class for implementing AuthenticationProvider for Bearer token scheme. */
 public class BaseBearerTokenAuthenticationProvider implements AuthenticationProvider {
+    /**
+     * Instantiates a new BaseBearerTokenAuthenticationProvider.
+     * @param accessTokenProvider the access token provider.
+     */
     public BaseBearerTokenAuthenticationProvider(@Nonnull final AccessTokenProvider accessTokenProvider) {
         this.accessTokenProvider = Objects.requireNonNull(accessTokenProvider);
     }

@@ -25,9 +25,14 @@ import com.microsoft.kiota.serialization.AdditionalDataHolder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/** ParseNode implementation for text/plain */
 public class TextParseNode implements ParseNode {
     private final String text;
     private final static String NoStructuredDataMessage = "text does not support structured data";
+    /**
+     * Initializes a new instance of the {@link TextParseNode} class.
+     * @param rawText the raw text to parse.
+     */
     public TextParseNode(@Nonnull final String rawText) {
         Objects.requireNonNull(rawText, "parameter node cannot be null");
         text = rawText.startsWith("\"") && rawText.endsWith("\"") ? rawText.substring(1, rawText.length() - 2) : rawText;

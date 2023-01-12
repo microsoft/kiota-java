@@ -12,18 +12,20 @@ import com.microsoft.kiota.TriConsumer;
 */
 public interface BackingStore {
     /**
-    * Gets a value from the backing store based on its key. Returns null if the value hasn't changed and "ReturnOnlyChangedValues" is true.
-    * @return The value from the backing store.
-    * @param key The key to lookup the backing store with.
-    */
+     * Gets a value from the backing store based on its key. Returns null if the value hasn't changed and "ReturnOnlyChangedValues" is true.
+     * @return The value from the backing store.
+     * @param key The key to lookup the backing store with.
+     * @param <T> The type of the value to be retrieved.
+     */
     @Nullable
     <T> T get(@Nonnull final String key);
     /**
-    * Sets or updates the stored value for the given key.
-    * Will trigger subscriptions callbacks.
-    * @param key The key to store and retrieve the information.
-    * @param value The value to be stored.
-    */
+     * Sets or updates the stored value for the given key.
+     * Will trigger subscriptions callbacks.
+     * @param key The key to store and retrieve the information.
+     * @param value The value to be stored.
+     * @param <T> The type of the value to be stored.
+     */
     <T> void set(@Nonnull final String key, @Nullable final T value);
     /**
     * Enumerates all the values stored in the backing store. Values will be filtered if "ReturnOnlyChangedValues" is true.
@@ -65,8 +67,9 @@ public interface BackingStore {
     */
     void setIsInitializationCompleted(final boolean value);
     /**
-    * @return Whether the initialization of the object and/or the initial deserialization has been completed to track whether objects have changed.
-    */
+     * Gets whether the initialization of the object and/or the initial deserialization has been completed to track whether objects have changed.
+     * @return Whether the initialization of the object and/or the initial deserialization has been completed to track whether objects have changed.
+     */
     boolean getIsInitializationCompleted();
     /**
     * Sets whether to return only values that have changed since the initialization of the object when calling the Get and Enumerate methods.
@@ -74,7 +77,8 @@ public interface BackingStore {
     */
     void setReturnOnlyChangedValues(final boolean value);
     /**
-    * @return Whether to return only values that have changed since the initialization of the object when calling the Get and Enumerate methods.
-    */
+     * Gets whether to return only values that have changed since the initialization of the object when calling the Get and Enumerate methods.
+     * @return Whether to return only values that have changed since the initialization of the object when calling the Get and Enumerate methods.
+     */
     boolean getReturnOnlyChangedValues();
 }
