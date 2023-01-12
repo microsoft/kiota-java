@@ -40,10 +40,7 @@ public class TelemetryHandler implements Interceptor{
     }
 
     /**
-     * Send the HttpRequest after telemetryOptions are handled
-     * @param chain
-     * @return
-     * @throws IOException
+     * {@inheritDoc}
      */
     @Override
 	@SuppressWarnings("UnknownNullness")

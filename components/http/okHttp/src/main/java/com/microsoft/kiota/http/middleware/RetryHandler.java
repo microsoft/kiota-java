@@ -60,6 +60,7 @@ public class RetryHandler implements Interceptor{
 
 
     /**
+     * Initialize retry handler with retry option
      * @param retryOption Create Retry handler using retry option
      */
     public RetryHandler(@Nullable final RetryHandlerOption retryOption) {
@@ -187,11 +188,16 @@ public class RetryHandler implements Interceptor{
         return true;
     }
 
+    /**
+     * Gets the retry options in use by the handler.
+     * @return the retry options in use by the handler.
+     */
     @Nonnull
     public RetryHandlerOption getRetryOptions(){
         return this.mRetryOption;
     }
 
+    /** {@inheritDoc} */
     @Override
     @Nonnull
 	@SuppressWarnings("UnknownNullness")

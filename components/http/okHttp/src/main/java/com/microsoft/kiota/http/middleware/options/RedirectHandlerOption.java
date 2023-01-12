@@ -35,6 +35,7 @@ public class RedirectHandlerOption implements RequestOption {
     }
 
     /**
+     * Create an instance with provided values
      * @param maxRedirects Max redirects to occur
      * @param shouldRedirect Should redirect callback called before every redirect
      */
@@ -49,6 +50,7 @@ public class RedirectHandlerOption implements RequestOption {
     }
 
     /**
+     * Gets the maximum number of redirects to follow.
      * @return max redirects
      */
     public int maxRedirects() {
@@ -56,6 +58,7 @@ public class RedirectHandlerOption implements RequestOption {
     }
 
     /**
+     * Gets the callback evaluating whether a redirect should be followed.
      * @return should redirect
      */
     @Nonnull
@@ -63,7 +66,7 @@ public class RedirectHandlerOption implements RequestOption {
         return this.shouldRedirect;
     }
 
-	/* @inheritdoc */
+    /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     @Nonnull

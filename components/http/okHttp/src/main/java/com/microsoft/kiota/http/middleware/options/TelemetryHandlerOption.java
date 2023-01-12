@@ -13,6 +13,8 @@ import okhttp3.Request;
  * TelemetryHandlerOption class
  */
 public class TelemetryHandlerOption implements RequestOption {
+    /** Creates a new instance of the TelemetryHandlerOption class */
+    public TelemetryHandlerOption() {}
 
     /**
     * A delegate which can be called to configure the Request with desired telemetry values.

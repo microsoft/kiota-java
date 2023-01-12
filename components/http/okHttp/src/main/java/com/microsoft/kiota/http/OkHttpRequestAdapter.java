@@ -60,6 +60,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import io.opentelemetry.context.Context;
 
+/** RequestAdapter implementation for OkHttp */
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
     private final static String contentTypeHeaderKey = "Content-Type";
     private final OkHttpClient client;
@@ -75,21 +76,51 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     public String getBaseUrl() {
         return baseUrl;
     }
+    /**
+     * Instantiates a new OkHttp request adapter with the provided authentication provider.
+     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     */
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider){
         this(authenticationProvider, null, null, null, null);
     }
+    /**
+     * Instantiates a new OkHttp request adapter with the provided authentication provider, and the parse node factory.
+     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     * @param parseNodeFactory the parse node factory to use for parsing responses.
+     */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory) {
         this(authenticationProvider, parseNodeFactory, null, null, null);
     }
+    /**
+     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, and the serialization writer factory.
+     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     * @param parseNodeFactory the parse node factory to use for parsing responses.
+     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
+     */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory) {
         this(authenticationProvider, parseNodeFactory, serializationWriterFactory, null, null);
     }
+    /**
+     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, serialization writer factory, and the http client.
+     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     * @param parseNodeFactory the parse node factory to use for parsing responses.
+     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
+     * @param client the http client to use for sending requests.
+     */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client) {
         this(authenticationProvider, parseNodeFactory, serializationWriterFactory, client, null);
     }
+    /**
+     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, serialization writer factory, http client and observability options.
+     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     * @param parseNodeFactory the parse node factory to use for parsing responses.
+     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
+     * @param client the http client to use for sending requests.
+     * @param observabilityOptions the observability options to use for sending requests.
+     */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client, @Nullable final ObservabilityOptions observabilityOptions) {
         this.authProvider = Objects.requireNonNull(authenticationProvider, "parameter authenticationProvider cannot be null");
@@ -196,6 +227,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         span.setAttribute("http.uri_template", decodedUriTemplate);
         return span;
     }
+    /** The key used for the event when a custom response handler is invoked. */
     @Nonnull
     public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
     @Nullable
@@ -523,8 +555,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         final int statusCode = response.code();
         return statusCode == 204;
     }
+    /** key used for the attribute when the error response has models mappings provided */
     @Nonnull
     public static final String errorMappingFoundAttributeName = "com.microsoft.kiota.error_mapping_found";
+    /** Key used for the attribute when an error response body is found */
     @Nonnull
     public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
     private Response throwIfFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
@@ -639,6 +673,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
     private final static Pattern bearerPattern = Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
     private final static Pattern claimsPattern = Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    /** Key used for events when an authentication challenge is returned by the API */
     @Nonnull
     public static final String authenticateChallengedEventKey = "com.microsoft.kiota.authenticate_challenge_received";
     private CompletableFuture<Response> retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {

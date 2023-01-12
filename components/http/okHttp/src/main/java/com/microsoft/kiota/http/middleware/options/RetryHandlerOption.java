@@ -71,6 +71,7 @@ public class RetryHandlerOption implements RequestOption{
     }
 
     /**
+     * Gets the callback evaluating whether a retry should be made.
      * @return should retry callback
      */
     @Nonnull
@@ -79,6 +80,7 @@ public class RetryHandlerOption implements RequestOption{
     }
 
     /**
+     * Gets the maximum number of retries.
      * @return Number of max retries
      */
     public int maxRetries() {
@@ -86,13 +88,14 @@ public class RetryHandlerOption implements RequestOption{
     }
 
     /**
-     * @return Delay in seconds between retries
+     * Gets the delay in milliseconds between retries.
+     * @return Delay in milliseconds between retries
      */
     public long delay() {
         return mDelay;
     }
 
-    /* @inheritdoc */
+    /** {@inheritDoc} */
     @Override
 	@SuppressWarnings("unchecked")
     @Nonnull

@@ -22,16 +22,21 @@ import io.opentelemetry.context.Scope;
 /** This handlers decodes special characters in the request query parameters that had to be encoded due to RFC 6570 restrictions names before executing the request. */
 public class ParametersNameDecodingHandler implements Interceptor {
     private final ParametersNameDecodingOption options;
+    /** Creates a new instance of the handler with default options */
     public ParametersNameDecodingHandler() {
         this(new ParametersNameDecodingOption());
     }
+    /**
+     * Creates a new instance of the handler with the provided options
+     * @param options the options to use
+     */
     public ParametersNameDecodingHandler(@Nonnull final ParametersNameDecodingOption options) {
         super();
         this.options = Objects.requireNonNull(options);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     @Nonnull

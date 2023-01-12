@@ -20,6 +20,8 @@ import io.opentelemetry.context.Scope;
  * interceptor that randomly fails the responses for unit testing purposes
  */
 public class ChaosHandler implements Interceptor {
+    /** Creates a new instance of the chaos handler */
+    public ChaosHandler() { }
     /**
      * constant string being used
      */
