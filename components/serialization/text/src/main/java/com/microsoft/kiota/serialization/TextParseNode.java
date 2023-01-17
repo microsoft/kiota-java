@@ -1,7 +1,5 @@
 package com.microsoft.kiota.serialization;
 
-import com.google.common.collect.Lists;
-
 import java.lang.UnsupportedOperationException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -11,17 +9,10 @@ import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.Base64;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import com.microsoft.kiota.serialization.ParseNode;
-import com.microsoft.kiota.serialization.Parsable;
-import com.microsoft.kiota.serialization.AdditionalDataHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +20,7 @@ import javax.annotation.Nullable;
 /** ParseNode implementation for text/plain */
 public class TextParseNode implements ParseNode {
     private final String text;
-    private final static String NoStructuredDataMessage = "text does not support structured data";
+    private final static String NO_STRUCTURED_DATA_MESSAGE = "text does not support structured data";
     /**
      * Initializes a new instance of the {@link TextParseNode} class.
      * @param rawText the raw text to parse.
@@ -40,7 +31,7 @@ public class TextParseNode implements ParseNode {
     }
     @Nullable
     public ParseNode getChildNode(@Nonnull final String identifier) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nullable
     public String getStringValue() {
@@ -100,19 +91,19 @@ public class TextParseNode implements ParseNode {
     }
     @Nullable
     public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nullable
     public <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nullable
     public <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nonnull
     public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nullable
     public <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum) {
@@ -132,7 +123,7 @@ public class TextParseNode implements ParseNode {
     }
     @Nullable
     public <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nullable
     public Consumer<Parsable> getOnBeforeAssignFieldValues() {
