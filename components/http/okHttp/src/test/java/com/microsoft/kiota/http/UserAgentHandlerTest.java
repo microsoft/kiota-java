@@ -42,7 +42,7 @@ public class UserAgentHandlerTest {
 	});
 	}
 	@Test
-	public void AddsTheProduct() throws IOException  {
+	public void addsTheProduct() throws IOException  {
 		final UserAgentHandler handler = new UserAgentHandler();
 		final Request request = new Request.Builder().url("http://localhost").build();
 		when(mockChain.request()).thenReturn(request);
@@ -53,7 +53,7 @@ public class UserAgentHandlerTest {
 		assertEquals("kiota-java", result.header("User-Agent").split("/")[0]);
 	}
 	@Test
-	public void AddsTheProductOnce() throws IOException  {
+	public void addsTheProductOnce() throws IOException  {
 		final UserAgentHandler handler = new UserAgentHandler();
 		final Request request = new Request.Builder().url("http://localhost").build();
 		when(mockChain.request()).thenReturn(request);
@@ -65,7 +65,7 @@ public class UserAgentHandlerTest {
 		assertEquals(1, result.header("User-Agent").split("kiota-java").length - 1);
 	}
 	@Test
-	public void DoesNotAddTheProductWhenDisabled() throws IOException  {
+	public void doesNotAddTheProductWhenDisabled() throws IOException  {
 		final UserAgentHandler handler = new UserAgentHandler(new UserAgentHandlerOption() {{ setEnabled(false); }});
 		final Request request = new Request.Builder().url("http://localhost").build();
 		when(mockChain.request()).thenReturn(request);

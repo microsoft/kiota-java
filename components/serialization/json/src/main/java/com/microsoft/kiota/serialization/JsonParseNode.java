@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -43,7 +44,7 @@ public class JsonParseNode implements ParseNode {
         currentNode = Objects.requireNonNull(node, "parameter node cannot be null");
     }
     /** {@inheritDoc} */
-    @Nonnull
+    @Nullable
     public ParseNode getChildNode(@Nonnull final String identifier) {
         Objects.requireNonNull(identifier, "identifier parameter is required");
         if(currentNode.isJsonObject()) {
@@ -255,7 +256,7 @@ public class JsonParseNode implements ParseNode {
     @Nonnull
     public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
-        final T item = factory.Create(this);
+        final T item = factory.create(this);
         assignFieldValues(item, item.getFieldDeserializers());
         return item;
     }
@@ -271,7 +272,7 @@ public class JsonParseNode implements ParseNode {
     private <T extends Enum<T>> T getEnumValueInt(@Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
         try {
             return (T)targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
-        } catch (Exception ex) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | SecurityException ex) {
             return null;
         }
     }

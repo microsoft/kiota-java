@@ -15,22 +15,22 @@ import okhttp3.OkHttpClient;
 public class KiotaClientFactory {
     private KiotaClientFactory() { }
     /**
-     * Creates an OkHttpClient Builder with the default configuration and middlewares.
+     * Creates an OkHttpClient Builder with the default configuration and middleware.
      * @return an OkHttpClient Builder instance.
      */
     @Nonnull
-    public static OkHttpClient.Builder Create() {
-        return Create(null);
+    public static OkHttpClient.Builder create() {
+        return create(null);
     }
     /**
-     * Creates an OkHttpClient Builder with the default configuration and middlewares.
-     * @param interceptors The interceptors to add to the client. Will default to CreateDefaultInterceptors() if null.
+     * Creates an OkHttpClient Builder with the default configuration and middleware.
+     * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
      * @return an OkHttpClient Builder instance.
      */
     @Nonnull
-    public static OkHttpClient.Builder Create(@Nullable final Interceptor[] interceptors) {
+    public static OkHttpClient.Builder create(@Nullable final Interceptor[] interceptors) {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder(); //TODO configure the default client options.
-        final Interceptor[] interceptorsOrDefault = interceptors != null ? interceptors : CreateDefaultInterceptors();
+        final Interceptor[] interceptorsOrDefault = interceptors != null ? interceptors : createDefaultInterceptors();
         for (final Interceptor interceptor : interceptorsOrDefault) {
             builder.addInterceptor(interceptor);
         }
@@ -41,7 +41,7 @@ public class KiotaClientFactory {
      * @return an array of interceptors.
      */
     @Nonnull
-    public static Interceptor[] CreateDefaultInterceptors() {
+    public static Interceptor[] createDefaultInterceptors() {
         return new Interceptor[] {
             new RedirectHandler(),
             new RetryHandler(),

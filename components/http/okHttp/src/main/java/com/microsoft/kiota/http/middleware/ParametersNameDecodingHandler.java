@@ -91,7 +91,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
     @Nonnull
     public static String decodeQueryParameters(@Nullable final String original, @Nonnull final char[] charactersToDecode) {
         Objects.requireNonNull(charactersToDecode);
-        String decoded = original == null ? new String() : new String(original);
+        String decoded = original == null ? "" : new StringBuffer(original).toString();
         final ArrayList<SimpleEntry<String, String>> symbolsToReplace = new ArrayList<SimpleEntry<String, String>>(charactersToDecode.length);
         for (final char charToReplace : charactersToDecode) {
             symbolsToReplace.add(new SimpleEntry<String,String>("%" + String.format("%x", (int)charToReplace), String.valueOf(charToReplace)));

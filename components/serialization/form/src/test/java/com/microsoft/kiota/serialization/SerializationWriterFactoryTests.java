@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 public class SerializationWriterFactoryTests {
-	private final FormSerializationWriterFactory _serializationWriterFactory = new FormSerializationWriterFactory();
-	private final String contentType = "application/x-www-form-urlencoded";
+	private static final FormSerializationWriterFactory _serializationWriterFactory = new FormSerializationWriterFactory();
+	private static final String contentType = "application/x-www-form-urlencoded";
 	@Test
 	public void getsWriterForFormContentType() {
 		final var serializationWriter = _serializationWriterFactory.getSerializationWriter(contentType);

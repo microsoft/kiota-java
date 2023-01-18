@@ -28,7 +28,7 @@ class ObservabilityHelper {
 			if (parentToUse == null) {
 				parentToUse = request.tag(Span.class);
 			}
-			final SpanBuilder builder = GlobalOpenTelemetry.getTracer(obsOptions.GetTracerInstrumentationName()).spanBuilder(spanName);
+			final SpanBuilder builder = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder(spanName);
 			if (parentToUse != null) {
 				builder.setParent(Context.current().with(parentToUse));
 			}

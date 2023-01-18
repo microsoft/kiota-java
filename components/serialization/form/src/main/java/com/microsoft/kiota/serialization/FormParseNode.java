@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +40,7 @@ public class FormParseNode implements ParseNode {
             final String key = sanitizeKey(split[0]);
             if(split.length == 2) {
                 if(fields.containsKey(key))
-                    fields.get(key).concat("," + split[1].trim());
+                    fields.put(key, fields.get(key).concat("," + split[1].trim()));
                 else
                     fields.put(key, split[1].trim());
             }
@@ -53,7 +54,7 @@ public class FormParseNode implements ParseNode {
             throw new RuntimeException("Unsupported encoding", e);
         }
     }
-    @Nonnull
+    @Nullable
     public ParseNode getChildNode(@Nonnull final String identifier) {
         Objects.requireNonNull(identifier, "identifier parameter is required");
         final String key = sanitizeKey(identifier);
@@ -201,7 +202,7 @@ public class FormParseNode implements ParseNode {
     @Nonnull
     public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
-        final T item = factory.Create(this);
+        final T item = factory.create(this);
         assignFieldValues(item, item.getFieldDeserializers());
         return item;
     }
@@ -217,7 +218,7 @@ public class FormParseNode implements ParseNode {
     private <T extends Enum<T>> T getEnumValueInt(@Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
         try {
             return (T)targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
-        } catch (Exception ex) {
+        } catch (SecurityException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
             return null;
         }
     }

@@ -23,7 +23,7 @@ public interface ParseNode {
      * @param identifier the identifier of the current node property.
      * @return a new parse node for the given identifier.
      */
-    @Nonnull
+    @Nullable
     ParseNode getChildNode(@Nonnull final String identifier);
     /**
      * Gets the string value of the node.
