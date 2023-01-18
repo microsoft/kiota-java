@@ -20,12 +20,12 @@ Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README
 In `build.gradle` in the `dependencies` section:
 
 ```Groovy
-implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:0.1.2'
-implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:0.1.2'
-implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:0.1.2'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:0.1.2'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:0.1.2'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:0.1.2'
+implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:0.2.0'
 ```
 
 ### With Maven:
@@ -36,32 +36,32 @@ In `pom.xml` in the `dependencies` section:
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-abstractions</artifactId>
-      <version>0.1.2</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-authentication-azure</artifactId>
-      <version>0.1.2</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-http-okHttp</artifactId>
-      <version>0.1.2</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-json</artifactId>
-      <version>0.1.2</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-text</artifactId>
-      <version>0.1.2</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-form</artifactId>
-      <version>0.1.2</version>
+      <version>0.2.0</version>
     </dependency>
 ```
 
