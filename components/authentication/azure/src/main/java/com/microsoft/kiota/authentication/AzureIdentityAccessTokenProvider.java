@@ -52,13 +52,11 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
 
         if(scopes == null) {
             _scopes = new ArrayList<String>();
-        } else if(scopes.length == 0) {
-            _scopes = Arrays.asList(new String[] { "https://graph.microsoft.com/.default" });
         } else {
             _scopes = Arrays.asList(scopes);
         }
         if (allowedHosts == null || allowedHosts.length == 0) {
-            _hostValidator = new AllowedHostsValidator(new String[] { "graph.microsoft.com", "graph.microsoft.us", "dod-graph.microsoft.us", "graph.microsoft.de", "microsoftgraph.chinacloudapi.cn", "canary.graph.microsoft.com" });
+            _hostValidator = new AllowedHostsValidator();
         } else {
             _hostValidator = new AllowedHostsValidator(allowedHosts);
         }
@@ -107,6 +105,9 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
             span.setAttribute("com.microsoft.kiota.authentication.additional_claims_provided", decodedClaim != null && !decodedClaim.isEmpty());
 
             final TokenRequestContext context = new TokenRequestContext();
+            if(_scopes.isEmpty()) {
+                _scopes.add(uri.getScheme() + "://" + uri.getHost() + "/.default");
+            }
             context.setScopes(_scopes);
             span.setAttribute("com.microsoft.kiota.authentication.scopes", String.join("|", _scopes));
             if(decodedClaim != null && !decodedClaim.isEmpty()) {

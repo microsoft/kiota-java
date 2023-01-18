@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.2.0] - 2023-01-17
+
+### Changed
+
+- Removed defaults specific to Microsoft Graph for Azure Identity authentication library.
+
 ## [0.1.2] - 2023-01-06
 
 # Added
