@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ import io.opentelemetry.context.Scope;
  */
 public class RetryHandler implements Interceptor{
 
+    @Nonnull
     private RetryHandlerOption mRetryOption;
 
     /**
@@ -58,12 +60,14 @@ public class RetryHandler implements Interceptor{
 
 
     /**
+     * Initialize retry handler with retry option
      * @param retryOption Create Retry handler using retry option
      */
     public RetryHandler(@Nullable final RetryHandlerOption retryOption) {
-        this.mRetryOption = retryOption;
-        if(this.mRetryOption == null) {
+        if (retryOption == null) {
             this.mRetryOption = new RetryHandlerOption();
+        } else {
+            this.mRetryOption = retryOption;
         }
     }
     /**
@@ -73,7 +77,7 @@ public class RetryHandler implements Interceptor{
         this(null);
     }
 
-    boolean retryRequest(Response response, int executionCount, Request request, RetryHandlerOption retryOption) {
+    boolean retryRequest(@Nonnull final Response response, int executionCount, @Nonnull final Request request, @Nonnull final RetryHandlerOption retryOption) {
 
         // Should retry option
         // Use should retry common for all requests
@@ -89,10 +93,9 @@ public class RetryHandler implements Interceptor{
         // Payloads with forward only streams will be have the responses returned
         // without any retry attempt.
         shouldRetry =
-                retryOption != null
+                    shouldRetryCallback != null
                         && executionCount <= retryOption.maxRetries()
                         && checkStatus(statusCode) && isBuffered(request)
-                        && shouldRetryCallback != null
                         && shouldRetryCallback.shouldRetry(retryOption.delay(), executionCount, request, response);
 
         if(shouldRetry) {
@@ -121,7 +124,7 @@ public class RetryHandler implements Interceptor{
             if(retryDelay == -1) {
                 retryDelay = tryParseDateHeader(retryAfterHeader);
             }
-        } else if( retryAfterHeader == null || retryDelay == -1) {
+        } else if(retryDelay == -1) {
             retryDelay = exponentialBackOffDelay(delay, executionCount);
         }
         return (long)Math.min(retryDelay, RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
@@ -184,15 +187,25 @@ public class RetryHandler implements Interceptor{
         return true;
     }
 
+    /**
+     * Gets the retry options in use by the handler.
+     * @return the retry options in use by the handler.
+     */
     @Nonnull
     public RetryHandlerOption getRetryOptions(){
         return this.mRetryOption;
     }
 
+    /** {@inheritDoc} */
     @Override
     @Nonnull
-    public Response intercept(@Nonnull final Chain chain) throws IOException {
+	@SuppressWarnings("UnknownNullness")
+    public Response intercept(final Chain chain) throws IOException {
+        Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
+        if (request == null) {
+            throw new IllegalArgumentException("request cannot be null");
+        }
         final Span span = ObservabilityHelper.getSpanForRequest(request, "RetryHandler_Intercept");
         Scope scope = null;
         if (span != null) {
@@ -204,6 +217,8 @@ public class RetryHandler implements Interceptor{
                 request = request.newBuilder().tag(Span.class, span).build();
             }
             Response response = chain.proceed(request);
+            if (response == null)
+                throw new RuntimeException("unable to get a response from the chain");
 
             // Use should retry pass along with this request
             RetryHandlerOption retryOption = request.tag(RetryHandlerOption.class);
@@ -216,18 +231,21 @@ public class RetryHandler implements Interceptor{
                     builder.tag(Span.class, span);
                 }
                 request = builder.build();
-                executionCount++;
-                if(response != null) {
-                    final ResponseBody body = response.body();
-                    if(body != null)
-                        body.close();
-                    response.close();
+                if (request == null) {
+                    throw new IllegalArgumentException("request cannot be null");
                 }
+                executionCount++;
+                final ResponseBody body = response.body();
+                if(body != null)
+                    body.close();
+                response.close();
                 final Span retrySpan = ObservabilityHelper.getSpanForRequest(request, "RetryHandler_Intercept - attempt " + executionCount, span);
                 retrySpan.setAttribute("http.retry_count", executionCount);
                 retrySpan.setAttribute("http.status_code", response.code());
                 retrySpan.end();
                 response = chain.proceed(request);
+                if (response == null)
+                    throw new RuntimeException("unable to get a response from the chain");
             }
             return response;
         } finally {

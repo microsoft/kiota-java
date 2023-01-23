@@ -34,6 +34,9 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 
 /** This class represents an abstract HTTP request. */
 public class RequestInformation {
+    /** Creates a new instance of the request information class. */
+    public RequestInformation() {
+    }
     /** The url template for the current request */
     @Nullable
     public String urlTemplate;
@@ -42,8 +45,9 @@ public class RequestInformation {
     public HashMap<String, Object> pathParameters = new HashMap<>();
     private URI uri;
     /** Gets the URI of the request. 
-     * @throws URISyntaxException
-     * @throws IllegalStateException
+     * @throws URISyntaxException when the uri template is invalid.
+     * @throws IllegalStateException when the baseurl template parameter is missing from the path parameters.
+     * @return the URI of the request.
      */
     @Nullable
     public URI getUri() throws URISyntaxException,IllegalStateException{
@@ -66,7 +70,10 @@ public class RequestInformation {
             return template.toURI();
         }
     }
-    /** Sets the URI of the request. */
+    /** 
+     * Sets the URI of the request.
+     * @param uri the URI of the request.
+     */
     public void setUri(@Nonnull final URI uri) {
         this.uri = Objects.requireNonNull(uri);
         if(queryParameters != null) {
@@ -102,7 +109,7 @@ public class RequestInformation {
                 if(value != null) {
                     if(value.getClass().isArray()) {
                         queryParameters.put(name, Arrays.asList((Object[])value));
-                    } else {
+                    } else if(!value.toString().isEmpty()){
                         queryParameters.put(name, value);
                     }
                 }

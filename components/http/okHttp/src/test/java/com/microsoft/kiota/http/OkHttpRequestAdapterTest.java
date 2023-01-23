@@ -43,7 +43,7 @@ public class OkHttpRequestAdapterTest {
 													.message("OK")
 													.protocol(Protocol.HTTP_1_1)
 													.request(new Request.Builder().url("http://localhost").build())
-													.body(ResponseBody.create("".getBytes(), MediaType.parse("application/json")))
+													.body(ResponseBody.create("".getBytes("UTF-8"), MediaType.parse("application/json")))
 													.build());
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
 		final var requestInformation = new RequestInformation() {{
@@ -105,7 +105,7 @@ public class OkHttpRequestAdapterTest {
 													.message("OK")
 													.protocol(Protocol.HTTP_1_1)
 													.request(new Request.Builder().url("http://localhost").build())
-													.body(ResponseBody.create("test".getBytes(), MediaType.parse("application/json")))
+													.body(ResponseBody.create("test".getBytes("UTF-8"), MediaType.parse("application/json")))
 													.build());
 		final var requestInformation = new RequestInformation() {{
 			setUri(new URI("https://localhost"));

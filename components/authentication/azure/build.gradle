@@ -5,16 +5,56 @@ plugins {
     id 'eclipse'
     id 'maven-publish'
     id 'signing'
+    id 'jacoco'
+    id 'com.github.spotbugs' version '5.0.13'
+    id "org.sonarqube" version "3.5.0.2730"
 }
 
 java {
     modularity.inferModulePath = true
     withSourcesJar()
-    //withJavadocJar()
+    withJavadocJar()
 }
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+spotbugsMain {
+    excludeFilter = file("spotBugsExcludeFilter.xml")
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+spotbugsTest {
+    excludeFilter = file("spotBugsExcludeFilter.xml")
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/test/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
 }
 
 sourceSets {
@@ -29,7 +69,6 @@ sourceSets {
 repositories {
     // You can declare any Maven/Ivy/file repository here.
     mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 apply from: "gradle/dependencies.gradle"
@@ -44,9 +83,17 @@ def pomConfig = {
     }
 }
 
+sonarqube {
+  properties {
+    property "sonar.projectKey", "microsoft_kiota-java"
+    property "sonar.organization", "microsoft"
+    property "sonar.host.url", "https://sonarcloud.io"
+  }
+}
+
 //Publishing tasks-
-//Maven Central Snapshot: publishSnapshotPublicationToMavenRepository
-//Maven Central Release: publishMavenCentralReleasePublicationToMaven2Repository
+//Maven Central Snapshot: publishMavenPublicationToMavenRepository
+//Maven Central Release: publishmavenPublicationToMaven2Repository
 
 tasks.jar {
     manifest {
@@ -57,39 +104,11 @@ tasks.jar {
 publishing {
 
     publications {
-
-        maven(MavenPublication) {
-            groupId project.property('mavenGroupId')
-            artifactId project.property('mavenArtifactId')
-            version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenArtifactSuffix}"
-            from components.java
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', 'Microsoft Kiota Azure-Authentication for Java')
-                root.appendNode('url', 'https://github.com/microsoft/kiota-java')
-                root.children().last() + pomConfig
-                def pomFile = file("${project.buildDir}/libs/microsoft-kiota-authentication-azure.pom")
-                writeTo(pomFile)
-            }
-
-        }
-        Snapshot(MavenPublication) {
+		maven(MavenPublication) {
         	customizePom(pom)
         	groupId project.property('mavenGroupId')
         	artifactId project.property('mavenArtifactId')
         	version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
-        	from components.java
-        	pom.withXml {
-        		def pomFile = file("${project.buildDir}/generated-pom.xml")
-        		writeTo(pomFile)
-        	}
-		}
-		
-		mavenCentralRelease(MavenPublication) {
-        	customizePom(pom)
-        	groupId project.property('mavenGroupId')
-        	artifactId project.property('mavenArtifactId')
-        	version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}"
         	from components.java
         	pom.withXml {
         		def pomFile = file("${project.buildDir}/generated-pom.xml")
@@ -129,7 +148,7 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.mavenCentralRelease
+    sign publishing.publications.maven
 }
 tasks.withType(Sign)*.enabled = mavenCentralPublishingEnabled.toBoolean()
 
@@ -214,7 +233,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 }
 
 model {
-    tasks.generatePomFileForMavenCentralReleasePublication {
+    tasks.generatePomFileForMavenPublication {
         destination = file("${project.buildDir}/generated-pom.xml")
     }
 }

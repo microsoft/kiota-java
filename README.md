@@ -1,14 +1,69 @@
-# Project
+# Kiota Java Libraries
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+[![Release](https://img.shields.io/github/v/release/microsoft/kiota-java)](https://search.maven.org/search?q=g:com.microsoft.kiota%20a:kiota-abstractions)
 
-As the maintainer of this project, please make a few updates:
+The Kiota Java Libraries for Java are:
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+ - [abstractions] Defining the basic constructs Kiota projects need once an SDK has been generated from an OpenAPI definition
+ - [authentication/azure] Implementing Azure authentication mechanisms
+ - [http/okHttp] Implementing a default OkHttp client
+ - [serialization/form] Implementing default serialization for forms
+ - [serialization/json] Implementing default serialization for json
+ - [serialization/text] Implementing default serialization for text
+
+Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README.md).
+
+## Using the Libraries
+
+### With Gradle:
+
+In `build.gradle` in the `dependencies` section:
+
+```Groovy
+implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:0.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:0.2.0'
+```
+
+### With Maven:
+
+In `pom.xml` in the `dependencies` section:
+
+```xml
+    <dependency>
+      <groupId>com.microsoft.kiota</groupId>
+      <artifactId>microsoft-kiota-abstractions</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.kiota</groupId>
+      <artifactId>microsoft-kiota-authentication-azure</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.kiota</groupId>
+      <artifactId>microsoft-kiota-http-okHttp</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.kiota</groupId>
+      <artifactId>microsoft-kiota-serialization-json</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.kiota</groupId>
+      <artifactId>microsoft-kiota-serialization-text</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.kiota</groupId>
+      <artifactId>microsoft-kiota-serialization-form</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+```
 
 ## Contributing
 

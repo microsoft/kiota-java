@@ -1,11 +1,6 @@
 package com.microsoft.kiota.serialization;
 
-import com.microsoft.kiota.serialization.SerializationWriter;
-import com.microsoft.kiota.serialization.ValuedEnum;
-import com.microsoft.kiota.serialization.Parsable;
-
 import java.lang.Enum;
-import java.lang.reflect.Field;
 import java.lang.UnsupportedOperationException;
 import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
@@ -13,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -21,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
@@ -29,21 +24,29 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/** Serialization writer implementation for text/plain */
 public class TextSerializationWriter implements SerializationWriter {
-    private final static String NoStructuredDataMessage = "text does not support structured data";
+    private final static String NO_STRUCTURED_DATA_MESSAGE = "text does not support structured data";
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private final OutputStreamWriter writer;
     private boolean written;
+    /**
+     * Initializes a new instance of the {@link TextSerializationWriter} class.
+     */
     public TextSerializationWriter() {
-        this.writer = new OutputStreamWriter(this.stream);
+        try {
+            this.writer = new OutputStreamWriter(this.stream, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         if(key != null && !key.isEmpty())
-            throw new UnsupportedOperationException(NoStructuredDataMessage);
+            throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
         if(value != null && !value.isEmpty())
-            if(written)
+            if(written) {
                 throw new UnsupportedOperationException("a value was already written for this serialization writer, text content only supports a single value");
-            else {
+            } else {
                 written = true;
                 try {
                     writer.write(value);
@@ -105,19 +108,19 @@ public class TextSerializationWriter implements SerializationWriter {
             writeStringValue(key, value.toString());
     }
     public <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nullable final Iterable<T> values) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     public <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nullable final Iterable<T> values) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     public <T extends Enum<T>> void writeCollectionOfEnumValues(@Nullable final String key, @Nullable final Iterable<T> values) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     public <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nullable final T value, @Nonnull final Parsable ...additionalValuesToMerge) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     public <T extends Enum<T>> void writeEnumSetValue(@Nullable final String key, @Nullable final EnumSet<T> values) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     public <T extends Enum<T>> void writeEnumValue(@Nullable final String key, @Nullable final T value) {
         if(value != null) {
@@ -148,7 +151,7 @@ public class TextSerializationWriter implements SerializationWriter {
         this.stream.close();
     }
     public void writeAdditionalData(@Nonnull final Map<String, Object> value) {
-        throw new UnsupportedOperationException(NoStructuredDataMessage);
+        throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
     @Nullable
     public Consumer<Parsable> getOnBeforeObjectSerialization() {

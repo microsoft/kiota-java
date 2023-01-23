@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.microsoft.kiota.http.ObservabilityOptions;
 import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
 
 import okhttp3.HttpUrl;
@@ -23,20 +22,26 @@ import io.opentelemetry.context.Scope;
 /** This handlers decodes special characters in the request query parameters that had to be encoded due to RFC 6570 restrictions names before executing the request. */
 public class ParametersNameDecodingHandler implements Interceptor {
     private final ParametersNameDecodingOption options;
+    /** Creates a new instance of the handler with default options */
     public ParametersNameDecodingHandler() {
         this(new ParametersNameDecodingOption());
     }
+    /**
+     * Creates a new instance of the handler with the provided options
+     * @param options the options to use
+     */
     public ParametersNameDecodingHandler(@Nonnull final ParametersNameDecodingOption options) {
         super();
         this.options = Objects.requireNonNull(options);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     @Nonnull
-    public Response intercept(@Nonnull final Chain chain) throws IOException {
+	@SuppressWarnings("UnknownNullness")
+    public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain);
         final Request request = chain.request();
         ParametersNameDecodingOption nameOption = request.tag(ParametersNameDecodingOption.class);
@@ -86,7 +91,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
     @Nonnull
     public static String decodeQueryParameters(@Nullable final String original, @Nonnull final char[] charactersToDecode) {
         Objects.requireNonNull(charactersToDecode);
-        String decoded = original == null ? new String() : new String(original);
+        String decoded = original == null ? "" : new StringBuffer(original).toString();
         final ArrayList<SimpleEntry<String, String>> symbolsToReplace = new ArrayList<SimpleEntry<String, String>>(charactersToDecode.length);
         for (final char charToReplace : charactersToDecode) {
             symbolsToReplace.add(new SimpleEntry<String,String>("%" + String.format("%x", (int)charToReplace), String.valueOf(charToReplace)));

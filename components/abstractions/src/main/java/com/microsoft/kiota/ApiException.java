@@ -4,19 +4,19 @@ import javax.annotation.Nonnull;
 
 /** Parent type for exceptions thrown by the client when receiving failed responses to its requests. */
 public class ApiException extends Exception {
-    /** {@inheritdoc} */
+    /** {@inheritDoc} */
     public ApiException() {
         super();
     }
-    /** {@inheritdoc} */
+    /** {@inheritDoc} */
     public ApiException(@Nonnull final String message) {
         super(message);
     }
-    /** {@inheritdoc} */
+    /** {@inheritDoc} */
     public ApiException(@Nonnull final String message, @Nonnull final Throwable cause) {
         super(message, cause);
     }
-    /** {@inheritdoc} */
+    /** {@inheritDoc} */
     public ApiException(@Nonnull final Throwable cause) {
         super(cause);
     }

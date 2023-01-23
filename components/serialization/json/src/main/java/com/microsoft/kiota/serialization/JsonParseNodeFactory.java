@@ -10,12 +10,17 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+/** Creates new Json parse nodes from the payload. */
 public class JsonParseNodeFactory implements ParseNodeFactory {
+    /** Creates a new factory */
+    public JsonParseNodeFactory() {}
+    /** {@inheritDoc} */
     @Nonnull
     public String getValidContentType() {
         return validContentType;
     }
     private final static String validContentType = "application/json";
+    /** {@inheritDoc} */
     @Override
     @Nonnull
     public ParseNode getParseNode(@Nonnull final String contentType, @Nonnull final InputStream rawResponse) {

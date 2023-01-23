@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 public interface ParseNodeFactory {
     /**
      * Returns the content type this factory's parse nodes can deserialize.
+     * @return the content type this factory's parse nodes can deserialize.
      */
     @Nonnull
     String getValidContentType();

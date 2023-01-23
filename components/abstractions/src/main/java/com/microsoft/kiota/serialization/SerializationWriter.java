@@ -107,18 +107,21 @@ public interface SerializationWriter extends Closeable {
      * Writes the specified collection of primitive values to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param values the value to write to the stream.
+     * @param <T> the type of the primitive.
      */
     <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nullable final Iterable<T> values);
     /**
      * Writes the specified collection of object values to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param values the value to write to the stream.
+     * @param <T> the type of the object.
      */
     <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nullable final Iterable<T> values);
     /**
      * Writes the specified collection of enum values to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param values the values to write to the stream.
+     * @param <T> the type of the enum.
      */
     <T extends Enum<T>> void writeCollectionOfEnumValues(@Nullable final String key, @Nullable final Iterable<T> values);
     /**
@@ -126,6 +129,7 @@ public interface SerializationWriter extends Closeable {
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      * @param additionalValuesToMerge the additional values to merge to the main value when serializing an intersection wrapper.
+     * @param <T> the type of the model object.
      */
     <T extends Parsable> void writeObjectValue(@Nullable final String key, @Nullable final T value, @Nonnull final Parsable ...additionalValuesToMerge);
     /**
@@ -138,12 +142,14 @@ public interface SerializationWriter extends Closeable {
      * Writes the specified enum set value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param values the value to write to the stream.
+     * @param <T> the type of the enum.
      */
     <T extends Enum<T>> void writeEnumSetValue(@Nullable final String key, @Nullable final EnumSet<T> values);
     /**
      * Writes the specified enum value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
+     * @param <T> the type of the enum.
      */
     <T extends Enum<T>> void writeEnumValue(@Nullable final String key, @Nullable final T value);
     /**

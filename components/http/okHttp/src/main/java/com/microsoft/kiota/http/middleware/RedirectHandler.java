@@ -8,6 +8,7 @@ import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 
 import java.io.IOException;
 import java.net.ProtocolException;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
@@ -26,8 +27,8 @@ import io.opentelemetry.context.Scope;
  * Middleware that determines whether a redirect information should be followed or not, and follows it if necessary.
  */
 public class RedirectHandler implements Interceptor{
-
-    private RedirectHandlerOption mRedirectOption;
+    @Nonnull
+    private final RedirectHandlerOption mRedirectOption;
 
     /**
      * Initialize using default redirect options, default IShouldRedirect and max redirect value
@@ -41,13 +42,17 @@ public class RedirectHandler implements Interceptor{
      * @param redirectOption pass instance of redirect options to be used
      */
     public RedirectHandler(@Nullable final RedirectHandlerOption redirectOption) {
-        this.mRedirectOption = redirectOption;
         if(redirectOption == null) {
             this.mRedirectOption = new RedirectHandlerOption();
+        } else {
+            this.mRedirectOption = redirectOption;
         }
     }
 
-    boolean isRedirected(Request request, Response response, int redirectCount, RedirectHandlerOption redirectOption) throws IOException {
+    boolean isRedirected(@Nonnull final Request request, @Nonnull final Response response, int redirectCount, @Nonnull final RedirectHandlerOption redirectOption) throws IOException {
+        Objects.requireNonNull(request, "parameter request cannot be null");
+        Objects.requireNonNull(response, "parameter response cannot be null");
+        Objects.requireNonNull(redirectOption, "parameter redirectOption cannot be null");
         // Check max count of redirects reached
         if(redirectCount > redirectOption.maxRedirects()) return false;
 
@@ -112,10 +117,16 @@ public class RedirectHandler implements Interceptor{
     // Intercept request and response made to network
     @Override
     @Nonnull
-    public Response intercept(@Nonnull final Chain chain) throws IOException {
+	@SuppressWarnings("UnknownNullness")
+    public Response intercept(final Chain chain) throws IOException {
+        Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
+        if (request == null) {
+            throw new IllegalArgumentException("request cannot be null");
+        }
         Response response = null;
         int requestsCount = 1;
+        boolean shouldRedirect = true;
 
         // Use should retry pass along with this request
         RedirectHandlerOption redirectOption = request.tag(RedirectHandlerOption.class);
@@ -128,16 +139,21 @@ public class RedirectHandler implements Interceptor{
             span.setAttribute("com.microsoft.kiota.handler.redirect.enable", true);
         }
         try {
-            while(true) {
+            do {
                 if (span != null) {
                     request = request.newBuilder().tag(Span.class, span).build();
+                    if (request == null) {
+                        throw new IllegalArgumentException("request cannot be null");
+                    }
                 }
                 response = chain.proceed(request);
-                final boolean shouldRedirect = isRedirected(request, response, requestsCount, redirectOption)
+                if (response == null) {
+                    throw new IllegalArgumentException("response cannot be null");
+                }
+                shouldRedirect = isRedirected(request, response, requestsCount, redirectOption)
                         && redirectOption.shouldRedirect().shouldRedirect(response);
-                if(!shouldRedirect) break;
 
-                final Request followup = getRedirect(request, response);
+                final Request followup = shouldRedirect ? getRedirect(request, response) : null;
                 if(followup != null) {
                     response.close();
                     request = followup;
@@ -147,7 +163,7 @@ public class RedirectHandler implements Interceptor{
                     redirectSpan.setAttribute("http.status_code", response.code());
                     redirectSpan.end();
                 }
-            }
+            } while(shouldRedirect);
         } finally {
             if (scope != null) {
                 scope.close();

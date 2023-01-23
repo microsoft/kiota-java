@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 /** This factory holds a list of all the registered factories for the various types of nodes. */
 public class SerializationWriterFactoryRegistry implements SerializationWriterFactory {
+    /** Default constructor for the registry. */
+    public SerializationWriterFactoryRegistry() {}
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public final static SerializationWriterFactoryRegistry defaultInstance = new SerializationWriterFactoryRegistry();
     /** List of factories that are registered by content type. */
