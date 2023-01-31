@@ -5,7 +5,7 @@ dependencies {
 
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testImplementation 'org.mockito:mockito-inline:5.1.0'
+    testImplementation 'org.mockito:mockito-inline:5.1.1'
 
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
