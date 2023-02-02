@@ -11,7 +11,7 @@ dependencies {
     implementation 'io.opentelemetry:opentelemetry-api:1.22.0'
     implementation 'io.opentelemetry:opentelemetry-context:1.22.0'
     implementation 'com.google.guava:guava:31.1-jre'
-    api 'com.azure:azure-core:1.35.0'
+    api 'com.azure:azure-core:1.36.0'
 
     api project(':components:abstractions')
 }
