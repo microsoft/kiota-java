@@ -63,7 +63,8 @@ class UriTemplate implements Comparable<UriTemplate> {
     private static final char AND_OPERATOR = '&';
     private static final String SLASH_STRING = "/";
     private static final char DOT_OPERATOR = '.';
-    private static final DateTimeFormatter RFC3339 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+
+    static final DateTimeFormatter RFC3339 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
     // Regex patterns that matches URIs. See RFC 3986, appendix B
     static final Pattern PATTERN_SCHEME = Pattern.compile("^" + STRING_PATTERN_SCHEME + "//.*");
@@ -423,7 +424,7 @@ class UriTemplate implements Comparable<UriTemplate> {
             } else {
                 PathSegment last = segments.get(segments.size() - 1);
                 if (last instanceof UriTemplateParser.RawPathSegment) {
-                    String v = ((UriTemplateParser.RawPathSegment) last).value;
+                    String v = ((UriTemplateParser.RawPathSegment) last).getValue();
                     if (v.endsWith(SLASH_STRING)) {
                         templateString = templateString.substring(1);
                     } else {
@@ -465,12 +466,12 @@ class UriTemplate implements Comparable<UriTemplate> {
             boolean isVar = segment instanceof UriTemplateParser.VariablePathSegment;
             if (previousVariable != null && isVar) {
                 UriTemplateParser.VariablePathSegment varSeg = (UriTemplateParser.VariablePathSegment) segment;
-                if (varSeg.operator == previousVariable.operator && varSeg.modifierChar != EXPAND_MODIFIER) {
-                    builder.append(varSeg.delimiter);
+                if (varSeg.getOperator() == previousVariable.getOperator() && varSeg.getModifierChar() != EXPAND_MODIFIER) {
+                    builder.append(varSeg.getDelimiter());
                 } else {
                     builder.append(VAR_END);
                     builder.append(VAR_START);
-                    char op = varSeg.operator;
+                    char op = varSeg.getOperator();
                     if (OPERATOR_NONE != op) {
                         builder.append(op);
                     }
@@ -481,7 +482,7 @@ class UriTemplate implements Comparable<UriTemplate> {
                 if (isVar) {
                     previousVariable = (UriTemplateParser.VariablePathSegment) segment;
                     builder.append(VAR_START);
-                    char op = previousVariable.operator;
+                    char op = previousVariable.getOperator();
                     if (OPERATOR_NONE != op) {
                         builder.append(op);
                     }
@@ -817,6 +818,10 @@ class UriTemplate implements Comparable<UriTemplate> {
                 this.value = value;
             }
 
+            public String getValue() {
+                return value;
+            }
+
             @Override
             public boolean isQuerySegment() {
                 return isQuerySegment;
@@ -906,6 +911,14 @@ class UriTemplate implements Comparable<UriTemplate> {
 
             public char getOperator() {
                 return this.operator;
+            }
+
+            public char getModifierChar() {
+                return this.modifierChar;
+            }
+
+            public String getDelimiter() {
+                return this.delimiter;
             }
 
             @Override
