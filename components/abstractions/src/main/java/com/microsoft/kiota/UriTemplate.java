@@ -217,7 +217,7 @@ class UriTemplate implements Comparable<UriTemplate> {
             }
             if (segment instanceof UriTemplateParser.VariablePathSegment) {
                 UriTemplateParser.VariablePathSegment varPathSegment = (UriTemplateParser.VariablePathSegment) segment;
-                if (varPathSegment.isQuerySegment && ! queryParameter) {
+                if (varPathSegment.isQuerySegment() && ! queryParameter) {
                     // reset anyPrevious* when we reach query parameters
                     queryParameter = true;
                     anyPreviousHasContent = false;
