@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,7 +43,6 @@ public class RequestInformation {
     @Nullable
     public HashMap<String, Object> pathParameters = new HashMap<>();
     private URI uri;
-    private static DateTimeFormatter RFC3339 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     /** Gets the URI of the request. 
      * @throws URISyntaxException when the uri template is invalid.
      * @throws IllegalStateException when the baseurl template parameter is missing from the path parameters.
