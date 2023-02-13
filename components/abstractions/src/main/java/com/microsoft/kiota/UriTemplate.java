@@ -1108,7 +1108,6 @@ class UriTemplate implements Comparable<UriTemplate> {
             }
 
             private Object expandPOJO(Object found) {
-                System.out.println("EXPAND POJO!!!");
                 // Check for common expanded types, such as list or Map
                 if (found instanceof Iterable || found instanceof Map) {
                     return found;
@@ -1116,6 +1115,10 @@ class UriTemplate implements Comparable<UriTemplate> {
                 // If a simple value, just use that
                 if (found == null || found.getClass().getCanonicalName().startsWith("java.lang")) {
                     return found;
+                }
+                // Handle OffsetDateTime
+                if (found instanceof OffsetDateTime) {
+                    return ((OffsetDateTime) found).format(RFC3339);
                 }
                 // This is not a complete implementation, just give up ...
                 throw new RuntimeException("Unsupported type " + found.getClass());
