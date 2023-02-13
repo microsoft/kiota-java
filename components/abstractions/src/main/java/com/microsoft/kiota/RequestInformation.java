@@ -24,7 +24,6 @@ import java.time.Period;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.damnhandy.uri.template.UriTemplate;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.SerializationWriter;
 
@@ -69,15 +68,12 @@ public class RequestInformation {
             params.putAll(pathParameters);
             params.putAll(queryParameters);
 
-            for (Map.Entry<String, Object> entry: params.entrySet()) {
-                if (entry.getValue() instanceof OffsetDateTime) {
-                    params.put(entry.getKey(), ((OffsetDateTime) entry.getValue()).format(RFC3339));
-                }
-            }
-
-            return new URI(UriTemplate.fromTemplate(urlTemplate)
-                    .set(params)
-                    .expand());
+//            for (Map.Entry<String, Object> entry: params.entrySet()) {
+//                if (entry.getValue() instanceof OffsetDateTime) {
+//                    params.put(entry.getKey(), ((OffsetDateTime) entry.getValue()).format(RFC3339));
+//                }
+//            }
+            return new URI(new UriTemplate(urlTemplate).expand(params));
         }
     }
     /** 
