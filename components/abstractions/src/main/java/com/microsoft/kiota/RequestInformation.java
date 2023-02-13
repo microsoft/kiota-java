@@ -68,11 +68,6 @@ public class RequestInformation {
             params.putAll(pathParameters);
             params.putAll(queryParameters);
 
-//            for (Map.Entry<String, Object> entry: params.entrySet()) {
-//                if (entry.getValue() instanceof OffsetDateTime) {
-//                    params.put(entry.getKey(), ((OffsetDateTime) entry.getValue()).format(RFC3339));
-//                }
-//            }
             return new URI(new UriTemplate(urlTemplate).expand(params));
         }
     }
