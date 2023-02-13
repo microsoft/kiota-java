@@ -19,7 +19,7 @@ public class UriTemplateTest {
             "page", 10,
             "date", OffsetDateTime.of(2023, 2, 13, 18, 49, 00, 00, ZoneOffset.UTC));
 
-    // Tests from: https://github.com/micronaut-projects/micronaut-core/blob/02992a905cf9a2279b7fe8e49927ff080cb937d5/http/src/test/groovy/io/micronaut/http/uri/UriTemplateSpec.groovy
+    // Tests inspired from: https://github.com/micronaut-projects/micronaut-core/blob/02992a905cf9a2279b7fe8e49927ff080cb937d5/http/src/test/groovy/io/micronaut/http/uri/UriTemplateSpec.groovy
     @ParameterizedTest
     @CsvFileSource(resources = "/data.csv", numLinesToSkip = 1, delimiter = ';')
     void shouldProduceExpectedOutput(String template, String expected) {
