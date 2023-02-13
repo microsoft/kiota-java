@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,14 +24,14 @@ import java.time.Period;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.damnhandy.uri.template.UriTemplate;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.SerializationWriter;
-
-import com.github.hal4j.uritemplate.URITemplate;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+
 
 /** This class represents an abstract HTTP request. */
 public class RequestInformation {
@@ -44,6 +45,7 @@ public class RequestInformation {
     @Nullable
     public HashMap<String, Object> pathParameters = new HashMap<>();
     private URI uri;
+    private static DateTimeFormatter RFC3339 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     /** Gets the URI of the request. 
      * @throws URISyntaxException when the uri template is invalid.
      * @throws IllegalStateException when the baseurl template parameter is missing from the path parameters.
@@ -63,11 +65,20 @@ public class RequestInformation {
             if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase(Locale.ROOT).contains("{+baseurl}"))
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
-            final URITemplate template = new URITemplate(urlTemplate)
-                            .expandOnly(new HashMap<String, Object>(queryParameters) {{
-                                putAll(pathParameters);
-                            }});
-            return template.toURI();
+            Map<String, Object> params = new HashMap<>(pathParameters.size() + queryParameters.size());
+            params.putAll(pathParameters);
+            params.putAll(queryParameters);
+
+            for (String param: params.keySet()) {
+                Object value = params.get(param);
+                if (value instanceof OffsetDateTime) {
+                    params.put(param, ((OffsetDateTime) value).format(RFC3339));
+                }
+            }
+
+            return new URI(UriTemplate.fromTemplate(urlTemplate)
+                    .set(params)
+                    .expand());
         }
     }
     /** 
