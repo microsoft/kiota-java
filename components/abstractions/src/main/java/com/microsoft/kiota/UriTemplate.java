@@ -873,7 +873,7 @@ class UriTemplate implements Comparable<UriTemplate> {
         /**
          * Variable path segment implementation.
          */
-        private class VariablePathSegment implements PathSegment {
+        private static class VariablePathSegment implements PathSegment {
 
             private final boolean isQuerySegment;
             private final String variable;
