@@ -26,11 +26,10 @@ import javax.annotation.Nullable;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.SerializationWriter;
 
-import com.github.hal4j.uritemplate.URITemplate;
-
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+
 
 /** This class represents an abstract HTTP request. */
 public class RequestInformation {
@@ -63,11 +62,11 @@ public class RequestInformation {
             if(!pathParameters.containsKey("baseurl") && urlTemplate.toLowerCase(Locale.ROOT).contains("{+baseurl}"))
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
-            final URITemplate template = new URITemplate(urlTemplate)
-                            .expandOnly(new HashMap<String, Object>(queryParameters) {{
-                                putAll(pathParameters);
-                            }});
-            return template.toURI();
+            Map<String, Object> params = new HashMap<>(pathParameters.size() + queryParameters.size());
+            params.putAll(pathParameters);
+            params.putAll(queryParameters);
+
+            return new URI(new UriTemplate(urlTemplate).expand(params));
         }
     }
     /** 

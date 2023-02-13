@@ -64,8 +64,28 @@ public class RequestInformationTest {
 
         // Assert
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
-        assertTrue(uriResult.toString().contains("fromDateTime='2022-08-01T00%3A00Z'"));
-        assertTrue(uriResult.toString().contains("toDateTime='2022-08-02T00%3A00Z'"));
+        assertTrue(uriResult.toString().contains("fromDateTime='2022-08-01T00%3A00%3A00Z'"));
+        assertTrue(uriResult.toString().contains("toDateTime='2022-08-02T00%3A00%3A00Z'"));
+    }
+
+    @Test
+    public void ExpandQueryParametersAfterPathParams()
+    {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.urlTemplate = "{+baseurl}/users/{id}/list{?async*,page*,size*,orderBy*,search*}";
+
+        // Act
+        requestInfo.pathParameters.put("baseurl", "http://localhost:9090");
+        requestInfo.pathParameters.put("id", 1);
+        requestInfo.addQueryParameter("async", true);
+        requestInfo.addQueryParameter("size", 10);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("size=10"));
+        assertTrue(uriResult.toString().contains("async=true"));
     }
 
     @Test
