@@ -69,10 +69,9 @@ public class RequestInformation {
             params.putAll(pathParameters);
             params.putAll(queryParameters);
 
-            for (String param: params.keySet()) {
-                Object value = params.get(param);
-                if (value instanceof OffsetDateTime) {
-                    params.put(param, ((OffsetDateTime) value).format(RFC3339));
+            for (Map.Entry<String, Object> entry: params.entrySet()) {
+                if (entry.getValue() instanceof OffsetDateTime) {
+                    params.put(entry.getKey(), ((OffsetDateTime) entry.getValue()).format(RFC3339));
                 }
             }
 
