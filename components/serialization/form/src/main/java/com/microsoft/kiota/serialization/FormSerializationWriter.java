@@ -111,7 +111,11 @@ public class FormSerializationWriter implements SerializationWriter {
             writeStringValue(key, value.toString());
     }
     public <T> void writeCollectionOfPrimitiveValues(@Nullable final String key, @Nullable final Iterable<T> values) {
-        throw new RuntimeException("collections serialization is not supported with form encoding");
+        if(values != null) {
+            for (final T t : values) {
+                this.writeAnyValue(key, t);
+            }
+        }
     }
     public <T extends Parsable> void writeCollectionOfObjectValues(@Nullable final String key, @Nullable final Iterable<T> values) {
         throw new RuntimeException("collections serialization is not supported with form encoding");
