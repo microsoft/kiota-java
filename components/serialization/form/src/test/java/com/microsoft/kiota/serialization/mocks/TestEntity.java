@@ -3,10 +3,7 @@ package com.microsoft.kiota.serialization.mocks;
 import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.SerializationWriter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
@@ -50,7 +47,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	}
 
 	public void setDeviceNames(List<String> value) {
-		this._deviceNames = value;
+		this._deviceNames = new ArrayList<String>(value);
 	}
 	private Period _workDuration;
 	public Period getWorkDuration() {
