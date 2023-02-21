@@ -4,6 +4,7 @@ import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.SerializationWriter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -43,6 +44,14 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 		this._birthDay = value;
 	}
 
+	private List<String> _deviceNames;
+	public List<String> getDeviceNames() {
+		return _deviceNames;
+	}
+
+	public void setDeviceNames(List<String> value) {
+		this._deviceNames = value;
+	}
 	private Period _workDuration;
 	public Period getWorkDuration() {
 		return _workDuration;
@@ -105,6 +114,9 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 			put("createdDateTime", (n) -> {
 				setCreatedDateTime(n.getOffsetDateTimeValue());
 			});
+			put("deviceNames", (n) -> {
+				setDeviceNames(n.getCollectionOfPrimitiveValues(String.class));
+			});
 		}};
 	}
 
@@ -118,6 +130,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 		writer.writeLocalTimeValue("startWorkTime", getStartWorkTime());
 		writer.writeLocalTimeValue("endWorkTime", getEndWorkTime());
 		writer.writeOffsetDateTimeValue("createdDateTime", getCreatedDateTime());
+		writer.writeCollectionOfPrimitiveValues("deviceNames", getDeviceNames());
 		writer.writeAdditionalData(getAdditionalData());
 	}
 

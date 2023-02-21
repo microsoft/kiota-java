@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import com.google.common.collect.Lists;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -10,9 +12,11 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -178,7 +182,60 @@ public class FormParseNode implements ParseNode {
     }
     @Nullable
     public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
-        throw new RuntimeException("deserialization of collections of is not supported with form encoding");
+        final List<String> primitiveStringCollection = Arrays.asList(getStringValue().split(","));
+        final Iterator<String> sourceIterator = primitiveStringCollection.iterator();
+        final FormParseNode _this = this;
+        return Lists.newArrayList(new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>(){
+                    @Override
+                    public boolean hasNext() {
+                        return sourceIterator.hasNext();
+                    }
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public T next() {
+                        final String item = sourceIterator.next();
+                        final Consumer<Parsable> onBefore = _this.getOnBeforeAssignFieldValues();
+                        final Consumer<Parsable> onAfter = _this.getOnAfterAssignFieldValues();
+                        final FormParseNode itemNode = new FormParseNode(item) {{
+                            this.setOnBeforeAssignFieldValues(onBefore);
+                            this.setOnAfterAssignFieldValues(onAfter);
+                        }};
+                        if(targetClass == Boolean.class) {
+                            return (T)itemNode.getBooleanValue();
+                        } else if(targetClass == Short.class) {
+                            return (T)itemNode.getShortValue();
+                        } else if(targetClass == Byte.class) {
+                            return (T)itemNode.getByteValue();
+                        } else if(targetClass == BigDecimal.class) {
+                            return (T)itemNode.getBigDecimalValue();
+                        } else if(targetClass == String.class) {
+                            return (T)itemNode.getStringValue();
+                        } else if(targetClass == Integer.class) {
+                            return (T)itemNode.getIntegerValue();
+                        } else if(targetClass == Float.class) {
+                            return (T)itemNode.getFloatValue();
+                        } else if(targetClass == Long.class) {
+                            return (T)itemNode.getLongValue();
+                        } else if(targetClass == UUID.class) {
+                            return (T)itemNode.getUUIDValue();
+                        } else if(targetClass == OffsetDateTime.class) {
+                            return (T)itemNode.getOffsetDateTimeValue();
+                        } else if(targetClass == LocalDate.class) {
+                            return (T)itemNode.getLocalDateValue();
+                        } else if(targetClass == LocalTime.class) {
+                            return (T)itemNode.getLocalTimeValue();
+                        } else if(targetClass == Period.class) {
+                            return (T)itemNode.getPeriodValue();
+                        } else {
+                            throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
+                        }
+                    }
+                };
+            }
+        });
     }
     @Nullable
     public <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory) {

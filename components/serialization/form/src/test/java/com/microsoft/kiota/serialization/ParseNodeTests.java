@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalTime;
 import java.time.Period;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +32,8 @@ public class ParseNodeTests {
                                         "endWorkTime=17:00:00&" +
                                         "userPrincipalName=MeganB@M365x214355.onmicrosoft.com&" +
                                         "birthDay=2017-09-04&" +
+										"deviceNames=device1&deviceNames=device2&"+ //collection property
+										"otherPhones=123456789&otherPhones=987654321&" + //collection property for additionalData
                                         "id=48d31887-5fad-4d73-a9f5-3c356e68a038";
 	@Test
 	public void getsEntityValueFromForm() {
@@ -39,6 +43,9 @@ public class ParseNodeTests {
 		assertNull(entity.getOfficeLocation());
 		assertTrue(entity.getAdditionalData().containsKey("jobTitle"));
 		assertTrue(entity.getAdditionalData().containsKey("mobilePhone"));
+		assertTrue(entity.getAdditionalData().containsKey("mobilePhone"));
+		assertEquals(2, entity.getDeviceNames().size());
+		assertEquals("true", entity.getAdditionalData().get("accountEnabled"));
 		assertEquals("Auditor", entity.getAdditionalData().get("jobTitle"));
 		assertEquals("48d31887-5fad-4d73-a9f5-3c356e68a038", entity.getId());
 		assertEquals(Period.parse("P1M"), entity.getWorkDuration());
@@ -56,5 +63,29 @@ public class ParseNodeTests {
 		final FormParseNode parseNode = new FormParseNode(testUserForm);
 		final ParseNode childNode = parseNode.getChildNode("doesNotExist");
 		assertNull(childNode);
+	}
+
+	@Test
+	public void getCollectionOfBooleanPrimitiveValuesFromForm()
+	{
+		final String TestFormData = "bools=true&" +
+				"bools=false";
+		final ParseNode numberNode = new FormParseNode(TestFormData).getChildNode("bools");
+		final List<Boolean> numberCollection = numberNode.getCollectionOfPrimitiveValues(Boolean.class);
+		assertNotNull(numberCollection);
+		assertEquals(2, numberCollection.size());
+		assertEquals(true, numberCollection.get(0));
+	}
+
+	@Test
+	public void getCollectionOfGuidPrimitiveValuesFromForm()
+	{
+		final String TestFormData = "ids=48d31887-5fad-4d73-a9f5-3c356e68a038&" +
+				"ids=48d31887-5fad-4d73-a9f5-3c356e68a038";
+		final ParseNode numberNode = new FormParseNode(TestFormData).getChildNode("ids");
+		var numberCollection = numberNode.getCollectionOfPrimitiveValues(UUID.class);
+		assertNotNull(numberCollection);
+		assertEquals(2, numberCollection.size());
+		assertEquals(UUID.fromString("48d31887-5fad-4d73-a9f5-3c356e68a038"), numberCollection.get(0));
 	}
 }
