@@ -25,6 +25,31 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/abstractions/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/json/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/text/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/authentication/azure/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/http/okHttp/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
