@@ -65,6 +65,12 @@ In `pom.xml` in the `dependencies` section:
     </dependency>
 ```
 
+## Extra
+
+[RedHat](https://www.redhat.com/) is maintaining extra utilities for Java projects based on Kiota:
+
+https://github.com/redhat-developer/kiota-java-extra
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
