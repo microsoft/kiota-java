@@ -67,9 +67,9 @@ In `pom.xml` in the `dependencies` section:
 
 ## Extra
 
-[RedHat](https://www.redhat.com/) is maintaining extra utilities for Java projects based on Kiota:
+Third party tools and extensions:
 
-https://github.com/redhat-developer/kiota-java-extra
+- [Extra utilities for Java projects based](https://github.com/redhat-developer/kiota-java-extra) by [RedHat](https://www.redhat.com/). Kiota Maven plugin to ease the usage of the Kiota CLI from Maven projects.
 
 ## Contributing
 
