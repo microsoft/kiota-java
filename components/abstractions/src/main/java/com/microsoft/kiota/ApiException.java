@@ -20,4 +20,7 @@ public class ApiException extends Exception {
     public ApiException(@Nonnull final Throwable cause) {
         super(cause);
     }
+
+    /** The HTTP status code  for the response*/
+    public int responseStatusCode;
 }

@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.3.1] - 2023-03-08
+
+# Added
+
+- Adds ResponseStatusCode property to API exception class
+
 ## [0.3.0] - 2023-02-21
 
 ### Changed
