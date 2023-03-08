@@ -586,6 +586,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             !(statusCode >= 500 && statusCode < 600 && errorMappings.containsKey("5XX"))) {
 		        spanForAttributes.setAttribute(errorMappingFoundAttributeName, false);
                 final ApiException result = new ApiException("the server returned an unexpected status code and no error class is registered for this code " + statusCode);
+                result.responseStatusCode = statusCode;
                 spanForAttributes.recordException(result);
                 throw result;
             }
@@ -603,6 +604,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 		            spanForAttributes.setAttribute(errorBodyFoundAttributeName, false);
                     closeResponse = false;
                     final ApiException result = new ApiException("service returned status code" + statusCode + " but no response body was found");
+                    result.responseStatusCode = statusCode;
                     spanForAttributes.recordException(result);
                     throw result;
                 }
@@ -616,6 +618,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     } else {
                         result = new ApiException("unexpected error type " + error.getClass().getName());
                     }
+                    result.responseStatusCode = statusCode;
                     spanForAttributes.recordException(result);
                     throw result;
                 } finally {
