@@ -35,4 +35,14 @@ public abstract class BaseRequestBuilder {
         this.urlTemplate = Objects.requireNonNull(urlTemplate);
         this.pathParameters = new HashMap<String, Object>(Objects.requireNonNull(pathParameters));
     }
+    /**
+     * Instantiates a new BaseRequestBuilder and sets the default values.
+     * @param requestAdapter The request adapter to use to execute the requests.
+     * @param urlTemplate Url template to use to build the URL for the current request builder
+     * @param rawUrl the raw url to use for the request
+     */
+    protected BaseRequestBuilder(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String urlTemplate, @Nonnull final String rawUrl) {
+        this(requestAdapter, urlTemplate);
+        this.pathParameters.put(RequestInformation.RAW_URL_KEY, Objects.requireNonNull(rawUrl));
+    }
 }
