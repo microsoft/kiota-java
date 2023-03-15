@@ -16,12 +16,7 @@ public abstract class BaseRequestBuilder {
     /** Url template to use to build the URL for the current request builder */
     @Nonnull
     protected String urlTemplate;
-    /**
-     * Instantiates a new BaseRequestBuilder and sets the default values.
-     * @param requestAdapter The request adapter to use to execute the requests.
-     * @param urlTemplate Url template to use to build the URL for the current request builder
-     */
-    protected BaseRequestBuilder(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String urlTemplate) {
+    private BaseRequestBuilder(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String urlTemplate) {
         this(requestAdapter, urlTemplate, new HashMap<String, Object>());
     }
     /**
