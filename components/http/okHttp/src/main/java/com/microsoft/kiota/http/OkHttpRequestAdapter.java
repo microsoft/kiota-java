@@ -767,7 +767,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
-    protected Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
+    protected @Nonnull Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             spanForAttributes.setAttribute(SemanticAttributes.HTTP_METHOD, requestInfo.httpMethod.toString());
