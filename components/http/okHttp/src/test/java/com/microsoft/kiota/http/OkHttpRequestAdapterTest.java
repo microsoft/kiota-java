@@ -3,8 +3,6 @@ package com.microsoft.kiota.http;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,8 +15,6 @@ import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.io.InputStream;
 import java.io.IOException;
@@ -39,8 +35,6 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-
-import javax.annotation.Nonnull;
 
 public class OkHttpRequestAdapterTest {
 	@ParameterizedTest
