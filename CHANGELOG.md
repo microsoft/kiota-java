@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Fix add an empty body when method is POST and the body is null
+
 ## [0.3.1] - 2023-03-08
 
 # Added
