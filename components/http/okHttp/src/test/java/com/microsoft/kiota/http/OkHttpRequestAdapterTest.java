@@ -1,6 +1,10 @@
 package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -11,6 +15,9 @@ import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.io.InputStream;
 import java.io.IOException;
@@ -32,7 +39,26 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import javax.annotation.Nonnull;
+
 public class OkHttpRequestAdapterTest {
+	@Test
+	public void PostRequestsShouldHaveEmptyBody() throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException: method POST must have a request body.
+		final var authenticationProviderMock = mock(AuthenticationProvider.class);
+		final var adapter = new OkHttpRequestAdapter(authenticationProviderMock) {
+			public Request test() throws Exception {
+				var ri = new RequestInformation();
+				ri.httpMethod = HttpMethod.POST;
+				ri.urlTemplate = "http://localhost:1234";
+				var span1 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
+				var span2 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
+				return this.getRequestFromRequestInformation(ri, span1, span2);
+			}
+		};
+
+		final var request = assertDoesNotThrow(() -> adapter.test());
+		assertNotNull(request.body());
+	}
 	@ParameterizedTest
 	@ValueSource(ints = {200, 201, 202, 203, 206})
 	public void SendStreamReturnsUsableStream(int statusCode) throws Exception {
