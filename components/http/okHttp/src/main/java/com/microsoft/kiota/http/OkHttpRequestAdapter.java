@@ -802,7 +802,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 };
 
             // https://stackoverflow.com/a/35743536
-            if (body == null && requestInfo.httpMethod.equals(HttpMethod.POST)) {
+            if (body == null &&
+                    (requestInfo.httpMethod.equals(HttpMethod.POST) ||
+                     requestInfo.httpMethod.equals(HttpMethod.PATCH) ||
+                     requestInfo.httpMethod.equals(HttpMethod.PUT))) {
                 body = RequestBody.create(new byte[0]);
             }
             final Request.Builder requestBuilder = new Request.Builder()
