@@ -1,7 +1,6 @@
 package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -14,7 +13,6 @@ import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
-
 import java.util.concurrent.CompletableFuture;
 import java.io.InputStream;
 import java.io.IOException;
