@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.3.3] - 2023-03-20
+
 ### Changed
+
+- Aligns default http client timeout to be 100 seconds
+- Updates the JsonParseNodeFactory to pass a JsonElement using `JsonParser.parseReader` rather than creating a string when creating the root parseNode.
 
 ## [0.3.2] - 2023-03-16
 
