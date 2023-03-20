@@ -1,12 +1,12 @@
 package com.microsoft.kiota.serialization;
 
-import java.io.BufferedReader;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -31,16 +31,11 @@ public class JsonParseNodeFactory implements ParseNodeFactory {
         } else if (!contentType.equals(validContentType)) {
             throw new IllegalArgumentException("expected a " + validContentType + " content type");
         }
-        String rawText;
         try(final InputStreamReader reader = new InputStreamReader(rawResponse, StandardCharsets.UTF_8)) {
-            try(final BufferedReader buff = new BufferedReader(reader)) {
-                rawText = buff.lines()
-                .collect(Collectors.joining("\n"));
-            }
+            return new JsonParseNode(JsonParser.parseReader(reader));
         } catch (IOException ex) {
             throw new RuntimeException("could not close the reader", ex);
         }
-        return new JsonParseNode(rawText);
     }
 
 }

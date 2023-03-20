@@ -2,7 +2,7 @@ package com.microsoft.kiota.http;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
+import java.time.Duration;
 import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
@@ -29,7 +29,11 @@ public class KiotaClientFactory {
      */
     @Nonnull
     public static OkHttpClient.Builder create(@Nullable final Interceptor[] interceptors) {
-        final OkHttpClient.Builder builder = new OkHttpClient.Builder(); //TODO configure the default client options.
+        final OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectTimeout(Duration.ofSeconds(100))
+                .readTimeout(Duration.ofSeconds(100))
+                .callTimeout(Duration.ofSeconds(100)); //TODO configure the default client options.
+
         final Interceptor[] interceptorsOrDefault = interceptors != null ? interceptors : createDefaultInterceptors();
         for (final Interceptor interceptor : interceptorsOrDefault) {
             builder.addInterceptor(interceptor);
