@@ -6,6 +6,11 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: gradle
+  directory: "/components/serialization/form"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
   directory: "/components/serialization/json"
   schedule:
     interval: daily
@@ -22,6 +27,36 @@ updates:
   open-pull-requests-limit: 10
 - package-ecosystem: gradle
   directory: "/components/http/okHttp"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/abstractions/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/form/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/json/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/serialization/text/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/authentication/azure/android"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directory: "/components/http/okHttp/android"
   schedule:
     interval: daily
   open-pull-requests-limit: 10

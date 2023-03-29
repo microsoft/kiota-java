@@ -1,7 +1,9 @@
 package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.microsoft.kiota.authentication.AuthenticationProvider;
@@ -33,6 +35,24 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class OkHttpRequestAdapterTest {
+	@ParameterizedTest
+	@EnumSource(value = HttpMethod.class, names = {"PUT", "POST", "PATCH"})
+	public void PostRequestsShouldHaveEmptyBody(HttpMethod method) throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException: method POST must have a request body.
+		final var authenticationProviderMock = mock(AuthenticationProvider.class);
+		final var adapter = new OkHttpRequestAdapter(authenticationProviderMock) {
+			public Request test() throws Exception {
+				var ri = new RequestInformation();
+				ri.httpMethod = method;
+				ri.urlTemplate = "http://localhost:1234";
+				var span1 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
+				var span2 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
+				return this.getRequestFromRequestInformation(ri, span1, span2);
+			}
+		};
+
+		final var request = assertDoesNotThrow(() -> adapter.test());
+		assertNotNull(request.body());
+	}
 	@ParameterizedTest
 	@ValueSource(ints = {200, 201, 202, 203, 206})
 	public void SendStreamReturnsUsableStream(int statusCode) throws Exception {

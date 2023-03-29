@@ -82,7 +82,7 @@ public class RequestInformation {
             pathParameters.clear();
         }
     }
-    private static String RAW_URL_KEY = "request-raw-url";
+    static String RAW_URL_KEY = "request-raw-url";
     /** The HTTP method for the request */
     @Nullable
     public HttpMethod httpMethod;

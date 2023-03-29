@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 
 import com.microsoft.kiota.ApiClientBuilder;
 import com.microsoft.kiota.ApiException;
+import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
 import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.ResponseHandlerOption;
@@ -586,6 +587,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             !(statusCode >= 500 && statusCode < 600 && errorMappings.containsKey("5XX"))) {
 		        spanForAttributes.setAttribute(errorMappingFoundAttributeName, false);
                 final ApiException result = new ApiException("the server returned an unexpected status code and no error class is registered for this code " + statusCode);
+                result.responseStatusCode = statusCode;
                 spanForAttributes.recordException(result);
                 throw result;
             }
@@ -603,6 +605,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 		            spanForAttributes.setAttribute(errorBodyFoundAttributeName, false);
                     closeResponse = false;
                     final ApiException result = new ApiException("service returned status code" + statusCode + " but no response body was found");
+                    result.responseStatusCode = statusCode;
                     spanForAttributes.recordException(result);
                     throw result;
                 }
@@ -616,6 +619,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     } else {
                         result = new ApiException("unexpected error type " + error.getClass().getName());
                     }
+                    result.responseStatusCode = statusCode;
                     spanForAttributes.recordException(result);
                     throw result;
                 } finally {
@@ -763,7 +767,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
-    private Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
+    protected @Nonnull Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             spanForAttributes.setAttribute(SemanticAttributes.HTTP_METHOD, requestInfo.httpMethod.toString());
@@ -775,8 +779,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             spanForAttributes.setAttribute(SemanticAttributes.HTTP_HOST, requestURL.getHost());
             spanForAttributes.setAttribute(SemanticAttributes.HTTP_SCHEME, requestURL.getProtocol());
 
-        
-            final RequestBody body = requestInfo.content == null ? 
+            RequestBody body = requestInfo.content == null ?
                 null :
                 new RequestBody() {
                     @Override
@@ -797,6 +800,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     }
 
                 };
+
+            // https://stackoverflow.com/a/35743536
+            if (body == null &&
+                    (requestInfo.httpMethod.equals(HttpMethod.POST) ||
+                     requestInfo.httpMethod.equals(HttpMethod.PATCH) ||
+                     requestInfo.httpMethod.equals(HttpMethod.PUT))) {
+                body = RequestBody.create(new byte[0]);
+            }
             final Request.Builder requestBuilder = new Request.Builder()
                                                 .url(requestURL)
                                                 .method(requestInfo.httpMethod.toString(), body);

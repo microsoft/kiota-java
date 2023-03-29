@@ -4,14 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [Unreleased]
 
 ### Added
 
 - Added NativeResponseHandler for use in Large File Upload Task in Java-Core
 
+## [0.4.0] - 2023-03-22
+
+### Added
+
+- Added a base request builder and request configuration class to reduce the amount of code being generated.
+
+## [0.3.3] - 2023-03-20
+
 ### Changed
+
+- Aligns default http client timeout to be 100 seconds
+- Updates the JsonParseNodeFactory to pass a JsonElement using `JsonParser.parseReader` rather than creating a string when creating the root parseNode.
+
+## [0.3.2] - 2023-03-16
+
+### Added
+
+### Changed
+
+- Fix add an empty body when method is POST/PUT/PATCH and the body is null
+
+## [0.3.1] - 2023-03-08
+
+# Added
+
+- Adds ResponseStatusCode property to API exception class
 
 ## [0.3.0] - 2023-02-21
 

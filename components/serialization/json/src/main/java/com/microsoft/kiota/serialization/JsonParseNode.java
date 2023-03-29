@@ -30,14 +30,6 @@ public class JsonParseNode implements ParseNode {
     private final JsonElement currentNode;
     /**
      * Creates a new instance of the JsonParseNode class.
-     * @param rawJson the raw json to parse.
-     */
-    public JsonParseNode(@Nonnull final String rawJson) {
-        Objects.requireNonNull(rawJson, "parameter node cannot be null");
-        currentNode = JsonParser.parseString(rawJson);
-    }
-    /**
-     * Creates a new instance of the JsonParseNode class.
      * @param node the node to wrap.
      */
     public JsonParseNode(@Nonnull final JsonElement node) {
