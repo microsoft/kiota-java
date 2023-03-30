@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added NativeResponseHandler for use in Large File Upload Task in Java-Core
 
+## [0.4.1] - 2023-03-29
+
+### Changed
+
+- Changed the visibility of one of the base constructors in request builders.
+
 ## [0.4.0] - 2023-03-22
 
 ### Added
