@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -176,6 +177,16 @@ public class RequestInformation {
         for(final RequestOption option : options) {
             requestOptions.remove(option.getClass().getCanonicalName());
         }
+    }
+    /**
+     * Adds a response hanlder as a RequestOption.
+     * @param responseHandler the response handler to add to the request. 
+     */
+    public void setResponseHandler(@Nonnull ResponseHandler responseHandler) {
+        Objects.requireNonNull(responseHandler);
+        ResponseHandlerOption handlerOption = new ResponseHandlerOption();
+        handlerOption.setResponseHandler(responseHandler);
+        addRequestOptions(new ArrayList<>(Arrays.asList(handlerOption)));
     }
     @Nonnull
     private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
