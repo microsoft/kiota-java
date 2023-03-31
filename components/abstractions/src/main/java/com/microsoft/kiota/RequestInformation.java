@@ -83,7 +83,7 @@ public class RequestInformation {
             pathParameters.clear();
         }
     }
-    static String RAW_URL_KEY = "request-raw-url";
+    static final String RAW_URL_KEY = "request-raw-url";
     /** The HTTP method for the request */
     @Nullable
     public HttpMethod httpMethod;
@@ -201,8 +201,8 @@ public class RequestInformation {
         this.content = value;
         headers.add(CONTENT_TYPE_HEADER, BINARY_CONTENT_TYPE);
     }
-    private final String SERIALIZE_ERROR = "could not serialize payload";
-    private final String SPAN_NAME = "setContentFromParsable";
+    private static final String SERIALIZE_ERROR = "could not serialize payload";
+    private static final String SPAN_NAME = "setContentFromParsable";
     private static final String OBSERVABILITY_TRACER_NAME = "com.microsoft.kiota";
     /**
      * Sets the request body from a model with the specified content type.

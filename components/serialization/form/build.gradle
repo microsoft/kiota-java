@@ -33,8 +33,8 @@ spotbugsMain {
     excludeFilter = file("spotBugsExcludeFilter.xml")
     reports {
         html {
-            enabled = true
-            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            required
+            outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
     }
@@ -44,8 +44,8 @@ spotbugsTest {
     excludeFilter = file("spotBugsExcludeFilter.xml")
     reports {
         html {
-            enabled = true
-            destination = file("$buildDir/reports/spotbugs/test/spotbugs.html")
+            required
+            outputLocation = file("$buildDir/reports/spotbugs/test/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
     }
@@ -53,7 +53,7 @@ spotbugsTest {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
+        xml.required
     }
 }
 
@@ -234,6 +234,6 @@ gradle.taskGraph.whenReady { taskGraph ->
 
 model {
     tasks.generatePomFileForMavenPublication {
-        destination = file("${project.buildDir}/generated-pom.xml")
+        outputLocation = file("${project.buildDir}/generated-pom.xml")
     }
 }
