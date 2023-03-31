@@ -1,7 +1,7 @@
 package com.microsoft.kiota;
 
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
@@ -24,14 +24,14 @@ public class NativeResponseHandler implements ResponseHandler {
      * Set the error mappings for the response to use when deserializing failed responses bodies.
      * @param errorMappings The designated error mappings.
      */
-    public void setErrorMappings(HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public void setErrorMappings(Map<String, ParsableFactory<? extends Parsable>> errorMappings) {
         this.errorMappings = new HashMap<>(errorMappings);
     }
     /**
      * Get the error mappings for the response when deserializing failed response bodies.
      * @return The error mappings for failed response bodies.
      */
-    public HashMap<String, ParsableFactory<? extends Parsable>> getErrorMappings() {
+    public Map<String, ParsableFactory<? extends Parsable>> getErrorMappings() {
         return new HashMap<>(this.errorMappings);
     }
     /**
