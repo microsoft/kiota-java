@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,14 +35,14 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 /** This class represents an abstract HTTP request. */
 public class RequestInformation {
     /** Creates a new instance of the request information class. */
-    public RequestInformation() {
+    public RequestInformation() { //Default constructor
     }
     /** The url template for the current request */
     @Nullable
     public String urlTemplate;
     /** The path parameters for the current request */
     @Nullable
-    public HashMap<String, Object> pathParameters = new HashMap<>();
+    public Map<String, Object> pathParameters = new HashMap<>();
     private URI uri;
     /** Gets the URI of the request. 
      * @throws URISyntaxException when the uri template is invalid.
@@ -82,7 +83,7 @@ public class RequestInformation {
             pathParameters.clear();
         }
     }
-    static String RAW_URL_KEY = "request-raw-url";
+    static final String RAW_URL_KEY = "request-raw-url";
     /** The HTTP method for the request */
     @Nullable
     public HttpMethod httpMethod;
@@ -177,6 +178,16 @@ public class RequestInformation {
             requestOptions.remove(option.getClass().getCanonicalName());
         }
     }
+    /**
+     * Adds a response hanlder as a RequestOption.
+     * @param responseHandler the response handler to add to the request. 
+     */
+    public void setResponseHandler(@Nonnull ResponseHandler responseHandler) {
+        Objects.requireNonNull(responseHandler);
+        ResponseHandlerOption handlerOption = new ResponseHandlerOption();
+        handlerOption.setResponseHandler(responseHandler);
+        addRequestOptions(new ArrayList<>(Arrays.asList(handlerOption)));
+    }
     @Nonnull
     private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
     @Nonnull
@@ -190,7 +201,9 @@ public class RequestInformation {
         this.content = value;
         headers.add(CONTENT_TYPE_HEADER, BINARY_CONTENT_TYPE);
     }
-    private static final String observabilityTracerName = "com.microsoft.kiota";
+    private static final String SERIALIZE_ERROR = "could not serialize payload";
+    private static final String SPAN_NAME = "setContentFromParsable";
+    private static final String OBSERVABILITY_TRACER_NAME = "com.microsoft.kiota";
     /**
      * Sets the request body from a model with the specified content type.
      * @param values the models.
@@ -199,7 +212,7 @@ public class RequestInformation {
      * @param <T> the model type.
      */
     public <T extends Parsable> void setContentFromParsable(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T[] values) {
-        final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.add(CONTENT_TYPE_HEADER, contentType);
@@ -209,7 +222,7 @@ public class RequestInformation {
                 writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
-                final RuntimeException result = new RuntimeException("could not serialize payload", ex);
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
                 span.recordException(result);
                 throw result;
             }
@@ -225,7 +238,7 @@ public class RequestInformation {
      * @param <T> the model type.
      */
     public <T extends Parsable> void setContentFromParsable(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T value) {
-        final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
                 headers.add(CONTENT_TYPE_HEADER, contentType);
@@ -233,7 +246,7 @@ public class RequestInformation {
                 writer.writeObjectValue(null, value);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
-                final RuntimeException result = new RuntimeException("could not serialize payload", ex);
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
                 span.recordException(result);
                 throw result;
             }
@@ -262,7 +275,7 @@ public class RequestInformation {
      * @param <T> the model type.
      */
     public <T> void setContentFromScalar(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T value) {
-        final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
                 headers.add(CONTENT_TYPE_HEADER, contentType);
@@ -301,7 +314,7 @@ public class RequestInformation {
                 }
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
-                final RuntimeException result = new RuntimeException("could not serialize payload", ex);
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
                 span.recordException(result);
                 throw result;
             }
@@ -317,7 +330,7 @@ public class RequestInformation {
      * @param <T> the model type.
      */
     public <T> void setContentFromScalarCollection(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String contentType, @Nonnull final T[] values) {
-        final Span span = GlobalOpenTelemetry.getTracer(observabilityTracerName).spanBuilder("setContentFromParsable").startSpan();
+        final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.add(CONTENT_TYPE_HEADER, contentType);
@@ -326,7 +339,7 @@ public class RequestInformation {
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
-                final RuntimeException result = new RuntimeException("could not serialize payload", ex);
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
                 span.recordException(result);
                 throw result;
             }
