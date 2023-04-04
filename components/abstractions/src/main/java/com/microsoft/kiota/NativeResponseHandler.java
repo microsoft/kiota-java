@@ -39,7 +39,7 @@ public class NativeResponseHandler implements ResponseHandler {
      * Get the value for the response.
      * @return the value of the response.
      */
-    @Nullable
+    @Nonnull
     public Object getValue() {
         return this.value;
     }
