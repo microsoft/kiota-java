@@ -1,5 +1,6 @@
 package com.microsoft.kiota;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -27,5 +28,6 @@ public class ApiException extends Exception {
     public int responseStatusCode;
 
     /** The HTTP response headers for the error response*/
-    public Map<String, List<String>> responseHeaders;
+    @Nonnull
+    public Map<String, List<String>> responseHeaders = new HashMap<String, List<String>>();
 }
