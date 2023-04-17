@@ -581,6 +581,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
             final String statusCodeAsString = Integer.toString(response.code());
             final Integer statusCode = response.code();
+            final Map<String, List<String>> responseHeaders = response.headers().toMultimap();
             if (errorMappings == null ||
             !errorMappings.containsKey(statusCodeAsString) &&
             !(statusCode >= 400 && statusCode < 500 && errorMappings.containsKey("4XX")) &&
@@ -588,6 +589,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 		        spanForAttributes.setAttribute(errorMappingFoundAttributeName, false);
                 final ApiException result = new ApiException("the server returned an unexpected status code and no error class is registered for this code " + statusCode);
                 result.responseStatusCode = statusCode;
+                result.responseHeaders = responseHeaders;
                 spanForAttributes.recordException(result);
                 throw result;
             }
@@ -606,6 +608,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     closeResponse = false;
                     final ApiException result = new ApiException("service returned status code" + statusCode + " but no response body was found");
                     result.responseStatusCode = statusCode;
+                    result.responseHeaders = responseHeaders;
                     spanForAttributes.recordException(result);
                     throw result;
                 }
@@ -620,6 +623,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         result = new ApiException("unexpected error type " + error.getClass().getName());
                     }
                     result.responseStatusCode = statusCode;
+                    result.responseHeaders = responseHeaders;
                     spanForAttributes.recordException(result);
                     throw result;
                 } finally {

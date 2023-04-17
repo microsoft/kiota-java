@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.4.3] - 2023-04-17
+
+### Added
+
+- Adds responseHeader to APIException class
+
 ## [0.4.2] - 2023-03-31
 
 ### Added
