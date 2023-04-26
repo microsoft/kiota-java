@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,6 +33,7 @@ import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
 import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.ResponseHandlerOption;
+import com.microsoft.kiota.ResponseHeaders;
 import com.microsoft.kiota.ResponseHandler;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
@@ -581,7 +583,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
             final String statusCodeAsString = Integer.toString(response.code());
             final Integer statusCode = response.code();
-            final Map<String, List<String>> responseHeaders = response.headers().toMultimap();
+            final ResponseHeaders responseHeaders = new ResponseHeaders();
+            response.headers().toMultimap().forEach((name,value) ->{
+                Objects.requireNonNull(name);
+                responseHeaders.put(name, new HashSet<>(value));
+            });
             if (errorMappings == null ||
             !errorMappings.containsKey(statusCodeAsString) &&
             !(statusCode >= 400 && statusCode < 500 && errorMappings.containsKey("4XX")) &&
@@ -771,6 +777,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
+    
+    /**
+     * Creates a new request from the request information instance.
+     * 
+     * @param requestInfo       request information instance.
+     * @param parentSpan        the parent span for telemetry.
+     * @param spanForAttributes the span for the attributes.
+     * @return the created request instance.
+     * @throws URISyntaxException if the URI is invalid.
+     * @throws MalformedURLException if the URL is invalid.
+     */
     protected @Nonnull Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
