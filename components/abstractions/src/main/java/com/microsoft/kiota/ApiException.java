@@ -31,6 +31,7 @@ public class ApiException extends Exception {
     private ResponseHeaders responseHeaders = new ResponseHeaders();
 
     /** Gets the HTTP response headers for the error response */
+    @Nonnull
     public ResponseHeaders getResponseHeaders() {
         return new ResponseHeaders(responseHeaders);
     }
