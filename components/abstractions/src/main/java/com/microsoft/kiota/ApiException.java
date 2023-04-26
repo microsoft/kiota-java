@@ -29,5 +29,5 @@ public class ApiException extends Exception {
 
     /** The HTTP response headers for the error response*/
     @Nonnull
-    public ResponseHeaders responseHeaders = new ResponseHeaders();
+    public final ResponseHeaders responseHeaders = new ResponseHeaders();
 }
