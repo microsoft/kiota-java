@@ -1,8 +1,7 @@
 package com.microsoft.kiota;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
 /** Parent type for exceptions thrown by the client when receiving failed responses to its requests. */
@@ -29,5 +28,17 @@ public class ApiException extends Exception {
 
     /** The HTTP response headers for the error response*/
     @Nonnull
-    public final ResponseHeaders responseHeaders = new ResponseHeaders();
+    private ResponseHeaders responseHeaders = new ResponseHeaders();
+
+    /** Gets the HTTP response headers for the error response */
+    public ResponseHeaders getResponseHeaders() {
+        return new ResponseHeaders(responseHeaders);
+    }
+
+    /** Sets the HTTP response headers for the error response */
+    public void setResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
+        Objects.requireNonNull(responseHeaders);
+        this.responseHeaders = new ResponseHeaders(responseHeaders);
+    }
+
 }

@@ -7,6 +7,18 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 class Headers extends CaseInsensitiveMap {
+    /** Default constructor */
+    public Headers() {
+        super();
+    }
+
+    /** Copy constructor */
+    public Headers(@Nonnull Headers headers) {
+        super();
+        Objects.requireNonNull(headers);
+        putAll(headers);
+    }
+
     /**
      * Adds a header to the current request.
      * 
