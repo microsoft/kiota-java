@@ -325,9 +325,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             return CompletableFuture.completedFuture(null);
                         } else {
                             if(targetClass == InputStream.class) {
+                                closeResponse = false;
                                 final ResponseBody body = response.body();
                                 if(body == null) {
-                                    closeResponse = false;
                                     return CompletableFuture.completedFuture(null);
                                 }
                                 final InputStream rawInputStream = body.byteStream();

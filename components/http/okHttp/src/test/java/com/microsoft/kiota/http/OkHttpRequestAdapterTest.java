@@ -2,6 +2,7 @@ package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import okio.Okio;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,6 +14,9 @@ import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.RequestInformation;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.io.InputStream;
@@ -62,20 +66,28 @@ public class OkHttpRequestAdapterTest {
 	public void SendStreamReturnsUsableStream(int statusCode) throws Exception {
 		final var authenticationProviderMock = mock(AuthenticationProvider.class);
 		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		final var text = "my-demo-text";
+		final var bufferedSource = Okio.buffer(Okio.source(new ByteArrayInputStream(text.getBytes("UTF-8"))));
 		final var client = getMockClient(new Response.Builder()
 													.code(statusCode)
 													.message("OK")
 													.protocol(Protocol.HTTP_1_1)
 													.request(new Request.Builder().url("http://localhost").build())
-													.body(ResponseBody.create("".getBytes("UTF-8"), MediaType.parse("application/json")))
+													.body(ResponseBody.create(bufferedSource, MediaType.parse("application/binary"), text.getBytes().length))
 													.build());
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
 		final var requestInformation = new RequestInformation() {{
 			setUri(new URI("https://localhost"));
 			httpMethod = HttpMethod.GET;
 		}};
-		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null).get();
-		assertNotNull(response);
+		InputStream response = null;
+		try {
+			response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null).get();
+			assertNotNull(response);
+			assertEquals(text, new String(response.readAllBytes(), StandardCharsets.UTF_8));
+		} finally {
+			response.close();
+		}
 	}
 	@ParameterizedTest
 	@ValueSource(ints = {200, 201, 202, 203, 204})
