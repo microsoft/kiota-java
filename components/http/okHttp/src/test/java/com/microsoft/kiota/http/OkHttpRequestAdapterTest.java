@@ -73,7 +73,7 @@ public class OkHttpRequestAdapterTest {
 													.message("OK")
 													.protocol(Protocol.HTTP_1_1)
 													.request(new Request.Builder().url("http://localhost").build())
-													.body(ResponseBody.create(bufferedSource, MediaType.parse("application/binary"), text.getBytes().length))
+													.body(ResponseBody.create(bufferedSource, MediaType.parse("application/binary"), text.getBytes("UTF-8").length))
 													.build());
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
 		final var requestInformation = new RequestInformation() {{
@@ -86,7 +86,9 @@ public class OkHttpRequestAdapterTest {
 			assertNotNull(response);
 			assertEquals(text, new String(response.readAllBytes(), StandardCharsets.UTF_8));
 		} finally {
-			response.close();
+			if (response != null) {
+				response.close();	
+			}
 		}
 	}
 	@ParameterizedTest
