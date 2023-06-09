@@ -6,7 +6,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.guava:guava:32.0.0-jre' 
+    implementation 'com.google.guava:guava:32.0.1-jre' 
     
     api project(':components:abstractions')
 }
