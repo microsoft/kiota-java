@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.4.4] - 2023-06-09
+
+### Added
+
+- Fix a bug where the OkHttp client would close InputStream responses before they reach the user code
+
 ## [0.4.3] - 2023-04-17
 
 ### Added
