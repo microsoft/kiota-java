@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class IntersectionWrapperParseTests {
+class IntersectionWrapperParseTests {
 	private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
 	private static final JsonSerializationWriterFactory _serializationWriterFactory = new JsonSerializationWriterFactory();
 	private static final String contentType = "application/json";
 	@Test
-	public void ParsesIntersectionTypeComplexProperty1() throws UnsupportedEncodingException {
+	void ParsesIntersectionTypeComplexProperty1() throws UnsupportedEncodingException {
 		final var initialString = "{\"displayName\":\"McGill\",\"officeLocation\":\"Montreal\", \"id\": \"opaque\"}";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -31,7 +31,7 @@ public class IntersectionWrapperParseTests {
 		assertEquals("McGill", result.getComposedType2().getDisplayName());
 	}
 	@Test
-	public void ParsesIntersectionTypeComplexProperty2() throws UnsupportedEncodingException {
+	void ParsesIntersectionTypeComplexProperty2() throws UnsupportedEncodingException {
 		final var initialString = "{\"displayName\":\"McGill\",\"officeLocation\":\"Montreal\", \"id\": 10}";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -46,7 +46,7 @@ public class IntersectionWrapperParseTests {
 		assertEquals("McGill", result.getComposedType2().getDisplayName());
 	}
 	@Test
-	public void ParsesIntersectionTypeComplexProperty3() throws UnsupportedEncodingException {
+	void ParsesIntersectionTypeComplexProperty3() throws UnsupportedEncodingException {
 		final var initialString = "[{\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Ottawa\", \"id\": \"11\"}, {\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Montreal\", \"id\": \"10\"}]";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -60,7 +60,7 @@ public class IntersectionWrapperParseTests {
 		assertEquals("Ottawa", result.getComposedType3().get(0).getOfficeLocation());
 	}
 	@Test
-	public void ParsesIntersectionTypeStringValue() throws UnsupportedEncodingException {
+	void ParsesIntersectionTypeStringValue() throws UnsupportedEncodingException {
 		final var initialString = "\"officeLocation\"";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -73,13 +73,13 @@ public class IntersectionWrapperParseTests {
 		assertEquals("officeLocation", result.getStringValue());
 	}
 	@Test
-	public void SerializesIntersectionTypeStringValue() throws IOException {
+	void SerializesIntersectionTypeStringValue() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new IntersectionTypeMock() {{
 				setStringValue("officeLocation");
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("\"officeLocation\"", text);
@@ -87,7 +87,7 @@ public class IntersectionWrapperParseTests {
 		}
 	}
 	@Test
-	public void SerializesIntersectionTypeComplexProperty1() throws IOException {
+	void SerializesIntersectionTypeComplexProperty1() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new IntersectionTypeMock() {{
 				setComposedType1(new TestEntity() {{
@@ -99,7 +99,7 @@ public class IntersectionWrapperParseTests {
 				}});
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("{\"id\":\"opaque\",\"officeLocation\":\"Montreal\",\"displayName\":\"McGill\"}", text);
@@ -107,7 +107,7 @@ public class IntersectionWrapperParseTests {
 		}
 	}
 	@Test
-	public void SerializesIntersectionTypeComplexProperty2() throws IOException {
+	void SerializesIntersectionTypeComplexProperty2() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new IntersectionTypeMock() {{
 				setComposedType2(new SecondTestEntity() {{
@@ -116,7 +116,7 @@ public class IntersectionWrapperParseTests {
 				}});
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("{\"displayName\":\"McGill\",\"id\":10}", text);
@@ -124,7 +124,7 @@ public class IntersectionWrapperParseTests {
 		}
 	}
 	@Test
-	public void SerializesIntersectionTypeComplexProperty3() throws IOException {
+	void SerializesIntersectionTypeComplexProperty3() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new IntersectionTypeMock() {{
 				setComposedType3(new ArrayList<>() {{
@@ -139,7 +139,7 @@ public class IntersectionWrapperParseTests {
 				}});
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("[{\"id\":\"10\",\"officeLocation\":\"Montreal\"},{\"id\":\"11\",\"officeLocation\":\"Ottawa\"}]", text);

@@ -7,9 +7,10 @@ import java.util.function.Consumer;
 
 import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.SerializationWriter;
+import com.microsoft.kiota.serialization.ComposedTypeWrapper;
 import com.microsoft.kiota.serialization.Parsable;
 
-public class UnionTypeMock implements Parsable {
+public class UnionTypeMock implements Parsable, ComposedTypeWrapper {
     private TestEntity _composedType1;
     private SecondTestEntity _composedType2;
     private String _stringValue;
@@ -21,9 +22,9 @@ public class UnionTypeMock implements Parsable {
         final ParseNode mappingValueNode = parseNode.getChildNode("@odata.type");
         if (mappingValueNode != null) {
             final String mappingValue = mappingValueNode.getStringValue();
-            if (mappingValue.equals("#microsoft.graph.testEntity")) {
+            if ("#microsoft.graph.testEntity".equalsIgnoreCase(mappingValue)) {
                 result.setComposedType1(new TestEntity());
-            } else if (mappingValue.equals("#microsoft.graph.secondTestEntity")) {
+            } else if ("#microsoft.graph.secondTestEntity".equalsIgnoreCase(mappingValue)) {
                 result.setComposedType2(new SecondTestEntity());
             }
         } else if (parseNode.getStringValue() != null) {

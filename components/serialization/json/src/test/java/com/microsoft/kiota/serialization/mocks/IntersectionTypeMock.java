@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import com.microsoft.kiota.serialization.ComposedTypeWrapper;
 import com.microsoft.kiota.serialization.Parsable;
 
-public class IntersectionTypeMock implements Parsable {
+public class IntersectionTypeMock implements Parsable, ComposedTypeWrapper {
 	private TestEntity _composedType1;
     private SecondTestEntity _composedType2;
     private String _stringValue;

@@ -253,14 +253,17 @@ public class JsonSerializationWriter implements SerializationWriter {
         Objects.requireNonNull(additionalValuesToMerge);
         try {
             final List<Parsable> nonNullAdditionalValuesToMerge = Stream.of(additionalValuesToMerge).filter(Objects::nonNull).collect(Collectors.toList());
-            if(value != null || nonNullAdditionalValuesToMerge.size() > 0) {
+            if(value != null || !nonNullAdditionalValuesToMerge.isEmpty()) {
                 if(key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
                 if(onBeforeObjectSerialization != null && value != null) {
                     onBeforeObjectSerialization.accept(value);
                 }
-                writer.beginObject();
+                final boolean serializingComposedType = value instanceof ComposedTypeWrapper;
+                if(!serializingComposedType) {
+                    writer.beginObject();
+                }
                 if(value != null) {
                     if(onStartObjectSerialization != null) {
                         onStartObjectSerialization.accept(value, this);
@@ -279,7 +282,9 @@ public class JsonSerializationWriter implements SerializationWriter {
                         onAfterObjectSerialization.accept(additionalValueToMerge);
                     }
                 }
-                writer.endObject();
+                if(!serializingComposedType) {
+                    writer.endObject();
+                }
                 if(onAfterObjectSerialization != null && value != null) {
                     onAfterObjectSerialization.accept(value);
                 }
