@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-java@v3
       with: 
         java-version: 17
-        distribution: 'adopt'
+        distribution: 'temurin'
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
@@ -65,7 +65,7 @@ jobs:
       uses: actions/setup-java@v3
       with: 
         java-version: 17
-        distribution: 'adopt'
+        distribution: 'temurin'
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
