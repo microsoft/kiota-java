@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class UnionWrapperParseTests {
+class UnionWrapperParseTests {
 	private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
 	private static final JsonSerializationWriterFactory _serializationWriterFactory = new JsonSerializationWriterFactory();
 	private static final String contentType = "application/json";
 	@Test
-	public void ParsesUnionTypeComplexProperty1() throws UnsupportedEncodingException {
+	void ParsesUnionTypeComplexProperty1() throws UnsupportedEncodingException {
 		final var initialString = "{\"@odata.type\":\"#microsoft.graph.testEntity\",\"officeLocation\":\"Montreal\", \"id\": \"opaque\"}";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -31,7 +31,7 @@ public class UnionWrapperParseTests {
 		assertEquals("opaque", result.getComposedType1().getId());
 	}
 	@Test
-	public void ParsesUnionTypeComplexProperty2() throws UnsupportedEncodingException {
+	void ParsesUnionTypeComplexProperty2() throws UnsupportedEncodingException {
 		final var initialString = "{\"@odata.type\":\"#microsoft.graph.secondTestEntity\",\"officeLocation\":\"Montreal\", \"id\": 10}";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -44,7 +44,7 @@ public class UnionWrapperParseTests {
 		assertEquals(10, result.getComposedType2().getId());
 	}
 	@Test
-	public void ParsesUnionTypeComplexProperty3() throws UnsupportedEncodingException {
+	void ParsesUnionTypeComplexProperty3() throws UnsupportedEncodingException {
 		final var initialString = "[{\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Ottawa\", \"id\": \"11\"}, {\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Montreal\", \"id\": \"10\"}]";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -58,7 +58,7 @@ public class UnionWrapperParseTests {
 		assertEquals("11", result.getComposedType3().get(0).getId());
 	}
 	@Test
-	public void ParsesUnionTypeStringValue() throws UnsupportedEncodingException {
+	void ParsesUnionTypeStringValue() throws UnsupportedEncodingException {
 		final var initialString = "\"officeLocation\"";
 		final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
 		final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -71,13 +71,13 @@ public class UnionWrapperParseTests {
 		assertEquals("officeLocation", result.getStringValue());
 	}
 	@Test
-	public void SerializesUnionTypeStringValue() throws IOException {
+	void SerializesUnionTypeStringValue() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new UnionTypeMock() {{
 				setStringValue("officeLocation");
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("\"officeLocation\"", text);
@@ -85,7 +85,7 @@ public class UnionWrapperParseTests {
 		}
 	}
 	@Test
-	public void SerializesUnionTypeComplexProperty1() throws IOException {
+	void SerializesUnionTypeComplexProperty1() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new UnionTypeMock() {{
 				setComposedType1(new TestEntity() {{
@@ -97,7 +97,7 @@ public class UnionWrapperParseTests {
 				}});
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("{\"id\":\"opaque\",\"officeLocation\":\"Montreal\"}", text);
@@ -105,7 +105,7 @@ public class UnionWrapperParseTests {
 		}
 	}
 	@Test
-	public void SerializesUnionTypeComplexProperty2() throws IOException {
+	void SerializesUnionTypeComplexProperty2() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new UnionTypeMock() {{
 				setComposedType2(new SecondTestEntity() {{
@@ -114,7 +114,7 @@ public class UnionWrapperParseTests {
 				}});
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("{\"displayName\":\"McGill\",\"id\":10}", text);
@@ -122,7 +122,7 @@ public class UnionWrapperParseTests {
 		}
 	}
 	@Test
-	public void SerializesUnionTypeComplexProperty3() throws IOException {
+	void SerializesUnionTypeComplexProperty3() throws IOException {
 		try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
 			var model = new UnionTypeMock() {{
 				setComposedType3(new ArrayList<>() {{
@@ -137,7 +137,7 @@ public class UnionWrapperParseTests {
 				}});
 			}};
 
-			model.serialize(writer);
+			writer.writeObjectValue("", model);
 			try (final var result = writer.getSerializedContent()) {
 				final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
 				assertEquals("[{\"id\":\"10\",\"officeLocation\":\"Montreal\"},{\"id\":\"11\",\"officeLocation\":\"Ottawa\"}]", text);

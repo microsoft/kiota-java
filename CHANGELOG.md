@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.4.5] - 2023-06-27
+
+### Changed
+
+- Fixed a bug where composed types would not serialize properly.
+
 ## [0.4.4] - 2023-06-09
 
 ### Added
