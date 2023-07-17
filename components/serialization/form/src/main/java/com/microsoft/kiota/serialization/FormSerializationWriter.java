@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.PeriodAndDuration;
+
 import java.lang.Enum;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -13,7 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
@@ -106,7 +107,7 @@ public class FormSerializationWriter implements SerializationWriter {
         if(value != null)
             writeStringValue(key, value.format(DateTimeFormatter.ISO_LOCAL_TIME));
     }
-    public void writePeriodValue(@Nullable final String key, @Nullable final Period value) {
+    public void writePeriodAndDurationValue(@Nullable final String key, @Nullable final PeriodAndDuration value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }
@@ -236,8 +237,8 @@ public class FormSerializationWriter implements SerializationWriter {
                 this.writeLocalDateValue(key, (LocalDate)value);
             else if(valueClass.equals(LocalTime.class))
                 this.writeLocalTimeValue(key, (LocalTime)value);
-            else if(valueClass.equals(Period.class))
-                this.writePeriodValue(key, (Period)value);
+            else if(valueClass.equals(PeriodAndDuration.class))
+                this.writePeriodAndDurationValue(key, (PeriodAndDuration)value);
             else if(value instanceof Iterable<?>)
                 this.writeCollectionOfPrimitiveValues(key, (Iterable<?>)value);
             else

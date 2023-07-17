@@ -1,12 +1,13 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.PeriodAndDuration;
+
 import java.lang.UnsupportedOperationException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.List;
@@ -86,8 +87,8 @@ public class TextParseNode implements ParseNode {
         return LocalTime.parse(this.getStringValue());
     }
     @Nullable
-    public Period getPeriodValue() {
-        return Period.parse(this.getStringValue());
+    public PeriodAndDuration getPeriodAndDurationValue() {
+        return PeriodAndDuration.parse(this.getStringValue());
     }
     @Nullable
     public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {

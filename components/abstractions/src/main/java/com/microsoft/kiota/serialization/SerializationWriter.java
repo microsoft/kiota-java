@@ -1,11 +1,12 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.PeriodAndDuration;
+
 import java.io.Closeable;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.util.Map;
 import java.util.UUID;
 import java.util.EnumSet;
@@ -98,11 +99,11 @@ public interface SerializationWriter extends Closeable {
      */
     void writeLocalTimeValue(@Nullable final String key, @Nullable final LocalTime value);
     /**
-     * Writes the specified Period value to the stream with an optional given key.
+     * Writes the specified Period/Duration value to the stream with an optional given key.
      * @param key the key to write the value with.
      * @param value the value to write to the stream.
      */
-    void writePeriodValue(@Nullable final String key, @Nullable final Period value);
+    void writePeriodAndDurationValue(@Nullable final String key, @Nullable final PeriodAndDuration value);
     /**
      * Writes the specified collection of primitive values to the stream with an optional given key.
      * @param key the key to write the value with.

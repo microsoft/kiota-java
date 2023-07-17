@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization.mocks;
 
+import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.SerializationWriter;
 
@@ -8,7 +9,6 @@ import java.util.function.Consumer;
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Period;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.AdditionalDataHolder;
@@ -49,12 +49,12 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	public void setDeviceNames(List<String> value) {
 		this._deviceNames = new ArrayList<String>(value);
 	}
-	private Period _workDuration;
-	public Period getWorkDuration() {
+	private PeriodAndDuration _workDuration;
+	public PeriodAndDuration getWorkDuration() {
 		return _workDuration;
 	}
 
-	public void setWorkDuration(Period value) {
+	public void setWorkDuration(PeriodAndDuration value) {
 		this._workDuration = value;
 	}
 
@@ -100,7 +100,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 				setBirthDay(n.getLocalDateValue());
 			});
 			put("workDuration", (n) -> {
-				setWorkDuration(n.getPeriodValue());
+				setWorkDuration(n.getPeriodAndDurationValue());
 			});
 			put("startWorkTime", (n) -> {
 				setStartWorkTime(n.getLocalTimeValue());
@@ -123,7 +123,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 		writer.writeStringValue("id", getId());
 		writer.writeStringValue("officeLocation", getOfficeLocation());
 		writer.writeLocalDateValue("birthDay", getBirthDay());
-		writer.writePeriodValue("workDuration", getWorkDuration());
+		writer.writePeriodAndDurationValue("workDuration", getWorkDuration());
 		writer.writeLocalTimeValue("startWorkTime", getStartWorkTime());
 		writer.writeLocalTimeValue("endWorkTime", getEndWorkTime());
 		writer.writeOffsetDateTimeValue("createdDateTime", getCreatedDateTime());

@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.PeriodAndDuration;
+
 import java.lang.Enum;
 import java.lang.UnsupportedOperationException;
 import java.math.BigDecimal;
@@ -12,7 +14,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
@@ -103,7 +104,7 @@ public class TextSerializationWriter implements SerializationWriter {
         if(value != null)
             writeStringValue(key, value.format(DateTimeFormatter.ISO_LOCAL_TIME));
     }
-    public void writePeriodValue(@Nullable final String key, @Nullable final Period value) {
+    public void writePeriodAndDurationValue(@Nullable final String key, @Nullable final PeriodAndDuration value) {
         if(value != null)
             writeStringValue(key, value.toString());
     }

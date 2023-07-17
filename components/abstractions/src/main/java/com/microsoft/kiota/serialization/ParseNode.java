@@ -1,11 +1,12 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.PeriodAndDuration;
+
 import java.lang.Enum;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Period;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
@@ -111,7 +112,7 @@ public interface ParseNode {
      * @return the Period value of the node.
      */
     @Nullable
-    Period getPeriodValue();
+    PeriodAndDuration getPeriodAndDurationValue();
 
     /**
      * Gets the Enum value of the node.

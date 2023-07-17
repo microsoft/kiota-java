@@ -10,11 +10,11 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import com.microsoft.kiota.PeriodAndDuration;
 import org.junit.jupiter.api.Test;
 
 import com.microsoft.kiota.serialization.mocks.TestEntity;
@@ -24,7 +24,7 @@ public class FormSerializationWriterTests {
 	public void writesSampleObjectValue() throws IOException, UnsupportedEncodingException {
 		final var testEntity = new TestEntity() {{
 			setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
-			setWorkDuration(Period.parse("P1M"));
+			setWorkDuration(PeriodAndDuration.parse("P1M"));
 			setStartWorkTime(LocalTime.of(8, 0, 0));
 			setBirthDay(LocalDate.of(2017, 9, 4));
 			setDeviceNames(Arrays.asList("device1","device2"));
@@ -58,7 +58,7 @@ public class FormSerializationWriterTests {
 	public void writesSampleCollectionOfObjectValues() throws IOException {
 		final var testEntity = new TestEntity() {{
 			setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
-			setWorkDuration(Period.parse("P1M"));
+			setWorkDuration(PeriodAndDuration.parse("P1M"));
 			setStartWorkTime(LocalTime.of(8, 0, 0));
 			setBirthDay(LocalDate.of(2017, 9, 4));
 		}};
@@ -71,7 +71,7 @@ public class FormSerializationWriterTests {
 	public void writesNestedObjectValuesInAdditionalData() throws IOException {
 		final var testEntity = new TestEntity() {{
 			setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
-			setWorkDuration(Period.parse("P1M"));
+			setWorkDuration(PeriodAndDuration.parse("P1M"));
 			setStartWorkTime(LocalTime.of(8, 0, 0));
 			setBirthDay(LocalDate.of(2017, 9, 4));
 		}};
