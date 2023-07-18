@@ -45,6 +45,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * Gets the period section of the type.
      * @return the period section
      */
+    @Nonnull
     public Period getPeriod() {
         return period;
     }
@@ -57,6 +58,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * Gets the duration section of the type.
      * @return the duration section
      */
+    @Nonnull
     public Duration getDuration() {
         return duration;
     }
@@ -79,7 +81,8 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * @param duration  the {@code Duration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    public static PeriodAndDuration of(Period period, Duration duration) {
+    @Nonnull
+    public static PeriodAndDuration of(@Nonnull Period period, @Nonnull Duration duration) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(period, duration);
@@ -90,7 +93,8 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * @param period  the {@code Period}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    public static PeriodAndDuration ofPeriod(Period period) {
+    @Nonnull
+    public static PeriodAndDuration ofPeriod(@Nonnull Period period) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         return new PeriodAndDuration(period, Duration.ZERO);
     }
@@ -100,7 +104,8 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * @param duration  the {@code Duration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    public static PeriodAndDuration ofDuration(Duration duration) {
+    @Nonnull
+    public static PeriodAndDuration ofDuration(@Nonnull Duration duration) {
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(Period.ZERO, duration);
     }
@@ -109,7 +114,8 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * @param stringValue the {@code String} parse from.
      * @return parsed instance of {@code PeriodAndDuration}
      */
-    public static PeriodAndDuration parse(String stringValue) {
+    @Nonnull
+    public static PeriodAndDuration parse(@Nonnull  String stringValue) {
         Objects.requireNonNull(stringValue, "parameter stringValue cannot be null");
 
         if (stringValue.startsWith("PT")) {// it is only a duration value

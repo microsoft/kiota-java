@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.4.6] - 2023-07-20
+
+### Added
+
+- Adds the `PeriodAndDuration` type to aggregate `Period` and `Duration` serialization
+
+### Changed
+
+- Drops the `getPeriodValue` function in favour of `getPeriodAndDurationValue` in the serialization interface.
+- Drops the `writePeriodValue` function in favour of `writePeriodAndDurationValue` in the serialization interface.
+
 ## [0.4.5] - 2023-06-27
 
 ### Changed
