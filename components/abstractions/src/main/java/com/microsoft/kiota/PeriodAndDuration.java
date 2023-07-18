@@ -103,8 +103,23 @@ public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDu
      */
     public static PeriodAndDuration parse(String stringValue) {
         Objects.requireNonNull(stringValue, "parameter stringValue cannot be null");
-        //TODO implement me
-        return null;
+
+        if (stringValue.startsWith("PT")) {// it is only a duration value
+            return PeriodAndDuration.ofDuration(Duration.parse(stringValue));
+        }
+        int timePosition = stringValue.indexOf("T");
+        if (timePosition < 0) {// only a period value as there is no time component
+            return PeriodAndDuration.ofPeriod(Period.parse(stringValue));
+        }
+
+        String sign = "";
+        if (stringValue.charAt(0) == '-') {
+            sign = "-";
+        }// no need for checking the `+` sign as this is the default
+
+        Period period = Period.parse(stringValue.substring(0, timePosition));//sign will be passed and parsed
+        Duration duration = Duration.parse(sign + "P" + stringValue.substring(timePosition));// pass the negative if need be
+        return PeriodAndDuration.of(period, duration);
     }
 
     /**
@@ -114,8 +129,21 @@ public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDu
     @Override
     public int compareTo(@Nonnull PeriodAndDuration periodAndDuration) {
         Objects.requireNonNull(periodAndDuration, "parameter periodAndDuration cannot be null");
-        //TODO implement me
-        return 0;
+
+        if(this.equals(periodAndDuration)) {
+            return 0;//they are the same/equal
+        }
+
+        if(this.period.equals(periodAndDuration.getPeriod())) {// same period so just compare the durations
+            return this.duration.compareTo(periodAndDuration.getDuration());
+        }
+
+        // just check if the difference in the period is negative as this makes the duration moot
+        if(this.period.minus(periodAndDuration.getPeriod()).isNegative()) {
+            return -1;//this period is smaller. So duration won't count
+        }else {
+            return 1;
+        }
     }
 
     /**
@@ -201,6 +229,10 @@ public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDu
      */
     @Override
     public boolean equals(Object otherPeriodAndDuration) {
+        if(this == otherPeriodAndDuration) {
+            return true; // same instance
+        }
+
         if (otherPeriodAndDuration instanceof PeriodAndDuration) {
             PeriodAndDuration otherInstance = (PeriodAndDuration) otherPeriodAndDuration;
             return this.period.equals(otherInstance.period) && this.duration.equals(otherInstance.duration);
