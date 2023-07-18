@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/*
+/**
  * This annotation allows mapping between the query parameter name in the template and the property name in the class.
  */
 @Retention(RetentionPolicy.RUNTIME)

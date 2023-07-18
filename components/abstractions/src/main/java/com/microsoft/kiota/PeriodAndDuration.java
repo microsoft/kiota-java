@@ -1,6 +1,7 @@
 package com.microsoft.kiota;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Period;
@@ -9,10 +10,11 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 import static java.time.temporal.ChronoUnit.YEARS;
 import static java.time.temporal.ChronoUnit.MONTHS;
@@ -23,7 +25,11 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.time.temporal.ChronoUnit.NANOS;
 
 
-public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDuration>, Serializable {
+/**
+ * The aggregate type for {@code Period} and {@code Duration }
+ */
+@Immutable
+public final class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDuration>, Serializable {
 
     /**
      * A constant for a duration of zero.
@@ -57,6 +63,8 @@ public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDu
 
     /**
      * Non-public Constructor for PeriodAndDuration
+     * @param period The {@code Period} component of the aggregate type
+     * @param duration The {@code Duration } component of the aggregate type
      */
     protected PeriodAndDuration(@Nonnull Period period, @Nonnull Duration duration) {
         Objects.requireNonNull(period, "parameter period cannot be null");
@@ -182,7 +190,7 @@ public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDu
      */
     @Override
     public List<TemporalUnit> getUnits() {
-        return UNITS;
+        return new ArrayList<>(UNITS);
     }
 
     /**
@@ -222,7 +230,14 @@ public class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDu
     }
 
     /**
-     /**
+     * Gets the hashcode for the object.
+     * @return The hashCode of the object
+     */
+    @Override
+    public int hashCode() {
+        return period.hashCode() + duration.hashCode();
+    }
+    /**
      * Checks if this instance is equal to the specified {@code PeriodAndDuration}.
      * @param otherPeriodAndDuration  the other Object, null returns false
      * @return true if the other otherPeriodAndDuration is equal to this one

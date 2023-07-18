@@ -30,13 +30,19 @@ public class ApiException extends Exception {
     @Nonnull
     private ResponseHeaders responseHeaders = new ResponseHeaders();
 
-    /** Gets the HTTP response headers for the error response */
+    /**
+     * Gets the HTTP response headers for the error response
+     * @return The response headers collections from the failed response.
+     */
     @Nonnull
     public ResponseHeaders getResponseHeaders() {
         return new ResponseHeaders(responseHeaders);
     }
 
-    /** Sets the HTTP response headers for the error response */
+    /**
+     * Sets the HTTP response headers for the error response
+     * @param responseHeaders The response headers collections to set.
+     */
     public void setResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
         Objects.requireNonNull(responseHeaders);
         this.responseHeaders = new ResponseHeaders(responseHeaders);

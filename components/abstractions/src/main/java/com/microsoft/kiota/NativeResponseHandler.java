@@ -9,6 +9,10 @@ import javax.annotation.Nullable;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParsableFactory;
+
+/**
+ * The {@code ResponseHandler} implementation to handle native response objects
+ */
 public class NativeResponseHandler implements ResponseHandler {
     private Object value;
     private HashMap<String, ParsableFactory<? extends Parsable>> errorMappings;
