@@ -68,7 +68,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * @param period The {@code Period} component of the aggregate type
      * @param duration The {@code Duration } component of the aggregate type
      */
-    protected PeriodAndDuration(@Nonnull Period period, @Nonnull Duration duration) {
+    private PeriodAndDuration(@Nonnull Period period, @Nonnull Duration duration) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         this.period = period;
@@ -118,7 +118,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
     public static PeriodAndDuration parse(@Nonnull  String stringValue) {
         Objects.requireNonNull(stringValue, "parameter stringValue cannot be null");
 
-        if (stringValue.startsWith("PT")) {// it is only a duration value
+        if (stringValue.substring(0,3).contains("PT")) {// it is only a duration value as it starts with 'PT', '+PT' or, '-PT'
             return PeriodAndDuration.ofDuration(Duration.parse(stringValue));
         }
         int timePosition = stringValue.indexOf("T");
@@ -180,7 +180,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
                 case MINUTES:
                     return duration.toMinutes() % 60;
                 case SECONDS:
-                    return duration.getSeconds();
+                    return duration.getSeconds() % 60;
                 case NANOS:
                     return duration.getNano();
                 default:
@@ -232,7 +232,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
             return period.toString();
         }
         //simply concatenate and drop the first `P` in the duration
-        return period.toString() + duration.toString().substring(1);
+        return period + duration.toString().substring(1);
     }
 
     /**
