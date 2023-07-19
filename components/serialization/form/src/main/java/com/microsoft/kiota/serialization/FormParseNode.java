@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import com.google.common.collect.Lists;
+import com.microsoft.kiota.PeriodAndDuration;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -10,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -175,10 +175,10 @@ public class FormParseNode implements ParseNode {
         return LocalTime.parse(stringValue);
     }
     @Nullable
-    public Period getPeriodValue() {
+    public PeriodAndDuration getPeriodAndDurationValue() {
         final String stringValue = getStringValue();
         if(stringValue == null) return null;
-        return Period.parse(stringValue);
+        return PeriodAndDuration.parse(stringValue);
     }
     @Nullable
     public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
@@ -227,8 +227,8 @@ public class FormParseNode implements ParseNode {
                             return (T)itemNode.getLocalDateValue();
                         } else if(targetClass == LocalTime.class) {
                             return (T)itemNode.getLocalTimeValue();
-                        } else if(targetClass == Period.class) {
-                            return (T)itemNode.getPeriodValue();
+                        } else if(targetClass == PeriodAndDuration.class) {
+                            return (T)itemNode.getPeriodAndDurationValue();
                         } else {
                             throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
                         }

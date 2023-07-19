@@ -1,8 +1,6 @@
 package com.microsoft.kiota.serialization;
 
-import com.microsoft.kiota.serialization.SerializationWriter;
-import com.microsoft.kiota.serialization.ValuedEnum;
-import com.microsoft.kiota.serialization.Parsable;
+import com.microsoft.kiota.PeriodAndDuration;
 
 import java.lang.Enum;
 import java.lang.reflect.Field;
@@ -12,11 +10,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.EnumSet;
@@ -41,11 +38,7 @@ public class JsonSerializationWriter implements SerializationWriter {
     private final JsonWriter writer;
     /** Creates a new instance of a json serialization writer */
     public JsonSerializationWriter() {
-        try {
-            this.writer = new JsonWriter(new OutputStreamWriter(this.stream, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("could not create json writer", e);
-        }
+        this.writer = new JsonWriter(new OutputStreamWriter(this.stream, StandardCharsets.UTF_8));
     }
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         if(value != null)
@@ -190,7 +183,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 throw new RuntimeException("could not serialize value", ex);
             }
     }
-    public void writePeriodValue(@Nullable final String key, @Nullable final Period value) {
+    public void writePeriodAndDurationValue(@Nullable final String key, @Nullable final PeriodAndDuration value) {
         if(value != null)
             try {
                 if(key != null && !key.isEmpty()) {
@@ -386,8 +379,8 @@ public class JsonSerializationWriter implements SerializationWriter {
                 this.writeLocalDateValue(key, (LocalDate)value);
             else if(valueClass.equals(LocalTime.class))
                 this.writeLocalTimeValue(key, (LocalTime)value);
-            else if(valueClass.equals(Period.class))
-                this.writePeriodValue(key, (Period)value);
+            else if(valueClass.equals(PeriodAndDuration.class))
+                this.writePeriodAndDurationValue(key, (PeriodAndDuration)value);
             else if(value instanceof Iterable<?>)
                 this.writeCollectionOfPrimitiveValues(key, (Iterable<?>)value);
             else if(!valueClass.isPrimitive())
@@ -420,7 +413,7 @@ public class JsonSerializationWriter implements SerializationWriter {
     public void setOnStartObjectSerialization(@Nullable final BiConsumer<Parsable, SerializationWriter> value) {
         this.onStartObjectSerialization = value;
     }
-    public void writeByteArrayValue(@Nullable final String key, @Nullable @Nonnull final byte[] value) {
+    public void writeByteArrayValue(@Nullable final String key, @Nullable final byte[] value) {
         if(value != null)
             this.writeStringValue(key, Base64.getEncoder().encodeToString(value));
     }

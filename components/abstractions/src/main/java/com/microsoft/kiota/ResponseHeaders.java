@@ -11,7 +11,10 @@ public class ResponseHeaders extends Headers {
         super();
     }
 
-    /** Copy constructor */
+    /**
+     *  Copy constructor
+     * @param responseHeaders The response headers to initialize with.
+     */
     public ResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
         super(responseHeaders);
     }

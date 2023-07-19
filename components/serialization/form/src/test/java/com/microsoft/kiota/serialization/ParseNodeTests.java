@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalTime;
-import java.time.Period;
 import java.util.List;
 import java.util.UUID;
 
+import com.microsoft.kiota.PeriodAndDuration;
 import org.junit.jupiter.api.Test;
 
 import com.microsoft.kiota.serialization.mocks.TestEntity;
@@ -48,7 +48,7 @@ public class ParseNodeTests {
 		assertEquals("true", entity.getAdditionalData().get("accountEnabled"));
 		assertEquals("Auditor", entity.getAdditionalData().get("jobTitle"));
 		assertEquals("48d31887-5fad-4d73-a9f5-3c356e68a038", entity.getId());
-		assertEquals(Period.parse("P1M"), entity.getWorkDuration());
+		assertEquals(PeriodAndDuration.parse("P1M"), entity.getWorkDuration());
 		assertEquals(LocalTime.of(8, 0, 0, 0), entity.getStartWorkTime());
 		assertEquals(LocalTime.of(17, 0, 0, 0), entity.getEndWorkTime());
 		assertEquals("2017-09-04", entity.getBirthDay().toString());

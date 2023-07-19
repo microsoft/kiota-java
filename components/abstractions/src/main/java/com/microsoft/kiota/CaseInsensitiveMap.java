@@ -16,6 +16,11 @@ import javax.annotation.Nullable;
 class CaseInsensitiveMap implements Map<String, Set<String>>{
     private final HashMap<String, HashSet<String>> internalMap = new HashMap<>();
 
+    /**
+     * Formats the string to lower case
+     * @param key string to normalize to lower case
+     * @return The normalized string
+     */
     protected String normalizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
         return key.toLowerCase(Locale.ROOT);

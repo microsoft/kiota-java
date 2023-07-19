@@ -9,7 +9,6 @@ import java.net.URL;
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Collection;
@@ -22,7 +21,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,6 +33,7 @@ import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.ResponseHandlerOption;
 import com.microsoft.kiota.ResponseHeaders;
 import com.microsoft.kiota.ResponseHandler;
+import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
 import com.microsoft.kiota.serialization.ParseNodeFactoryRegistry;
@@ -367,8 +366,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     result = rootNode.getLocalDateValue();
                                 } else if(targetClass == LocalTime.class) {
                                     result = rootNode.getLocalTimeValue();
-                                } else if(targetClass == Period.class) {
-                                    result = rootNode.getPeriodValue();
+                                } else if(targetClass == PeriodAndDuration.class) {
+                                    result = rootNode.getPeriodAndDurationValue();
                                 } else if(targetClass == byte[].class) {
                                     result = rootNode.getByteArrayValue();
                                 } else {

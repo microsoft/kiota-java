@@ -18,7 +18,6 @@ import java.util.UUID;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.Period;
 
 
 import javax.annotation.Nonnull;
@@ -305,8 +304,8 @@ public class RequestInformation {
                     writer.writeLocalDateValue(null, (LocalDate)value);
                 else if(valueClass.equals(LocalTime.class))
                     writer.writeLocalTimeValue(null, (LocalTime)value);
-                else if(valueClass.equals(Period.class))
-                    writer.writePeriodValue(null, (Period)value);
+                else if(valueClass.equals(PeriodAndDuration.class))
+                    writer.writePeriodAndDurationValue(null, (PeriodAndDuration)value);
                 else {
                     final RuntimeException result = new RuntimeException("unknown type to serialize " + valueClass.getName());
                     span.recordException(result);

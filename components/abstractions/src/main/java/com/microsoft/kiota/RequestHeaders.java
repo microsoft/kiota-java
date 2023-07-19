@@ -10,8 +10,11 @@ public class RequestHeaders extends Headers {
     public RequestHeaders() {
         super();
     }
-    
-    /** Copy constructor */
+
+    /**
+     *  Copy constructor
+     * @param requestHeaders The request headers to initialize with.
+     */
     public RequestHeaders(@Nonnull RequestHeaders requestHeaders) {
         super(requestHeaders);
     }
