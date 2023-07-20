@@ -84,17 +84,21 @@ public class UrlReplaceHandler implements Interceptor {
      * @param request the request to replace the url of.
      * @param replacementPairs the replacement pairs to use.
      * @return the request with the updated url.
-     * @throws UnsupportedEncodingException if the url encoding is not supported.
      */
     @Nonnull
-    public static Request replaceRequestUrl(@Nonnull Request request, @Nonnull Map<String, String> replacementPairs) throws UnsupportedEncodingException {
+    public static Request replaceRequestUrl(@Nonnull Request request, @Nonnull Map<String, String> replacementPairs) {
         Request.Builder builder = request.newBuilder();
-        //Decoding the url since Request.url is encoded by default.
-        String replacedUrl = URLDecoder.decode(request.url().toString(), "UTF-8");//Using decode(String,String) method to maintain source compatibility with Java 8
-        for (Map.Entry<String, String> entry : replacementPairs.entrySet()) {
-            replacedUrl = replacedUrl.replace(entry.getKey(), entry.getValue());
+        try {
+            //Decoding the url since Request.url is encoded by default.
+            String replacedUrl = URLDecoder.decode(request.url().toString(), "UTF-8");//Using decode(String,String) method to maintain source compatibility with Java 8
+            for (Map.Entry<String, String> entry : replacementPairs.entrySet()) {
+                replacedUrl = replacedUrl.replace(entry.getKey(), entry.getValue());
+            }
+            builder.url(replacedUrl);
+            return builder.build();
+
+        } catch (UnsupportedEncodingException e) {
+            return request; //This should never happen since "UTF-8" is a supported encoding.
         }
-        builder.url(replacedUrl);
-        return builder.build();
     }
 }
