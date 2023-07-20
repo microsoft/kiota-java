@@ -22,14 +22,14 @@ public class UrlReplaceHandler implements Interceptor {
     private UrlReplaceHandlerOption mUrlReplaceHandlerOption;
 
     /**
-     * Instantiate a GraphTelemetryHandler with default GraphClientOption.
+     * Instantiate a UrlReplaceHandler with default UrlReplaceHandlerOption.
      */
     public UrlReplaceHandler(){
         this(new UrlReplaceHandlerOption());
     }
     /**
-     * Instantiate a UrlReplaceHandler with specified GraphClientOption
-     * @param urlReplaceHandlerOption the specified GraphClientOption for the GraphTelemetryHandler.
+     * Instantiate a UrlReplaceHandler with specified UrlReplaceHandlerOption
+     * @param urlReplaceHandlerOption the specified UrlReplaceHandlerOption for the UrlReplaceHandler.
      */
     public UrlReplaceHandler(@Nonnull UrlReplaceHandlerOption urlReplaceHandlerOption){
         Objects.requireNonNull(urlReplaceHandlerOption);
@@ -66,15 +66,15 @@ public class UrlReplaceHandler implements Interceptor {
         return chain.proceed(request);
     }
     /**
-     * Gets the GraphClientOption for the GraphTelemetryHandler.
-     * @return the GraphClientOption for the GraphTelemetryHandler.
+     * Gets the UrlReplaceHandlerOption for the UrlReplaceHandler.
+     * @return the UrlReplaceHandlerOption for the UrlReplaceHandler.
      */
     public UrlReplaceHandlerOption getUrlReplaceHandlerOption() {
         return new UrlReplaceHandlerOption(mUrlReplaceHandlerOption.getReplacementPairs(), mUrlReplaceHandlerOption.isEnabled());
     }
     /**
-     * Sets the GraphClientOption for the GraphTelemetryHandler.
-     * @param urlReplaceHandlerOption the GraphClientOption to set.
+     * Sets the GraphClientOption for the UrlReplaceHandler.
+     * @param urlReplaceHandlerOption the UrlReplaceHandlerOption to set.
      */
     public void setUrlReplaceHandlerOption(UrlReplaceHandlerOption urlReplaceHandlerOption) {
         this.mUrlReplaceHandlerOption = new UrlReplaceHandlerOption(urlReplaceHandlerOption.getReplacementPairs(), urlReplaceHandlerOption.isEnabled());
