@@ -28,7 +28,7 @@ public class UrlReplaceHandler implements Interceptor {
         this(new UrlReplaceHandlerOption());
     }
     /**
-     * Instantiate a GraphTelemetryHandler with specified GraphClientOption
+     * Instantiate a UrlReplaceHandler with specified GraphClientOption
      * @param urlReplaceHandlerOption the specified GraphClientOption for the GraphTelemetryHandler.
      */
     public UrlReplaceHandler(@Nonnull UrlReplaceHandlerOption urlReplaceHandlerOption){
