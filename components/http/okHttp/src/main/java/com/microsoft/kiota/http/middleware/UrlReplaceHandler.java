@@ -69,14 +69,15 @@ public class UrlReplaceHandler implements Interceptor {
      * Gets the UrlReplaceHandlerOption for the UrlReplaceHandler.
      * @return the UrlReplaceHandlerOption for the UrlReplaceHandler.
      */
+    @Nonnull
     public UrlReplaceHandlerOption getUrlReplaceHandlerOption() {
         return new UrlReplaceHandlerOption(mUrlReplaceHandlerOption.getReplacementPairs(), mUrlReplaceHandlerOption.isEnabled());
     }
     /**
-     * Sets the GraphClientOption for the UrlReplaceHandler.
+     * Sets the UrlReplaceHandlerOption for the UrlReplaceHandler.
      * @param urlReplaceHandlerOption the UrlReplaceHandlerOption to set.
      */
-    public void setUrlReplaceHandlerOption(UrlReplaceHandlerOption urlReplaceHandlerOption) {
+    public void setUrlReplaceHandlerOption(@Nonnull UrlReplaceHandlerOption urlReplaceHandlerOption) {
         this.mUrlReplaceHandlerOption = new UrlReplaceHandlerOption(urlReplaceHandlerOption.getReplacementPairs(), urlReplaceHandlerOption.isEnabled());
     }
     /**

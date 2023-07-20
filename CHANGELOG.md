@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.4.7] - 2023-07-21
+
+### Added
+
 - Adds the `UrlReplaceHandler` middleware to the Okhttp component to allow for customizing the URL before sending the request.
 
 ## [0.4.6] - 2023-07-20

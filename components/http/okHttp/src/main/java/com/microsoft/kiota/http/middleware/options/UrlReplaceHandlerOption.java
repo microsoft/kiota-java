@@ -43,6 +43,7 @@ public class UrlReplaceHandlerOption implements RequestOption {
      * Gets the replacement pairs map.
      * @return the replacement pairs map.
      */
+    @Nonnull
     public Map<String, String> getReplacementPairs() {
         return new HashMap<>(replacementPairs);
     }
