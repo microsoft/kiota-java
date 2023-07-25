@@ -46,6 +46,7 @@ jobs:
         Copy-Item secring.gpg components/serialization/form/ -Verbose
         Copy-Item secring.gpg components/serialization/text/ -Verbose
         Copy-Item secring.gpg components/serialization/json/ -Verbose
+        Copy-Item secring.gpg components/serialization/multipart/ -Verbose
         Copy-Item secring.gpg components/http/okHttp/ -Verbose
       shell: pwsh
       working-directory: ./
@@ -90,6 +91,7 @@ jobs:
         Copy-Item secring.gpg components/serialization/form/ -Verbose
         Copy-Item secring.gpg components/serialization/text/ -Verbose
         Copy-Item secring.gpg components/serialization/json/ -Verbose
+        Copy-Item secring.gpg components/serialization/multipart/ -Verbose
         Copy-Item secring.gpg components/http/okHttp/ -Verbose
       shell: pwsh
       working-directory: ./
@@ -107,6 +109,9 @@ jobs:
       working-directory: ./
     - name: Publish Release serialization text
       run: ./gradlew --no-daemon :components:serialization:text:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release serialization multipart
+      run: ./gradlew --no-daemon :components:serialization:multipart:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
       working-directory: ./
     - name: Publish Release authentication azure
       run: ./gradlew --no-daemon :components:authentication:azure:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
