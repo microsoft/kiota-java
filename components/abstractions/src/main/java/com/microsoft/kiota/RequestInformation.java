@@ -240,7 +240,13 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
-                headers.add(CONTENT_TYPE_HEADER, contentType);
+                String effectiveContentType = contentType;
+                if (value instanceof MultipartBody) {
+                    final MultipartBody multipartBody = (MultipartBody)value;
+                    effectiveContentType += "; boundary=" + multipartBody.getBoundary();
+                    multipartBody.requestAdapter = requestAdapter;
+                }
+                headers.add(CONTENT_TYPE_HEADER, effectiveContentType);
                 setRequestType(value, span);
                 writer.writeObjectValue(null, value);
                 this.content = writer.getSerializedContent();

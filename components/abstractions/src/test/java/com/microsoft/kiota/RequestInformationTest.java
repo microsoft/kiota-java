@@ -18,9 +18,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class RequestInformationTest {
+class RequestInformationTest {
     @Test
-    public void ThrowsInvalidOperationExceptionWhenBaseUrlNotSet()
+    void ThrowsInvalidOperationExceptionWhenBaseUrlNotSet()
     {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -33,7 +33,7 @@ public class RequestInformationTest {
     }
 
     @Test
-    public void BuildsUrlOnProvidedBaseUrl()
+    void BuildsUrlOnProvidedBaseUrl()
     {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -49,7 +49,7 @@ public class RequestInformationTest {
     }
 
     @Test
-    public void SetsPathParametersOfDateTimeOffsetType()
+    void SetsPathParametersOfDateTimeOffsetType()
     {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -69,7 +69,7 @@ public class RequestInformationTest {
     }
 
     @Test
-    public void ExpandQueryParametersAfterPathParams()
+    void ExpandQueryParametersAfterPathParams()
     {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -89,7 +89,7 @@ public class RequestInformationTest {
     }
 
     @Test
-    public void DoesNotSetQueryParametersParametersIfEmptyString()
+    void DoesNotSetQueryParametersParametersIfEmptyString()
     {
 
         // Arrange as the request builders would
@@ -111,7 +111,7 @@ public class RequestInformationTest {
     }
 
     @Test
-    public void DoesNotSetQueryParametersParametersIfEmptyCollection()
+    void DoesNotSetQueryParametersParametersIfEmptyCollection()
     {
 
         // Arrange as the request builders would
@@ -131,7 +131,7 @@ public class RequestInformationTest {
     }
 
     @Test
-    public void SetsPathParametersOfBooleanType()
+    void SetsPathParametersOfBooleanType()
     {
 
         // Arrange as the request builders would
@@ -148,7 +148,7 @@ public class RequestInformationTest {
         assertTrue(uriResult.toString().contains("count=true"));
     }
     @Test
-    public void SetsParsableContent() {
+    void SetsParsableContent() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.POST;
@@ -164,7 +164,7 @@ public class RequestInformationTest {
         verify(writerMock, never()).writeCollectionOfObjectValues(anyString(), any(ArrayList.class));
     }
     @Test
-    public void SetsParsableContentCollection() {
+    void SetsParsableContentCollection() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.POST;
@@ -180,7 +180,7 @@ public class RequestInformationTest {
         verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), any(Iterable.class));
     }
     @Test
-    public void SetsScalarContentCollection() {
+    void SetsScalarContentCollection() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.POST;
@@ -196,7 +196,7 @@ public class RequestInformationTest {
         verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
     @Test
-    public void SetsScalarContent() {
+    void SetsScalarContent() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod= HttpMethod.POST;
@@ -210,6 +210,25 @@ public class RequestInformationTest {
 
         verify(writerMock, times(1)).writeStringValue(any(), anyString());
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+    @Test
+    void SetsBoundaryOnMultipartBody() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod= HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/{URITemplate}/ParameterMapping?IsCaseSensitive={IsCaseSensitive}";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
+        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
+        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
+        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+
+        final MultipartBody multipartBody = new MultipartBody();
+        multipartBody.requestAdapter = requestAdapterMock;
+
+        requestInfo.setContentFromParsable(requestAdapterMock, "multipart/form-data", multipartBody);
+        assertNotNull(multipartBody.getBoundary());
+        assertFalse(multipartBody.getBoundary().isEmpty());
+        assertEquals("multipart/form-data; boundary=" + multipartBody.getBoundary(), requestInfo.headers.get("Content-Type").toArray()[0]);
     }
 }
 
