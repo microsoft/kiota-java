@@ -50,7 +50,7 @@ public class MultipartBody implements Parsable {
 			throw new IllegalArgumentException("name cannot be blank or empty");
 
 		final String normalizedName = normalizePartName(name);
-		originalNames.put(name, normalizedName);
+		originalNames.put(normalizedName, name);
 		parts.put(normalizedName, Map.entry(contentType, value));
 	}
 	private final Map<String, Map.Entry<String, Object>> parts = new HashMap<>();
@@ -92,7 +92,7 @@ public class MultipartBody implements Parsable {
 		if(candidate == null)
 			return false;
 
-		originalNames.remove(partName);
+		originalNames.remove(normalizedName);
 		return true;
 	}
 
@@ -100,7 +100,6 @@ public class MultipartBody implements Parsable {
 	@Override
 	@Nonnull
 	public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'getFieldDeserializers'");
 	}
 
@@ -121,7 +120,7 @@ public class MultipartBody implements Parsable {
 					isFirst = false;
 				else
 					writer.writeStringValue("", "");
-				writer.writeStringValue("", getBoundary());
+				writer.writeStringValue("", "--" + getBoundary());
 				final String partContentType = partEntry.getValue().getKey();
 				writer.writeStringValue("Content-Type", partContentType);
 				writer.writeStringValue("Content-Disposition", "form-data; name=\"" + originalNames.get(partEntry.getKey()) + "\"");
@@ -155,9 +154,9 @@ public class MultipartBody implements Parsable {
 			} catch (final IOException ex) {
 				throw new RuntimeException(ex);
 			}
-			writer.writeStringValue("", "");
-			writer.writeStringValue("", "--" + boundary + "--");
 		}
+		writer.writeStringValue("", "");
+		writer.writeStringValue("", "--" + boundary + "--");
 	}
 	
 }
