@@ -44,9 +44,9 @@ class MultiPartBodyTest {
 		final RequestAdapter requestAdapter = mock(RequestAdapter.class);
 		multipartBody.requestAdapter = requestAdapter;
 		multipartBody.addOrReplacePart("foo", "bar", "baz");
-		final Map.Entry<String, Object> result = multipartBody.getPartValue("foo");
+		final Object result = multipartBody.getPartValue("foo");
 		assertNotNull(result);
-		assertTrue(result.getValue() instanceof String);
+		assertTrue(result instanceof String);
 	}
 	@Test 
 	void removesPart() {
@@ -55,7 +55,7 @@ class MultiPartBodyTest {
 		multipartBody.requestAdapter = requestAdapter;
 		multipartBody.addOrReplacePart("foo", "bar", "baz");
 		multipartBody.removePart("FOO");
-		final Map.Entry<String, Object> result = multipartBody.getPartValue("foo");
+		final Object result = multipartBody.getPartValue("foo");
 		assertNull(result);
 	}
 	// serialize method is being tested in the serialization library

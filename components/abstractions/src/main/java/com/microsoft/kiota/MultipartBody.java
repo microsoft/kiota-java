@@ -68,13 +68,16 @@ public class MultipartBody implements Parsable {
 	 * @return the content type of the part with the specified name.
 	 */
 	@Nullable
-	public Map.Entry<String, Object> getPartValue(@Nonnull final String partName)
+	public Object getPartValue(@Nonnull final String partName)
 	{
 		Objects.requireNonNull(partName);
 		if (partName.isBlank() || partName.isEmpty())
 			throw new IllegalArgumentException("partName cannot be blank or empty");
 		final String normalizedName = normalizePartName(partName);
-		return parts.get(normalizedName);
+		final Map.Entry<String, Object> candidate = parts.get(normalizedName);
+		if(candidate == null)
+			return null;
+		return candidate.getValue();
 	}
 	/**
 	 * Gets the content type of the part with the specified name.
