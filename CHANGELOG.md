@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.5.0] - 2023-07-26
+
+### Added
+
+- Added support for multipart form data request bodies.
+
 ## [0.4.7] - 2023-07-21
 
 ### Added
