@@ -1,5 +1,8 @@
 package com.microsoft.kiota;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -132,9 +135,7 @@ public class MultipartBody implements Parsable {
 						try (final InputStream partContent = partWriter.getSerializedContent()) {
 							if (partContent.markSupported())
 								partContent.reset();
-							final byte[] bytes = partContent.readAllBytes();
-							if (bytes != null)
-								writer.writeByteArrayValue("", bytes);
+							writer.writeByteArrayValue("", readAllBytes(partContent));
 						}
 					}
 				} else if (objectValue instanceof String) {
@@ -143,9 +144,7 @@ public class MultipartBody implements Parsable {
 					final InputStream inputStream = (InputStream)objectValue;
 					if (inputStream.markSupported())
 						inputStream.reset();
-					final byte[] bytes = inputStream.readAllBytes();
-					if (bytes != null)
-						writer.writeByteArrayValue("", bytes);
+					writer.writeByteArrayValue("", readAllBytes(inputStream));
 				} else if (objectValue instanceof byte[]) {
 					writer.writeByteArrayValue("", (byte[])objectValue);
 				} else {
@@ -158,5 +157,16 @@ public class MultipartBody implements Parsable {
 		writer.writeStringValue("", "");
 		writer.writeStringValue("", "--" + boundary + "--");
 	}
-	
+	@Nonnull
+	private byte[] readAllBytes(@Nonnull final InputStream inputStream) throws IOException {
+		// InputStream.readAllBytes() is only available to Android API level 33+
+		final int bufLen = 1024;
+		byte[] buf = new byte[bufLen];
+		int readLen;
+		try(final ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+			while ((readLen = inputStream.read(buf, 0, bufLen)) != -1)
+				outputStream.write(buf, 0, readLen);
+			return outputStream.toByteArray();
+		}
+	}
 }
