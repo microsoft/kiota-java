@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.base.Strings;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.SerializationWriter;
@@ -44,12 +45,10 @@ public class MultipartBody implements Parsable {
 	 * @param value the value of the part to add or replace.
 	 */
 	public <T> void addOrReplacePart(@Nonnull final String name, @Nonnull final String contentType, @Nonnull final T value) {
-		Objects.requireNonNull(name);
-		Objects.requireNonNull(contentType);
 		Objects.requireNonNull(value);
-		if (contentType.isBlank() || contentType.isEmpty())
+		if (Strings.isNullOrEmpty(contentType) || contentType.isBlank())
 			throw new IllegalArgumentException("contentType cannot be blank or empty");
-		if (name.isBlank() || name.isEmpty())
+		if (Strings.isNullOrEmpty(name) || name.isBlank())
 			throw new IllegalArgumentException("name cannot be blank or empty");
 
 		final String normalizedName = normalizePartName(name);
@@ -70,8 +69,7 @@ public class MultipartBody implements Parsable {
 	@Nullable
 	public Object getPartValue(@Nonnull final String partName)
 	{
-		Objects.requireNonNull(partName);
-		if (partName.isBlank() || partName.isEmpty())
+		if (Strings.isNullOrEmpty(partName) || partName.isBlank())
 			throw new IllegalArgumentException("partName cannot be blank or empty");
 		final String normalizedName = normalizePartName(partName);
 		final Map.Entry<String, Object> candidate = parts.get(normalizedName);
@@ -86,8 +84,7 @@ public class MultipartBody implements Parsable {
 	 */
 	public boolean removePart(@Nonnull final String partName)
 	{
-		Objects.requireNonNull(partName);
-		if (partName.isBlank() || partName.isEmpty())
+		if (Strings.isNullOrEmpty(partName) || partName.isBlank())
 			throw new IllegalArgumentException("partName cannot be blank or empty");
 		final String normalizedName = normalizePartName(partName);
 		final Object candidate = parts.remove(normalizedName);

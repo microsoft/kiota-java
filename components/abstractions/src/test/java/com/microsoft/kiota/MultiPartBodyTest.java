@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
@@ -16,11 +14,11 @@ class MultiPartBodyTest {
 	@Test
 	void defensive() {
 		final MultipartBody multipartBody = new MultipartBody();
-		assertThrows(NullPointerException.class, () -> multipartBody.addOrReplacePart(null, "foo", "bar"));
-		assertThrows(NullPointerException.class, () -> multipartBody.addOrReplacePart("foo", null, "bar"));
+		assertThrows(IllegalArgumentException.class, () -> multipartBody.addOrReplacePart(null, "foo", "bar"));
+		assertThrows(IllegalArgumentException.class, () -> multipartBody.addOrReplacePart("foo", null, "bar"));
 		assertThrows(NullPointerException.class, () -> multipartBody.addOrReplacePart("foo", "bar", null));
-		assertThrows(NullPointerException.class, () -> multipartBody.getPartValue(null));
-		assertThrows(NullPointerException.class, () -> multipartBody.removePart(null));
+		assertThrows(IllegalArgumentException.class, () -> multipartBody.getPartValue(null));
+		assertThrows(IllegalArgumentException.class, () -> multipartBody.removePart(null));
 		assertThrows(NullPointerException.class, () -> multipartBody.serialize(null));
 		assertThrows(UnsupportedOperationException.class, () -> multipartBody.getFieldDeserializers());
 	}
