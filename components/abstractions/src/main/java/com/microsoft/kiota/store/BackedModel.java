@@ -1,6 +1,6 @@
 package com.microsoft.kiota.store;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Defines the contracts for a model that is backed by a store. */
 public interface BackedModel {

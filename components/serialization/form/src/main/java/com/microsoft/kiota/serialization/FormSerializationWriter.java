@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.function.BiConsumer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** Serialization writer implementation for URI form encoded payloads */
 public class FormSerializationWriter implements SerializationWriter {

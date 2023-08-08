@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParseNode;

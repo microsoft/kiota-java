@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** Returns access tokens */
 public interface AccessTokenProvider {

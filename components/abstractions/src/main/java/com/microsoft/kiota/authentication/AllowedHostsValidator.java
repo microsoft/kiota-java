@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Maintains a list of valid hosts and allows authentication providers to check whether a host is valid before authenticating a request */
 public class AllowedHostsValidator {

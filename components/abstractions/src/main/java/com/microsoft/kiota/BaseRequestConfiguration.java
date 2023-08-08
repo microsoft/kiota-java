@@ -2,7 +2,7 @@ package com.microsoft.kiota;
 
 import java.util.Collections;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /** Base class for request configuration */
 public abstract class BaseRequestConfiguration {

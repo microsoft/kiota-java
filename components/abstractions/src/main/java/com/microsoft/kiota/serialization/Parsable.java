@@ -3,7 +3,7 @@ package com.microsoft.kiota.serialization;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 /**
  * Defines a serializable model object.
  */

@@ -2,8 +2,8 @@ package com.microsoft.kiota.http.middleware.options;
 
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.RequestOption;
 

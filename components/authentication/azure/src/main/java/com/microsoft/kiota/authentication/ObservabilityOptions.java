@@ -1,6 +1,6 @@
 package com.microsoft.kiota.authentication;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Holds the tracing, metrics and logging configuration for the authentication provider adapter */
 public class ObservabilityOptions {

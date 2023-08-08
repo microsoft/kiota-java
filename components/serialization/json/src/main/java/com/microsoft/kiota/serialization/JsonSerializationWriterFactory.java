@@ -2,7 +2,7 @@ package com.microsoft.kiota.serialization;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Creates new Json serialization writers. */
 public class JsonSerializationWriterFactory implements SerializationWriterFactory {

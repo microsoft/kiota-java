@@ -1,6 +1,6 @@
 package com.microsoft.kiota.store;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Defines the contract for a factory that creates backing stores. */
 public interface BackingStoreFactory {

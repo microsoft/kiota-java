@@ -3,8 +3,8 @@ package com.microsoft.kiota;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParsableFactory;

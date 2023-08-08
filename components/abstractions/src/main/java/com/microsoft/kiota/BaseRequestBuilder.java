@@ -3,7 +3,7 @@ package com.microsoft.kiota;
 import java.util.HashMap;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Base class for request builders */
 public abstract class BaseRequestBuilder {

@@ -1,6 +1,6 @@
 package com.microsoft.kiota.serialization;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** The interface for the valued enum. */
 public interface ValuedEnum {

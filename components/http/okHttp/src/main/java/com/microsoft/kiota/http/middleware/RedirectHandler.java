@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
 

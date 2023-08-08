@@ -1,6 +1,6 @@
 package com.microsoft.kiota;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.time.Duration;

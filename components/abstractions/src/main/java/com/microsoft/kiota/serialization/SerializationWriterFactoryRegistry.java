@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 /** This factory holds a list of all the registered factories for the various types of nodes. */
 public class SerializationWriterFactoryRegistry implements SerializationWriterFactory {
     /** Default constructor for the registry. */

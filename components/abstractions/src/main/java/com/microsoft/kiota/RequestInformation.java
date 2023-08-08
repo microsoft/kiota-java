@@ -20,8 +20,8 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.SerializationWriter;

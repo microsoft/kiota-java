@@ -3,8 +3,8 @@ package com.microsoft.kiota.http.middleware;
 import java.io.IOException;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 

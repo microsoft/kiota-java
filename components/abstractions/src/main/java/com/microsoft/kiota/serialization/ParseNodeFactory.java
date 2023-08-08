@@ -2,7 +2,7 @@ package com.microsoft.kiota.serialization;
 
 import java.io.InputStream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines the contract for a factory that is used to create {@link ParseNode}s.

@@ -2,7 +2,7 @@ package com.microsoft.kiota.serialization;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Defines a contract for models that can hold additional data besides the described properties. */
 public interface AdditionalDataHolder {

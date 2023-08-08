@@ -1,6 +1,6 @@
 package com.microsoft.kiota.store;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** This class is used to create instances of InMemoryBackingStore */
 public class InMemoryBackingStoreFactory implements BackingStoreFactory {

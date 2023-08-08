@@ -3,7 +3,7 @@ package com.microsoft.kiota.http.middleware.options;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Indicates whether a specific request should be retried

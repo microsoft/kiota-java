@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
 

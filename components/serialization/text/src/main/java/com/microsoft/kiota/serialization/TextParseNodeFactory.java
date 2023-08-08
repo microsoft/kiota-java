@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Creates new text parse nodes */
 public class TextParseNodeFactory implements ParseNodeFactory {

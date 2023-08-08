@@ -1,7 +1,7 @@
 package com.microsoft.kiota.store;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.Map;
 
