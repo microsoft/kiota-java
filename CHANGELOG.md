@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.6.0] - 2023-08-08
+
+### Changed
+
+- Javax annotations replaced in favor of Jakarta annotations. 
+
 ## [0.5.0] - 2023-07-26
 
 ### Added
