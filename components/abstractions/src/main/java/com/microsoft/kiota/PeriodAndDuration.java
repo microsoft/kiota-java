@@ -1,7 +1,7 @@
 package com.microsoft.kiota;
 
 import jakarta.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.google.errorprone.annotations.Immutable;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Period;

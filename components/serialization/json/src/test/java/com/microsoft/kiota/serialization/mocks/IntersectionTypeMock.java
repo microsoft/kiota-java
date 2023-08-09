@@ -17,8 +17,8 @@ public class IntersectionTypeMock implements Parsable, ComposedTypeWrapper {
     private SecondTestEntity _composedType2;
     private String _stringValue;
     private java.util.List<TestEntity> _composedType3;
-	@javax.annotation.Nonnull
-    public static IntersectionTypeMock createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
+	@jakarta.annotation.Nonnull
+    public static IntersectionTypeMock createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
 		final var result = new IntersectionTypeMock();
 		if (parseNode.getStringValue() != null) {

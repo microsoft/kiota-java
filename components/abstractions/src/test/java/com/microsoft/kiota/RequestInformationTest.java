@@ -238,10 +238,10 @@ class GetQueryParameters
 {
     /// <summary>Select properties to be returned</summary>\
     @QueryParameter(name ="%24select")
-    @javax.annotation.Nullable
+    @jakarta.annotation.Nullable
     public String[] select;
     /// <summary>Search items by search phrases</summary>
     @QueryParameter(name ="%24search")
-    @javax.annotation.Nullable
+    @jakarta.annotation.Nullable
     public String search;
 }
