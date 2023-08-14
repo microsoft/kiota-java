@@ -13,7 +13,10 @@ import java.util.Set;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-class CaseInsensitiveMap implements Map<String, Set<String>>{
+/**
+ * A map that is case insensitive on the keys
+ */
+public class CaseInsensitiveMap implements Map<String, Set<String>>{
     private final HashMap<String, HashSet<String>> internalMap = new HashMap<>();
 
     /**
@@ -21,6 +24,7 @@ class CaseInsensitiveMap implements Map<String, Set<String>>{
      * @param key string to normalize to lower case
      * @return The normalized string
      */
+    @Nonnull
     protected String normalizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
         return key.toLowerCase(Locale.ROOT);
