@@ -20,30 +20,30 @@ import okhttp3.Response;
  * The middleware responsible for inspecting the request and response headers
  */
 public class HeadersInspectionHandler implements Interceptor {
-	/**
-	 * Create a new instance of the HeadersInspectionHandler class with the default options
-	 */
-	public HeadersInspectionHandler() {
-		this(new HeadersInspectionOption());
-	}
-	/**
-	 * Create a new instance of the HeadersInspectionHandler class with the provided options
-	 * @param options The options to use for the handler
-	 */
-	public HeadersInspectionHandler(@Nonnull final HeadersInspectionOption options) {
-		this.options = Objects.requireNonNull(options);
-	}
-	private final HeadersInspectionOption options;
+    /**
+     * Create a new instance of the HeadersInspectionHandler class with the default options
+     */
+    public HeadersInspectionHandler() {
+        this(new HeadersInspectionOption());
+    }
+    /**
+     * Create a new instance of the HeadersInspectionHandler class with the provided options
+     * @param options The options to use for the handler
+     */
+    public HeadersInspectionHandler(@Nonnull final HeadersInspectionOption options) {
+        this.options = Objects.requireNonNull(options);
+    }
+    private final HeadersInspectionOption options;
 
     /** {@inheritDoc} */
     @Nonnull
-	@Override
-	@SuppressWarnings("UnknownNullness")
-	public Response intercept(final Chain chain) throws IOException {
+    @Override
+    @SuppressWarnings("UnknownNullness")
+    public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
-		Request request = chain.request();
-		HeadersInspectionOption inspectionOption = request.tag(HeadersInspectionOption.class);
-		if(inspectionOption == null) { inspectionOption = options; }
+        Request request = chain.request();
+        HeadersInspectionOption inspectionOption = request.tag(HeadersInspectionOption.class);
+        if(inspectionOption == null) { inspectionOption = options; }
         final Span span = ObservabilityHelper.getSpanForRequest(request, "HeadersInspectionHandler_Intercept");
         Scope scope = null;
         if (span != null) {
@@ -54,18 +54,18 @@ public class HeadersInspectionHandler implements Interceptor {
             if (span != null) {
                 request = request.newBuilder().tag(Span.class, span).build();
             }
-			if (inspectionOption.getInspectRequestHeaders()) {
-				for(final Pair<? extends String, ? extends String> header : request.headers()) {
-					inspectionOption.getRequestHeaders().put(header.getFirst(), Set.of(header.getSecond()));
-				}
-			}
+            if (inspectionOption.getInspectRequestHeaders()) {
+                for(final Pair<? extends String, ? extends String> header : request.headers()) {
+                    inspectionOption.getRequestHeaders().put(header.getFirst(), Set.of(header.getSecond()));
+                }
+            }
             final Response response = chain.proceed(request);
-			if (inspectionOption.getInspectResponseHeaders()) {
-				for(final Pair<? extends String, ? extends String> header : response.headers()) {
-					inspectionOption.getResponseHeaders().put(header.getFirst(), Set.of(header.getSecond()));
-				}
-			}
-			return response;
+            if (inspectionOption.getInspectResponseHeaders()) {
+                for(final Pair<? extends String, ? extends String> header : response.headers()) {
+                    inspectionOption.getResponseHeaders().put(header.getFirst(), Set.of(header.getSecond()));
+                }
+            }
+            return response;
         } finally {
             if (scope != null) {
                 scope.close();
@@ -74,6 +74,6 @@ public class HeadersInspectionHandler implements Interceptor {
                 span.end();
             }
         }
-	}
-	
+    }
+    
 }
