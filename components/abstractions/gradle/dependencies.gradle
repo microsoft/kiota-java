@@ -7,12 +7,10 @@ dependencies {
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-    //This dependency is used internally and also by Kiota generated code which leverages this library.
-    api 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:32.1.2-jre'
     implementation 'org.javatuples:javatuples:1.2'
     implementation 'io.opentelemetry:opentelemetry-api:1.28.0'
     implementation 'io.opentelemetry:opentelemetry-context:1.28.0'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
