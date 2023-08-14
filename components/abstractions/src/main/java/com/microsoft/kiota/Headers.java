@@ -6,14 +6,19 @@ import java.util.Set;
 
 import jakarta.annotation.Nonnull;
 
-class Headers extends CaseInsensitiveMap {
+/**
+ * A class representing the headers of a request or a response.
+ */
+public abstract class Headers extends CaseInsensitiveMap {
     /** Default constructor */
-    public Headers() {
+    protected Headers() {
         super();
     }
 
-    /** Copy constructor */
-    public Headers(@Nonnull Headers headers) {
+    /** Copy constructor
+     * @param headers The headers to initialize with.
+     */
+    protected Headers(@Nonnull Headers headers) {
         super();
         Objects.requireNonNull(headers);
         putAll(headers);

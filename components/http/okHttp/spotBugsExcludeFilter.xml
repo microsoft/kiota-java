@@ -7,8 +7,13 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 		<Bug pattern="EI_EXPOSE_REP2" />
 		<Or>
 			<Class name="com.microsoft.kiota.http.middleware.UserAgentHandler" />
+			<Class name="com.microsoft.kiota.http.middleware.HeadersInspectionHandler" />
 			<Class name="com.microsoft.kiota.http.OkHttpRequestAdapter" />
 		</Or>
+	</Match>
+	<Match>
+		<Bug pattern="EI_EXPOSE_REP" />
+		<Class name="com.microsoft.kiota.http.middleware.options.HeadersInspectionOption" />
 	</Match>
 	<Match>
 		<Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />

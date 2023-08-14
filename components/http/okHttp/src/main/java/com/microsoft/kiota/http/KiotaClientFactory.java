@@ -6,6 +6,7 @@ import java.time.Duration;
 import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
+import com.microsoft.kiota.http.middleware.HeadersInspectionHandler;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
 
 import okhttp3.Interceptor;
@@ -50,7 +51,8 @@ public class KiotaClientFactory {
             new RedirectHandler(),
             new RetryHandler(),
             new ParametersNameDecodingHandler(),
-            new UserAgentHandler()
+            new UserAgentHandler(),
+            new HeadersInspectionHandler()
         };
     }
 }

@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.7.0] - 2023-08-18
+
+### Added
+
+- Added headers inspection option and handler.
+
 ## [0.6.0] - 2023-08-08
 
 ### Changed
