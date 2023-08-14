@@ -24,6 +24,7 @@ public class CaseInsensitiveMap implements Map<String, Set<String>>{
      * @param key string to normalize to lower case
      * @return The normalized string
      */
+    @Nonnull
     protected String normalizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
         return key.toLowerCase(Locale.ROOT);
