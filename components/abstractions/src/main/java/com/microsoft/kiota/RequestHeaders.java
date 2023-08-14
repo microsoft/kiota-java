@@ -1,6 +1,6 @@
 package com.microsoft.kiota;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * A class representing the headers of a request.

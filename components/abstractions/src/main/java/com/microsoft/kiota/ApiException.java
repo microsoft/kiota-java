@@ -2,7 +2,7 @@ package com.microsoft.kiota;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Parent type for exceptions thrown by the client when receiving failed responses to its requests. */
 public class ApiException extends Exception {

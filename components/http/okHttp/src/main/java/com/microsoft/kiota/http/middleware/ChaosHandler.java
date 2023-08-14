@@ -3,7 +3,7 @@ package com.microsoft.kiota.http.middleware;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import okhttp3.Interceptor;
 import okhttp3.MediaType;

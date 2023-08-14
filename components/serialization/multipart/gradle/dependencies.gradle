@@ -8,6 +8,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
     api project(':components:abstractions')
     testImplementation project(':components:serialization:json')

@@ -1,7 +1,6 @@
 package com.microsoft.kiota;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import jakarta.annotation.Nonnull;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Period;
@@ -28,7 +27,6 @@ import static java.time.temporal.ChronoUnit.NANOS;
 /**
  * The aggregate type for {@code Period} and {@code Duration }
  */
-@Immutable
 public final class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDuration>, Serializable {
 
     /**

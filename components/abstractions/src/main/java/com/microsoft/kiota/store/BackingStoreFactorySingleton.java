@@ -1,6 +1,6 @@
 package com.microsoft.kiota.store;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** This class is used to register the backing store factory. */
 public class BackingStoreFactorySingleton {

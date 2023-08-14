@@ -5,8 +5,8 @@ import java.util.Objects;
 
 import java.io.InputStream;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class ParseNodeProxyFactory implements ParseNodeFactory {

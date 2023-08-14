@@ -22,8 +22,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** Serialization writer implementation for text/plain */
 public class TextSerializationWriter implements SerializationWriter {

@@ -7,8 +7,8 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 import com.microsoft.kiota.http.middleware.options.IShouldRetry;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;

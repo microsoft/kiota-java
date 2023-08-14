@@ -3,7 +3,7 @@ package com.microsoft.kiota.store;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
 import com.microsoft.kiota.serialization.SerializationWriterProxyFactory;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 /**Proxy implementation of SerializationWriterFactory for the backing store that automatically sets the state of the backing store when serializing. */
 public class BackingStoreSerializationWriterProxyFactory extends SerializationWriterProxyFactory {
     /**

@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Creates new Json parse nodes from the payload. */
 public class JsonParseNodeFactory implements ParseNodeFactory {

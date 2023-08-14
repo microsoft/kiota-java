@@ -1,6 +1,6 @@
 package com.microsoft.kiota.serialization;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines the factory for creating parsable objects.

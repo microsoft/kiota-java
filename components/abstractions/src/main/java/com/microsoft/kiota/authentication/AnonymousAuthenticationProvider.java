@@ -5,8 +5,8 @@ import com.microsoft.kiota.RequestInformation;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** This authentication provider does not perform any authentication. */
 public class AnonymousAuthenticationProvider implements AuthenticationProvider {

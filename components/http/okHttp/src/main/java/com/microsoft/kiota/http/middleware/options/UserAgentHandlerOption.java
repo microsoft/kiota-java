@@ -2,7 +2,7 @@ package com.microsoft.kiota.http.middleware.options;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.microsoft.kiota.RequestOption;
 
@@ -14,7 +14,7 @@ public class UserAgentHandlerOption implements RequestOption {
 	@Nonnull
 	private String productName = "kiota-java";
 	@Nonnull
-	private String productVersion = "0.5.0";
+	private String productVersion = "0.6.0";
 	/**
 	 * Gets the product name to be used in the user agent header
 	 * @return the product name

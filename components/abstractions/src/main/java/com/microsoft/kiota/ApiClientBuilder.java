@@ -13,7 +13,7 @@ import java.lang.NoSuchMethodException;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Provides a builder for creating an ApiClient and register the default serializers/deserializers. */
 public class ApiClientBuilder {

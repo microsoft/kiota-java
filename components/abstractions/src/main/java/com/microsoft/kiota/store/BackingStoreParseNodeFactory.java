@@ -1,6 +1,6 @@
 package com.microsoft.kiota.store;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.microsoft.kiota.serialization.ParseNodeProxyFactory;
 import com.microsoft.kiota.serialization.ParseNodeFactory;

@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Utility methods to reduce the amount of code being generated. */
 public class ParseNodeHelper {

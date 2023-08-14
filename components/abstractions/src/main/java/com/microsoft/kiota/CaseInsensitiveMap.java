@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 class CaseInsensitiveMap implements Map<String, Set<String>>{
     private final HashMap<String, HashSet<String>> internalMap = new HashMap<>();

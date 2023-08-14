@@ -63,8 +63,8 @@ public class SecondTestEntity implements Parsable, AdditionalDataHolder {
 	public void setFailureRate(Long value) {
 		this._failureRate = value;
 	}
-	@javax.annotation.Nonnull
-    public static SecondTestEntity createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
+	@jakarta.annotation.Nonnull
+    public static SecondTestEntity createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
 		return new SecondTestEntity();
 	}	
 }

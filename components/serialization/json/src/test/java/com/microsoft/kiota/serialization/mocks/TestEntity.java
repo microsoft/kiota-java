@@ -49,7 +49,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	}
 
 	public void setWorkDuration(PeriodAndDuration value) {
-		this._workDuration = value;
+		this._workDuration = PeriodAndDuration.of(value.getPeriod(), value.getDuration());
 	}
 
 	private LocalTime _startWorkTime;
@@ -127,8 +127,8 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	public Map<String, Object> getAdditionalData() {
 		return _additionalData;
 	}
-	@javax.annotation.Nonnull
-    public static TestEntity createFromDiscriminatorValue(@javax.annotation.Nonnull final ParseNode parseNode) {
+	@jakarta.annotation.Nonnull
+    public static TestEntity createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
 		return new TestEntity();
 	}
 }

@@ -1,6 +1,6 @@
 package com.microsoft.kiota.http;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.microsoft.kiota.RequestOption;
 

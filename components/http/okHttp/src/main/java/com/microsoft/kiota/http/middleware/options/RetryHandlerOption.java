@@ -1,10 +1,10 @@
 package com.microsoft.kiota.http.middleware.options;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.RequestOption;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * The options to be passed to the retry middleware.

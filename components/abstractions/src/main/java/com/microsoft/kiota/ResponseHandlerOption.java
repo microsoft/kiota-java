@@ -1,7 +1,7 @@
 package com.microsoft.kiota;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** Request option that can be used to provide a callback and handle the raw response */
 public class ResponseHandlerOption implements RequestOption {

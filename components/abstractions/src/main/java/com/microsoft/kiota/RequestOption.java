@@ -1,6 +1,6 @@
 package com.microsoft.kiota;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Represents a request option. */
 public interface RequestOption {

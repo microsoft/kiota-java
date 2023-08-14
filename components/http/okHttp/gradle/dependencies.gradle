@@ -13,6 +13,7 @@ dependencies {
     implementation 'io.opentelemetry:opentelemetry-context:1.29.0'
     implementation 'io.opentelemetry:opentelemetry-semconv:1.29.0-alpha'
     implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
     api 'com.squareup.okhttp3:okhttp:4.11.0'
 
     api project(':components:abstractions')
