@@ -49,7 +49,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	}
 
 	public void setWorkDuration(PeriodAndDuration value) {
-		this._workDuration = PeriodAndDuration.of(value.getPeriod(), value.getDuration());
+		this._workDuration = PeriodAndDuration.ofPeriodAndDuration(value);
 	}
 
 	private LocalTime _startWorkTime;

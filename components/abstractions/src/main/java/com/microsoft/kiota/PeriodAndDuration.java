@@ -60,7 +60,6 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
     public Duration getDuration() {
         return duration;
     }
-
     /**
      * Non-public Constructor for PeriodAndDuration
      * @param period The {@code Period} component of the aggregate type
@@ -72,7 +71,6 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         this.period = period;
         this.duration = duration;
     }
-
     /**
      * Creates an instance based on a period and duration.
      * @param period  the {@code Period}, not null
@@ -85,7 +83,6 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(period, duration);
     }
-
     /**
      * Creates an instance based on a period.
      * @param period  the {@code Period}, not null
@@ -96,7 +93,6 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         Objects.requireNonNull(period, "parameter period cannot be null");
         return new PeriodAndDuration(period, Duration.ZERO);
     }
-
     /**
      * Creates an instance based on a duration.
      * @param duration  the {@code Duration}, not null
@@ -107,7 +103,16 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(Period.ZERO, duration);
     }
-
+    /**
+     * Creates an instance based on a PeriodAndDuration.
+     * @param periodAndDuration the {@code PeriodAndDuration}, not null
+     * @return the combined {@code PeriodAndDuration}, not null
+     */
+    @Nonnull
+    public static PeriodAndDuration ofPeriodAndDuration(@Nonnull PeriodAndDuration periodAndDuration) {
+        Objects.requireNonNull(periodAndDuration, "parameter periodAndDuration cannot be null");
+        return new PeriodAndDuration(periodAndDuration.getPeriod(), periodAndDuration.getDuration());
+    }
     /**
      * @param stringValue the {@code String} parse from.
      * @return parsed instance of {@code PeriodAndDuration}
