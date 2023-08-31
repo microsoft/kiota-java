@@ -30,6 +30,8 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 
+import io.github.stduritemplate.StdUriTemplate;
+
 
 /** This class represents an abstract HTTP request. */
 public class RequestInformation {
@@ -66,7 +68,8 @@ public class RequestInformation {
             params.putAll(pathParameters);
             params.putAll(queryParameters);
 
-            return new URI(new UriTemplate(urlTemplate).expand(params));
+            
+            return new URI(StdUriTemplate.expand(urlTemplate, params));
         }
     }
     /** 
