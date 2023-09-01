@@ -7,6 +7,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 
+import io.github.stduritemplate.StdUriTemplate;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UriTemplateTest {
@@ -23,13 +25,8 @@ public class UriTemplateTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/data.csv", numLinesToSkip = 1, delimiter = ';')
     void shouldProduceExpectedOutput(String template, String expected) {
-        // Arrange
-        UriTemplate uriTemplate = new UriTemplate(template);
+        String result = StdUriTemplate.expand(template, params);
 
-        // Act
-        String result = uriTemplate.expand(params);
-
-        // Assert
         assertEquals(expected, result);
     }
 }

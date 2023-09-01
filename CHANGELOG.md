@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.7.2] - 2023-09-01
+
+### Changed
+
+- Swapped custom implementation of RFC6570 URI templates to std uritemplates.
+
 ## [0.7.1] - 2023-08-21
 
 ### Changed
