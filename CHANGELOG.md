@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.7.3] - 2023-09-04
+
+### Fixed
+
+- Fixed bug that caused the ParametersNameDecodingHandler to decode query parameter values in addition to names
+
 ## [0.7.2] - 2023-09-01
 
 ### Changed
