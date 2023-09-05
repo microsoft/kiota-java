@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -61,7 +63,8 @@ public class ParametersNameDecodingHandler implements Interceptor {
                 nameOption.parametersToDecode.length == 0) {
                     return chain.proceed(request);
                 }
-            String query = originalUri.query();
+            // Must use .encodedQuery() because .query() method decodes both parameter values and names
+            String query = originalUri.encodedQuery();
             if (query == null || query.isEmpty()) {
                 return chain.proceed(request);
             }
@@ -71,7 +74,8 @@ public class ParametersNameDecodingHandler implements Interceptor {
             if (span != null) {
                 builder.tag(Span.class, span);
             }
-            final HttpUrl newUrl = originalUri.newBuilder().query(query).build();
+            // Must use .encodedQuery() because .query() method decodes both parameter values and names
+            final HttpUrl newUrl = originalUri.newBuilder().encodedQuery(query).build();
             return chain.proceed(builder.url(newUrl).build());
         } finally {
             if (scope != null) {
@@ -91,15 +95,37 @@ public class ParametersNameDecodingHandler implements Interceptor {
     @Nonnull
     public static String decodeQueryParameters(@Nullable final String original, @Nonnull final char[] charactersToDecode) {
         Objects.requireNonNull(charactersToDecode);
-        String decoded = original == null ? "" : new StringBuffer(original).toString();
+
+        if (original == null || original.isBlank() || charactersToDecode.length == 0) {
+            return "";
+        }
+
+        String[] encodedQueryParameters = 
+                (original.startsWith("?") ? original.substring(1) : original)
+                .split("&");
+
+        final ArrayList<SimpleEntry<String, String>> toDecode = new ArrayList<SimpleEntry<String, String>>();
+        for (final String encodedQueryParameter : encodedQueryParameters) {
+            String[] nameAndValue = encodedQueryParameter.split("=", 2);
+            // Use query parameter value as simple entry key and query parameter name as simple entry value to allow
+            // for in-place updating of query parameter name during iteration and prevent the need to add or remove keys.
+            // Note: query parameter values may not be unique, so a LinkedHashMap or equivalent would not be appropriate
+            toDecode.add(new SimpleEntry<String, String>(nameAndValue.length > 1 ? nameAndValue[1] : "", nameAndValue[0]));
+        }
+
         final ArrayList<SimpleEntry<String, String>> symbolsToReplace = new ArrayList<SimpleEntry<String, String>>(charactersToDecode.length);
         for (final char charToReplace : charactersToDecode) {
-            symbolsToReplace.add(new SimpleEntry<String,String>("%" + String.format("%x", (int)charToReplace), String.valueOf(charToReplace)));
+            symbolsToReplace.add(new SimpleEntry<String, String>("%" + String.format("%x", (int) charToReplace), String.valueOf(charToReplace)));
         }
+        
         for (final Entry<String, String> symbolToReplace : symbolsToReplace) {
-            decoded = decoded.replace(symbolToReplace.getKey(), symbolToReplace.getValue());
+            for (final Entry<String, String> queryParameter : toDecode) {
+                queryParameter.setValue(queryParameter.getValue().replaceAll("(?i)"+Pattern.quote(symbolToReplace.getKey()), symbolToReplace.getValue()));
+            }
         }
-        return decoded;
+
+        return toDecode.stream()
+                .map(tuple -> tuple.getKey().isBlank() ? tuple.getValue() : tuple.getValue() + "=" + tuple.getKey())
+                .collect(Collectors.joining("&"));
     }
-    
 }
