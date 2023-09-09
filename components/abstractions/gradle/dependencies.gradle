@@ -11,7 +11,7 @@ dependencies {
     implementation 'com.google.guava:guava:32.1.2-jre'
     implementation 'org.javatuples:javatuples:1.2'
     implementation 'io.github.std-uritemplate:std-uritemplate:0.0.40'
-    implementation 'io.opentelemetry:opentelemetry-api:1.29.0'
+    implementation 'io.opentelemetry:opentelemetry-api:1.30.0'
     implementation 'io.opentelemetry:opentelemetry-context:1.30.0'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
