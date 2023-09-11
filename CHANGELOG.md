@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.7.4] - 2023-09-08
+
+### Fixed
+
+- Fixed a regression where query parameters name replacement would fail with group like regex syntax ($ sign)
+
 ## [0.7.3] - 2023-09-04
 
 ### Fixed

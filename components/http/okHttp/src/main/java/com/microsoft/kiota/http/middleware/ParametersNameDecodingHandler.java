@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -120,7 +121,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
         
         for (final Entry<String, String> symbolToReplace : symbolsToReplace) {
             for (final Entry<String, String> queryParameter : toDecode) {
-                queryParameter.setValue(queryParameter.getValue().replaceAll("(?i)"+Pattern.quote(symbolToReplace.getKey()), symbolToReplace.getValue()));
+                queryParameter.setValue(queryParameter.getValue().replaceAll("(?i)"+Pattern.quote(symbolToReplace.getKey()), Matcher.quoteReplacement(symbolToReplace.getValue())));
             }
         }
 
