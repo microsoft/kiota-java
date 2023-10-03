@@ -40,7 +40,6 @@ public class ApiException extends Exception {
      * @param responseStatusCode The response status code to set.
      */
     protected void setResponseStatusCode(int responseStatusCode) {
-        Objects.requireNonNull(responseStatusCode);
         this.responseStatusCode = responseStatusCode;
     }
 
