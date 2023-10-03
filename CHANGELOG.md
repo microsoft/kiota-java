@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a `tryAdd` method to the `RequestHeaders` Map
 
+### Changed
+
+- Better encapsulation of the mutable field `responseStatusCode` in `ApiException`
+
 ## [0.7.4] - 2023-09-08
 
 ### Fixed
