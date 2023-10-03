@@ -20,7 +20,7 @@ public class ApiExceptionBuilder {
      * @param base The original ApiException to be used as a base.
      */
     public ApiExceptionBuilder(ApiException base) {
-        value = base;
+        value = new ApiException(base.getMessage(), base.getCause());
     }
 
     /**
@@ -84,6 +84,8 @@ public class ApiExceptionBuilder {
      * @return The built ApiException.
      */
     public ApiException build() {
-        return value;
+        ApiException result = value;
+        value = null;
+        return result;
     }
 }
