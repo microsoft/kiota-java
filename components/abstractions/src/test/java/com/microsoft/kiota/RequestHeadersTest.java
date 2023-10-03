@@ -38,6 +38,27 @@ class RequestHeadersTest {
         assertEquals(2, requestHeaders.get("key").size());
     }
     @Test
+    void TryAdds() {
+        // Arrange
+        final RequestHeaders requestHeaders = new RequestHeaders();
+        assertTrue(requestHeaders.isEmpty());
+        // Act
+        requestHeaders.tryAdd("key", "value");
+        // Assert
+        assertEquals(1, requestHeaders.size());
+        assertEquals(1, requestHeaders.get("key").size());
+        assertEquals("value", requestHeaders.get("key").iterator().next());
+        assertTrue(requestHeaders.containsKey("key"));
+        assertFalse(requestHeaders.isEmpty());
+        assertEquals(1, requestHeaders.keySet().size());
+        assertEquals(1, requestHeaders.values().size());
+
+        requestHeaders.tryAdd("key", "value2");
+        assertEquals(1, requestHeaders.size());
+        assertEquals(1, requestHeaders.get("key").size());
+        assertEquals("value", requestHeaders.get("key").iterator().next());
+    }
+    @Test
     void NormalizesKey() {
         // Arrange
         final RequestHeaders requestHeaders = new RequestHeaders();

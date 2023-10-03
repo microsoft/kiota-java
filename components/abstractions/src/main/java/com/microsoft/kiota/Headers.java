@@ -31,18 +31,35 @@ public abstract class Headers extends CaseInsensitiveMap {
      * @param value the value of the header to add.
      */
     public void add(@Nonnull final String key, @Nonnull final String value) {
+        addImpl(key, value, true);
+    }
+
+    /**
+     * Adds a header to the current request if it was not already set
+     *
+     * @param key   the key of the header to add.
+     * @param value the value of the header to add.
+     */
+    public void tryAdd(@Nonnull final String key, @Nonnull final String value) {
+        addImpl(key, value, false);
+    }
+
+    private void addImpl(@Nonnull final String key, @Nonnull final String value, boolean appendIfPresent) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         final String normalizedKey = normalizeKey(key);
         if (this.containsKey(normalizedKey)) {
-            final Set<String> values = this.get(normalizedKey);
-            values.add(value);
+            if (appendIfPresent) {
+                final Set<String> values = this.get(normalizedKey);
+                values.add(value);
+            }
         } else {
             final Set<String> values = new HashSet<>(1);
             values.add(value);
             this.put(normalizedKey, values);
         }
     }
+
 
     /**
      * Removes a value from a header
