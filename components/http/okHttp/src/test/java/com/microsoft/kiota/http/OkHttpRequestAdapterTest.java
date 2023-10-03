@@ -187,7 +187,7 @@ public class OkHttpRequestAdapterTest {
 		final var exception = assertThrows(ExecutionException.class, ()->requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null).get()) ;
 		final var cause = exception.getCause();	
 		assertTrue(cause instanceof ApiException);
-		assertEquals(404, ((ApiException)cause).responseStatusCode);
+		assertEquals(404, ((ApiException)cause).getResponseStatusCode());
 		assertTrue(((ApiException)cause).getResponseHeaders().containsKey("request-id"));
 	}
 	public static OkHttpClient getMockClient(final Response response) throws IOException {
