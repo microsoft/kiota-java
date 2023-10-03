@@ -8,11 +8,24 @@ import java.util.Objects;
 public class ApiExceptionBuilder {
 
     private ApiException value = null;
+
+    /**
+     * Constructs an empty ApiExceptionBuilder
+     */
     public ApiExceptionBuilder() {
     }
+
+    /**
+     * Constructs an ApiExceptionBuilder starting from a base ApiException
+     */
     public ApiExceptionBuilder(ApiException base) {
         value = base;
     }
+
+    /**
+     * Assign the message to the builder
+     * @return The builder object.
+     */
     public ApiExceptionBuilder withMessage(@Nonnull String message) {
         Objects.requireNonNull(message);
         if (value == null) {
@@ -22,6 +35,11 @@ public class ApiExceptionBuilder {
         }
         return this;
     }
+
+    /**
+     * Assign the Throwable cause of the Exception to the builder
+     * @return The builder object.
+     */
     public ApiExceptionBuilder withThrowable(@Nonnull Throwable exception) {
         Objects.requireNonNull(exception);
         if (value == null) {
@@ -31,6 +49,11 @@ public class ApiExceptionBuilder {
         }
         return this;
     }
+
+    /**
+     * Assign the response status code to the builder
+     * @return The builder object.
+     */
     public ApiExceptionBuilder withResponseStatusCode(int responseStatusCode) {
         if (value == null) {
             value = new ApiException();
@@ -38,6 +61,11 @@ public class ApiExceptionBuilder {
         value.setResponseStatusCode(responseStatusCode);
         return this;
     }
+
+    /**
+     * Assign the response headers to the builder
+     * @return The builder object.
+     */
     public ApiExceptionBuilder withResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
         if (value == null) {
             value = new ApiException();
@@ -45,6 +73,11 @@ public class ApiExceptionBuilder {
         value.setResponseHeaders(responseHeaders);
         return this;
     }
+
+    /**
+     * Build and return an instance of ApiException
+     * @return The built ApiException.
+     */
     public ApiException build() {
         return value;
     }
