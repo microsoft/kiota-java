@@ -17,6 +17,7 @@ public class ApiExceptionBuilder {
 
     /**
      * Constructs an ApiExceptionBuilder starting from a base ApiException
+     * @param base The original ApiException to be used as a base.
      */
     public ApiExceptionBuilder(ApiException base) {
         value = base;
@@ -24,6 +25,7 @@ public class ApiExceptionBuilder {
 
     /**
      * Assign the message to the builder
+     * @param message The message to be attached to this ApiException.
      * @return The builder object.
      */
     public ApiExceptionBuilder withMessage(@Nonnull String message) {
@@ -38,6 +40,7 @@ public class ApiExceptionBuilder {
 
     /**
      * Assign the Throwable cause of the Exception to the builder
+     * @param exception The Throwable to be used as Cause for this ApiException.
      * @return The builder object.
      */
     public ApiExceptionBuilder withThrowable(@Nonnull Throwable exception) {
@@ -52,6 +55,7 @@ public class ApiExceptionBuilder {
 
     /**
      * Assign the response status code to the builder
+     * @param responseStatusCode an int representing the response status code.
      * @return The builder object.
      */
     public ApiExceptionBuilder withResponseStatusCode(int responseStatusCode) {
@@ -64,6 +68,7 @@ public class ApiExceptionBuilder {
 
     /**
      * Assign the response headers to the builder
+     * @param responseHeaders the response headers to be added to this ApiException.
      * @return The builder object.
      */
     public ApiExceptionBuilder withResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
