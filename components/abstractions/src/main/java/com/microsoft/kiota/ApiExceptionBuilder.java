@@ -29,6 +29,7 @@ public class ApiExceptionBuilder {
      * @param message The message to be attached to this ApiException.
      * @return The builder object.
      */
+    @Nonnull
     public ApiExceptionBuilder withMessage(@Nonnull String message) {
         Objects.requireNonNull(message);
         if (value == null) {
@@ -44,6 +45,7 @@ public class ApiExceptionBuilder {
      * @param exception The Throwable to be used as Cause for this ApiException.
      * @return The builder object.
      */
+    @Nonnull
     public ApiExceptionBuilder withThrowable(@Nonnull Throwable exception) {
         Objects.requireNonNull(exception);
         if (value == null) {
@@ -59,6 +61,7 @@ public class ApiExceptionBuilder {
      * @param responseStatusCode an int representing the response status code.
      * @return The builder object.
      */
+    @Nonnull
     public ApiExceptionBuilder withResponseStatusCode(int responseStatusCode) {
         if (value == null) {
             value = new ApiException();
@@ -72,6 +75,7 @@ public class ApiExceptionBuilder {
      * @param responseHeaders the response headers to be added to this ApiException.
      * @return The builder object.
      */
+    @Nonnull
     public ApiExceptionBuilder withResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
         if (value == null) {
             value = new ApiException();
@@ -84,6 +88,7 @@ public class ApiExceptionBuilder {
      * Build and return an instance of ApiException
      * @return The built ApiException.
      */
+    @Nonnull
     public ApiException build() {
         ApiException result = value;
         value = null;
