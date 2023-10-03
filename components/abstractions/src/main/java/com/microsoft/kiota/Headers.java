@@ -39,12 +39,13 @@ public abstract class Headers extends CaseInsensitiveMap {
      *
      * @param key   the key of the header to add.
      * @param value the value of the header to add.
+     * @return if the value have been added
      */
-    public void tryAdd(@Nonnull final String key, @Nonnull final String value) {
-        addImpl(key, value, false);
+    public boolean tryAdd(@Nonnull final String key, @Nonnull final String value) {
+        return addImpl(key, value, false);
     }
 
-    private void addImpl(@Nonnull final String key, @Nonnull final String value, boolean appendIfPresent) {
+    private boolean addImpl(@Nonnull final String key, @Nonnull final String value, boolean appendIfPresent) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         final String normalizedKey = normalizeKey(key);
@@ -52,12 +53,15 @@ public abstract class Headers extends CaseInsensitiveMap {
             if (appendIfPresent) {
                 final Set<String> values = this.get(normalizedKey);
                 values.add(value);
+                return true;
             }
         } else {
             final Set<String> values = new HashSet<>(1);
             values.add(value);
             this.put(normalizedKey, values);
+            return true;
         }
+        return false;
     }
 
 

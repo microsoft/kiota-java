@@ -43,8 +43,9 @@ class RequestHeadersTest {
         final RequestHeaders requestHeaders = new RequestHeaders();
         assertTrue(requestHeaders.isEmpty());
         // Act
-        requestHeaders.tryAdd("key", "value");
+        var result = requestHeaders.tryAdd("key", "value");
         // Assert
+        assertTrue(result);
         assertEquals(1, requestHeaders.size());
         assertEquals(1, requestHeaders.get("key").size());
         assertEquals("value", requestHeaders.get("key").iterator().next());
@@ -53,7 +54,8 @@ class RequestHeadersTest {
         assertEquals(1, requestHeaders.keySet().size());
         assertEquals(1, requestHeaders.values().size());
 
-        requestHeaders.tryAdd("key", "value2");
+        result = requestHeaders.tryAdd("key", "value2");
+        assertFalse(result);
         assertEquals(1, requestHeaders.size());
         assertEquals(1, requestHeaders.get("key").size());
         assertEquals("value", requestHeaders.get("key").iterator().next());
