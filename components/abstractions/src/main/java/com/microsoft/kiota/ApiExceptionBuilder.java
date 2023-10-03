@@ -19,7 +19,8 @@ public class ApiExceptionBuilder {
      * Constructs an ApiExceptionBuilder starting from a base ApiException
      * @param base The original ApiException to be used as a base.
      */
-    public ApiExceptionBuilder(ApiException base) {
+    public ApiExceptionBuilder(@Nonnull final ApiException base) {
+        Objects.requireNonNull(base);
         value = new ApiException(base.getMessage(), base.getCause());
     }
 
