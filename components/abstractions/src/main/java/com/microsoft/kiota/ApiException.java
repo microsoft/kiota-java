@@ -24,7 +24,24 @@ public class ApiException extends Exception {
     }
 
     /** The HTTP status code  for the response*/
-    public int responseStatusCode;
+    private int responseStatusCode;
+
+    /**
+     * Gets the HTTP response status code
+     * @return The response status code from the failed response.
+     */
+    @Nonnull
+    public int getResponseStatusCode() {
+        return responseStatusCode;
+    }
+
+    /**
+     * Sets the HTTP response status code
+     * @param responseStatusCode The response status code to set.
+     */
+    protected void setResponseStatusCode(int responseStatusCode) {
+        this.responseStatusCode = responseStatusCode;
+    }
 
     /** The HTTP response headers for the error response*/
     @Nonnull
@@ -43,7 +60,7 @@ public class ApiException extends Exception {
      * Sets the HTTP response headers for the error response
      * @param responseHeaders The response headers collections to set.
      */
-    public void setResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
+    protected void setResponseHeaders(@Nonnull ResponseHeaders responseHeaders) {
         Objects.requireNonNull(responseHeaders);
         this.responseHeaders = new ResponseHeaders(responseHeaders);
     }

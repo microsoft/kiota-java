@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.microsoft.kiota.ApiExceptionBuilder;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -592,9 +593,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             !(statusCode >= 400 && statusCode < 500 && errorMappings.containsKey("4XX")) &&
             !(statusCode >= 500 && statusCode < 600 && errorMappings.containsKey("5XX"))) {
 		        spanForAttributes.setAttribute(errorMappingFoundAttributeName, false);
-                final ApiException result = new ApiException("the server returned an unexpected status code and no error class is registered for this code " + statusCode);
-                result.responseStatusCode = statusCode;
-                result.setResponseHeaders(responseHeaders);
+                final ApiException result = new ApiExceptionBuilder()
+                        .withMessage("the server returned an unexpected status code and no error class is registered for this code " + statusCode)
+                        .withResponseStatusCode(statusCode)
+                        .withResponseHeaders(responseHeaders)
+                        .build();
                 spanForAttributes.recordException(result);
                 throw result;
             }
@@ -611,9 +614,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 if(rootNode == null) {
 		            spanForAttributes.setAttribute(errorBodyFoundAttributeName, false);
                     closeResponse = false;
-                    final ApiException result = new ApiException("service returned status code" + statusCode + " but no response body was found");
-                    result.responseStatusCode = statusCode;
-                    result.setResponseHeaders(responseHeaders);
+                    final ApiException result = new ApiExceptionBuilder()
+                            .withMessage("service returned status code" + statusCode + " but no response body was found")
+                            .withResponseStatusCode(statusCode)
+                            .withResponseHeaders(responseHeaders)
+                            .build();
                     spanForAttributes.recordException(result);
                     throw result;
                 }
@@ -621,14 +626,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
                 try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
                     final Parsable error = rootNode.getObjectValue(errorClass);
-                    ApiException result;
+                    ApiExceptionBuilder resultBuilder;
                     if (error instanceof ApiException) {
-                        result = (ApiException)error;
+                        resultBuilder = new ApiExceptionBuilder((ApiException)error);
                     } else {
-                        result = new ApiException("unexpected error type " + error.getClass().getName());
+                        resultBuilder = new ApiExceptionBuilder()
+                                .withMessage("unexpected error type " + error.getClass().getName());
                     }
-                    result.responseStatusCode = statusCode;
-                    result.setResponseHeaders(responseHeaders);
+                    ApiException result = resultBuilder
+                            .withResponseStatusCode(statusCode)
+                            .withResponseHeaders(responseHeaders)
+                            .build();
                     spanForAttributes.recordException(result);
                     throw result;
                 } finally {
