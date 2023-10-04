@@ -201,7 +201,7 @@ public class RequestInformation {
     public void setStreamContent(@Nonnull final InputStream value) {
         Objects.requireNonNull(value);
         this.content = value;
-        headers.add(CONTENT_TYPE_HEADER, BINARY_CONTENT_TYPE);
+        headers.tryAdd(CONTENT_TYPE_HEADER, BINARY_CONTENT_TYPE);
     }
     private static final String SERIALIZE_ERROR = "could not serialize payload";
     private static final String SPAN_NAME = "setContentFromParsable";
@@ -217,7 +217,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
-                headers.add(CONTENT_TYPE_HEADER, contentType);
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
                 if (values.length > 0) {
                     setRequestType(values[0], span);
                 }
@@ -249,7 +249,7 @@ public class RequestInformation {
                     effectiveContentType += "; boundary=" + multipartBody.getBoundary();
                     multipartBody.requestAdapter = requestAdapter;
                 }
-                headers.add(CONTENT_TYPE_HEADER, effectiveContentType);
+                headers.tryAdd(CONTENT_TYPE_HEADER, effectiveContentType);
                 setRequestType(value, span);
                 writer.writeObjectValue(null, value);
                 this.content = writer.getSerializedContent();
@@ -286,7 +286,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, value)) {
-                headers.add(CONTENT_TYPE_HEADER, contentType);
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
                 setRequestType(value, span);
                 final Class<?> valueClass = value.getClass();
                 if(valueClass.equals(String.class))
@@ -341,7 +341,7 @@ public class RequestInformation {
         final Span span = GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME).spanBuilder(SPAN_NAME).startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try(final SerializationWriter writer = getSerializationWriter(requestAdapter, contentType, values)) {
-                headers.add(CONTENT_TYPE_HEADER, contentType);
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
                 if (values.length > 0)
                     setRequestType(values[0], span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
