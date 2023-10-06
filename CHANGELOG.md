@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.7.6] - 2023-10-09
+
+### Changed
+
+- Use `tryAdd` instead of `add` in all of the `setContentFrom...` methods 
+
 ## [0.7.5] - 2023-10-04
 
 ### Added
