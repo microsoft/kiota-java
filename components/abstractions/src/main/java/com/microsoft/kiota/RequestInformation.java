@@ -197,11 +197,25 @@ public class RequestInformation {
     /**
      * Sets the request body to be a binary stream.
      * @param value the binary stream
+     * @deprecated use {@link #setStreamContent(InputStream, String)} instead.
      */
+    @Deprecated
     public void setStreamContent(@Nonnull final InputStream value) {
+        setStreamContent(value, BINARY_CONTENT_TYPE);
+    }
+    /**
+     * Sets the request body to be a binary stream.
+     * @param value the binary stream
+     * @param contentType the content type of the stream.
+     */
+    public void setStreamContent(@Nonnull final InputStream value, @Nonnull final String contentType) {
         Objects.requireNonNull(value);
+        Objects.requireNonNull(contentType);
+        if (contentType.isEmpty()) {
+            throw new IllegalArgumentException("contentType cannot be empty");
+        }
         this.content = value;
-        headers.tryAdd(CONTENT_TYPE_HEADER, BINARY_CONTENT_TYPE);
+        headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
     }
     private static final String SERIALIZE_ERROR = "could not serialize payload";
     private static final String SPAN_NAME = "setContentFromParsable";
