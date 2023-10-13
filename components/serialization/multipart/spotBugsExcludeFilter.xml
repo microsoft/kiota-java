@@ -12,4 +12,16 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 			<Class name="com.microsoft.kiota.serialization.mocks.TestEntity" />
 		</Or>
 	</Match>
+	<Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+        <Class name="com.microsoft.kiota.serialization.MultipartSerializationWriter" />
+    </Match>
+	<Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.SerializationWriterFactoryTests" />
+	</Match>
+	<Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.MultipartSerializationWriterTests" />
+	</Match>
 </FindBugsFilter>

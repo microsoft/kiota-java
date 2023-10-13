@@ -46,7 +46,7 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
         this.location = location;
         this.validator = new AllowedHostsValidator(validHosts);
     }
-    private final static String parentSpanKey = "parent-span";
+    private static final String parentSpanKey = "parent-span";
     /** {@inheritDoc} */
     @Override
     @Nonnull
