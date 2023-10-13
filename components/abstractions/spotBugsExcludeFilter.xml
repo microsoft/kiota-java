@@ -15,4 +15,24 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
             <Class name="com.microsoft.kiota.RequestInformation" />
         </Or>
     </Match>
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+        <Class name="com.microsoft.kiota.authentication.ApiKeyAuthenticationProvider" />
+    </Match>
+    <Match>
+        <Bug code="PI" />
+        <Class name="com.microsoft.kiota.Headers" />
+    </Match>
+    <Match>
+        <Bug code="PA"/>
+        <Class name="com.microsoft.kiota.RequestInformation"/>
+    </Match>
+    <Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.MultiPartBodyTest" />
+	</Match>
+    <Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.authentication.ApiKeyAuthenticationProviderTest" />
+	</Match>
 </FindBugsFilter>

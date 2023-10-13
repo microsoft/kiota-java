@@ -181,7 +181,7 @@ public class RequestInformation {
         }
     }
     /**
-     * Adds a response hanlder as a RequestOption.
+     * Adds a response handler as a RequestOption.
      * @param responseHandler the response handler to add to the request. 
      */
     public void setResponseHandler(@Nonnull ResponseHandler responseHandler) {

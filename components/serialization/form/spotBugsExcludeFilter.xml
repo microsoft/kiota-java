@@ -16,4 +16,24 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 		<Bug pattern="NP_BOOLEAN_RETURN_NULL" />
 		<Class name="com.microsoft.kiota.serialization.FormParseNode" />
 	</Match>
+	<Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+        <Class name="com.microsoft.kiota.serialization.FormSerializationWriter" />
+    </Match>
+	<Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.FormSerializationWriterTests" />
+	</Match>
+	<Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.ParseNodeFactoryTests" />
+	</Match>
+	<Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.ParseNodeTests" />
+	</Match>
+	<Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.SerializationWriterFactoryTests" />
+	</Match>
 </FindBugsFilter>

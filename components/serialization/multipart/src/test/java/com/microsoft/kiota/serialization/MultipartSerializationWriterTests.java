@@ -10,14 +10,12 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.MultipartBody;
 import com.microsoft.kiota.RequestAdapter;
-import com.microsoft.kiota.serialization.JsonSerializationWriterFactory;
 import org.junit.jupiter.api.Test;
 
 import com.microsoft.kiota.serialization.mocks.TestEntity;
@@ -25,9 +23,9 @@ import com.microsoft.kiota.serialization.mocks.TestEntity;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MultipartSerializationWriterTests {
+class MultipartSerializationWriterTests {
 	@Test
-	public void throwsOnParsable() throws IOException, UnsupportedEncodingException {
+	void throwsOnParsable() throws IOException {
 		final var testEntity = new TestEntity();
 		testEntity.setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
 		testEntity.setWorkDuration(PeriodAndDuration.parse("P1M"));
@@ -45,7 +43,7 @@ public class MultipartSerializationWriterTests {
 	}
 	private final byte[] byteForTest = new byte[] { 0x01, 0x02, 0x03 };
 	@Test
-	public void writesBytArrayValue() throws IOException {
+	void writesBytArrayValue() throws IOException {
 		try (final var serializationWriter = new MultipartSerializationWriter()) {
 			serializationWriter.writeByteArrayValue("key", byteForTest);
 			try(final var result = serializationWriter.getSerializedContent()) {
@@ -57,7 +55,7 @@ public class MultipartSerializationWriterTests {
 		}
 	}
 	@Test
-	public void writesAStructuredObject() throws IOException {
+	void writesAStructuredObject() throws IOException {
 		final TestEntity testEntity = new TestEntity();
 		testEntity.setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
 		testEntity.setWorkDuration(PeriodAndDuration.parse("P1M"));
