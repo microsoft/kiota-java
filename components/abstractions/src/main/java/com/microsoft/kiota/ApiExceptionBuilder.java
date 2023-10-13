@@ -4,7 +4,6 @@ import com.microsoft.kiota.serialization.Parsable;
 import jakarta.annotation.Nonnull;
 
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /** Builder class for ApiException. */
