@@ -1,8 +1,11 @@
 package com.microsoft.kiota;
 
+import com.microsoft.kiota.serialization.Parsable;
 import jakarta.annotation.Nonnull;
 
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /** Builder class for ApiException. */
 public class ApiExceptionBuilder {
@@ -17,11 +20,18 @@ public class ApiExceptionBuilder {
 
     /**
      * Constructs an ApiExceptionBuilder starting from a base ApiException
-     * @param base The original ApiException to be used as a base.
+     * @param builder A builder for the ApiException to be used as a base.
      */
-    public ApiExceptionBuilder(@Nonnull final ApiException base) {
-        Objects.requireNonNull(base);
-        value = new ApiException(base.getMessage(), base.getCause());
+    public ApiExceptionBuilder(@Nonnull final Supplier<Parsable> builder) {
+        Objects.requireNonNull(builder);
+        final Parsable error = builder.get();
+        if (error instanceof ApiException) {
+            value = (ApiException) error;
+        } else {
+            value = new ApiExceptionBuilder()
+                    .withMessage("\"unexpected error type \" + error.getClass().getName()")
+                    .build();
+        }
     }
 
     /**

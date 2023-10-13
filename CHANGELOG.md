@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.7.8] - 2023-10-13
+
+### Fixed
+
+- Fixed a bug to preserve the user defined error instead of converting it to generic ApiException.
+
 ## [0.7.7] - 2023-10-12
 
 ### Added
