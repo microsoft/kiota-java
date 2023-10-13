@@ -625,15 +625,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 spanForAttributes.setAttribute(errorBodyFoundAttributeName, true);
                 final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
                 try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                    final Parsable error = rootNode.getObjectValue(errorClass);
-                    ApiExceptionBuilder resultBuilder;
-                    if (error instanceof ApiException) {
-                        resultBuilder = new ApiExceptionBuilder((ApiException)error);
-                    } else {
-                        resultBuilder = new ApiExceptionBuilder()
-                                .withMessage("unexpected error type " + error.getClass().getName());
-                    }
-                    ApiException result = resultBuilder
+                    ApiException result = new ApiExceptionBuilder(() -> rootNode.getObjectValue(errorClass))
                             .withResponseStatusCode(statusCode)
                             .withResponseHeaders(responseHeaders)
                             .build();
