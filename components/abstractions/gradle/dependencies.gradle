@@ -10,7 +10,7 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:32.1.3-jre'
     implementation 'org.javatuples:javatuples:1.2'
-    implementation 'io.github.std-uritemplate:std-uritemplate:0.0.44'
+    implementation 'io.github.std-uritemplate:std-uritemplate:0.0.46'
     implementation 'io.opentelemetry:opentelemetry-api:1.31.0'
     implementation 'io.opentelemetry:opentelemetry-context:1.31.0'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
