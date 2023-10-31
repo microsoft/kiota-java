@@ -11,6 +11,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
+import com.microsoft.kiota.Compatibility;
+
 import jakarta.annotation.Nonnull;
 /**
  * Helper methods for serialization of kiota models
@@ -44,7 +46,7 @@ public final class KiotaSerialization {
 	@Nonnull
 	public static <T extends Parsable> String serializeAsString(@Nonnull final String contentType, @Nonnull final T value) throws IOException {
 		try(final InputStream stream = serializeAsStream(contentType, value)) {
-			return new String(stream.readAllBytes(), CHARSET_NAME);
+			return new String(Compatibility.readAllBytes(stream), CHARSET_NAME);
 		}
 	}
 	/**
