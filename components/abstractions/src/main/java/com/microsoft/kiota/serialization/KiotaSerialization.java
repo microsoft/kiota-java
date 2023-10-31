@@ -76,7 +76,7 @@ public final class KiotaSerialization {
 	@Nonnull
 	public static <T extends Parsable> String serializeAsString(@Nonnull final String contentType, @Nonnull final Iterable<T> values) throws IOException {
 		try(final InputStream stream = serializeAsStream(contentType, values)) {
-			return new String(stream.readAllBytes(), CHARSET_NAME);
+			return new String(Compatibility.readAllBytes(stream), CHARSET_NAME);
 		}
 	}
 	private static SerializationWriter getSerializationWriter(@Nonnull final String contentType, @Nonnull final Object value) {
