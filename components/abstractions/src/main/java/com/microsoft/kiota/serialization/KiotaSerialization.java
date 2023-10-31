@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Objects;
 
 import jakarta.annotation.Nonnull;
-
+/**
+ * Helper methods for serialization of kiota models
+ */
 public final class KiotaSerialization {
 	private static final String CHARSET_NAME = "UTF-8";
 	private KiotaSerialization() {}
@@ -116,8 +118,7 @@ public final class KiotaSerialization {
 	 * @param value the string to deserialize
 	 * @param parsableFactory the factory to use for creating the model object
 	 * @return the deserialized value
-	 * @throws IOException
-	 * @throws UnsupportedEncodingException
+	 * @throws IOException when the stream cannot be closed or read.
 	 */
 	@Nonnull
 	public static <T extends Parsable> T deserialize(@Nonnull final String contentType, @Nonnull final String value, @Nonnull final ParsableFactory<T> parsableFactory) throws IOException {
@@ -132,7 +133,7 @@ public final class KiotaSerialization {
 	 * @param value the string to deserialize
 	 * @param parsableFactory the factory to use for creating the model object
 	 * @return the deserialized value
-	 * @throws IOException
+	 * @throws IOException when the stream cannot be closed or read.
 	 */
 	@Nonnull
 	public static <T extends Parsable> List<T> deserializeCollection(@Nonnull final String contentType, @Nonnull final String value, @Nonnull final ParsableFactory<T> parsableFactory) throws IOException {
@@ -147,7 +148,6 @@ public final class KiotaSerialization {
 	 * @param stream the stream to deserialize
 	 * @param parsableFactory the factory to use for creating the model object
 	 * @return the deserialized value
-	 * @throws IOException
 	 */
 	@Nonnull
 	public static <T extends Parsable> List<T> deserializeCollection(@Nonnull final String contentType, @Nonnull final InputStream stream, @Nonnull final ParsableFactory<T> parsableFactory) {
@@ -173,7 +173,7 @@ public final class KiotaSerialization {
 	 * @param value the string to deserialize
 	 * @param typeClass the class of the model object
 	 * @return the deserialized value
-	 * @throws IOException
+	 * @throws IOException when the stream cannot be closed or read.
 	 */
 	@Nonnull
 	public static <T extends Parsable> T deserialize(@Nonnull final String contentType, @Nonnull final String value, @Nonnull final Class<T> typeClass) throws IOException {
@@ -198,7 +198,7 @@ public final class KiotaSerialization {
 	 * @param value the string to deserialize
 	 * @param typeClass the class of the model object
 	 * @return the deserialized value
-	 * @throws IOException
+	 * @throws IOException when the stream cannot be closed or read.
 	 */
 	@Nonnull
 	public static <T extends Parsable> List<T> deserializeCollection(@Nonnull final String contentType, @Nonnull final String value, @Nonnull final Class<T> typeClass) throws IOException {

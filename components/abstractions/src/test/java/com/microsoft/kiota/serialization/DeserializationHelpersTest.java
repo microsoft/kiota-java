@@ -17,17 +17,18 @@ import com.microsoft.kiota.serialization.mocks.TestEntity;
 
 class DeserializationHelpersTest {
 	private final static String _jsonContentType = "application/json";
+	private final static String _charset = "utf-8";
 	@Test
 	void defensive() {
 		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserialize(null, (InputStream)null, TestEntity::createFromDiscriminatorValue));
 		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserialize(_jsonContentType, (InputStream)null, TestEntity::createFromDiscriminatorValue));
-		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserialize(_jsonContentType, new ByteArrayInputStream("{}".getBytes()), (ParsableFactory<TestEntity>)null));
+		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserialize(_jsonContentType, new ByteArrayInputStream("{}".getBytes(_charset)), (ParsableFactory<TestEntity>)null));
 	}
 	@Test
 	void defensiveCollection() {
 		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserializeCollection(null, (InputStream)null, TestEntity::createFromDiscriminatorValue));
 		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserializeCollection(_jsonContentType, (InputStream)null, TestEntity::createFromDiscriminatorValue));
-		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserializeCollection(_jsonContentType, new ByteArrayInputStream("{}".getBytes()), (ParsableFactory<TestEntity>)null));
+		assertThrows(NullPointerException.class, () -> KiotaSerialization.deserializeCollection(_jsonContentType, new ByteArrayInputStream("{}".getBytes(_charset)), (ParsableFactory<TestEntity>)null));
 	}
 	@Test
 	void deserializesObjectWithoutReflection() throws IOException {

@@ -19,6 +19,7 @@ import com.microsoft.kiota.serialization.mocks.TestEntity;
 
 class SerializationHelpersTest {
 	private final static String _jsonContentType = "application/json";
+	private final static String _charset = "utf-8";
 	@Test
 	void defensive() {
 		assertThrows(NullPointerException.class, () -> KiotaSerialization.serializeAsStream(null, (Parsable)null));
@@ -32,7 +33,7 @@ class SerializationHelpersTest {
 	@Test
 	void serializesObject() throws IOException {
 		final var mockSerializationWriter = mock(SerializationWriter.class);
-		when(mockSerializationWriter.getSerializedContent()).thenReturn(new ByteArrayInputStream("{'id':'123'}".getBytes()));
+		when(mockSerializationWriter.getSerializedContent()).thenReturn(new ByteArrayInputStream("{'id':'123'}".getBytes(_charset)));
 		final var mockSerializationWriterFactory = mock(SerializationWriterFactory.class);
 		when(mockSerializationWriterFactory.getSerializationWriter(_jsonContentType)).thenReturn(mockSerializationWriter);
 		SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(_jsonContentType, mockSerializationWriterFactory);
@@ -45,7 +46,7 @@ class SerializationHelpersTest {
 	@Test
 	void serializesObjectCollection() throws IOException {
 		final var mockSerializationWriter = mock(SerializationWriter.class);
-		when(mockSerializationWriter.getSerializedContent()).thenReturn(new ByteArrayInputStream("[{'id':'123'}]".getBytes()));
+		when(mockSerializationWriter.getSerializedContent()).thenReturn(new ByteArrayInputStream("[{'id':'123'}]".getBytes(_charset)));
 		final var mockSerializationWriterFactory = mock(SerializationWriterFactory.class);
 		when(mockSerializationWriterFactory.getSerializationWriter(_jsonContentType)).thenReturn(mockSerializationWriter);
 		SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(_jsonContentType, mockSerializationWriterFactory);
