@@ -10,7 +10,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
     /** Default constructor for the registry. */
     public SerializationWriterFactoryRegistry() {}
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
-    public final static SerializationWriterFactoryRegistry defaultInstance = new SerializationWriterFactoryRegistry();
+    public static final SerializationWriterFactoryRegistry defaultInstance = new SerializationWriterFactoryRegistry();
     /** List of factories that are registered by content type. */
     @Nonnull
     public final HashMap<String, SerializationWriterFactory> contentTypeAssociatedFactories = new HashMap<>();
