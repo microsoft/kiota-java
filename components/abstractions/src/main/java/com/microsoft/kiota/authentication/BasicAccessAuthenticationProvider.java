@@ -7,6 +7,7 @@ import jakarta.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /** Provides an implementation of the Basic Access Authentication scheme: https://en.wikipedia.org/wiki/Basic_access_authentication . */
@@ -24,6 +25,9 @@ public class BasicAccessAuthenticationProvider implements AuthenticationProvider
      * @param password the password to be used.
      */
     public BasicAccessAuthenticationProvider(@Nonnull final String username, @Nonnull final String password) {
+        Objects.requireNonNull(username);
+        Objects.requireNonNull(password);
+
         this.username = username;
         this.password = password;
         encoded = Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
