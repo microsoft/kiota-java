@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a default implementation of `BasicAccessAuthenticationProvider`
+
 ## [0.7.8] - 2023-10-13
 
 ### Fixed
