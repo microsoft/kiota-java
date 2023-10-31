@@ -29,6 +29,7 @@ public class BasicAccessAuthenticationProvider implements AuthenticationProvider
         encoded = Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Nonnull
     public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
