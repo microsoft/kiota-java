@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.8.0] - 2023-10-31
+
+### Added
+
 - Added a default implementation of `BasicAccessAuthenticationProvider`
+- Added helper methods to serialize kiota models. [microsoft/kiota#3406](https://github.com/microsoft/kiota/issues/3406)
 
 ## [0.7.8] - 2023-10-13
 

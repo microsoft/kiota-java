@@ -35,4 +35,16 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
 		<Class name="com.microsoft.kiota.authentication.ApiKeyAuthenticationProviderTest" />
 	</Match>
+    <Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.DeserializationHelpersTest" />
+	</Match>
+    <Match>
+		<Bug pattern="RV_EXCEPTION_NOT_THROWN"/>
+		<Class name="com.microsoft.kiota.serialization.SerializationHelpersTest" />
+	</Match>
+    <Match>
+		<Bug pattern="EI_EXPOSE_REP" />
+		<Class name="com.microsoft.kiota.serialization.mocks.TestEntity" />
+	</Match>
 </FindBugsFilter>
