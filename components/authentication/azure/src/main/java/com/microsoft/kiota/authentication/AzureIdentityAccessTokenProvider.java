@@ -69,7 +69,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
     private final static String ClaimsKey = "claims";
     private final static String parentSpanKey = "parent-span";
     @Nonnull
-    public CompletableFuture<String> getAuthorizationToken(@Nonnull final URI uri, @Nullable final Map<String, Object> additionalAuthenticationContext) {
+    public String getAuthorizationToken(@Nonnull final URI uri, @Nullable final Map<String, Object> additionalAuthenticationContext) {
         Span span;
         if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(parentSpanKey) && additionalAuthenticationContext.get(parentSpanKey) instanceof Span) {
             final Span parentSpan = (Span) additionalAuthenticationContext.get(parentSpanKey);
@@ -80,15 +80,11 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         try(final Scope scope = span.makeCurrent()) {
             if(!_hostValidator.isUrlHostValid(uri)) {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
-                return CompletableFuture.completedFuture("");
+                return "";
             }
             if(!uri.getScheme().equalsIgnoreCase("https")) {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
-                final Exception result = new IllegalArgumentException("Only https is supported");
-                span.recordException(result);
-                final CompletableFuture<String> resultFuture = new CompletableFuture<>();
-                resultFuture.completeExceptionally(result);
-                return resultFuture;
+                throw new IllegalArgumentException("Only https is supported");
             }
             span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", true);
 
@@ -113,8 +109,13 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
             if(decodedClaim != null && !decodedClaim.isEmpty()) {
                 context.setClaims(decodedClaim);
             }
-            return this.creds.getToken(context).toFuture().thenApply(r -> r.getToken());
-        } finally {
+            return this.creds.getToken(context).toFuture().join().getToken();
+        }
+        catch (IllegalArgumentException e){
+            span.recordException(e);
+            throw e;
+        }
+        finally {
             span.end();
         }
     }
