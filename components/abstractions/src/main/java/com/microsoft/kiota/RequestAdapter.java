@@ -1,5 +1,8 @@
 package com.microsoft.kiota;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +38,7 @@ public interface RequestAdapter {
      */
     @Nullable
     @SuppressWarnings("LambdaLast")
-    <ModelType extends Parsable> ModelType sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    <ModelType extends Parsable> ModelType sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, URISyntaxException;
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized response model collection.
      * @param requestInfo the request info to execute.
@@ -107,5 +110,5 @@ public interface RequestAdapter {
      * @return the native HTTP request.
      */
     @Nonnull
-    <T> T convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo);
+    <T> T convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) throws URISyntaxException, MalformedURLException;
 }

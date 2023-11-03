@@ -168,7 +168,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    public <ModelType extends Parsable> CompletableFuture<List<ModelType>> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Parsable> List<ModelType> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -198,11 +198,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
-                        return new CompletableFuture<List<ModelType>>(){{
+                        return new List<ModelType>(){{
                             this.completeExceptionally(ex);
                         }};
                     } catch(IOException ex) {
-                        return new CompletableFuture<List<ModelType>>(){{
+                        return new List<ModelType>(){{
                             this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
                         }};
                     } finally {
@@ -240,7 +240,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @Nonnull
     public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
     @Nullable
-    public <ModelType extends Parsable> CompletableFuture<ModelType> sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Parsable> ModelType sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, URISyntaxException {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(factory, "parameter factory cannot be null");
 
@@ -269,16 +269,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         } finally {
                             deserializationSpan.end();
                         }
-                    } catch(ApiException ex) {
+                    } catch(ApiException | IOException ex) {
                         span.recordException(ex);
-                        return new CompletableFuture<ModelType>(){{
-                            this.completeExceptionally(ex);
-                        }};
-                    } catch(IOException ex) {
-                        span.recordException(ex);
-                        return new CompletableFuture<ModelType>(){{
-                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
-                        }};
+                        throw ex;
                     } finally {
                         closeResponse(closeResponse, response);
                     }
@@ -306,7 +299,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return mediaType.type() + "/" + mediaType.subtype();
     }
     @Nullable
-    public <ModelType> CompletableFuture<ModelType> sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType> ModelType sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
@@ -381,11 +374,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             }
                         }
                     } catch(ApiException ex) {
-                        return new CompletableFuture<ModelType>(){{
+                        return new ModelType(){{
                             this.completeExceptionally(ex);
                         }};
                     } catch(IOException ex) {
-                        return new CompletableFuture<ModelType>(){{
+                        return new ModelType(){{
                             this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
                         }};
                     } finally {
@@ -401,7 +394,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    public <ModelType extends Enum<ModelType>> CompletableFuture<ModelType> sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Enum<ModelType>> ModelType sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendEnumAsync");
@@ -430,11 +423,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
-                        return new CompletableFuture<ModelType>(){{
+                        return new ModelType(){{
                             this.completeExceptionally(ex);
                         }};
                     } catch(IOException ex) {
-                        return new CompletableFuture<ModelType>(){{
+                        return new ModelType(){{
                             this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
                         }};
                     } finally {
@@ -450,7 +443,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    public <ModelType extends Enum<ModelType>> CompletableFuture<List<ModelType>> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
@@ -479,11 +472,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
-                        return new CompletableFuture<List<ModelType>>(){{
+                        return new List<ModelType>(){{
                             this.completeExceptionally(ex);
                         }};
                     } catch(IOException ex) {
-                        return new CompletableFuture<List<ModelType>>(){{
+                        return new List<ModelType>(){{
                             this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
                         }};
                     } finally {
@@ -499,7 +492,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     @Nullable
-    public <ModelType> CompletableFuture<List<ModelType>> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <ModelType> List<ModelType> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
 
         final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
@@ -528,11 +521,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                             deserializationSpan.end();
                         }
                     } catch(ApiException ex) {
-                        return new CompletableFuture<List<ModelType>>(){{
+                        return new List<ModelType>(){{
                             this.completeExceptionally(ex);
                         }};
                     } catch(IOException ex) {
-                        return new CompletableFuture<List<ModelType>>(){{
+                        return new List<ModelType>(){{
                             this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
                         }};
                     } finally {
@@ -642,31 +635,22 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     private final static String claimsKey = "claims";
-    private CompletableFuture<Response> getHttpResponseMessage(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
+    private Response getHttpResponseMessage(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) throws IOException, URISyntaxException {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getHttpResponseMessage").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             this.setBaseUrlForRequestInformation(requestInfo);
-            final Map<String, Object> additionalContext = new HashMap<String, Object>() {{
-                put("parent-span", span);
-            }};
+            final Map<String, Object> additionalContext = new HashMap<String, Object>();
+            additionalContext.put("parent-span", span);
             if(claims != null && !claims.isEmpty()) {
                 additionalContext.put(claimsKey, claims);
             }
-            return this.authProvider.authenticateRequest(requestInfo, additionalContext)
-            .thenCompose(x -> {
-                try {
-                    final OkHttpCallbackFutureWrapper wrapper = new OkHttpCallbackFutureWrapper();
-                    this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes)).enqueue(wrapper);
-                    return wrapper.future;
-                } catch (URISyntaxException | MalformedURLException ex) {
-                    spanForAttributes.recordException(ex);
-                    final CompletableFuture<Response> result = new CompletableFuture<Response>();
-                    result.completeExceptionally(ex);
-                    return result;
-                }
-            })
-            .thenApply(x -> {
+            this.authProvider.authenticateRequest(requestInfo, additionalContext);
+            final OkHttpCallbackFutureWrapper wrapper = new OkHttpCallbackFutureWrapper();
+            this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes)).enqueue(wrapper);
+
+
+            Response response = wrapper.future.thenApply(x -> {
                 final String contentLengthHeaderValue = getHeaderValue(x, "Content-Length");
                 if(contentLengthHeaderValue != null && !contentLengthHeaderValue.isEmpty()) {
                     final Integer contentLengthHeaderValueAsInt = Integer.parseInt(contentLengthHeaderValue);
@@ -679,8 +663,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 spanForAttributes.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, x.code());
                 spanForAttributes.setAttribute(SemanticAttributes.HTTP_FLAVOR, x.protocol().toString().toUpperCase(Locale.ROOT));
                 return x;
-            })
-            .thenCompose(x -> this.retryCAEResponseIfRequired(x, requestInfo, span, spanForAttributes, claims));
+            }).join();
+            return this.retryCAEResponseIfRequired(response, requestInfo, span, spanForAttributes, claims);
+        }
+        catch (URISyntaxException | IOException ex) {
+            spanForAttributes.recordException(ex);
+            throw ex;
         } finally {
             span.end();
         }
@@ -695,12 +683,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
         return null;
     }
-    private final static Pattern bearerPattern = Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
-    private final static Pattern claimsPattern = Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern bearerPattern = Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern claimsPattern = Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
     /** Key used for events when an authentication challenge is returned by the API */
     @Nonnull
     public static final String authenticateChallengedEventKey = "com.microsoft.kiota.authenticate_challenge_received";
-    private CompletableFuture<Response> retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
+    private Response retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) throws IOException, URISyntaxException {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("retryCAEResponseIfRequired").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             final String responseClaims = this.getClaimsFromResponse(response, requestInfo, claims);
@@ -710,9 +699,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         requestInfo.content.reset();
                     } catch (IOException ex) {
                         spanForAttributes.recordException(ex);
-                        return new CompletableFuture<Response>(){{
-                            this.completeExceptionally(ex);
-                        }};
+                        throw ex;
                     }
                 }
                 closeResponse(true, response);
@@ -721,7 +708,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 return this.getHttpResponseMessage(requestInfo, span, spanForAttributes, responseClaims);
             }
 
-            return CompletableFuture.completedFuture(response);
+            return response;
+        } catch (URISyntaxException e) {
+            spanForAttributes.recordException(e);
+            throw e;
         } finally {
             span.end();
         }
@@ -760,18 +750,17 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Nonnull
-    public <T> CompletableFuture<T> convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) {
+    public <T> T convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) throws URISyntaxException, MalformedURLException {
         Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
         final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.authProvider.authenticateRequest(requestInfo, null)
-                .thenApply(x -> {
-                    try {
-                        return (T) getRequestFromRequestInformation(requestInfo, span, span);
-                    } catch (MalformedURLException | URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            this.authProvider.authenticateRequest(requestInfo, null);
+            try {
+                return (T) getRequestFromRequestInformation(requestInfo, span, span);
+            } catch (MalformedURLException | URISyntaxException e) {
+                span.recordException(e);
+                throw e;
+            }
         } finally {
             span.end();
         }
@@ -815,7 +804,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     }
 
                     @Override
-                    public void writeTo(BufferedSink sink) throws IOException {
+                    public void writeTo(@Nonnull BufferedSink sink) throws IOException {
                         sink.writeAll(Okio.source(requestInfo.content));
                     }
 
@@ -849,7 +838,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             requestBuilder.tag(Span.class, parentSpan);
             final Request request = requestBuilder.build();
             final List<String> contentLengthHeader = request.headers().values("Content-Length");
-            if(contentLengthHeader != null && contentLengthHeader.size() > 0) {
+            if(contentLengthHeader != null && !contentLengthHeader.isEmpty()) {
                 final String firstEntryValue = contentLengthHeader.get(0);
                 if(firstEntryValue != null && !firstEntryValue.isEmpty()) {
                     spanForAttributes.setAttribute(SemanticAttributes.HTTP_REQUEST_CONTENT_LENGTH, Long.parseLong(firstEntryValue));
