@@ -49,10 +49,8 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
     private static final String parentSpanKey = "parent-span";
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
+    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) throws URISyntaxException {
         Objects.requireNonNull(request);
-        final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
         Span span;
         if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(parentSpanKey) && additionalAuthenticationContext.get(parentSpanKey) instanceof Span) {
             final Span parentSpan = (Span) additionalAuthenticationContext.get(parentSpanKey);
@@ -64,14 +62,11 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
             final URI uri = request.getUri();
             if(uri == null || !validator.isUrlHostValid(uri)) {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
-                return CompletableFuture.completedFuture(null);
+                return;
             }
             if(!uri.getScheme().equalsIgnoreCase("https")) {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
-                final Exception result = new IllegalArgumentException("Only https is supported");
-                span.recordException(result);
-                resultFuture.completeExceptionally(result);
-                return resultFuture;
+                throw new IllegalArgumentException("Only https is supported");
             }
             span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", true);
 
@@ -83,17 +78,13 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
                     request.setUri(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), uri.getQuery() == null ? paramName + "=" + apiKey : uri.getQuery() + "&" + paramName + "=" + apiKey, uri.getFragment()));
                     break;
                 default:
-                    resultFuture.completeExceptionally(new IllegalArgumentException("Unsupported key location"));
+                    throw new IllegalArgumentException("Unsupported key location");
             }
-            if (!resultFuture.isDone()) {
-                resultFuture.complete(null);
-            }
-            return resultFuture;
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IllegalArgumentException e ) {
             span.recordException(e);
-            resultFuture.completeExceptionally(e);
-            return resultFuture;
-        } finally {
+            throw e;
+        }
+        finally {
             span.end();
         }
     }

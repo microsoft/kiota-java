@@ -16,7 +16,7 @@ public interface AccessTokenProvider {
      * @return A CompletableFuture that holds the access token.
      */
     @Nonnull
-    CompletableFuture<String> getAuthorizationToken(@Nonnull final URI uri, @Nullable final Map<String, Object> additionalAuthenticationContext);
+    String getAuthorizationToken(@Nonnull final URI uri, @Nullable final Map<String, Object> additionalAuthenticationContext);
     /**
      * Returns the allowed hosts validator.
      * @return The allowed hosts validator.

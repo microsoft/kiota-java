@@ -35,9 +35,7 @@ public class BasicAccessAuthenticationProvider implements AuthenticationProvider
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
+    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
         request.headers.add(AUTHORIZATION_HEADER_KEY, BASIC + encoded);
-        return CompletableFuture.completedFuture(null);
     }
 }

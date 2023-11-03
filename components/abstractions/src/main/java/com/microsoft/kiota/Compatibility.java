@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Compatibility methods for android
  */
@@ -29,5 +31,13 @@ public class Compatibility {
 				outputStream.write(buf, 0, readLen);
 			return outputStream.toByteArray();
 		}
+	}
+	/** INTERNAL METHOD, DO NOT USE DIRECTLY
+	 * Checks if the string is null or empty or blank
+	 * @param str the string to check
+	 * @return true if the string is null or empty or blank
+	 */
+	public static boolean isBlank(@Nullable final String str) {
+		return str == null || str.trim().isEmpty();
 	}
 }

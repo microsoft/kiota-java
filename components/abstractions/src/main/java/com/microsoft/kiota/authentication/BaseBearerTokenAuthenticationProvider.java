@@ -2,6 +2,7 @@ package com.microsoft.kiota.authentication;
 
 import com.microsoft.kiota.RequestInformation;
 
+import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
@@ -24,9 +25,8 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
     private final static String authorizationHeaderKey = "Authorization";
     private final static String ClaimsKey = "claims";
     @Nonnull
-    public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
+    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) throws URISyntaxException {
         Objects.requireNonNull(request);
-
         if (request.headers.containsKey(authorizationHeaderKey) &&
             additionalAuthenticationContext != null &&
             additionalAuthenticationContext.containsKey(ClaimsKey))
@@ -35,23 +35,11 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
         }
         if(!request.headers.containsKey(authorizationHeaderKey)) {
             final URI targetUri;
-            try {
-                targetUri = request.getUri();
-            } catch (URISyntaxException e) {
-                final CompletableFuture<Void> result = new CompletableFuture<>();
-                result.completeExceptionally(e);
-                return result;
+            targetUri = request.getUri();
+            String accessToken = this.accessTokenProvider.getAuthorizationToken(targetUri, additionalAuthenticationContext);
+            if(!Strings.isNullOrEmpty(accessToken)) {
+                request.headers.add(authorizationHeaderKey, "Bearer " + accessToken);
             }
-            return this.accessTokenProvider.getAuthorizationToken(targetUri, additionalAuthenticationContext)
-                .thenApply(token -> {
-                    if(token != null && !token.isEmpty()) { 
-                    // Not an error, just no need to authenticate as we might have been given an external URL from the main API (large file upload, etc.)
-                        request.headers.add(authorizationHeaderKey, "Bearer " + token);
-                    }
-                    return null;
-                });
-        } else {
-            return CompletableFuture.completedFuture(null);
         }
     }
 }

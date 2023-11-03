@@ -30,7 +30,6 @@ public class ApiException extends Exception {
      * Gets the HTTP response status code
      * @return The response status code from the failed response.
      */
-    @Nonnull
     public int getResponseStatusCode() {
         return responseStatusCode;
     }

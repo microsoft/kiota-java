@@ -8,7 +8,9 @@ import jakarta.annotation.Nonnull;
 /** This factory holds a list of all the registered factories for the various types of nodes. */
 public class SerializationWriterFactoryRegistry implements SerializationWriterFactory {
     /** Default constructor for the registry. */
-    public SerializationWriterFactoryRegistry() {}
+    public SerializationWriterFactoryRegistry() {
+        // Default constructor for the registry.
+    }
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public static final SerializationWriterFactoryRegistry defaultInstance = new SerializationWriterFactoryRegistry();
     /** List of factories that are registered by content type. */
@@ -18,7 +20,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
     public String getValidContentType() {
         throw new UnsupportedOperationException("The registry supports multiple content types. Get the registered factory instead.");
     }
-    private static Pattern contentTypeVendorCleanupPattern = Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern contentTypeVendorCleanupPattern = Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
     @Override
     @Nonnull
     public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {

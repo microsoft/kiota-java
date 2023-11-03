@@ -18,7 +18,9 @@ import org.javatuples.Pair;
 /** In-memory implementation of the backing store. Allows for dirty tracking of changes. */
 public class InMemoryBackingStore implements BackingStore {
     /** Creates a new instance of the backing store. */
-    public InMemoryBackingStore() {}
+    public InMemoryBackingStore() {
+        // default constructor
+    }
     private boolean isInitializationCompleted = true;
     private boolean returnOnlyChangedValues;
     private final Map<String, Pair<Boolean, Object>> store = new HashMap<>();

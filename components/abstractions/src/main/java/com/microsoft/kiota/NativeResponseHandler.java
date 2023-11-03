@@ -2,7 +2,6 @@ package com.microsoft.kiota;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -18,11 +17,10 @@ public class NativeResponseHandler implements ResponseHandler {
     private HashMap<String, ParsableFactory<? extends Parsable>> errorMappings;
     @Override
     @Nonnull
-    public <NativeResponseType, ModelType> CompletableFuture<ModelType> handleResponseAsync(@Nonnull NativeResponseType response, @Nullable HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <NativeResponseType, ModelType> void handleResponseAsync(@Nonnull NativeResponseType response, @Nullable HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         this.value = response;
         if(errorMappings != null)
             this.errorMappings = new HashMap<>(errorMappings);
-        return CompletableFuture.completedFuture(null);
     }
     /**
      * Set the error mappings for the response to use when deserializing failed responses bodies.

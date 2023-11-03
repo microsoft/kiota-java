@@ -2,11 +2,7 @@ package com.microsoft.kiota;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import jakarta.annotation.Nonnull;
@@ -24,7 +20,10 @@ import com.microsoft.kiota.serialization.SerializationWriterFactory;
 public class MultipartBody implements Parsable {
 	@Nonnull
 	private final String boundary = UUID.randomUUID().toString().replace("-", "");
-	/** @return the boundary string for the multipart body. */
+	/**
+	 * Gets the boundary string for the multipart body.
+	 * @return the boundary string for the multipart body.
+	 */
 	@Nonnull
 	public String getBoundary() {
 		return boundary;
@@ -43,14 +42,14 @@ public class MultipartBody implements Parsable {
 	 */
 	public <T> void addOrReplacePart(@Nonnull final String name, @Nonnull final String contentType, @Nonnull final T value) {
 		Objects.requireNonNull(value);
-		if (Strings.isNullOrEmpty(contentType) || contentType.isBlank())
+		if (Compatibility.isBlank(contentType))
 			throw new IllegalArgumentException("contentType cannot be blank or empty");
-		if (Strings.isNullOrEmpty(name) || name.isBlank())
+		if (Compatibility.isBlank(name))
 			throw new IllegalArgumentException("name cannot be blank or empty");
 
 		final String normalizedName = normalizePartName(name);
 		originalNames.put(normalizedName, name);
-		parts.put(normalizedName, Map.entry(contentType, value));
+		parts.put(normalizedName, new AbstractMap.SimpleEntry<>(contentType, value));
 	}
 	private final Map<String, Map.Entry<String, Object>> parts = new HashMap<>();
 	private final Map<String, String> originalNames = new HashMap<>();
@@ -66,7 +65,7 @@ public class MultipartBody implements Parsable {
 	@Nullable
 	public Object getPartValue(@Nonnull final String partName)
 	{
-		if (Strings.isNullOrEmpty(partName) || partName.isBlank())
+		if (Compatibility.isBlank(partName))
 			throw new IllegalArgumentException("partName cannot be blank or empty");
 		final String normalizedName = normalizePartName(partName);
 		final Map.Entry<String, Object> candidate = parts.get(normalizedName);
@@ -81,7 +80,7 @@ public class MultipartBody implements Parsable {
 	 */
 	public boolean removePart(@Nonnull final String partName)
 	{
-		if (Strings.isNullOrEmpty(partName) || partName.isBlank())
+		if (Compatibility.isBlank(partName))
 			throw new IllegalArgumentException("partName cannot be blank or empty");
 		final String normalizedName = normalizePartName(partName);
 		final Object candidate = parts.remove(normalizedName);
