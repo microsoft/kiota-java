@@ -16,11 +16,11 @@ public class NativeResponseHandler implements ResponseHandler {
     private Object value;
     private HashMap<String, ParsableFactory<? extends Parsable>> errorMappings;
     @Override
-    @Nonnull
-    public <NativeResponseType, ModelType> void handleResponseAsync(@Nonnull NativeResponseType response, @Nullable HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+    public <NativeResponseType, ModelType> ModelType handleResponse(@Nonnull NativeResponseType response, @Nullable HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         this.value = response;
         if(errorMappings != null)
             this.errorMappings = new HashMap<>(errorMappings);
+        return null;
     }
     /**
      * Set the error mappings for the response to use when deserializing failed responses bodies.

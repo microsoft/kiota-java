@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -49,7 +48,7 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
     private static final String parentSpanKey = "parent-span";
     /** {@inheritDoc} */
     @Override
-    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) throws URISyntaxException {
+    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
         Objects.requireNonNull(request);
         Span span;
         if(additionalAuthenticationContext != null && additionalAuthenticationContext.containsKey(parentSpanKey) && additionalAuthenticationContext.get(parentSpanKey) instanceof Span) {
@@ -80,11 +79,13 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
                 default:
                     throw new IllegalArgumentException("Unsupported key location");
             }
-        } catch (URISyntaxException | IllegalArgumentException e ) {
+        } catch(URISyntaxException e){
+            span.recordException(e);
+            throw new RuntimeException("Malformed URI",e);
+        } catch( IllegalArgumentException e ) {
             span.recordException(e);
             throw e;
-        }
-        finally {
+        } finally {
             span.end();
         }
     }

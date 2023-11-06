@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import com.microsoft.kiota.ApiExceptionBuilder;
 import jakarta.annotation.Nonnull;
@@ -47,12 +46,7 @@ import com.microsoft.kiota.serialization.SerializationWriterFactoryRegistry;
 import com.microsoft.kiota.store.BackingStoreFactory;
 import com.microsoft.kiota.store.BackingStoreFactorySingleton;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import okhttp3.Response;
+import okhttp3.*;
 import okio.BufferedSink;
 import okio.Okio;
 
@@ -65,7 +59,7 @@ import io.opentelemetry.context.Context;
 
 /** RequestAdapter implementation for OkHttp */
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
-    private final static String contentTypeHeaderKey = "Content-Type";
+    private static final String contentTypeHeaderKey = "Content-Type";
     @Nonnull
     private final OkHttpClient client;
     @Nonnull
@@ -167,52 +161,50 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             BackingStoreFactorySingleton.instance = backingStoreFactory;
         }
     }
+
+    private static final String nullRequestInfoParameter = "parameter requestInfo cannot be null";
+    private static final String nullTargetClassParameter = "parameter targetClass cannot be null";
+    private static final String nullFactoryParameter = "parameter factory cannot be null";
     @Nullable
-    public <ModelType extends Parsable> List<ModelType> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
-        Objects.requireNonNull(factory, "parameter factory cannot be null");
+    public <ModelType extends Parsable> List<ModelType> sendCollection(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
+        Objects.requireNonNull(factory, nullFactoryParameter);
 
         final Span span = startSpan(requestInfo, "sendCollectionAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.getHttpResponseMessage(requestInfo, span, span, null)
-            .thenCompose(response -> {
-                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
-                if(responseHandler == null) {
-                    boolean closeResponse = true;
-                    try {
-                        this.throwIfFailedResponse(response, span, errorMappings);
-                        if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final ParseNode rootNode = getRootParseNode(response, span, span);
-                        if (rootNode == null) {
-                            closeResponse = false;
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfObjectValues").startSpan();
-                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                            final List<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
-                            setResponseType(result, span);
-                            return CompletableFuture.completedFuture(result);
-                        } finally {
-                            deserializationSpan.end();
-                        }
-                    } catch(ApiException ex) {
-                        return new List<ModelType>(){{
-                            this.completeExceptionally(ex);
-                        }};
-                    } catch(IOException ex) {
-                        return new List<ModelType>(){{
-                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
-                        }};
-                    } finally {
-                        closeResponse(closeResponse, response);
+            Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
+            final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+            if(responseHandler == null) {
+                boolean closeResponse = true;
+                try {
+                    this.throwIfFailedResponse(response, span, errorMappings);
+                    if(this.shouldReturnNull(response)) {
+                        return null;
                     }
-                } else {
-                    span.addEvent(eventResponseHandlerInvokedKey);
-                    return responseHandler.handleResponseAsync(response, errorMappings);
+                    final ParseNode rootNode = getRootParseNode(response, span, span);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return null;
+                    }
+                    final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfObjectValues").startSpan();
+                    try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                        final List<ModelType> result = rootNode.getCollectionOfObjectValues(factory);
+                        setResponseType(result, span);
+                        return result;
+                    } finally {
+                        deserializationSpan.end();
+                    }
+                } finally {
+                        closeResponse(closeResponse, response);
                 }
-            });
+            } else {
+                span.addEvent(eventResponseHandlerInvokedKey);
+                return responseHandler.handleResponse(response, errorMappings);
+            }
+        } catch(ApiException ex) {
+            throw new RuntimeException(ex);
+        } catch(IOException ex) {
+            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -240,46 +232,46 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @Nonnull
     public static final String eventResponseHandlerInvokedKey = "com.microsoft.kiota.response_handler_invoked";
     @Nullable
-    public <ModelType extends Parsable> ModelType sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, URISyntaxException {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
-        Objects.requireNonNull(factory, "parameter factory cannot be null");
+    public <ModelType extends Parsable> ModelType send(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
+        Objects.requireNonNull(factory, nullFactoryParameter);
 
         final Span span = startSpan(requestInfo, "sendAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.getHttpResponseMessage(requestInfo, span, span, null)
-            .thenCompose(response -> {
-                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
-                if(responseHandler == null) {
-                    boolean closeResponse = true;
-                    try {
-                        this.throwIfFailedResponse(response, span, errorMappings);
-                        if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final ParseNode rootNode = getRootParseNode(response, span, span);
-                        if (rootNode == null) {
-                            closeResponse = false;
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
-                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                            final ModelType result = rootNode.getObjectValue(factory);
-                            setResponseType(result, span);
-                            return CompletableFuture.completedFuture(result);
-                        } finally {
-                            deserializationSpan.end();
-                        }
-                    } catch(ApiException | IOException ex) {
-                        span.recordException(ex);
-                        throw ex;
-                    } finally {
-                        closeResponse(closeResponse, response);
+            Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
+            final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+            if(responseHandler == null) {
+                boolean closeResponse = true;
+                try {
+                    this.throwIfFailedResponse(response, span, errorMappings);
+                    if(this.shouldReturnNull(response)) {
+                        return null;
                     }
-                } else {
-                    span.addEvent(eventResponseHandlerInvokedKey);
-                    return responseHandler.handleResponseAsync(response, errorMappings);
+                    final ParseNode rootNode = getRootParseNode(response, span, span);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return null;
+                    }
+                    final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getObjectValue").setParent(Context.current().with(span)).startSpan();
+                    try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                        final ModelType result = rootNode.getObjectValue(factory);
+                        setResponseType(result, span);
+                        return result;
+                    } finally {
+                        deserializationSpan.end();
+                    }
+                } finally {
+                    closeResponse(closeResponse, response);
                 }
-            });
+            }
+            else {
+                span.addEvent(eventResponseHandlerInvokedKey);
+                return responseHandler.handleResponse(response, errorMappings);
+            }
+        } catch(ApiException ex) {
+            throw new RuntimeException(ex);
+        } catch(IOException ex) {
+            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -299,243 +291,222 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return mediaType.type() + "/" + mediaType.subtype();
     }
     @Nullable
-    public <ModelType> ModelType sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
-        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
+    public <ModelType> ModelType sendPrimitive(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
+        Objects.requireNonNull(targetClass, nullTargetClassParameter);
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.getHttpResponseMessage(requestInfo, span, span, null)
-            .thenCompose(response -> {
-                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
-                if(responseHandler == null) {
-                    boolean closeResponse = true;
-                    try {
-                        this.throwIfFailedResponse(response, span, errorMappings);
-                        if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        if(targetClass == Void.class) {
-                            return CompletableFuture.completedFuture(null);
-                        } else {
-                            if(targetClass == InputStream.class) {
-                                closeResponse = false;
-                                final ResponseBody body = response.body();
-                                if(body == null) {
-                                    return CompletableFuture.completedFuture(null);
-                                }
-                                final InputStream rawInputStream = body.byteStream();
-                                return CompletableFuture.completedFuture((ModelType)rawInputStream);
-                            }
-                            final ParseNode rootNode = getRootParseNode(response, span, span);
-                            if (rootNode == null) {
-                                closeResponse = false;
-                                return CompletableFuture.completedFuture(null);
-                            }
-                            final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("get"+targetClass.getName()+"Value").setParent(Context.current().with(span)).startSpan();
-                            try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                                Object result;
-                                if(targetClass == Boolean.class) {
-                                    result = rootNode.getBooleanValue();
-                                } else if(targetClass == Byte.class) {
-                                    result = rootNode.getByteValue();
-                                } else if(targetClass == String.class) {
-                                    result = rootNode.getStringValue();
-                                } else if(targetClass == Short.class) {
-                                    result = rootNode.getShortValue();
-                                } else if(targetClass == BigDecimal.class) {
-                                    result = rootNode.getBigDecimalValue();
-                                } else if(targetClass == Double.class) {
-                                    result = rootNode.getDoubleValue();
-                                } else if(targetClass == Integer.class) {
-                                    result = rootNode.getIntegerValue();
-                                } else if(targetClass == Float.class) {
-                                    result = rootNode.getFloatValue();
-                                } else if(targetClass == Long.class) {
-                                    result = rootNode.getLongValue();
-                                } else if(targetClass == UUID.class) {
-                                    result = rootNode.getUUIDValue();
-                                } else if(targetClass == OffsetDateTime.class) {
-                                    result = rootNode.getOffsetDateTimeValue();
-                                } else if(targetClass == LocalDate.class) {
-                                    result = rootNode.getLocalDateValue();
-                                } else if(targetClass == LocalTime.class) {
-                                    result = rootNode.getLocalTimeValue();
-                                } else if(targetClass == PeriodAndDuration.class) {
-                                    result = rootNode.getPeriodAndDurationValue();
-                                } else if(targetClass == byte[].class) {
-                                    result = rootNode.getByteArrayValue();
-                                } else {
-                                    throw new RuntimeException("unexpected payload type " + targetClass.getName());
-                                }
-                                setResponseType(result, span);
-                                return CompletableFuture.completedFuture((ModelType)result);
-                            } finally {
-                                deserializationSpan.end();
-                            }
-                        }
-                    } catch(ApiException ex) {
-                        return new ModelType(){{
-                            this.completeExceptionally(ex);
-                        }};
-                    } catch(IOException ex) {
-                        return new ModelType(){{
-                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
-                        }};
-                    } finally {
-                        closeResponse(closeResponse, response);
+            Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
+            final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+            if(responseHandler == null) {
+                boolean closeResponse = true;
+                try {
+                    this.throwIfFailedResponse(response, span, errorMappings);
+                    if(this.shouldReturnNull(response)) {
+                        return null;
                     }
-                } else {
-                    span.addEvent(eventResponseHandlerInvokedKey);
-                    return responseHandler.handleResponseAsync(response, errorMappings);
+                    if(targetClass == Void.class) {
+                        return null;
+                    } else {
+                        if(targetClass == InputStream.class) {
+                            closeResponse = false;
+                            final ResponseBody body = response.body();
+                            if(body == null) {
+                                return null;
+                            }
+                            final InputStream rawInputStream = body.byteStream();
+                            return (ModelType) rawInputStream;
+                        }
+                        final ParseNode rootNode = getRootParseNode(response, span, span);
+                        if(rootNode == null) {
+                            closeResponse = false;
+                            return null;
+                        }
+                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("get" + targetClass.getName() + "Value").setParent(Context.current().with(span)).startSpan();
+                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                            Object result;
+                            if(targetClass == Boolean.class) {
+                                result = rootNode.getBooleanValue();
+                            } else if(targetClass == Byte.class) {
+                                result = rootNode.getByteValue();
+                            } else if(targetClass == String.class) {
+                                result = rootNode.getStringValue();
+                            } else if(targetClass == Short.class) {
+                                result = rootNode.getShortValue();
+                            } else if(targetClass == BigDecimal.class) {
+                                result = rootNode.getBigDecimalValue();
+                            } else if(targetClass == Double.class) {
+                                result = rootNode.getDoubleValue();
+                            } else if(targetClass == Integer.class) {
+                                result = rootNode.getIntegerValue();
+                            } else if(targetClass == Float.class) {
+                                result = rootNode.getFloatValue();
+                            } else if(targetClass == Long.class) {
+                                result = rootNode.getLongValue();
+                            } else if(targetClass == UUID.class) {
+                                result = rootNode.getUUIDValue();
+                            } else if(targetClass == OffsetDateTime.class) {
+                                result = rootNode.getOffsetDateTimeValue();
+                            } else if(targetClass == LocalDate.class) {
+                                result = rootNode.getLocalDateValue();
+                            } else if(targetClass == LocalTime.class) {
+                                result = rootNode.getLocalTimeValue();
+                            } else if(targetClass == PeriodAndDuration.class) {
+                                result = rootNode.getPeriodAndDurationValue();
+                            } else if(targetClass == byte[].class) {
+                                result = rootNode.getByteArrayValue();
+                            } else {
+                                throw new RuntimeException("unexpected payload type " + targetClass.getName());
+                            }
+                            setResponseType(result, span);
+                            return (ModelType)result;
+                        } finally {
+                            deserializationSpan.end();
+                        }
+                    }
+                } finally {
+                    closeResponse(closeResponse, response);
                 }
-            });
+            } else {
+                span.addEvent(eventResponseHandlerInvokedKey);
+                return responseHandler.handleResponse(response, errorMappings);
+            }
+
+        } catch(ApiException ex) {
+            throw new RuntimeException(ex);
+        } catch(IOException ex) {
+            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
     }
     @Nullable
-    public <ModelType extends Enum<ModelType>> ModelType sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
-        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
+    public <ModelType extends Enum<ModelType>> ModelType sendEnum(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
+        Objects.requireNonNull(targetClass, nullTargetClassParameter);
         final Span span = startSpan(requestInfo, "sendEnumAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.getHttpResponseMessage(requestInfo, span, span, null)
-            .thenCompose(response -> {
-                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
-                if(responseHandler == null) {
-                    boolean closeResponse = true;
-                    try {
-                        this.throwIfFailedResponse(response, span, errorMappings);
-                        if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final ParseNode rootNode = getRootParseNode(response, span, span);
-                        if (rootNode == null) {
-                            closeResponse = false;
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getEnumValue").setParent(Context.current().with(span)).startSpan();
-                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                            final Object result = rootNode.getEnumValue(targetClass);
-                            setResponseType(result, span);
-                            return CompletableFuture.completedFuture((ModelType)result);
-                        } finally {
-                            deserializationSpan.end();
-                        }
-                    } catch(ApiException ex) {
-                        return new ModelType(){{
-                            this.completeExceptionally(ex);
-                        }};
-                    } catch(IOException ex) {
-                        return new ModelType(){{
-                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
-                        }};
-                    } finally {
-                        closeResponse(closeResponse, response);
+            Response response= this.getHttpResponseMessage(requestInfo, span, span, null);
+            final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+            if(responseHandler == null) {
+                boolean closeResponse = true;
+                try {
+                    this.throwIfFailedResponse(response, span, errorMappings);
+                    if(this.shouldReturnNull(response)) {
+                        return null;
                     }
-                } else {
-                    span.addEvent(eventResponseHandlerInvokedKey);
-                    return responseHandler.handleResponseAsync(response, errorMappings);
+                    final ParseNode rootNode = getRootParseNode(response, span, span);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return null;
+                    }
+                    final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getEnumValue").setParent(Context.current().with(span)).startSpan();
+                    try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                        final Object result = rootNode.getEnumValue(targetClass);
+                        setResponseType(result, span);
+                        return (ModelType)result;
+                    } finally {
+                        deserializationSpan.end();
+                    }
+                } finally {
+                    closeResponse(closeResponse, response);
                 }
-            });
+            } else {
+                span.addEvent(eventResponseHandlerInvokedKey);
+                return responseHandler.handleResponse(response, errorMappings);
+            }
+        } catch(ApiException ex) {
+            throw new RuntimeException(ex);
+        } catch(IOException ex) {
+            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
     }
     @Nullable
-    public <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
-        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
+    public <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollection(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
+        Objects.requireNonNull(targetClass, nullTargetClassParameter);
         final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.getHttpResponseMessage(requestInfo, span, span, null)
-            .thenCompose(response -> {
-                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
-                if(responseHandler == null) {
-                    boolean closeResponse = true;
-                    try {
-                        this.throwIfFailedResponse(response, span, errorMappings);
-                        if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final ParseNode rootNode = getRootParseNode(response, span, span);
-                        if (rootNode == null) {
-                            closeResponse = false;
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfEnumValues").setParent(Context.current().with(span)).startSpan();
-                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                            final Object result = rootNode.getCollectionOfEnumValues(targetClass);
-                            setResponseType(result, span);
-                            return CompletableFuture.completedFuture((List<ModelType>)result);
-                        } finally {
-                            deserializationSpan.end();
-                        }
-                    } catch(ApiException ex) {
-                        return new List<ModelType>(){{
-                            this.completeExceptionally(ex);
-                        }};
-                    } catch(IOException ex) {
-                        return new List<ModelType>(){{
-                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
-                        }};
-                    } finally {
-                        closeResponse(closeResponse, response);
+            Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
+            final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+            if(responseHandler == null) {
+                boolean closeResponse = true;
+                try {
+                    this.throwIfFailedResponse(response, span, errorMappings);
+                    if(this.shouldReturnNull(response)) {
+                        return null;
                     }
-                } else {
-                    span.addEvent(eventResponseHandlerInvokedKey);
-                    return responseHandler.handleResponseAsync(response, errorMappings);
+                    final ParseNode rootNode = getRootParseNode(response, span, span);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return null;
+                    }
+                    final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfEnumValues").setParent(Context.current().with(span)).startSpan();
+                    try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                        final Object result = rootNode.getCollectionOfEnumValues(targetClass);
+                        setResponseType(result, span);
+                        return (List<ModelType>)result;
+                    } finally {
+                        deserializationSpan.end();
+                    }
+                } finally {
+                    closeResponse(closeResponse, response);
                 }
-            });
+            } else {
+                span.addEvent(eventResponseHandlerInvokedKey);
+                return responseHandler.handleResponse(response, errorMappings);
+            }
+
+
+        } catch(ApiException ex) {
+            throw new RuntimeException(ex);
+        } catch(IOException ex) {
+            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
     }
     @Nullable
-    public <ModelType> List<ModelType> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+    public <ModelType> List<ModelType> sendPrimitiveCollection(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
 
         final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
         try(final Scope scope = span.makeCurrent()) {
-            return this.getHttpResponseMessage(requestInfo, span, span, null)
-            .thenCompose(response -> {
-                final ResponseHandler responseHandler = getResponseHandler(requestInfo);
-                if(responseHandler == null) {
-                    boolean closeResponse = true;
-                    try {
-                        this.throwIfFailedResponse(response, span, errorMappings);
-                        if(this.shouldReturnNull(response)) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final ParseNode rootNode = getRootParseNode(response, span, span);
-                        if (rootNode == null) {
-                            closeResponse = false;
-                            return CompletableFuture.completedFuture(null);
-                        }
-                        final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfPrimitiveValues").setParent(Context.current().with(span)).startSpan();
-                        try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                            final List<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
-                            setResponseType(result, span);
-                            return CompletableFuture.completedFuture(result);
-                        } finally {
-                            deserializationSpan.end();
-                        }
-                    } catch(ApiException ex) {
-                        return new List<ModelType>(){{
-                            this.completeExceptionally(ex);
-                        }};
-                    } catch(IOException ex) {
-                        return new List<ModelType>(){{
-                            this.completeExceptionally(new RuntimeException("failed to read the response body", ex));
-                        }};
-                    } finally {
-                        closeResponse(closeResponse, response);
+            Response response = getHttpResponseMessage(requestInfo, span, span, null);
+            final ResponseHandler responseHandler = getResponseHandler(requestInfo);
+            if(responseHandler == null) {
+                boolean closeResponse = true;
+                try {
+                    this.throwIfFailedResponse(response, span, errorMappings);
+                    if(this.shouldReturnNull(response)) {
+                        return null;
                     }
-                } else {
-                    span.addEvent(eventResponseHandlerInvokedKey);
-                    return responseHandler.handleResponseAsync(response, errorMappings);
+                    final ParseNode rootNode = getRootParseNode(response, span, span);
+                    if (rootNode == null) {
+                        closeResponse = false;
+                        return null;
+                    }
+                    final Span deserializationSpan = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getCollectionOfPrimitiveValues").setParent(Context.current().with(span)).startSpan();
+                    try(final Scope deserializationScope = deserializationSpan.makeCurrent()) {
+                        final List<ModelType> result = rootNode.getCollectionOfPrimitiveValues(targetClass);
+                        setResponseType(result, span);
+                        return result;
+                    } finally {
+                        deserializationSpan.end();
+                    }
+                } finally {
+                    closeResponse(closeResponse, response);
                 }
-            });
+            } else {
+                span.addEvent(eventResponseHandlerInvokedKey);
+                return responseHandler.handleResponse(response, errorMappings);
+            }
+        } catch(ApiException ex) {
+            throw new RuntimeException(ex);
+        } catch(IOException ex) {
+            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -635,8 +606,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
     private final static String claimsKey = "claims";
-    private Response getHttpResponseMessage(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) throws IOException, URISyntaxException {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+    private Response getHttpResponseMessage(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getHttpResponseMessage").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             this.setBaseUrlForRequestInformation(requestInfo);
@@ -646,29 +617,24 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 additionalContext.put(claimsKey, claims);
             }
             this.authProvider.authenticateRequest(requestInfo, additionalContext);
-            final OkHttpCallbackFutureWrapper wrapper = new OkHttpCallbackFutureWrapper();
-            this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes)).enqueue(wrapper);
-
-
-            Response response = wrapper.future.thenApply(x -> {
-                final String contentLengthHeaderValue = getHeaderValue(x, "Content-Length");
-                if(contentLengthHeaderValue != null && !contentLengthHeaderValue.isEmpty()) {
-                    final Integer contentLengthHeaderValueAsInt = Integer.parseInt(contentLengthHeaderValue);
-                    spanForAttributes.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, contentLengthHeaderValueAsInt);
-                }
-                final String contentTypeHeaderValue = getHeaderValue(x, "Content-Length");
-                if(contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
-                    spanForAttributes.setAttribute("http.response_content_type", contentTypeHeaderValue);
-                }
-                spanForAttributes.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, x.code());
-                spanForAttributes.setAttribute(SemanticAttributes.HTTP_FLAVOR, x.protocol().toString().toUpperCase(Locale.ROOT));
-                return x;
-            }).join();
+            this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes));
+            Response response = this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes)).execute();
+            final String contentLengthHeaderValue = getHeaderValue(response, "Content-Length");
+            if(contentLengthHeaderValue != null && !contentLengthHeaderValue.isEmpty()) {
+                final Integer contentLengthHeaderValueAsInt = Integer.parseInt(contentLengthHeaderValue);
+                spanForAttributes.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, contentLengthHeaderValueAsInt);
+            }
+            final String contentTypeHeaderValue = getHeaderValue(response, "Content-Length");
+            if(contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
+                spanForAttributes.setAttribute("http.response_content_type", contentTypeHeaderValue);
+            }
+            spanForAttributes.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.code());
+            spanForAttributes.setAttribute(SemanticAttributes.HTTP_FLAVOR, response.protocol().toString().toUpperCase(Locale.ROOT));
             return this.retryCAEResponseIfRequired(response, requestInfo, span, spanForAttributes, claims);
         }
-        catch (URISyntaxException | IOException ex) {
+        catch (IOException | URISyntaxException ex) {
             spanForAttributes.recordException(ex);
-            throw ex;
+            throw new RuntimeException(ex);
         } finally {
             span.end();
         }
@@ -689,7 +655,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     /** Key used for events when an authentication challenge is returned by the API */
     @Nonnull
     public static final String authenticateChallengedEventKey = "com.microsoft.kiota.authenticate_challenge_received";
-    private Response retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) throws IOException, URISyntaxException {
+    private Response retryCAEResponseIfRequired(@Nonnull final Response response, @Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes, @Nullable final String claims) {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("retryCAEResponseIfRequired").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             final String responseClaims = this.getClaimsFromResponse(response, requestInfo, claims);
@@ -699,7 +665,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         requestInfo.content.reset();
                     } catch (IOException ex) {
                         spanForAttributes.recordException(ex);
-                        throw ex;
+                        throw new RuntimeException(ex);
                     }
                 }
                 closeResponse(true, response);
@@ -707,11 +673,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 spanForAttributes.setAttribute(SemanticAttributes.HTTP_RETRY_COUNT, 1);
                 return this.getHttpResponseMessage(requestInfo, span, spanForAttributes, responseClaims);
             }
-
             return response;
-        } catch (URISyntaxException e) {
-            spanForAttributes.recordException(e);
-            throw e;
         } finally {
             span.end();
         }
@@ -750,17 +712,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Nonnull
-    public <T> T convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) throws URISyntaxException, MalformedURLException {
-        Objects.requireNonNull(requestInfo, "parameter requestInfo cannot be null");
+    public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
+        Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
         try(final Scope scope = span.makeCurrent()) {
             this.authProvider.authenticateRequest(requestInfo, null);
-            try {
-                return (T) getRequestFromRequestInformation(requestInfo, span, span);
-            } catch (MalformedURLException | URISyntaxException e) {
-                span.recordException(e);
-                throw e;
-            }
+            return (T) getRequestFromRequestInformation(requestInfo, span, span);
+        } catch (URISyntaxException | MalformedURLException ex) {
+            span.recordException(ex);
+            throw new RuntimeException(ex);
         } finally {
             span.end();
         }
@@ -776,7 +736,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @throws URISyntaxException if the URI is invalid.
      * @throws MalformedURLException if the URL is invalid.
      */
-    protected @Nonnull Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException {
+    protected @Nonnull Request getRequestFromRequestInformation(@Nonnull final RequestInformation requestInfo, @Nonnull final Span parentSpan, @Nonnull final Span spanForAttributes) throws URISyntaxException, MalformedURLException{
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRequestFromRequestInformation").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             spanForAttributes.setAttribute(SemanticAttributes.HTTP_METHOD, requestInfo.httpMethod.toString());
@@ -793,7 +753,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 new RequestBody() {
                     @Override
                     public MediaType contentType() {
-                        final Set<String> contentTypes = requestInfo.headers.containsKey(contentTypeHeaderKey) ? requestInfo.headers.get(contentTypeHeaderKey) : Set.of();
+                        final Set<String> contentTypes = requestInfo.headers.containsKey(contentTypeHeaderKey) ? requestInfo.headers.get(contentTypeHeaderKey) : new HashSet<>();
                         if(contentTypes.isEmpty()) {
                             return null;
                         } else {

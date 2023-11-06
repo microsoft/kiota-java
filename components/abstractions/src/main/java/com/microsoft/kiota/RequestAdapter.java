@@ -1,9 +1,5 @@
 package com.microsoft.kiota;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.concurrent.CompletableFuture;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,42 +30,42 @@ public interface RequestAdapter {
      * @param factory the factory to create the parsable object from the type discriminator.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
-     * @return a {@link CompletableFuture} with the deserialized response model.
+     * @return the deserialized response model.
      */
     @Nullable
     @SuppressWarnings("LambdaLast")
-    <ModelType extends Parsable> ModelType sendAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, URISyntaxException;
+    <ModelType extends Parsable> ModelType send(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized response model collection.
      * @param requestInfo the request info to execute.
      * @param factory the factory to create the parsable object from the type discriminator.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
-     * @return a {@link CompletableFuture} with the deserialized response model collection.
+     * @return the deserialized response model collection.
      */
     @Nullable
     @SuppressWarnings("LambdaLast")
-    <ModelType extends Parsable> List<ModelType> sendCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    <ModelType extends Parsable> List<ModelType> sendCollection(@Nonnull final RequestInformation requestInfo, @Nonnull final ParsableFactory<ModelType> factory, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized primitive response model.
      * @param requestInfo the request info to execute.
      * @param targetClass the class of the response model to deserialize the response into.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
-     * @return a {@link CompletableFuture} with the deserialized primitive response model.
+     * @return the deserialized primitive response model.
      */
     @Nullable
-    <ModelType> ModelType sendPrimitiveAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    <ModelType> ModelType sendPrimitive(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized primitive collection response model.
      * @param requestInfo the request info to execute.
      * @param targetClass the class of the response model to deserialize the response into.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
-     * @return a {@link CompletableFuture} with the deserialized primitive collection response model.
+     * @return the deserialized primitive collection response model.
      */
     @Nullable
-    <ModelType> List<ModelType> sendPrimitiveCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    <ModelType> List<ModelType> sendPrimitiveCollection(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
 
     /**
      Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum value.
@@ -77,10 +73,10 @@ public interface RequestAdapter {
      * @param targetClass the class of the response model to deserialize the response into.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
-     * @return a {@link CompletableFuture} with the deserialized primitive response model.
+     * @return the deserialized primitive response model.
      */
     @Nullable
-    <ModelType extends Enum<ModelType>> ModelType sendEnumAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    <ModelType extends Enum<ModelType>> ModelType sendEnum(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
 
     /**
      Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum collection value.
@@ -88,10 +84,10 @@ public interface RequestAdapter {
      * @param targetClass the class of the response model to deserialize the response into.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
-     * @return a {@link CompletableFuture} with the deserialized primitive response model.
+     * @return the deserialized primitive response model.
      */
     @Nullable
-    <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollectionAsync(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollection(@Nonnull final RequestInformation requestInfo, @Nonnull final Class<ModelType> targetClass, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
     /**
      * Sets The base url for every request.
      * @param baseUrl The base url for every request.
@@ -110,5 +106,5 @@ public interface RequestAdapter {
      * @return the native HTTP request.
      */
     @Nonnull
-    <T> T convertToNativeRequestAsync(@Nonnull final RequestInformation requestInfo) throws URISyntaxException, MalformedURLException;
+    <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo);
 }

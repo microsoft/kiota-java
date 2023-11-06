@@ -5,7 +5,6 @@ import com.microsoft.kiota.RequestInformation;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.CompletableFuture;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,8 +23,7 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
     private final AccessTokenProvider accessTokenProvider;
     private final static String authorizationHeaderKey = "Authorization";
     private final static String ClaimsKey = "claims";
-    @Nonnull
-    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) throws URISyntaxException {
+    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext){
         Objects.requireNonNull(request);
         if (request.headers.containsKey(authorizationHeaderKey) &&
             additionalAuthenticationContext != null &&
@@ -35,7 +33,11 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
         }
         if(!request.headers.containsKey(authorizationHeaderKey)) {
             final URI targetUri;
-            targetUri = request.getUri();
+            try {
+                targetUri = request.getUri();
+            } catch (URISyntaxException e){
+                throw new RuntimeException("Malformed URI.", e);
+            }
             String accessToken = this.accessTokenProvider.getAuthorizationToken(targetUri, additionalAuthenticationContext);
             if(!Strings.isNullOrEmpty(accessToken)) {
                 request.headers.add(authorizationHeaderKey, "Bearer " + accessToken);

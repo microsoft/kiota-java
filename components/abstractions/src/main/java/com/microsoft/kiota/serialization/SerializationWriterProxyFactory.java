@@ -24,7 +24,7 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
      * @param onAfterSerialization the callback to invoke after the serialization of any model object.
      * @param onStartObjectSerialization the callback to invoke when the serialization of a model object starts.
      */
-    protected SerializationWriterProxyFactory(@Nonnull final SerializationWriterFactory concrete,
+    public SerializationWriterProxyFactory(@Nonnull final SerializationWriterFactory concrete,
         @Nullable final Consumer<Parsable> onBeforeSerialization,
         @Nullable final Consumer<Parsable> onAfterSerialization,
         @Nullable final BiConsumer<Parsable, SerializationWriter> onStartObjectSerialization) {

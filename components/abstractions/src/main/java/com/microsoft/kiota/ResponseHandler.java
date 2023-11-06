@@ -18,6 +18,6 @@ public interface ResponseHandler {
      * @param <NativeResponseType> The type of the native response object.
      * @param <ModelType>          The type of the response model object.
      */
-    @Nonnull
-    <NativeResponseType, ModelType> void handleResponseAsync(@Nonnull final NativeResponseType response, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    @Nullable
+    <NativeResponseType, ModelType> ModelType handleResponse(@Nonnull final NativeResponseType response, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
 }
