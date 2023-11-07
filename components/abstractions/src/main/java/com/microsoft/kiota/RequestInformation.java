@@ -38,6 +38,46 @@ public class RequestInformation {
     /** Creates a new instance of the request information class. */
     public RequestInformation() { //Default constructor
     }
+    /**
+     * Creates a new instance of the request information class.
+     * @param method The HTTP method for the request.
+     * @param urlTemplate The url template for the request.
+     * @param pathParameters The path parameters for the request.
+     */
+    public RequestInformation(final HttpMethod method, @Nonnull final String urlTemplate, @Nonnull final Map<String, Object> pathParameters) {
+        this.httpMethod = method;
+        this.urlTemplate = Objects.requireNonNull(urlTemplate);
+        this.pathParameters = Objects.requireNonNull(pathParameters);
+    }
+    /**
+     * Configures the request information based on the request configuration and the query parameters getter.
+     * @param <T> The type of the request configuration.
+     * @param requestConfiguration The request configuration to apply to the request information.
+     * @param configurationFactory The factory to create the request configuration from.
+     */
+    public <T extends BaseRequestConfiguration> void configure(@Nullable final java.util.function.Consumer<T> requestConfiguration, @Nonnull final java.util.function.Supplier<T> configurationFactory) {
+        configure(requestConfiguration, configurationFactory, null);
+    }
+    /**
+     * Configures the request information based on the request configuration and the query parameters getter.
+     * @param <T> The type of the request configuration.
+     * @param requestConfiguration The request configuration to apply to the request information.
+     * @param configurationFactory The factory to create the request configuration from.
+     * @param queryParametersGetter The function to get the query parameters from the request configuration.
+     */
+    public <T extends BaseRequestConfiguration> void configure(@Nullable final java.util.function.Consumer<T> requestConfiguration, @Nonnull final java.util.function.Supplier<T> configurationFactory, @Nullable final java.util.function.Function<Object, T> queryParametersGetter) {
+        Objects.requireNonNull(configurationFactory);
+        if (requestConfiguration == null)  {
+            return;
+        }
+        final T requestConfig = configurationFactory.get();
+        requestConfiguration.accept(requestConfig);
+        if (queryParametersGetter != null) {
+            addQueryParameters(queryParametersGetter.apply(requestConfig));
+        }
+        headers.putAll(requestConfig.headers);
+        addRequestOptions(requestConfig.options);
+    }
     /** The url template for the current request */
     @Nullable
     public String urlTemplate;
