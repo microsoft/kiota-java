@@ -1,8 +1,8 @@
 package com.microsoft.kiota.authentication;
 
+import com.microsoft.kiota.Compatibility;
 import com.microsoft.kiota.RequestInformation;
 
-import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
                 throw new RuntimeException("Malformed URI.", e);
             }
             String accessToken = this.accessTokenProvider.getAuthorizationToken(targetUri, additionalAuthenticationContext);
-            if(!Strings.isNullOrEmpty(accessToken)) {
+            if(!Compatibility.isBlank(accessToken)) {
                 request.headers.add(authorizationHeaderKey, "Bearer " + accessToken);
             }
         }

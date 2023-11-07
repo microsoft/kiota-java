@@ -106,7 +106,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
             if(decodedClaim != null && !decodedClaim.isEmpty()) {
                 context.setClaims(decodedClaim);
             }
-            return this.creds.getToken(context).toFuture().join().getToken();
+            return this.creds.getTokenSync(context).getToken();
         }
         catch (IllegalArgumentException e){
             span.recordException(e);

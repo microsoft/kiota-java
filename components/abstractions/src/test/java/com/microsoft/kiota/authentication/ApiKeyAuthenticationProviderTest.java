@@ -37,6 +37,7 @@ public class ApiKeyAuthenticationProviderTest {
 		}};
 		request.addQueryParameter("param1", "value1");
 		value.authenticateRequest(request, null);
+		assertNull(request.headers.get("param"));
 		assertEquals("https://localhost?param1=value1&param=key", request.getUri().toString());
 	}
 	@Test
