@@ -65,7 +65,7 @@ public class RequestInformation {
      * @param configurationFactory The factory to create the request configuration from.
      * @param queryParametersGetter The function to get the query parameters from the request configuration.
      */
-    public <T extends BaseRequestConfiguration> void configure(@Nullable final java.util.function.Consumer<T> requestConfiguration, @Nonnull final java.util.function.Supplier<T> configurationFactory, @Nullable final java.util.function.Function<Object, T> queryParametersGetter) {
+    public <T extends BaseRequestConfiguration> void configure(@Nullable final java.util.function.Consumer<T> requestConfiguration, @Nonnull final java.util.function.Supplier<T> configurationFactory, @Nullable final java.util.function.Function<T, Object> queryParametersGetter) {
         Objects.requireNonNull(configurationFactory);
         if (requestConfiguration == null)  {
             return;
