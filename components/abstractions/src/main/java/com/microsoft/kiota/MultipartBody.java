@@ -17,6 +17,12 @@ import com.microsoft.kiota.serialization.SerializationWriterFactory;
  * Represents a multipart body for a request or a response.
  */
 public class MultipartBody implements Parsable {
+	/**
+	 * Creates a new instance of the MultipartBody class.
+	 */
+	public MultipartBody() {
+		// default empty constructor
+	}
 	@Nonnull
 	private final String boundary = UUID.randomUUID().toString().replace("-", "");
 	/**

@@ -17,6 +17,9 @@ import jakarta.annotation.Nullable;
  * A map that is case-insensitive on the keys
  */
 public class CaseInsensitiveMap implements Map<String, Set<String>>{
+    /**
+     * Default constructor
+     */
     public CaseInsensitiveMap() {
         // default constructor
     }

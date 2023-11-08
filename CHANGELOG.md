@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-Changed OkHttpRequestAdapter dependency from OkHttpClient to Call.Factory (parent interface implemented by OkHttpClient).
+## [1.0.0] - 2023-11-10
+
+### Changed
+
+- Kiota-Java has moved away from Async/Completable futures, thus Async components are no longer utilized and have been removed. Furthermore, requestAdapter methods no longer use the async suffix. [#175](https://github.com/microsoft/kiota-java/issues/175)
+- ApiException class now extends RuntimeException instead of Exception.
+- Changed OkHttpRequestAdapter dependency from OkHttpClient to Call.Factory (parent interface implemented by OkHttpClient).
 
 ## [0.8.0] - 2023-10-31
 

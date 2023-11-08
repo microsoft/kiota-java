@@ -21,19 +21,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import com.microsoft.kiota.ApiExceptionBuilder;
+import com.microsoft.kiota.*;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-import com.microsoft.kiota.ApiClientBuilder;
-import com.microsoft.kiota.ApiException;
-import com.microsoft.kiota.HttpMethod;
-import com.microsoft.kiota.RequestInformation;
-import com.microsoft.kiota.RequestOption;
-import com.microsoft.kiota.ResponseHandlerOption;
-import com.microsoft.kiota.ResponseHeaders;
-import com.microsoft.kiota.ResponseHandler;
-import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
 import com.microsoft.kiota.serialization.ParseNodeFactoryRegistry;
@@ -201,10 +192,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 span.addEvent(eventResponseHandlerInvokedKey);
                 return responseHandler.handleResponse(response, errorMappings);
             }
-        } catch(ApiException ex) {
-            throw new RuntimeException(ex);
-        } catch(IOException ex) {
-            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -268,10 +255,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 span.addEvent(eventResponseHandlerInvokedKey);
                 return responseHandler.handleResponse(response, errorMappings);
             }
-        } catch(ApiException ex) {
-            throw new RuntimeException(ex);
-        } catch(IOException ex) {
-            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -371,11 +354,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 span.addEvent(eventResponseHandlerInvokedKey);
                 return responseHandler.handleResponse(response, errorMappings);
             }
-
-        } catch(ApiException ex) {
-            throw new RuntimeException(ex);
-        } catch(IOException ex) {
-            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -415,10 +393,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 span.addEvent(eventResponseHandlerInvokedKey);
                 return responseHandler.handleResponse(response, errorMappings);
             }
-        } catch(ApiException ex) {
-            throw new RuntimeException(ex);
-        } catch(IOException ex) {
-            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -458,12 +432,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 span.addEvent(eventResponseHandlerInvokedKey);
                 return responseHandler.handleResponse(response, errorMappings);
             }
-
-
-        } catch(ApiException ex) {
-            throw new RuntimeException(ex);
-        } catch(IOException ex) {
-            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
@@ -503,16 +471,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 span.addEvent(eventResponseHandlerInvokedKey);
                 return responseHandler.handleResponse(response, errorMappings);
             }
-        } catch(ApiException ex) {
-            throw new RuntimeException(ex);
-        } catch(IOException ex) {
-            throw new RuntimeException("failed to read the response body", ex);
         } finally {
             span.end();
         }
     }
     @Nullable
-    private ParseNode getRootParseNode(final Response response, final Span parentSpan, final Span spanForAttributes) throws IOException {
+    private ParseNode getRootParseNode(final Response response, final Span parentSpan, final Span spanForAttributes) {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("getRootParseNode").setParent(Context.current().with(parentSpan)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             final ResponseBody body = response.body(); // closing the response closes the body and stream https://square.github.io/okhttp/4.x/okhttp/okhttp3/-response-body/
@@ -539,14 +503,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     /** Key used for the attribute when an error response body is found */
     @Nonnull
     public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
-    private Response throwIfFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) throws IOException, ApiException {
+    private Response throwIfFailedResponse(@Nonnull final Response response, @Nonnull final Span spanForAttributes, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         final Span span = GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName()).spanBuilder("throwIfFailedResponse").setParent(Context.current().with(spanForAttributes)).startSpan();
         try(final Scope scope = span.makeCurrent()) {
             if (response.isSuccessful()) return response;
             spanForAttributes.setStatus(StatusCode.ERROR);
 
             final String statusCodeAsString = Integer.toString(response.code());
-            final Integer statusCode = response.code();
+            final int statusCode = response.code();
             final ResponseHeaders responseHeaders = HeadersCompatibility.getResponseHeaders(response.headers());
             if (errorMappings == null ||
             !errorMappings.containsKey(statusCodeAsString) &&
@@ -679,7 +643,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
            (claims == null || claims.isEmpty()) && // we avoid infinite loops and retry only once
            (requestInfo.content == null || requestInfo.content.markSupported())) {
                final List<String> authenticateHeader = response.headers("WWW-Authenticate");
-               if(authenticateHeader != null && !authenticateHeader.isEmpty()) {
+               if(!authenticateHeader.isEmpty()) {
                     String rawHeaderValue = null;
                     for(final String authenticateEntry: authenticateHeader) {
                         final Matcher matcher = bearerPattern.matcher(authenticateEntry);

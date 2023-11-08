@@ -5,7 +5,7 @@ import java.util.Objects;
 import jakarta.annotation.Nonnull;
 
 /** Parent type for exceptions thrown by the client when receiving failed responses to its requests. */
-public class ApiException extends Exception {
+public class ApiException extends RuntimeException {
     /** {@inheritDoc} */
     public ApiException() {
         super();

@@ -20,6 +20,7 @@ public class HeadersCompatibility {
      * @param headers the okhttp3 headers
      * @return the ResponseHeaders object
      */
+    @Nonnull
     public static ResponseHeaders getResponseHeaders(@Nonnull final okhttp3.Headers headers) {
         Objects.requireNonNull(headers);
         final ResponseHeaders responseHeaders = new ResponseHeaders();
@@ -29,13 +30,13 @@ public class HeadersCompatibility {
         });
         return responseHeaders;
     }
-
     /**
      * INTERNAL METHOD, DO NOT USE DIRECTLY
      * Get the request headers from the okhttp3 headers and convert them to a RequestHeaders object
      * @param headers the okhttp3 headers
      * @return the RequestHeaders object
      */
+    @Nonnull
     public static RequestHeaders getRequestHeaders(@Nonnull final okhttp3.Headers headers) {
         Objects.requireNonNull(headers);
         final RequestHeaders requestHeaders = new RequestHeaders();

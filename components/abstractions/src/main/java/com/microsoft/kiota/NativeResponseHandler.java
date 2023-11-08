@@ -13,6 +13,12 @@ import com.microsoft.kiota.serialization.ParsableFactory;
  * The {@code ResponseHandler} implementation to handle native response objects
  */
 public class NativeResponseHandler implements ResponseHandler {
+    /**
+     * Default constructor
+     */
+    public NativeResponseHandler() {
+        // default empty constructor
+    }
     private Object value;
     private HashMap<String, ParsableFactory<? extends Parsable>> errorMappings;
     @Override

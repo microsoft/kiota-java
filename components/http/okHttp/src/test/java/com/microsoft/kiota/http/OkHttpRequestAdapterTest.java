@@ -18,7 +18,6 @@ import com.microsoft.kiota.RequestInformation;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -184,11 +183,10 @@ public class OkHttpRequestAdapterTest {
 		when(mockFactory.getParseNode(any(String.class), any(InputStream.class))).thenReturn(mockParseNode);
 		when(mockFactory.getValidContentType()).thenReturn("application/json");
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
-		final var exception = assertThrows(RuntimeException.class, ()->requestAdapter.send(requestInformation, (node) -> mockEntity, null)) ;
-		final var cause = exception.getCause();	
-		assertTrue(cause instanceof ApiException);
-		assertEquals(404, ((ApiException)cause).getResponseStatusCode());
-		assertTrue(((ApiException)cause).getResponseHeaders().containsKey("request-id"));
+		final var exception = assertThrows(ApiException.class, ()->requestAdapter.send(requestInformation, (node) -> mockEntity, null)) ;
+        assertNotNull(exception);
+		assertEquals(404, exception.getResponseStatusCode());
+		assertTrue(exception.getResponseHeaders().containsKey("request-id"));
 	}
 	public static OkHttpClient getMockClient(final Response response) throws IOException {
         final OkHttpClient mockClient = mock(OkHttpClient.class);
