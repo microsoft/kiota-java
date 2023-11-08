@@ -44,8 +44,8 @@ public class RequestInformation {
      * @param urlTemplate The url template for the request.
      * @param pathParameters The path parameters for the request.
      */
-    public RequestInformation(final HttpMethod method, @Nonnull final String urlTemplate, @Nonnull final Map<String, Object> pathParameters) {
-        this.httpMethod = method;
+    public RequestInformation(@Nonnull final HttpMethod method, @Nonnull final String urlTemplate, @Nonnull final Map<String, Object> pathParameters) {
+        this.httpMethod = Objects.requireNonNull(method);
         this.urlTemplate = Objects.requireNonNull(urlTemplate);
         this.pathParameters = Objects.requireNonNull(pathParameters);
     }
