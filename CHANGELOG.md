@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+Changed OkHttpRequestAdapter dependency from OkHttpClient to Call.Factory (parent interface implemented by OkHttpClient).
+
 ## [0.8.0] - 2023-10-31
 
 ### Added
