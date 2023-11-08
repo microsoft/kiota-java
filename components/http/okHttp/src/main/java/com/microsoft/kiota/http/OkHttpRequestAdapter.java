@@ -547,11 +547,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
             final String statusCodeAsString = Integer.toString(response.code());
             final Integer statusCode = response.code();
-            final ResponseHeaders responseHeaders = new ResponseHeaders();
-            response.headers().toMultimap().forEach((name,value) ->{
-                Objects.requireNonNull(name);
-                responseHeaders.put(name, new HashSet<>(value));
-            });
+            final ResponseHeaders responseHeaders = HeadersCompatibility.getResponseHeaders(response.headers());
             if (errorMappings == null ||
             !errorMappings.containsKey(statusCodeAsString) &&
             !(statusCode >= 400 && statusCode < 500 && errorMappings.containsKey("4XX")) &&
