@@ -48,7 +48,7 @@ import com.microsoft.kiota.store.BackingStoreFactory;
 import com.microsoft.kiota.store.BackingStoreFactorySingleton;
 
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
+import okhttp3.Call;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -67,7 +67,7 @@ import io.opentelemetry.context.Context;
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
     private final static String contentTypeHeaderKey = "Content-Type";
     @Nonnull
-    private final OkHttpClient client;
+    private final Call.Factory client;
     @Nonnull
     private final AuthenticationProvider authProvider;
     @Nonnull
@@ -119,7 +119,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param client the http client to use for sending requests.
      */
     @SuppressWarnings("LambdaLast")
-    public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client) {
+    public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final Call.Factory client) {
         this(authenticationProvider, parseNodeFactory, serializationWriterFactory, client, null);
     }
     /**
@@ -131,7 +131,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param observabilityOptions the observability options to use for sending requests.
      */
     @SuppressWarnings("LambdaLast")
-    public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final OkHttpClient client, @Nullable final ObservabilityOptions observabilityOptions) {
+    public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider, @Nullable final ParseNodeFactory parseNodeFactory, @Nullable final SerializationWriterFactory serializationWriterFactory, @Nullable final Call.Factory client, @Nullable final ObservabilityOptions observabilityOptions) {
         this.authProvider = Objects.requireNonNull(authenticationProvider, "parameter authenticationProvider cannot be null");
         if(client == null) {
             this.client = KiotaClientFactory.create().build();
