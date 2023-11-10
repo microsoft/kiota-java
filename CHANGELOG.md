@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - 2023-11-10
 
+### Added
+
+- Added helper methods to request information to reduce the amount of generated code. [Kiota #3651](https://github.com/microsoft/kiota/issues/3651)
+
 ### Changed
 
 - Kiota-Java has moved away from Async/Completable futures, thus Async components are no longer utilized and have been removed. Furthermore, requestAdapter methods no longer use the async suffix. [#175](https://github.com/microsoft/kiota-java/issues/175)
