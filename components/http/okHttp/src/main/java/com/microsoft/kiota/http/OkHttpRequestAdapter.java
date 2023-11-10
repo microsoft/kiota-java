@@ -577,8 +577,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 additionalContext.put(claimsKey, claims);
             }
             this.authProvider.authenticateRequest(requestInfo, additionalContext);
-            this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes));
-            Response response = this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes)).execute();
+            final Response response = this.client.newCall(getRequestFromRequestInformation(requestInfo, span, spanForAttributes)).execute();
             final String contentLengthHeaderValue = getHeaderValue(response, "Content-Length");
             if(contentLengthHeaderValue != null && !contentLengthHeaderValue.isEmpty()) {
                 final int contentLengthHeaderValueAsInt = Integer.parseInt(contentLengthHeaderValue);
