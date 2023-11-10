@@ -2,6 +2,7 @@ package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
 import okio.Okio;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -17,8 +18,6 @@ import com.microsoft.kiota.RequestInformation;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -46,14 +45,14 @@ public class OkHttpRequestAdapterTest {
 	@ParameterizedTest
 	@EnumSource(value = HttpMethod.class, names = {"PUT", "POST", "PATCH"})
 	public void PostRequestsShouldHaveEmptyBody(HttpMethod method) throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException: method POST must have a request body.
-		final var authenticationProviderMock = mock(AuthenticationProvider.class);
+		final AuthenticationProvider authenticationProviderMock = mock(AuthenticationProvider.class);
 		final var adapter = new OkHttpRequestAdapter(authenticationProviderMock) {
 			public Request test() throws Exception {
-				var ri = new RequestInformation();
+				RequestInformation ri = new RequestInformation();
 				ri.httpMethod = method;
 				ri.urlTemplate = "http://localhost:1234";
-				var span1 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
-				var span2 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
+				Span span1 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
+				Span span2 = GlobalOpenTelemetry.getTracer("").spanBuilder("").startSpan();
 				return this.getRequestFromRequestInformation(ri, span1, span2);
 			}
 		};
@@ -63,9 +62,9 @@ public class OkHttpRequestAdapterTest {
 	}
 	@ParameterizedTest
 	@ValueSource(ints = {200, 201, 202, 203, 206})
-	public void SendStreamReturnsUsableStream(int statusCode) throws Exception {
+	void SendStreamReturnsUsableStream(int statusCode) throws Exception {
 		final var authenticationProviderMock = mock(AuthenticationProvider.class);
-		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class));
 		final var text = "my-demo-text";
 		final var bufferedSource = Okio.buffer(Okio.source(new ByteArrayInputStream(text.getBytes("UTF-8"))));
 		final var client = getMockClient(new Response.Builder()
@@ -82,7 +81,7 @@ public class OkHttpRequestAdapterTest {
 		}};
 		InputStream response = null;
 		try {
-			response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null).get();
+			response = requestAdapter.sendPrimitive(requestInformation, InputStream.class, null);
 			assertNotNull(response);
 			assertEquals(text, new String(response.readAllBytes(), StandardCharsets.UTF_8));
 		} finally {
@@ -95,7 +94,7 @@ public class OkHttpRequestAdapterTest {
 	@ValueSource(ints = {200, 201, 202, 203, 204})
 	public void SendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
 		final var authenticationProviderMock = mock(AuthenticationProvider.class);
-		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class));
 		final var client = getMockClient(new Response.Builder()
 													.code(statusCode)
 													.message("OK")
@@ -108,14 +107,14 @@ public class OkHttpRequestAdapterTest {
 			setUri(new URI("https://localhost"));
 			httpMethod = HttpMethod.GET;
 		}};
-		final var response = requestAdapter.sendPrimitiveAsync(requestInformation, InputStream.class, null).get();
+		final var response = requestAdapter.sendPrimitive(requestInformation, InputStream.class, null);
 		assertNull(response);
 	}
 	@ParameterizedTest
 	@ValueSource(ints = {200, 201, 202, 203, 204, 205})
 	public void SendReturnsNullOnNoContent(int statusCode) throws Exception {
 		final var authenticationProviderMock = mock(AuthenticationProvider.class);
-		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class));
 		final var client = getMockClient(new Response.Builder()
 													.code(statusCode)
 													.message("OK")
@@ -130,14 +129,14 @@ public class OkHttpRequestAdapterTest {
 		}};
 		final var mockEntity = mock(Parsable.class);
 		when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
-		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null).get();
+		final var response = requestAdapter.send(requestInformation, (node) -> mockEntity, null);
 		assertNull(response);
 	}
 	@ParameterizedTest
 	@ValueSource(ints = {200, 201, 202, 203})
 	public void SendReturnsObjectOnContent(int statusCode) throws Exception {
 		final var authenticationProviderMock = mock(AuthenticationProvider.class);
-		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class));
 		final var client = getMockClient(new Response.Builder()
 													.code(statusCode)
 													.message("OK")
@@ -157,13 +156,13 @@ public class OkHttpRequestAdapterTest {
 		when(mockFactory.getParseNode(any(String.class), any(InputStream.class))).thenReturn(mockParseNode);
 		when(mockFactory.getValidContentType()).thenReturn("application/json");
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
-		final var response = requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null).get();
+		final var response = requestAdapter.send(requestInformation, (node) -> mockEntity, null);
 		assertNotNull(response);
 	}
 	@Test
 	public void throwsAPIException() throws Exception  {
 		final var authenticationProviderMock = mock(AuthenticationProvider.class);
-		when(authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class))).thenReturn(CompletableFuture.completedFuture(null));
+		authenticationProviderMock.authenticateRequest(any(RequestInformation.class), any(Map.class));
 		final var client = getMockClient(new Response.Builder()
 													.code(404)
 													.message("Not Found")
@@ -184,11 +183,10 @@ public class OkHttpRequestAdapterTest {
 		when(mockFactory.getParseNode(any(String.class), any(InputStream.class))).thenReturn(mockParseNode);
 		when(mockFactory.getValidContentType()).thenReturn("application/json");
 		final var requestAdapter = new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
-		final var exception = assertThrows(ExecutionException.class, ()->requestAdapter.sendAsync(requestInformation, (node) -> mockEntity, null).get()) ;
-		final var cause = exception.getCause();	
-		assertTrue(cause instanceof ApiException);
-		assertEquals(404, ((ApiException)cause).getResponseStatusCode());
-		assertTrue(((ApiException)cause).getResponseHeaders().containsKey("request-id"));
+		final var exception = assertThrows(ApiException.class, ()->requestAdapter.send(requestInformation, (node) -> mockEntity, null)) ;
+        assertNotNull(exception);
+		assertEquals(404, exception.getResponseStatusCode());
+		assertTrue(exception.getResponseHeaders().containsKey("request-id"));
 	}
 	public static OkHttpClient getMockClient(final Response response) throws IOException {
         final OkHttpClient mockClient = mock(OkHttpClient.class);

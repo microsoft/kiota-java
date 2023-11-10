@@ -14,6 +14,7 @@ import java.time.LocalTime;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.AdditionalDataHolder;
+import jakarta.annotation.Nonnull;
 
 public class TestEntity implements Parsable, AdditionalDataHolder {
 	private String _id;
@@ -81,7 +82,8 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 		this._createdDateTime = value;
 	}
 
-	@Override
+	@Nonnull
+    @Override
 	public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
 		return new HashMap<>() {{
 			put("id", (n) -> {
@@ -109,7 +111,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 	}
 
 	@Override
-	public void serialize(SerializationWriter writer) {
+	public void serialize(@Nonnull SerializationWriter writer) {
 		Objects.requireNonNull(writer);
 		writer.writeStringValue("id", getId());
 		writer.writeStringValue("officeLocation", getOfficeLocation());
@@ -123,6 +125,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 
 	private final Map<String, Object> _additionalData = new HashMap<>();
 
+	@Nonnull
 	@Override
 	public Map<String, Object> getAdditionalData() {
 		return _additionalData;

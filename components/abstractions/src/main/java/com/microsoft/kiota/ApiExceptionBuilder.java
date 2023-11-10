@@ -28,7 +28,7 @@ public class ApiExceptionBuilder {
             value = (ApiException) error;
         } else {
             value = new ApiExceptionBuilder()
-                    .withMessage("\"unexpected error type \" + error.getClass().getName()")
+                    .withMessage("\"unexpected error type \"" + error.getClass().getName())
                     .build();
         }
     }

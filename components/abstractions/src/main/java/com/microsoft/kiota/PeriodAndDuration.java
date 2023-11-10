@@ -114,6 +114,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         return new PeriodAndDuration(periodAndDuration.getPeriod(), periodAndDuration.getDuration());
     }
     /**
+     * Parses a string to produce a {@code PeriodAndDuration}.
      * @param stringValue the {@code String} parse from.
      * @return parsed instance of {@code PeriodAndDuration}
      */

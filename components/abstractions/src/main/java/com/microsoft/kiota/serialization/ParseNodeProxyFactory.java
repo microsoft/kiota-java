@@ -37,7 +37,7 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
         final ParseNode node = _concrete.getParseNode(contentType, rawResponse);
         final Consumer<Parsable> originalOnBefore = node.getOnBeforeAssignFieldValues();
         final Consumer<Parsable> originalOnAfter = node.getOnAfterAssignFieldValues();
-        node.setOnBeforeAssignFieldValues((x) -> {
+        node.setOnBeforeAssignFieldValues(x -> {
             if(this._onBefore != null) {
                 this._onBefore.accept(x);
             }
@@ -45,7 +45,7 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
                 originalOnBefore.accept(x);
             }
         });
-        node.setOnAfterAssignFieldValues((x) -> {
+        node.setOnAfterAssignFieldValues(x -> {
             if(this._onAfter != null) {
                 this._onAfter.accept(x);
             }
