@@ -5,7 +5,7 @@ import java.util.Objects;
 import jakarta.annotation.Nonnull;
 
 /** Parent type for exceptions thrown by the client when receiving failed responses to its requests. */
-public class ApiException extends Exception {
+public class ApiException extends RuntimeException {
     /** {@inheritDoc} */
     public ApiException() {
         super();
@@ -30,7 +30,6 @@ public class ApiException extends Exception {
      * Gets the HTTP response status code
      * @return The response status code from the failed response.
      */
-    @Nonnull
     public int getResponseStatusCode() {
         return responseStatusCode;
     }

@@ -22,7 +22,7 @@ public abstract class BaseRequestBuilder {
      * @param urlTemplate Url template to use to build the URL for the current request builder
      */
     protected BaseRequestBuilder(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String urlTemplate) {
-        this(requestAdapter, urlTemplate, new HashMap<String, Object>());
+        this(requestAdapter, urlTemplate, new HashMap<>());
     }
     /**
      * Instantiates a new BaseRequestBuilder and sets the default values.
@@ -33,7 +33,7 @@ public abstract class BaseRequestBuilder {
     protected BaseRequestBuilder(@Nonnull final RequestAdapter requestAdapter, @Nonnull final String urlTemplate, @Nonnull final HashMap<String, Object> pathParameters) {
         this.requestAdapter = Objects.requireNonNull(requestAdapter);
         this.urlTemplate = Objects.requireNonNull(urlTemplate);
-        this.pathParameters = new HashMap<String, Object>(Objects.requireNonNull(pathParameters));
+        this.pathParameters = new HashMap<>(Objects.requireNonNull(pathParameters));
     }
     /**
      * Instantiates a new BaseRequestBuilder and sets the default values.

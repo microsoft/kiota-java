@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import kotlin.Pair;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -56,13 +57,17 @@ public class HeadersInspectionHandler implements Interceptor {
             }
             if (inspectionOption.getInspectRequestHeaders()) {
                 for(final Pair<? extends String, ? extends String> header : request.headers()) {
-                    inspectionOption.getRequestHeaders().put(header.getFirst(), Set.of(header.getSecond()));
+                    HashSet<String> value = new HashSet<>();
+                    value.add(header.getSecond());
+                    inspectionOption.getRequestHeaders().put(header.getFirst(), value);
                 }
             }
             final Response response = chain.proceed(request);
             if (inspectionOption.getInspectResponseHeaders()) {
                 for(final Pair<? extends String, ? extends String> header : response.headers()) {
-                    inspectionOption.getResponseHeaders().put(header.getFirst(), Set.of(header.getSecond()));
+                    HashSet<String> value = new HashSet<>();
+                    value.add(header.getSecond());
+                    inspectionOption.getResponseHeaders().put(header.getFirst(), value);
                 }
             }
             return response;
@@ -75,5 +80,4 @@ public class HeadersInspectionHandler implements Interceptor {
             }
         }
     }
-    
 }

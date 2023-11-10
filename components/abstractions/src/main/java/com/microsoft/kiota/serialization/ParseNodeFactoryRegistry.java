@@ -2,6 +2,7 @@ package com.microsoft.kiota.serialization;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -12,17 +13,19 @@ import jakarta.annotation.Nonnull;
  */
 public class ParseNodeFactoryRegistry implements ParseNodeFactory {
     /** Default constructor for the registry. */
-    public ParseNodeFactoryRegistry() {}
+    public ParseNodeFactoryRegistry() {
+        // Default constructor for the registry.
+    }
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public static final ParseNodeFactoryRegistry defaultInstance = new ParseNodeFactoryRegistry();
     /** List of factories that are registered by content type. */
     @Nonnull
-    public final HashMap<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
+    public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
     @Nonnull
     public String getValidContentType() {
         throw new UnsupportedOperationException("The registry supports multiple content types. Get the registered factory instead.");
     }
-    private static Pattern contentTypeVendorCleanupPattern = Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern contentTypeVendorCleanupPattern = Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
     @Override
     @Nonnull
     public ParseNode getParseNode(@Nonnull final String contentType, @Nonnull final InputStream rawResponse) {

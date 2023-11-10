@@ -7,6 +7,7 @@ import jakarta.annotation.Nullable;
 public class ResponseHandlerOption implements RequestOption {
 	/** Creates a new instance of the option */
 	public ResponseHandlerOption() {
+		// default constructor
 	}
 	private ResponseHandler responseHandler;
 

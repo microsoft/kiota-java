@@ -6,6 +6,12 @@ import jakarta.annotation.Nullable;
 
 /** Base class for request configuration */
 public abstract class BaseRequestConfiguration {
+    /**
+     * Default constructor
+     */
+    public BaseRequestConfiguration() {
+        // default empty constructor
+    }
     /** Request headers */
     @Nullable
     public RequestHeaders headers = new RequestHeaders();

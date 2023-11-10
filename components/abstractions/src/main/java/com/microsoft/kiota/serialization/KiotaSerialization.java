@@ -1,7 +1,4 @@
 package com.microsoft.kiota.serialization;
-/**
- * Serialization helpers for kiota models.
- */
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

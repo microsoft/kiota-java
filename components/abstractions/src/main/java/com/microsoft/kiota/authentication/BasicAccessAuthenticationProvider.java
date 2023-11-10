@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /** Provides an implementation of the Basic Access Authentication scheme: https://en.wikipedia.org/wiki/Basic_access_authentication . */
 public class BasicAccessAuthenticationProvider implements AuthenticationProvider {
@@ -35,9 +34,7 @@ public class BasicAccessAuthenticationProvider implements AuthenticationProvider
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public CompletableFuture<Void> authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
+    public void authenticateRequest(@Nonnull final RequestInformation request, @Nullable final Map<String, Object> additionalAuthenticationContext) {
         request.headers.add(AUTHORIZATION_HEADER_KEY, BASIC + encoded);
-        return CompletableFuture.completedFuture(null);
     }
 }
