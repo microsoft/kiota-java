@@ -106,7 +106,7 @@ public class RequestInformation {
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
             Map<String, Object> params = new HashMap<>(pathParameters.size() + queryParameters.size());
-            for (final var pathParam : pathParameters.entrySet()) {
+            for (final Map.Entry<String, Object> pathParam : pathParameters.entrySet()) {
                 params.put(pathParam.getKey(), replaceEnumValue(pathParam.getValue()));
             }
             params.putAll(queryParameters);
