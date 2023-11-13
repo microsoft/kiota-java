@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.9.1] - 2023-11-13
+
+### Changed
+
+- Fixed a bug where path or query parameters of enum types would not be serialized properly. [microsoft/kiota#3693](https://github.com/microsoft/kiota/issues/3693)
+
 ## [0.9.0] - 2023-11-10
 
 ### Added

@@ -25,6 +25,7 @@ import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.SerializationWriter;
+import com.microsoft.kiota.serialization.ValuedEnum;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
@@ -105,9 +106,10 @@ public class RequestInformation {
                 throw new IllegalStateException("PathParameters must contain a value for \"baseurl\" for the url to be built.");
 
             Map<String, Object> params = new HashMap<>(pathParameters.size() + queryParameters.size());
-            params.putAll(pathParameters);
+            for (final Map.Entry<String, Object> pathParam : pathParameters.entrySet()) {
+                params.put(pathParam.getKey(), replaceEnumValue(pathParam.getValue()));
+            }
             params.putAll(queryParameters);
-
             
             return new URI(StdUriTemplate.expand(urlTemplate, params));
         }
@@ -140,7 +142,7 @@ public class RequestInformation {
         final Field[] fields = parameters.getClass().getFields();
         for(final Field field : fields) {
             try {
-                final Object value = field.get(parameters);
+                Object value = field.get(parameters);
                 String name = field.getName();
                 if (field.isAnnotationPresent(QueryParameter.class)) {
                     final String annotationName = field.getAnnotation(QueryParameter.class).name();
@@ -149,6 +151,7 @@ public class RequestInformation {
                     }
                 }
                 if(value != null) {
+                    value = replaceEnumValue(value);
                     if(value.getClass().isArray()) {
                         queryParameters.put(name, Arrays.asList((Object[])value));
                     } else if(!value.toString().isEmpty()){
@@ -158,6 +161,20 @@ public class RequestInformation {
             } catch (IllegalAccessException ex) {
                 //TODO log
             }
+        }
+    }
+    private Object replaceEnumValue(@Nonnull final Object source)
+    {
+        if (source instanceof ValuedEnum) {
+            return ((ValuedEnum)source).getValue();
+        } else if (source.getClass().isArray() && ((Object[])source).length > 0 && ((Object[])source)[0] instanceof ValuedEnum) {
+            final ArrayList<String> result = new ArrayList<>();
+            for(final Object item : (Object[])source) {
+                result.add(((ValuedEnum)item).getValue());
+            }
+            return result;
+        } else {
+            return source;
         }
     }
     /**

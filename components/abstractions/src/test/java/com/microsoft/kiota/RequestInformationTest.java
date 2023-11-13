@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
+import com.microsoft.kiota.serialization.mocks.TestEnum;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -125,7 +128,7 @@ class RequestInformationTest {
         requestInfo.addQueryParameters(queryParameters);
 
         // Assert
-        assertTrue(queryParameters.select.length == 0);
+        assertEquals(0, queryParameters.select.length);
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertFalse(uriResult.toString().contains("select"));
     }
@@ -230,18 +233,88 @@ class RequestInformationTest {
         assertFalse(multipartBody.getBoundary().isEmpty());
         assertEquals("multipart/form-data; boundary=" + multipartBody.getBoundary(), requestInfo.headers.get("Content-Type").toArray()[0]);
     }
+    @Test
+    void ReplacesEnumSingleValueQueryParameters() throws IllegalStateException, URISyntaxException
+    {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?dataset}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.dataset = TestEnum.First;
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?dataset=1", uri.toString());
+    }
+    @Test
+    void ReplacesEnumValuesQueryParameters() throws IllegalStateException, URISyntaxException
+    {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.datasets = new TestEnum[] {TestEnum.First, TestEnum.Second};
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+    @Test
+    void ReplacesEnumSingleValuePathParameters() throws IllegalStateException, URISyntaxException
+    {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{dataset}";
+
+        // Act
+        requestInfo.pathParameters.put("dataset", ((Object)(TestEnum.First)));
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/1", uri.toString());
+    }
+    @Test
+    void ReplacesEnumValuesPathParameters() throws IllegalStateException, URISyntaxException
+    {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{datasets}";
+
+        // Act
+        requestInfo.pathParameters.put("datasets", ((Object)(new TestEnum[] {TestEnum.First, TestEnum.Second})));
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/1,2", uri.toString());
+    }
 }
 
 
-/// <summary>The messages in a mailbox or folder. Read-only. Nullable.</summary>
+/** The messages in a mailbox or folder. Read-only. Nullable. */
 class GetQueryParameters
 {
-    /// <summary>Select properties to be returned</summary>\
+    /** Select properties to be returned */
     @QueryParameter(name ="%24select")
     @jakarta.annotation.Nullable
     public String[] select;
-    /// <summary>Search items by search phrases</summary>
+    /** Search items by search phrases */
     @QueryParameter(name ="%24search")
     @jakarta.annotation.Nullable
     public String search;
+    @QueryParameter(name ="dataset")
+    @jakarta.annotation.Nullable
+    public TestEnum dataset;
+    @QueryParameter(name ="datasets")
+    @jakarta.annotation.Nullable
+    public TestEnum[] datasets;
 }
