@@ -1,144 +1,170 @@
 package com.microsoft.kiota.serialization.mocks;
 
 import com.microsoft.kiota.PeriodAndDuration;
+import com.microsoft.kiota.serialization.AdditionalDataHolder;
+import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.SerializationWriter;
-
-import java.util.*;
-import java.util.function.Consumer;
-import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
-import com.microsoft.kiota.serialization.Parsable;
-import com.microsoft.kiota.serialization.AdditionalDataHolder;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class TestEntity implements Parsable, AdditionalDataHolder {
-	private String _id;
-	public String getId() {
-		return _id;
-	}
+    private String _id;
 
-	public void setId(String _id) {
-		this._id = _id;
-	}
+    public String getId() {
+        return _id;
+    }
 
-	private String _officeLocation;
-	public String getOfficeLocation() {
-		return _officeLocation;
-	}
+    public void setId(String _id) {
+        this._id = _id;
+    }
 
-	public void setOfficeLocation(String _officeLocation) {
-		this._officeLocation = _officeLocation;
-	}
+    private String _officeLocation;
 
-	private LocalDate _birthDay;
-	public LocalDate getBirthDay() {
-		return _birthDay;
-	}
+    public String getOfficeLocation() {
+        return _officeLocation;
+    }
 
-	public void setBirthDay(LocalDate value) {
-		this._birthDay = value;
-	}
+    public void setOfficeLocation(String _officeLocation) {
+        this._officeLocation = _officeLocation;
+    }
 
-	private List<String> _deviceNames;
-	public List<String> getDeviceNames() {
-		return _deviceNames;
-	}
+    private LocalDate _birthDay;
 
-	public void setDeviceNames(List<String> value) {
-		this._deviceNames = new ArrayList<String>(value);
-	}
-	private PeriodAndDuration _workDuration;
-	public PeriodAndDuration getWorkDuration() {
-		return _workDuration;
-	}
+    public LocalDate getBirthDay() {
+        return _birthDay;
+    }
 
-	public void setWorkDuration(PeriodAndDuration value) {
-		this._workDuration = PeriodAndDuration.ofPeriodAndDuration(value);
-	}
+    public void setBirthDay(LocalDate value) {
+        this._birthDay = value;
+    }
 
-	private LocalTime _startWorkTime;
-	public LocalTime getStartWorkTime() {
-		return _startWorkTime;
-	}
+    private List<String> _deviceNames;
 
-	public void setStartWorkTime(LocalTime value) {
-		this._startWorkTime = value;
-	}
+    public List<String> getDeviceNames() {
+        return _deviceNames;
+    }
 
-	private LocalTime _endWorkTime;
-	public LocalTime getEndWorkTime() {
-		return _endWorkTime;
-	}
+    public void setDeviceNames(List<String> value) {
+        this._deviceNames = new ArrayList<String>(value);
+    }
 
-	public void setEndWorkTime(LocalTime value) {
-		this._endWorkTime = value;
-	}
+    private PeriodAndDuration _workDuration;
 
-	//TODO enum
-	private OffsetDateTime _createdDateTime;
+    public PeriodAndDuration getWorkDuration() {
+        return _workDuration;
+    }
 
-	public OffsetDateTime getCreatedDateTime() {
-		return _createdDateTime;
-	}
+    public void setWorkDuration(PeriodAndDuration value) {
+        this._workDuration = PeriodAndDuration.ofPeriodAndDuration(value);
+    }
 
-	public void setCreatedDateTime(OffsetDateTime value) {
-		this._createdDateTime = value;
-	}
+    private LocalTime _startWorkTime;
 
-	@Override
-	public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
-		return new HashMap<>() {{
-			put("id", (n) -> {
-				setId(n.getStringValue());
-			});
-			put("officeLocation", (n) -> {
-				setOfficeLocation(n.getStringValue());
-			});
-			put("birthDay", (n) -> {
-				setBirthDay(n.getLocalDateValue());
-			});
-			put("workDuration", (n) -> {
-				setWorkDuration(n.getPeriodAndDurationValue());
-			});
-			put("startWorkTime", (n) -> {
-				setStartWorkTime(n.getLocalTimeValue());
-			});
-			put("endWorkTime", (n) -> {
-				setEndWorkTime(n.getLocalTimeValue());
-			});
-			put("createdDateTime", (n) -> {
-				setCreatedDateTime(n.getOffsetDateTimeValue());
-			});
-			put("deviceNames", (n) -> {
-				setDeviceNames(n.getCollectionOfPrimitiveValues(String.class));
-			});
-		}};
-	}
+    public LocalTime getStartWorkTime() {
+        return _startWorkTime;
+    }
 
-	@Override
-	public void serialize(SerializationWriter writer) {
-		Objects.requireNonNull(writer);
-		writer.writeStringValue("id", getId());
-		writer.writeStringValue("officeLocation", getOfficeLocation());
-		writer.writeLocalDateValue("birthDay", getBirthDay());
-		writer.writePeriodAndDurationValue("workDuration", getWorkDuration());
-		writer.writeLocalTimeValue("startWorkTime", getStartWorkTime());
-		writer.writeLocalTimeValue("endWorkTime", getEndWorkTime());
-		writer.writeOffsetDateTimeValue("createdDateTime", getCreatedDateTime());
-		writer.writeCollectionOfPrimitiveValues("deviceNames", getDeviceNames());
-		writer.writeAdditionalData(getAdditionalData());
-	}
+    public void setStartWorkTime(LocalTime value) {
+        this._startWorkTime = value;
+    }
 
-	private final Map<String, Object> _additionalData = new HashMap<>();
+    private LocalTime _endWorkTime;
 
-	@Override
-	public Map<String, Object> getAdditionalData() {
-		return _additionalData;
-	}
-	@jakarta.annotation.Nonnull
-    public static TestEntity createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
-		return new TestEntity();
-	}
+    public LocalTime getEndWorkTime() {
+        return _endWorkTime;
+    }
+
+    public void setEndWorkTime(LocalTime value) {
+        this._endWorkTime = value;
+    }
+
+    // TODO enum
+    private OffsetDateTime _createdDateTime;
+
+    public OffsetDateTime getCreatedDateTime() {
+        return _createdDateTime;
+    }
+
+    public void setCreatedDateTime(OffsetDateTime value) {
+        this._createdDateTime = value;
+    }
+
+    @Override
+    public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
+        return new HashMap<>() {
+            {
+                put(
+                        "id",
+                        (n) -> {
+                            setId(n.getStringValue());
+                        });
+                put(
+                        "officeLocation",
+                        (n) -> {
+                            setOfficeLocation(n.getStringValue());
+                        });
+                put(
+                        "birthDay",
+                        (n) -> {
+                            setBirthDay(n.getLocalDateValue());
+                        });
+                put(
+                        "workDuration",
+                        (n) -> {
+                            setWorkDuration(n.getPeriodAndDurationValue());
+                        });
+                put(
+                        "startWorkTime",
+                        (n) -> {
+                            setStartWorkTime(n.getLocalTimeValue());
+                        });
+                put(
+                        "endWorkTime",
+                        (n) -> {
+                            setEndWorkTime(n.getLocalTimeValue());
+                        });
+                put(
+                        "createdDateTime",
+                        (n) -> {
+                            setCreatedDateTime(n.getOffsetDateTimeValue());
+                        });
+                put(
+                        "deviceNames",
+                        (n) -> {
+                            setDeviceNames(n.getCollectionOfPrimitiveValues(String.class));
+                        });
+            }
+        };
+    }
+
+    @Override
+    public void serialize(SerializationWriter writer) {
+        Objects.requireNonNull(writer);
+        writer.writeStringValue("id", getId());
+        writer.writeStringValue("officeLocation", getOfficeLocation());
+        writer.writeLocalDateValue("birthDay", getBirthDay());
+        writer.writePeriodAndDurationValue("workDuration", getWorkDuration());
+        writer.writeLocalTimeValue("startWorkTime", getStartWorkTime());
+        writer.writeLocalTimeValue("endWorkTime", getEndWorkTime());
+        writer.writeOffsetDateTimeValue("createdDateTime", getCreatedDateTime());
+        writer.writeCollectionOfPrimitiveValues("deviceNames", getDeviceNames());
+        writer.writeAdditionalData(getAdditionalData());
+    }
+
+    private final Map<String, Object> _additionalData = new HashMap<>();
+
+    @Override
+    public Map<String, Object> getAdditionalData() {
+        return _additionalData;
+    }
+
+    @jakarta.annotation.Nonnull
+    public static TestEntity createFromDiscriminatorValue(
+            @jakarta.annotation.Nonnull final ParseNode parseNode) {
+        return new TestEntity();
+    }
 }

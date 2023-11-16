@@ -1,5 +1,7 @@
 package com.microsoft.kiota;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,19 +12,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-
 /**
  * A map that is case-insensitive on the keys
  */
-public class CaseInsensitiveMap implements Map<String, Set<String>>{
+public class CaseInsensitiveMap implements Map<String, Set<String>> {
     /**
      * Default constructor
      */
     public CaseInsensitiveMap() {
         // default constructor
     }
+
     private final HashMap<String, HashSet<String>> internalMap = new HashMap<>();
 
     /**
@@ -35,7 +35,7 @@ public class CaseInsensitiveMap implements Map<String, Set<String>>{
         Objects.requireNonNull(key);
         return key.toLowerCase(Locale.ROOT);
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public int size() {
@@ -135,24 +135,24 @@ public class CaseInsensitiveMap implements Map<String, Set<String>>{
     public Set<Entry<String, Set<String>>> entrySet() {
         final HashSet<Entry<String, Set<String>>> result = new HashSet<>();
         for (final Entry<String, HashSet<String>> entry : internalMap.entrySet()) {
-            result.add(new Entry<String, Set<String>>() {
-                @Override
-                public String getKey() {
-                    return entry.getKey();
-                }
+            result.add(
+                    new Entry<String, Set<String>>() {
+                        @Override
+                        public String getKey() {
+                            return entry.getKey();
+                        }
 
-                @Override
-                public Set<String> getValue() {
-                    return entry.getValue();
-                }
+                        @Override
+                        public Set<String> getValue() {
+                            return entry.getValue();
+                        }
 
-                @Override
-                public Set<String> setValue(Set<String> value) {
-                    return entry.setValue(new HashSet<>(value));
-                }
-            });
+                        @Override
+                        public Set<String> setValue(Set<String> value) {
+                            return entry.setValue(new HashSet<>(value));
+                        }
+                    });
         }
         return result;
     }
-
 }

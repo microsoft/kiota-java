@@ -1,10 +1,9 @@
 package com.microsoft.kiota.authentication;
 
-import java.net.URI;
-import java.util.Map;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import java.net.URI;
+import java.util.Map;
 
 /** Returns access tokens */
 public interface AccessTokenProvider {
@@ -15,7 +14,10 @@ public interface AccessTokenProvider {
      * @return the access token.
      */
     @Nonnull
-    String getAuthorizationToken(@Nonnull final URI uri, @Nullable final Map<String, Object> additionalAuthenticationContext);
+    String getAuthorizationToken(
+            @Nonnull final URI uri,
+            @Nullable final Map<String, Object> additionalAuthenticationContext);
+
     /**
      * Returns the allowed hosts validator.
      * @return The allowed hosts validator.

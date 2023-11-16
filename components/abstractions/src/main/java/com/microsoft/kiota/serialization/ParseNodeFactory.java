@@ -1,8 +1,7 @@
 package com.microsoft.kiota.serialization;
 
-import java.io.InputStream;
-
 import jakarta.annotation.Nonnull;
+import java.io.InputStream;
 
 /**
  * Defines the contract for a factory that is used to create {@link ParseNode}s.
@@ -14,6 +13,7 @@ public interface ParseNodeFactory {
      */
     @Nonnull
     String getValidContentType();
+
     /**
      * Creates a {@link ParseNode} from the given {@link InputStream} and content type.
      * @param rawResponse the {@link InputStream} to read from.
@@ -21,5 +21,6 @@ public interface ParseNodeFactory {
      * @return a {@link ParseNode} that can deserialize the given {@link InputStream}.
      */
     @Nonnull
-    ParseNode getParseNode(@Nonnull final String contentType, @Nonnull final InputStream rawResponse);
+    ParseNode getParseNode(
+            @Nonnull final String contentType, @Nonnull final InputStream rawResponse);
 }

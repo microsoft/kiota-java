@@ -2,7 +2,6 @@ package com.microsoft.kiota;
 
 import com.microsoft.kiota.serialization.Parsable;
 import jakarta.annotation.Nonnull;
-
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -14,8 +13,7 @@ public class ApiExceptionBuilder {
     /**
      * Constructs an empty ApiExceptionBuilder
      */
-    public ApiExceptionBuilder() {
-    }
+    public ApiExceptionBuilder() {}
 
     /**
      * Constructs an ApiExceptionBuilder starting from a base ApiException
@@ -27,9 +25,10 @@ public class ApiExceptionBuilder {
         if (error instanceof ApiException) {
             value = (ApiException) error;
         } else {
-            value = new ApiExceptionBuilder()
-                    .withMessage("\"unexpected error type \"" + error.getClass().getName())
-                    .build();
+            value =
+                    new ApiExceptionBuilder()
+                            .withMessage("\"unexpected error type \"" + error.getClass().getName())
+                            .build();
         }
     }
 

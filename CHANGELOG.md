@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Added Spotless as an automatic formatting tool for the entire codebase
+
 ## [0.9.2] - 2023-11-16
 
 ### Changed

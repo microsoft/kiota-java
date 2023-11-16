@@ -1,17 +1,5 @@
 package com.microsoft.kiota;
 
-import org.junit.jupiter.api.Test;
-
-import com.microsoft.kiota.serialization.SerializationWriter;
-import com.microsoft.kiota.serialization.SerializationWriterFactory;
-import com.microsoft.kiota.serialization.mocks.TestEnum;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,13 +9,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.kiota.serialization.SerializationWriter;
+import com.microsoft.kiota.serialization.SerializationWriterFactory;
+import com.microsoft.kiota.serialization.mocks.TestEnum;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import org.junit.jupiter.api.Test;
+
 class RequestInformationTest {
     @Test
-    void ThrowsInvalidOperationExceptionWhenBaseUrlNotSet()
-    {
+    void ThrowsInvalidOperationExceptionWhenBaseUrlNotSet() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "{+baseurl}/users{?%24count}";
 
         // Assert
@@ -36,15 +33,14 @@ class RequestInformationTest {
     }
 
     @Test
-    void BuildsUrlOnProvidedBaseUrl()
-    {
+    void BuildsUrlOnProvidedBaseUrl() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "{+baseurl}/users{?%24count}";
 
         // Act
-        requestInfo.pathParameters.put("baseurl","http://localhost");
+        requestInfo.pathParameters.put("baseurl", "http://localhost");
 
         // Assert
         var result = assertDoesNotThrow(() -> requestInfo.getUri());
@@ -52,16 +48,18 @@ class RequestInformationTest {
     }
 
     @Test
-    void SetsPathParametersOfDateTimeOffsetType()
-    {
+    void SetsPathParametersOfDateTimeOffsetType() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
-        requestInfo.urlTemplate = "http://localhost/getDirectRoutingCalls(fromDateTime='{fromDateTime}',toDateTime='{toDateTime}')";
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate =
+                "http://localhost/getDirectRoutingCalls(fromDateTime='{fromDateTime}',toDateTime='{toDateTime}')";
 
         // Act
-        final OffsetDateTime fromDateTime = OffsetDateTime.of(2022, 8, 1, 0, 0, 0,0, ZoneOffset.of("+00:00"));
-        final OffsetDateTime toDateTime = OffsetDateTime.of(2022, 8, 2, 0, 0, 0,0, ZoneOffset.of("+00:00"));
+        final OffsetDateTime fromDateTime =
+                OffsetDateTime.of(2022, 8, 1, 0, 0, 0, 0, ZoneOffset.of("+00:00"));
+        final OffsetDateTime toDateTime =
+                OffsetDateTime.of(2022, 8, 2, 0, 0, 0, 0, ZoneOffset.of("+00:00"));
         requestInfo.pathParameters.put("fromDateTime", fromDateTime);
         requestInfo.pathParameters.put("toDateTime", toDateTime);
 
@@ -72,12 +70,12 @@ class RequestInformationTest {
     }
 
     @Test
-    void ExpandQueryParametersAfterPathParams()
-    {
+    void ExpandQueryParametersAfterPathParams() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
-        requestInfo.urlTemplate = "{+baseurl}/users/{id}/list{?async*,page*,size*,orderBy*,search*}";
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate =
+                "{+baseurl}/users/{id}/list{?async*,page*,size*,orderBy*,search*}";
 
         // Act
         requestInfo.pathParameters.put("baseurl", "http://localhost:9090");
@@ -92,12 +90,11 @@ class RequestInformationTest {
     }
 
     @Test
-    void DoesNotSetQueryParametersParametersIfEmptyString()
-    {
+    void DoesNotSetQueryParametersParametersIfEmptyString() {
 
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/users{?%24search}";
 
         final GetQueryParameters queryParameters = new GetQueryParameters();
@@ -110,20 +107,18 @@ class RequestInformationTest {
         assertEquals("", queryParameters.search);
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertFalse(uriResult.toString().contains("search"));
-        
     }
 
     @Test
-    void DoesNotSetQueryParametersParametersIfEmptyCollection()
-    {
+    void DoesNotSetQueryParametersParametersIfEmptyCollection() {
 
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/users{?%24select}";
 
         final GetQueryParameters queryParameters = new GetQueryParameters();
-        queryParameters.select = new String[]{};
+        queryParameters.select = new String[] {};
         // Act
         requestInfo.addQueryParameters(queryParameters);
 
@@ -134,12 +129,11 @@ class RequestInformationTest {
     }
 
     @Test
-    void SetsPathParametersOfBooleanType()
-    {
+    void SetsPathParametersOfBooleanType() {
 
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.GET;
+        requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/users{?%24count}";
 
         // Act
@@ -150,59 +144,67 @@ class RequestInformationTest {
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertTrue(uriResult.toString().contains("count=true"));
     }
+
     @Test
     void SetsParsableContent() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.POST;
+        requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
         when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
         final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
         when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
-        requestInfo.setContentFromParsable(requestAdapterMock, "application/json", new TestEntity());
+        requestInfo.setContentFromParsable(
+                requestAdapterMock, "application/json", new TestEntity());
 
         verify(writerMock, times(1)).writeObjectValue(any(), any(TestEntity.class));
-        verify(writerMock, never()).writeCollectionOfObjectValues(anyString(), any(ArrayList.class));
+        verify(writerMock, never())
+                .writeCollectionOfObjectValues(anyString(), any(ArrayList.class));
     }
+
     @Test
     void SetsParsableContentCollection() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.POST;
+        requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
         when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
         final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
         when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
-        requestInfo.setContentFromParsable(requestAdapterMock, "application/json", new TestEntity[] {new TestEntity() });
+        requestInfo.setContentFromParsable(
+                requestAdapterMock, "application/json", new TestEntity[] {new TestEntity()});
 
         verify(writerMock, never()).writeObjectValue(any(), any(TestEntity.class));
         verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), any(Iterable.class));
     }
+
     @Test
     void SetsScalarContentCollection() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.POST;
+        requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
         when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
         final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
         when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
-        requestInfo.setContentFromScalarCollection(requestAdapterMock, "application/json", new String[] {"foo"});
+        requestInfo.setContentFromScalarCollection(
+                requestAdapterMock, "application/json", new String[] {"foo"});
 
         verify(writerMock, never()).writeStringValue(any(), anyString());
         verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
+
     @Test
     void SetsScalarContent() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.POST;
+        requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
@@ -214,11 +216,13 @@ class RequestInformationTest {
         verify(writerMock, times(1)).writeStringValue(any(), anyString());
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
+
     @Test
     void SetsBoundaryOnMultipartBody() {
         final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod= HttpMethod.POST;
-        requestInfo.urlTemplate = "http://localhost/{URITemplate}/ParameterMapping?IsCaseSensitive={IsCaseSensitive}";
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate =
+                "http://localhost/{URITemplate}/ParameterMapping?IsCaseSensitive={IsCaseSensitive}";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
         when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
@@ -228,14 +232,17 @@ class RequestInformationTest {
         final MultipartBody multipartBody = new MultipartBody();
         multipartBody.requestAdapter = requestAdapterMock;
 
-        requestInfo.setContentFromParsable(requestAdapterMock, "multipart/form-data", multipartBody);
+        requestInfo.setContentFromParsable(
+                requestAdapterMock, "multipart/form-data", multipartBody);
         assertNotNull(multipartBody.getBoundary());
         assertFalse(multipartBody.getBoundary().isEmpty());
-        assertEquals("multipart/form-data; boundary=" + multipartBody.getBoundary(), requestInfo.headers.get("Content-Type").toArray()[0]);
+        assertEquals(
+                "multipart/form-data; boundary=" + multipartBody.getBoundary(),
+                requestInfo.headers.get("Content-Type").toArray()[0]);
     }
+
     @Test
-    void ReplacesEnumSingleValueQueryParameters() throws IllegalStateException, URISyntaxException
-    {
+    void ReplacesEnumSingleValueQueryParameters() throws IllegalStateException, URISyntaxException {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
@@ -250,9 +257,9 @@ class RequestInformationTest {
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/?dataset=1", uri.toString());
     }
+
     @Test
-    void ReplacesEnumValuesQueryParameters() throws IllegalStateException, URISyntaxException
-    {
+    void ReplacesEnumValuesQueryParameters() throws IllegalStateException, URISyntaxException {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
@@ -267,31 +274,32 @@ class RequestInformationTest {
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/?datasets=1,2", uri.toString());
     }
+
     @Test
-    void ReplacesEnumSingleValuePathParameters() throws IllegalStateException, URISyntaxException
-    {
+    void ReplacesEnumSingleValuePathParameters() throws IllegalStateException, URISyntaxException {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/{dataset}";
 
         // Act
-        requestInfo.pathParameters.put("dataset", ((Object)(TestEnum.First)));
+        requestInfo.pathParameters.put("dataset", ((Object) (TestEnum.First)));
 
         // Assert
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/1", uri.toString());
     }
+
     @Test
-    void ReplacesEnumValuesPathParameters() throws IllegalStateException, URISyntaxException
-    {
+    void ReplacesEnumValuesPathParameters() throws IllegalStateException, URISyntaxException {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/{datasets}";
 
         // Act
-        requestInfo.pathParameters.put("datasets", ((Object)(new TestEnum[] {TestEnum.First, TestEnum.Second})));
+        requestInfo.pathParameters.put(
+                "datasets", ((Object) (new TestEnum[] {TestEnum.First, TestEnum.Second})));
 
         // Assert
         final URI uri = requestInfo.getUri();
@@ -299,22 +307,19 @@ class RequestInformationTest {
     }
 }
 
-
 /** The messages in a mailbox or folder. Read-only. Nullable. */
-class GetQueryParameters
-{
+class GetQueryParameters {
     /** Select properties to be returned */
-    @QueryParameter(name ="%24select")
-    @jakarta.annotation.Nullable
-    public String[] select;
+    @QueryParameter(name = "%24select")
+    @jakarta.annotation.Nullable public String[] select;
+
     /** Search items by search phrases */
-    @QueryParameter(name ="%24search")
-    @jakarta.annotation.Nullable
-    public String search;
-    @QueryParameter(name ="dataset")
-    @jakarta.annotation.Nullable
-    public TestEnum dataset;
-    @QueryParameter(name ="datasets")
-    @jakarta.annotation.Nullable
-    public TestEnum[] datasets;
+    @QueryParameter(name = "%24search")
+    @jakarta.annotation.Nullable public String search;
+
+    @QueryParameter(name = "dataset")
+    @jakarta.annotation.Nullable public TestEnum dataset;
+
+    @QueryParameter(name = "datasets")
+    @jakarta.annotation.Nullable public TestEnum[] datasets;
 }

@@ -1,10 +1,9 @@
 package com.microsoft.kiota;
 
+import jakarta.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import jakarta.annotation.Nonnull;
 
 /**
  * A class representing the headers of a request or a response.
@@ -26,7 +25,7 @@ public abstract class Headers extends CaseInsensitiveMap {
 
     /**
      * Adds a header to the current request.
-     * 
+     *
      * @param key   the key of the header to add.
      * @param value the value of the header to add.
      */
@@ -45,7 +44,8 @@ public abstract class Headers extends CaseInsensitiveMap {
         return addImpl(key, value, false);
     }
 
-    private boolean addImpl(@Nonnull final String key, @Nonnull final String value, boolean appendIfPresent) {
+    private boolean addImpl(
+            @Nonnull final String key, @Nonnull final String value, boolean appendIfPresent) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         final String normalizedKey = normalizeKey(key);
@@ -64,10 +64,9 @@ public abstract class Headers extends CaseInsensitiveMap {
         return false;
     }
 
-
     /**
      * Removes a value from a header
-     * 
+     *
      * @param key   the key of the header to remove the value from
      * @param value the value to remove
      * @return true if the value was removed, false otherwise

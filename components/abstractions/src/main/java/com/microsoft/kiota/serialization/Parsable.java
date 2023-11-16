@@ -1,9 +1,9 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import jakarta.annotation.Nonnull;
 /**
  * Defines a serializable model object.
  */
@@ -14,6 +14,7 @@ public interface Parsable {
      */
     @Nonnull
     Map<String, Consumer<ParseNode>> getFieldDeserializers();
+
     /**
      * Writes the objects properties to the current writer.
      * @param writer The writer to write to.

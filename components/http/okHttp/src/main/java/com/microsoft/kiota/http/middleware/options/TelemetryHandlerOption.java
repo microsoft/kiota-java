@@ -1,12 +1,9 @@
 package com.microsoft.kiota.http.middleware.options;
 
-import java.util.function.Function;
-
+import com.microsoft.kiota.RequestOption;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-
-import com.microsoft.kiota.RequestOption;
-
+import java.util.function.Function;
 import okhttp3.Request;
 
 /**
@@ -17,16 +14,15 @@ public class TelemetryHandlerOption implements RequestOption {
     public TelemetryHandlerOption() {}
 
     /**
-    * A delegate which can be called to configure the Request with desired telemetry values.
-    */
-    @Nullable
-    public Function<Request, Request> telemetryConfigurator = (request) -> request;
+     * A delegate which can be called to configure the Request with desired telemetry values.
+     */
+    @Nullable public Function<Request, Request> telemetryConfigurator = (request) -> request;
 
-	/* @inheritdoc */
+    /* @inheritdoc */
     @Override
     @Nonnull
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public <T extends RequestOption> Class<T> getType() {
-        return (Class<T>) TelemetryHandlerOption.class; 
+        return (Class<T>) TelemetryHandlerOption.class;
     }
 }

@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+
 /** Defines the contract for a factory that creates SerializationWriter instances. */
 public interface SerializationWriterFactory {
     /**
@@ -9,6 +10,7 @@ public interface SerializationWriterFactory {
      */
     @Nonnull
     String getValidContentType();
+
     /**
      * Creates a new SerializationWriter instance for the given content type.
      * @param contentType the content type to create a serialization writer for.

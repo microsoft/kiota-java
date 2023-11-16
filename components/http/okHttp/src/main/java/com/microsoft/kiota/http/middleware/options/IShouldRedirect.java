@@ -1,7 +1,6 @@
 package com.microsoft.kiota.http.middleware.options;
 
 import jakarta.annotation.Nonnull;
-
 import okhttp3.Response;
 
 /**

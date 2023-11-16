@@ -104,44 +104,44 @@ tasks.jar {
 publishing {
 
     publications {
-		maven(MavenPublication) {
-        	customizePom(pom)
-        	groupId project.property('mavenGroupId')
-        	artifactId project.property('mavenArtifactId')
-        	version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
-        	from components.java
-        	pom.withXml {
-        		def pomFile = file("${project.buildDir}/generated-pom.xml")
-        		writeTo(pomFile)
-        	}
-		}
+        maven(MavenPublication) {
+            customizePom(pom)
+            groupId project.property('mavenGroupId')
+            artifactId project.property('mavenArtifactId')
+            version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
+            from components.java
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+            }
+        }
     }
-	repositories {
+    repositories {
         maven {
             url = 'https://oss.sonatype.org/content/repositories/snapshots'
             name = 'sonatypeSnapshot'
-            
+
             credentials {
-    			if (project.rootProject.file('local.properties').exists()) {
-        			Properties properties = new Properties()
-        			properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        			username = properties.getProperty('sonatypeUsername')
-        			password = properties.getProperty('sonatypePassword')
-    			}
+                if (project.rootProject.file('local.properties').exists()) {
+                    Properties properties = new Properties()
+                    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                    username = properties.getProperty('sonatypeUsername')
+                    password = properties.getProperty('sonatypePassword')
+                }
             }
         }
-        
+
         maven {
             url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
             name = 'sonatype'
-            
+
             credentials {
-    			if (project.rootProject.file('local.properties').exists()) {
-        			Properties properties = new Properties()
-        			properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        			username = properties.getProperty('sonatypeUsername')
-        			password = properties.getProperty('sonatypePassword')
-    			}
+                if (project.rootProject.file('local.properties').exists()) {
+                    Properties properties = new Properties()
+                    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                    username = properties.getProperty('sonatypeUsername')
+                    password = properties.getProperty('sonatypePassword')
+                }
             }
         }
     }
@@ -152,7 +152,7 @@ signing {
 }
 tasks.withType(Sign)*.enabled = mavenCentralPublishingEnabled.toBoolean()
 
-def fixAscNames = { name -> 
+def fixAscNames = { name ->
     if(name.contains('pom')) {
         "${project.property('mavenArtifactId')}-${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}.pom.asc"
     } else {
@@ -175,7 +175,7 @@ def getVersionName() {
 }
 
 artifacts {
-	archives jar
+    archives jar
 }
 
 def customizePom(pom) {
@@ -203,14 +203,14 @@ def customizePom(pom) {
             licenses {
                 license {
                     name "MIT License"
-            		url "http://opensource.org/licenses/MIT"
-            		distribution "repo"
+                    url "http://opensource.org/licenses/MIT"
+                    distribution "repo"
                 }
             }
             scm {
                 url 'https://github.com/microsoft/kiota-java'
-            	connection 'scm:git:git://github.com/microsoft/kiota-java.git'
-            	developerConnection 'scm:git:ssh://git@github.com:microsoft/kiota-java.git'
+                connection 'scm:git:git://github.com/microsoft/kiota-java.git'
+                developerConnection 'scm:git:ssh://git@github.com:microsoft/kiota-java.git'
             }
             developers {
                 developer {
@@ -222,13 +222,13 @@ def customizePom(pom) {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-	if (project.rootProject.file('local.properties').exists()) {
+    if (project.rootProject.file('local.properties').exists()) {
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())
         tasks.withType(Sign)*.enabled = (properties.containsKey('enableSigning')) ? properties.getProperty('enableSigning').toBoolean() : false
         allprojects { ext."signing.keyId" = properties.getProperty('signing.keyId') }
         allprojects { ext."signing.secretKeyRingFile" = properties.getProperty('signing.secretKeyRingFile') }
-		allprojects { ext."signing.password" = properties.getProperty('signing.password') }
+        allprojects { ext."signing.password" = properties.getProperty('signing.password') }
     }
 }
 
@@ -239,4 +239,3 @@ model {
 }
 
 apply from: file('../../spotless.groovy')
-

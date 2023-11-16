@@ -8,6 +8,7 @@ public class InMemoryBackingStoreFactory implements BackingStoreFactory {
     public InMemoryBackingStoreFactory() {
         // default constructor
     }
+
     @Override
     @Nonnull
     public BackingStore createBackingStore() {

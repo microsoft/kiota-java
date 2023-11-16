@@ -1,7 +1,8 @@
 package com.microsoft.kiota.serialization;
 
 import com.microsoft.kiota.PeriodAndDuration;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -23,14 +24,12 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-
 /** ParseNode implementation for URI form encoded payloads */
 public class FormParseNode implements ParseNode {
     private final String rawStringValue;
-    private final String encoding  = StandardCharsets.UTF_8.name();
+    private final String encoding = StandardCharsets.UTF_8.name();
     private final HashMap<String, String> fields = new HashMap<>();
+
     /**
      * Initializes a new instance of the {@link FormParseNode} class.
      * @param rawString the raw string value to parse.
@@ -41,14 +40,14 @@ public class FormParseNode implements ParseNode {
         for (final String kv : rawString.split("&")) {
             final String[] split = kv.split("=");
             final String key = sanitizeKey(split[0]);
-            if(split.length == 2) {
-                if(fields.containsKey(key))
+            if (split.length == 2) {
+                if (fields.containsKey(key))
                     fields.put(key, fields.get(key).concat("," + split[1].trim()));
-                else
-                    fields.put(key, split[1].trim());
+                else fields.put(key, split[1].trim());
             }
         }
     }
+
     private String sanitizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
         try {
@@ -57,11 +56,11 @@ public class FormParseNode implements ParseNode {
             throw new RuntimeException("Unsupported encoding", e);
         }
     }
-    @Nullable
-    public ParseNode getChildNode(@Nonnull final String identifier) {
+
+    @Nullable public ParseNode getChildNode(@Nonnull final String identifier) {
         Objects.requireNonNull(identifier, "identifier parameter is required");
         final String key = sanitizeKey(identifier);
-        if(fields.containsKey(key)) {
+        if (fields.containsKey(key)) {
             final Consumer<Parsable> onBefore = this.onBeforeAssignFieldValues;
             final Consumer<Parsable> onAfter = this.onAfterAssignFieldValues;
             final FormParseNode result = new FormParseNode(fields.get(key));
@@ -70,8 +69,8 @@ public class FormParseNode implements ParseNode {
             return result;
         } else return null;
     }
-    @Nullable
-    public String getStringValue() {
+
+    @Nullable public String getStringValue() {
         try {
             final String decoded = URLDecoder.decode(rawStringValue, encoding);
             if (decoded.equalsIgnoreCase("null")) return null;
@@ -80,9 +79,12 @@ public class FormParseNode implements ParseNode {
             return null;
         }
     }
-    @Nullable
-    public Boolean getBooleanValue() {
-        switch(getStringValue().toLowerCase(Locale.ROOT)) { //boolean parse returns false for any value that is not true
+
+    @Nullable public Boolean getBooleanValue() {
+        switch (getStringValue()
+                .toLowerCase(
+                        Locale.ROOT)) { // boolean parse returns false for any value that is not
+                // true
             case "true":
             case "1":
                 return true;
@@ -93,174 +95,186 @@ public class FormParseNode implements ParseNode {
                 return null;
         }
     }
-    @Nullable
-    public Byte getByteValue() {
+
+    @Nullable public Byte getByteValue() {
         try {
             return Byte.parseByte(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public Short getShortValue() {
+
+    @Nullable public Short getShortValue() {
         try {
             return Short.parseShort(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public BigDecimal getBigDecimalValue() {
+
+    @Nullable public BigDecimal getBigDecimalValue() {
         try {
             return new BigDecimal(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public Integer getIntegerValue() {
+
+    @Nullable public Integer getIntegerValue() {
         try {
             return Integer.parseInt(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public Float getFloatValue() {
+
+    @Nullable public Float getFloatValue() {
         try {
             return Float.parseFloat(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public Double getDoubleValue() {
+
+    @Nullable public Double getDoubleValue() {
         try {
             return Double.parseDouble(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public Long getLongValue() {
+
+    @Nullable public Long getLongValue() {
         try {
             return Long.parseLong(getStringValue());
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
-    @Nullable
-    public UUID getUUIDValue() {
+
+    @Nullable public UUID getUUIDValue() {
         final String stringValue = getStringValue();
-        if(stringValue == null) return null;
+        if (stringValue == null) return null;
         return UUID.fromString(stringValue);
     }
-    @Nullable
-    public OffsetDateTime getOffsetDateTimeValue() {
+
+    @Nullable public OffsetDateTime getOffsetDateTimeValue() {
         final String stringValue = getStringValue();
-        if(stringValue == null) return null;
+        if (stringValue == null) return null;
         return OffsetDateTime.parse(stringValue);
     }
-    @Nullable
-    public LocalDate getLocalDateValue() {
+
+    @Nullable public LocalDate getLocalDateValue() {
         final String stringValue = getStringValue();
-        if(stringValue == null) return null;
+        if (stringValue == null) return null;
         return LocalDate.parse(stringValue);
     }
-    @Nullable
-    public LocalTime getLocalTimeValue() {
+
+    @Nullable public LocalTime getLocalTimeValue() {
         final String stringValue = getStringValue();
-        if(stringValue == null) return null;
+        if (stringValue == null) return null;
         return LocalTime.parse(stringValue);
     }
-    @Nullable
-    public PeriodAndDuration getPeriodAndDurationValue() {
+
+    @Nullable public PeriodAndDuration getPeriodAndDurationValue() {
         final String stringValue = getStringValue();
-        if(stringValue == null) return null;
+        if (stringValue == null) return null;
         return PeriodAndDuration.parse(stringValue);
     }
-    @Nullable
-    public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
+
+    @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
         final List<String> primitiveStringCollection = Arrays.asList(getStringValue().split(","));
         final Iterator<String> sourceIterator = primitiveStringCollection.iterator();
         final FormParseNode _this = this;
         final List<T> result = new ArrayList<>();
-        final Iterable<T> iterable = new Iterable<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return new Iterator<T>(){
+        final Iterable<T> iterable =
+                new Iterable<T>() {
                     @Override
-                    public boolean hasNext() {
-                        return sourceIterator.hasNext();
-                    }
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    public T next() {
-                        final String item = sourceIterator.next();
-                        final Consumer<Parsable> onBefore = _this.getOnBeforeAssignFieldValues();
-                        final Consumer<Parsable> onAfter = _this.getOnAfterAssignFieldValues();
-                        final FormParseNode itemNode = new FormParseNode(item) {{
-                            this.setOnBeforeAssignFieldValues(onBefore);
-                            this.setOnAfterAssignFieldValues(onAfter);
-                        }};
-                        if(targetClass == Boolean.class) {
-                            return (T)itemNode.getBooleanValue();
-                        } else if(targetClass == Short.class) {
-                            return (T)itemNode.getShortValue();
-                        } else if(targetClass == Byte.class) {
-                            return (T)itemNode.getByteValue();
-                        } else if(targetClass == BigDecimal.class) {
-                            return (T)itemNode.getBigDecimalValue();
-                        } else if(targetClass == String.class) {
-                            return (T)itemNode.getStringValue();
-                        } else if(targetClass == Integer.class) {
-                            return (T)itemNode.getIntegerValue();
-                        } else if(targetClass == Float.class) {
-                            return (T)itemNode.getFloatValue();
-                        } else if(targetClass == Long.class) {
-                            return (T)itemNode.getLongValue();
-                        } else if(targetClass == UUID.class) {
-                            return (T)itemNode.getUUIDValue();
-                        } else if(targetClass == OffsetDateTime.class) {
-                            return (T)itemNode.getOffsetDateTimeValue();
-                        } else if(targetClass == LocalDate.class) {
-                            return (T)itemNode.getLocalDateValue();
-                        } else if(targetClass == LocalTime.class) {
-                            return (T)itemNode.getLocalTimeValue();
-                        } else if(targetClass == PeriodAndDuration.class) {
-                            return (T)itemNode.getPeriodAndDurationValue();
-                        } else {
-                            throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
-                        }
+                    public Iterator<T> iterator() {
+                        return new Iterator<T>() {
+                            @Override
+                            public boolean hasNext() {
+                                return sourceIterator.hasNext();
+                            }
+
+                            @Override
+                            @SuppressWarnings("unchecked")
+                            public T next() {
+                                final String item = sourceIterator.next();
+                                final Consumer<Parsable> onBefore =
+                                        _this.getOnBeforeAssignFieldValues();
+                                final Consumer<Parsable> onAfter =
+                                        _this.getOnAfterAssignFieldValues();
+                                final FormParseNode itemNode =
+                                        new FormParseNode(item) {
+                                            {
+                                                this.setOnBeforeAssignFieldValues(onBefore);
+                                                this.setOnAfterAssignFieldValues(onAfter);
+                                            }
+                                        };
+                                if (targetClass == Boolean.class) {
+                                    return (T) itemNode.getBooleanValue();
+                                } else if (targetClass == Short.class) {
+                                    return (T) itemNode.getShortValue();
+                                } else if (targetClass == Byte.class) {
+                                    return (T) itemNode.getByteValue();
+                                } else if (targetClass == BigDecimal.class) {
+                                    return (T) itemNode.getBigDecimalValue();
+                                } else if (targetClass == String.class) {
+                                    return (T) itemNode.getStringValue();
+                                } else if (targetClass == Integer.class) {
+                                    return (T) itemNode.getIntegerValue();
+                                } else if (targetClass == Float.class) {
+                                    return (T) itemNode.getFloatValue();
+                                } else if (targetClass == Long.class) {
+                                    return (T) itemNode.getLongValue();
+                                } else if (targetClass == UUID.class) {
+                                    return (T) itemNode.getUUIDValue();
+                                } else if (targetClass == OffsetDateTime.class) {
+                                    return (T) itemNode.getOffsetDateTimeValue();
+                                } else if (targetClass == LocalDate.class) {
+                                    return (T) itemNode.getLocalDateValue();
+                                } else if (targetClass == LocalTime.class) {
+                                    return (T) itemNode.getLocalTimeValue();
+                                } else if (targetClass == PeriodAndDuration.class) {
+                                    return (T) itemNode.getPeriodAndDurationValue();
+                                } else {
+                                    throw new RuntimeException(
+                                            "unknown type to deserialize " + targetClass.getName());
+                                }
+                            }
+                        };
                     }
                 };
-            }
-        };
 
-        for (T elem: iterable) {
+        for (T elem : iterable) {
             result.add(elem);
         }
         return result;
     }
-    @Nullable
-    public <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory) {
-        throw new RuntimeException("deserialization of collections of is not supported with form encoding");
+
+    @Nullable public <T extends Parsable> List<T> getCollectionOfObjectValues(
+            @Nonnull final ParsableFactory<T> factory) {
+        throw new RuntimeException(
+                "deserialization of collections of is not supported with form encoding");
     }
-    @Nullable
-    public <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum) {
+
+    @Nullable public <T extends Enum<T>> List<T> getCollectionOfEnumValues(
+            @Nonnull final Class<T> targetEnum) {
         Objects.requireNonNull(targetEnum, "parameter targetEnum cannot be null");
         final String stringValue = getStringValue();
-        if(stringValue == null || stringValue.isEmpty()) {
+        if (stringValue == null || stringValue.isEmpty()) {
             return null;
         } else {
             final String[] array = stringValue.split(",");
             final ArrayList<T> result = new ArrayList<>();
-            for(final String item : array) {
+            for (final String item : array) {
                 result.add(getEnumValueInt(item, targetEnum));
             }
             return result;
         }
     }
+
     @Nonnull
     public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
@@ -268,89 +282,100 @@ public class FormParseNode implements ParseNode {
         assignFieldValues(item, item.getFieldDeserializers());
         return item;
     }
-    @Nullable
-    public <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum) {
+
+    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum) {
         final String rawValue = this.getStringValue();
-        if(rawValue == null || rawValue.isEmpty()) {
+        if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
         return getEnumValueInt(rawValue, targetEnum);
     }
+
     @SuppressWarnings("unchecked")
-    private <T extends Enum<T>> T getEnumValueInt(@Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
+    private <T extends Enum<T>> T getEnumValueInt(
+            @Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
         try {
-            return (T)targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
-        } catch (SecurityException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+            return (T) targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
+        } catch (SecurityException
+                | IllegalAccessException
+                | InvocationTargetException
+                | NoSuchMethodException ex) {
             return null;
         }
     }
-    @Nullable
-    public <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum) {
+
+    @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum) {
         final String rawValue = this.getStringValue();
-        if(rawValue == null || rawValue.isEmpty()) {
+        if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
         final EnumSet<T> result = EnumSet.noneOf(targetEnum);
         final String[] rawValues = rawValue.split(",");
         for (final String rawValueItem : rawValues) {
             final T value = getEnumValueInt(rawValueItem, targetEnum);
-            if(value != null) {
+            if (value != null) {
                 result.add(value);
             }
         }
         return result;
     }
-    private <T extends Parsable> void assignFieldValues(final T item, final Map<String, Consumer<ParseNode>> fieldDeserializers) {
-        if(!fields.isEmpty()) {
-            if(this.onBeforeAssignFieldValues != null) {
+
+    private <T extends Parsable> void assignFieldValues(
+            final T item, final Map<String, Consumer<ParseNode>> fieldDeserializers) {
+        if (!fields.isEmpty()) {
+            if (this.onBeforeAssignFieldValues != null) {
                 this.onBeforeAssignFieldValues.accept(item);
             }
             Map<String, Object> itemAdditionalData = null;
-            if(item instanceof AdditionalDataHolder) {
-                itemAdditionalData = ((AdditionalDataHolder)item).getAdditionalData();
+            if (item instanceof AdditionalDataHolder) {
+                itemAdditionalData = ((AdditionalDataHolder) item).getAdditionalData();
             }
             for (final Map.Entry<String, String> fieldEntry : fields.entrySet()) {
                 final String fieldKey = fieldEntry.getKey();
                 final Consumer<ParseNode> fieldDeserializer = fieldDeserializers.get(fieldKey);
                 final String fieldValue = fieldEntry.getValue();
-                if(fieldValue == null)
-                    continue;
-                if(fieldDeserializer != null) {
+                if (fieldValue == null) continue;
+                if (fieldDeserializer != null) {
                     final Consumer<Parsable> onBefore = this.onBeforeAssignFieldValues;
                     final Consumer<Parsable> onAfter = this.onAfterAssignFieldValues;
-                    fieldDeserializer.accept(new FormParseNode(fieldValue) {{
-                        this.setOnBeforeAssignFieldValues(onBefore);
-                        this.setOnAfterAssignFieldValues(onAfter);
-                    }});
-                }
-                else if (itemAdditionalData != null)
-                    itemAdditionalData.put(fieldKey, fieldValue);
+                    fieldDeserializer.accept(
+                            new FormParseNode(fieldValue) {
+                                {
+                                    this.setOnBeforeAssignFieldValues(onBefore);
+                                    this.setOnAfterAssignFieldValues(onAfter);
+                                }
+                            });
+                } else if (itemAdditionalData != null) itemAdditionalData.put(fieldKey, fieldValue);
             }
-            if(this.onAfterAssignFieldValues != null) {
+            if (this.onAfterAssignFieldValues != null) {
                 this.onAfterAssignFieldValues.accept(item);
             }
         }
     }
-    @Nullable
-    public Consumer<Parsable> getOnBeforeAssignFieldValues() {
+
+    @Nullable public Consumer<Parsable> getOnBeforeAssignFieldValues() {
         return this.onBeforeAssignFieldValues;
     }
-    @Nullable
-    public Consumer<Parsable> getOnAfterAssignFieldValues() {
+
+    @Nullable public Consumer<Parsable> getOnAfterAssignFieldValues() {
         return this.onAfterAssignFieldValues;
     }
+
     private Consumer<Parsable> onBeforeAssignFieldValues;
+
     public void setOnBeforeAssignFieldValues(@Nullable final Consumer<Parsable> value) {
         this.onBeforeAssignFieldValues = value;
     }
+
     private Consumer<Parsable> onAfterAssignFieldValues;
+
     public void setOnAfterAssignFieldValues(@Nullable final Consumer<Parsable> value) {
         this.onAfterAssignFieldValues = value;
     }
-    @Nullable
-    public byte[] getByteArrayValue() {
+
+    @Nullable public byte[] getByteArrayValue() {
         final String base64 = this.getStringValue();
-        if(base64 == null || base64.isEmpty()) {
+        if (base64 == null || base64.isEmpty()) {
             return null;
         }
         return Base64.getDecoder().decode(base64);
