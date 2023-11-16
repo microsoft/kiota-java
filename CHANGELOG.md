@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.9.2] - 2023-11-16
+
+### Changed
+
+- Reviewed transitive dependencies removing Guava and Javatuple
+
 ## [0.9.1] - 2023-11-13
 
 ### Changed
