@@ -1,6 +1,5 @@
 package com.microsoft.kiota.serialization;
 
-import com.google.common.collect.Lists;
 import com.microsoft.kiota.PeriodAndDuration;
 
 import java.io.UnsupportedEncodingException;
@@ -185,7 +184,8 @@ public class FormParseNode implements ParseNode {
         final List<String> primitiveStringCollection = Arrays.asList(getStringValue().split(","));
         final Iterator<String> sourceIterator = primitiveStringCollection.iterator();
         final FormParseNode _this = this;
-        return Lists.newArrayList(new Iterable<T>() {
+        final List<T> result = new ArrayList<>();
+        final Iterable<T> iterable = new Iterable<T>() {
             @Override
             public Iterator<T> iterator() {
                 return new Iterator<T>(){
@@ -235,7 +235,12 @@ public class FormParseNode implements ParseNode {
                     }
                 };
             }
-        });
+        };
+
+        for (T elem: iterable) {
+            result.add(elem);
+        }
+        return result;
     }
     @Nullable
     public <T extends Parsable> List<T> getCollectionOfObjectValues(@Nonnull final ParsableFactory<T> factory) {

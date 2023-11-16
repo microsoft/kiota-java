@@ -14,12 +14,32 @@ import jakarta.annotation.Nullable;
 
 import com.microsoft.kiota.TriConsumer;
 
-import org.javatuples.Pair;
 /** In-memory implementation of the backing store. Allows for dirty tracking of changes. */
 public class InMemoryBackingStore implements BackingStore {
     /** Creates a new instance of the backing store. */
     public InMemoryBackingStore() {
         // default constructor
+    }
+
+    private static class Pair<A, B> {
+        private final A value0;
+        private final B value1;
+        public Pair(A value0, B value1) {
+            this.value0 = value0;
+            this.value1 = value1;
+        }
+        public A getValue0() {
+            return value0;
+        }
+        public Pair<A, B> setValue0(A value0) {
+            return new Pair(value0, value1);
+        }
+        public B getValue1() {
+            return value1;
+        }
+        public Pair<A, B> setValue1(B value1) {
+            return new Pair(value0, value1);
+        }
     }
     private boolean isInitializationCompleted = true;
     private boolean returnOnlyChangedValues;
@@ -29,7 +49,7 @@ public class InMemoryBackingStore implements BackingStore {
         this.isInitializationCompleted = value;
         for(final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            final Pair<Boolean, Object> updatedValue = wrapper.setAt0(Boolean.valueOf(!value));
+            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(Boolean.valueOf(!value));
             entry.setValue(updatedValue);
         }
     }
@@ -94,7 +114,7 @@ public class InMemoryBackingStore implements BackingStore {
     }
     public <T> void set(@Nonnull final String key, @Nullable final T value) {
         Objects.requireNonNull(key);
-        final Pair<Boolean, Object> valueToAdd = Pair.with(Boolean.valueOf(this.isInitializationCompleted), value);
+        final Pair<Boolean, Object> valueToAdd = new Pair(Boolean.valueOf(this.isInitializationCompleted), value);
         final Pair<Boolean, Object> oldValue = this.store.put(key, valueToAdd);
         for(final TriConsumer<String, Object, Object> callback : this.subscriptionStore.values()) {
             callback.accept(key, oldValue.getValue1(), value);
