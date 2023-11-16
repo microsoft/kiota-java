@@ -22,8 +22,8 @@ public class InMemoryBackingStore implements BackingStore {
     }
 
     private static class Pair<A, B> {
-        private A value0;
-        private B value1;
+        private final A value0;
+        private final B value1;
         public Pair(A value0, B value1) {
             this.value0 = value0;
             this.value1 = value1;
