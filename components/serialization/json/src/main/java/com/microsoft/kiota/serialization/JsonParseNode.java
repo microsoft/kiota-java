@@ -2,7 +2,6 @@ package com.microsoft.kiota.serialization;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import com.microsoft.kiota.PeriodAndDuration;
@@ -12,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -123,14 +123,16 @@ public class JsonParseNode implements ParseNode {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
-            return Lists.newArrayList(new Iterable<T>() {
+            final List<T> result = new ArrayList<>();
+            final Iterable<T> iterable = new Iterable<T>() {
                 @Override
                 public Iterator<T> iterator() {
-                    return new Iterator<T>(){
+                    return new Iterator<T>() {
                         @Override
                         public boolean hasNext() {
                             return sourceIterator.hasNext();
                         }
+
                         @Override
                         @SuppressWarnings("unchecked")
                         public T next() {
@@ -141,39 +143,44 @@ public class JsonParseNode implements ParseNode {
                                 this.setOnBeforeAssignFieldValues(onBefore);
                                 this.setOnAfterAssignFieldValues(onAfter);
                             }};
-                            if(targetClass == Boolean.class) {
-                                return (T)itemNode.getBooleanValue();
-                            } else if(targetClass == Short.class) {
-                                return (T)itemNode.getShortValue();
-                            } else if(targetClass == Byte.class) {
-                                return (T)itemNode.getByteValue();
-                            } else if(targetClass == BigDecimal.class) {
-                                return (T)itemNode.getBigDecimalValue();
-                            } else if(targetClass == String.class) {
-                                return (T)itemNode.getStringValue();
-                            } else if(targetClass == Integer.class) {
-                                return (T)itemNode.getIntegerValue();
-                            } else if(targetClass == Float.class) {
-                                return (T)itemNode.getFloatValue();
-                            } else if(targetClass == Long.class) {
-                                return (T)itemNode.getLongValue();
-                            } else if(targetClass == UUID.class) {
-                                return (T)itemNode.getUUIDValue();
-                            } else if(targetClass == OffsetDateTime.class) {
-                                return (T)itemNode.getOffsetDateTimeValue();
-                            } else if(targetClass == LocalDate.class) {
-                                return (T)itemNode.getLocalDateValue();
-                            } else if(targetClass == LocalTime.class) {
-                                return (T)itemNode.getLocalTimeValue();
-                            } else if(targetClass == PeriodAndDuration.class) {
-                                return (T)itemNode.getPeriodAndDurationValue();
+                            if (targetClass == Boolean.class) {
+                                return (T) itemNode.getBooleanValue();
+                            } else if (targetClass == Short.class) {
+                                return (T) itemNode.getShortValue();
+                            } else if (targetClass == Byte.class) {
+                                return (T) itemNode.getByteValue();
+                            } else if (targetClass == BigDecimal.class) {
+                                return (T) itemNode.getBigDecimalValue();
+                            } else if (targetClass == String.class) {
+                                return (T) itemNode.getStringValue();
+                            } else if (targetClass == Integer.class) {
+                                return (T) itemNode.getIntegerValue();
+                            } else if (targetClass == Float.class) {
+                                return (T) itemNode.getFloatValue();
+                            } else if (targetClass == Long.class) {
+                                return (T) itemNode.getLongValue();
+                            } else if (targetClass == UUID.class) {
+                                return (T) itemNode.getUUIDValue();
+                            } else if (targetClass == OffsetDateTime.class) {
+                                return (T) itemNode.getOffsetDateTimeValue();
+                            } else if (targetClass == LocalDate.class) {
+                                return (T) itemNode.getLocalDateValue();
+                            } else if (targetClass == LocalTime.class) {
+                                return (T) itemNode.getLocalTimeValue();
+                            } else if (targetClass == PeriodAndDuration.class) {
+                                return (T) itemNode.getPeriodAndDurationValue();
                             } else {
                                 throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
                             }
                         }
                     };
                 }
-            });
+            };
+
+            for (T elem: iterable) {
+                result.add(elem);
+            }
+            return result;
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
     @Nullable
@@ -185,7 +192,8 @@ public class JsonParseNode implements ParseNode {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
-            return Lists.newArrayList(new Iterable<T>() {
+            final List<T> result = new ArrayList<>();
+            final Iterable<T> iterable = new Iterable<T>() {
                 @Override
                 public Iterator<T> iterator() {
                     return new Iterator<T>(){
@@ -206,8 +214,12 @@ public class JsonParseNode implements ParseNode {
                         }
                     };
                 }
+            };
 
-            });
+            for (T elem: iterable) {
+                result.add(elem);
+            }
+            return result;
         } else return null;
     }
     @Nullable
@@ -219,7 +231,8 @@ public class JsonParseNode implements ParseNode {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
-            return Lists.newArrayList(new Iterable<T>() {
+            final List<T> result = new ArrayList<>();
+            final Iterable<T> iterable = new Iterable<T>() {
                 @Override
                 public Iterator<T> iterator() {
                     return new Iterator<T>(){
@@ -240,8 +253,12 @@ public class JsonParseNode implements ParseNode {
                         }
                     };
                 }
+            };
 
-            });
+            for (T elem: iterable) {
+                result.add(elem);
+            }
+            return result;
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
     @Nonnull
