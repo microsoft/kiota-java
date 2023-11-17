@@ -1,7 +1,6 @@
 package com.microsoft.kiota.http.middleware.options;
 
 import com.microsoft.kiota.RequestOption;
-
 import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +21,7 @@ public class UrlReplaceHandlerOption implements RequestOption {
     public UrlReplaceHandlerOption() {
         this(new HashMap<>());
     }
+
     /**
      * Instantiates a new UrlReplaceOption with the specified replacementPairs map and enabled set to true.
      * @param replacementPairs the replacement pairs map.
@@ -29,6 +29,7 @@ public class UrlReplaceHandlerOption implements RequestOption {
     public UrlReplaceHandlerOption(@Nonnull Map<String, String> replacementPairs) {
         this(replacementPairs, true);
     }
+
     /**
      * Instantiates a new UrlReplaceOption with the specified replacementPairs map and enabled set to the specified value.
      * @param enabled whether the handler is enabled or not.
@@ -39,14 +40,15 @@ public class UrlReplaceHandlerOption implements RequestOption {
         this.replacementPairs = new HashMap<>(replacementPairs);
         this.enabled = enabled;
     }
+
     /**
      * Gets the replacement pairs map.
      * @return the replacement pairs map.
      */
-    @Nonnull
-    public Map<String, String> getReplacementPairs() {
+    @Nonnull public Map<String, String> getReplacementPairs() {
         return new HashMap<>(replacementPairs);
     }
+
     /**
      * Sets the replacement pairs map.
      * @param replacementPairs the replacement pairs map.
@@ -54,18 +56,21 @@ public class UrlReplaceHandlerOption implements RequestOption {
     public void setReplacementPairs(@Nonnull final Map<String, String> replacementPairs) {
         this.replacementPairs = new HashMap<>(replacementPairs);
     }
+
     /**
      * Enables the handler.
      */
     public void enable() {
         this.enabled = true;
     }
+
     /**
      * Disables the handler.
      */
     public void disable() {
         this.enabled = false;
     }
+
     /**
      * Gets whether the handler is enabled or not.
      * @return whether the handler is enabled or not.
@@ -73,10 +78,10 @@ public class UrlReplaceHandlerOption implements RequestOption {
     public boolean isEnabled() {
         return enabled;
     }
-    @Nonnull
+
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends RequestOption> Class<T> getType() {
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) UrlReplaceHandlerOption.class;
     }
 }

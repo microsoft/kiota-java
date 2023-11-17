@@ -8,6 +8,5 @@ public interface BackedModel {
      * Gets the store that is backing the model.
      * @return the backing store.
      */
-    @Nonnull
-    BackingStore getBackingStore();
+    @Nonnull BackingStore getBackingStore();
 }

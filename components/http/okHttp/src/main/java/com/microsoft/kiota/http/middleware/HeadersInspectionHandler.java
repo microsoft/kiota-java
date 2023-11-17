@@ -1,18 +1,13 @@
 package com.microsoft.kiota.http.middleware;
 
+import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
 import jakarta.annotation.Nonnull;
-import kotlin.Pair;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-
-import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
-import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
-
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.context.Scope;
+import kotlin.Pair;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -27,6 +22,7 @@ public class HeadersInspectionHandler implements Interceptor {
     public HeadersInspectionHandler() {
         this(new HeadersInspectionOption());
     }
+
     /**
      * Create a new instance of the HeadersInspectionHandler class with the provided options
      * @param options The options to use for the handler
@@ -34,18 +30,22 @@ public class HeadersInspectionHandler implements Interceptor {
     public HeadersInspectionHandler(@Nonnull final HeadersInspectionOption options) {
         this.options = Objects.requireNonNull(options);
     }
+
     private final HeadersInspectionOption options;
 
     /** {@inheritDoc} */
-    @Nonnull
     @Override
     @SuppressWarnings("UnknownNullness")
-    public Response intercept(final Chain chain) throws IOException {
+    @Nonnull public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
         HeadersInspectionOption inspectionOption = request.tag(HeadersInspectionOption.class);
-        if(inspectionOption == null) { inspectionOption = options; }
-        final Span span = ObservabilityHelper.getSpanForRequest(request, "HeadersInspectionHandler_Intercept");
+        if (inspectionOption == null) {
+            inspectionOption = options;
+        }
+        final Span span =
+                ObservabilityHelper.getSpanForRequest(
+                        request, "HeadersInspectionHandler_Intercept");
         Scope scope = null;
         if (span != null) {
             scope = span.makeCurrent();
@@ -56,7 +56,7 @@ public class HeadersInspectionHandler implements Interceptor {
                 request = request.newBuilder().tag(Span.class, span).build();
             }
             if (inspectionOption.getInspectRequestHeaders()) {
-                for(final Pair<? extends String, ? extends String> header : request.headers()) {
+                for (final Pair<? extends String, ? extends String> header : request.headers()) {
                     HashSet<String> value = new HashSet<>();
                     value.add(header.getSecond());
                     inspectionOption.getRequestHeaders().put(header.getFirst(), value);
@@ -64,7 +64,7 @@ public class HeadersInspectionHandler implements Interceptor {
             }
             final Response response = chain.proceed(request);
             if (inspectionOption.getInspectResponseHeaders()) {
-                for(final Pair<? extends String, ? extends String> header : response.headers()) {
+                for (final Pair<? extends String, ? extends String> header : response.headers()) {
                     HashSet<String> value = new HashSet<>();
                     value.add(header.getSecond());
                     inspectionOption.getResponseHeaders().put(header.getFirst(), value);

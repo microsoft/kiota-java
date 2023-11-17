@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,37 +9,36 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.Nonnull;
-
 /** Creates new text parse nodes */
 public class TextParseNodeFactory implements ParseNodeFactory {
     /** Creates a new instance of the factory */
     public TextParseNodeFactory() {}
-    @Nonnull
-    public String getValidContentType() {
+
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
-    private final static String validContentType = "text/plain";
+
+    private static final String validContentType = "text/plain";
+
     @Override
-    @Nonnull
-    public ParseNode getParseNode(@Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
+    @Nonnull public ParseNode getParseNode(
+            @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         Objects.requireNonNull(rawResponse, "parameter rawResponse cannot be null");
-        if(contentType.isEmpty()) {
+        if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
         } else if (!contentType.equals(validContentType)) {
             throw new IllegalArgumentException("expected a " + validContentType + " content type");
         }
         String rawText;
-        try(final InputStreamReader reader = new InputStreamReader(rawResponse, StandardCharsets.UTF_8)) {
-            try(final BufferedReader buff = new BufferedReader(reader)) {
-                rawText = buff.lines()
-                .collect(Collectors.joining("\n"));
+        try (final InputStreamReader reader =
+                new InputStreamReader(rawResponse, StandardCharsets.UTF_8)) {
+            try (final BufferedReader buff = new BufferedReader(reader)) {
+                rawText = buff.lines().collect(Collectors.joining("\n"));
             }
         } catch (IOException ex) {
             throw new RuntimeException("could not close the reader", ex);
         }
         return new TextParseNode(rawText);
     }
-
 }

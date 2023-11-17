@@ -1,5 +1,13 @@
 package com.microsoft.kiota;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.MONTHS;
+import static java.time.temporal.ChronoUnit.NANOS;
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.time.temporal.ChronoUnit.YEARS;
+
 import jakarta.annotation.Nonnull;
 import java.io.Serializable;
 import java.time.Duration;
@@ -9,25 +17,17 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.List;
-import java.util.Arrays;
 import java.util.ArrayList;
-
-import static java.time.temporal.ChronoUnit.YEARS;
-import static java.time.temporal.ChronoUnit.MONTHS;
-import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.ChronoUnit.HOURS;
-import static java.time.temporal.ChronoUnit.MINUTES;
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.time.temporal.ChronoUnit.NANOS;
-
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The aggregate type for {@code Period} and {@code Duration }
  */
-public final class PeriodAndDuration implements TemporalAmount, Comparable<PeriodAndDuration>, Serializable {
+public final class PeriodAndDuration
+        implements TemporalAmount, Comparable<PeriodAndDuration>, Serializable {
 
     /**
      * A constant for a duration of zero.
@@ -43,8 +43,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * Gets the period section of the type.
      * @return the period section
      */
-    @Nonnull
-    public Period getPeriod() {
+    @Nonnull public Period getPeriod() {
         return period;
     }
 
@@ -52,14 +51,15 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      * The duration.
      */
     private final Duration duration;
+
     /**
      * Gets the duration section of the type.
      * @return the duration section
      */
-    @Nonnull
-    public Duration getDuration() {
+    @Nonnull public Duration getDuration() {
         return duration;
     }
+
     /**
      * Non-public Constructor for PeriodAndDuration
      * @param period The {@code Period} component of the aggregate type
@@ -71,72 +71,84 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         this.period = period;
         this.duration = duration;
     }
+
     /**
      * Creates an instance based on a period and duration.
      * @param period  the {@code Period}, not null
      * @param duration  the {@code Duration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration of(@Nonnull Period period, @Nonnull Duration duration) {
+    @Nonnull public static PeriodAndDuration of(@Nonnull Period period, @Nonnull Duration duration) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(period, duration);
     }
+
     /**
      * Creates an instance based on a period.
      * @param period  the {@code Period}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration ofPeriod(@Nonnull Period period) {
+    @Nonnull public static PeriodAndDuration ofPeriod(@Nonnull Period period) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         return new PeriodAndDuration(period, Duration.ZERO);
     }
+
     /**
      * Creates an instance based on a duration.
      * @param duration  the {@code Duration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration ofDuration(@Nonnull Duration duration) {
+    @Nonnull public static PeriodAndDuration ofDuration(@Nonnull Duration duration) {
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(Period.ZERO, duration);
     }
+
     /**
      * Creates an instance based on a PeriodAndDuration.
      * @param periodAndDuration the {@code PeriodAndDuration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration ofPeriodAndDuration(@Nonnull PeriodAndDuration periodAndDuration) {
+    @Nonnull public static PeriodAndDuration ofPeriodAndDuration(
+            @Nonnull PeriodAndDuration periodAndDuration) {
         Objects.requireNonNull(periodAndDuration, "parameter periodAndDuration cannot be null");
-        return new PeriodAndDuration(periodAndDuration.getPeriod(), periodAndDuration.getDuration());
+        return new PeriodAndDuration(
+                periodAndDuration.getPeriod(), periodAndDuration.getDuration());
     }
+
     /**
      * Parses a string to produce a {@code PeriodAndDuration}.
      * @param stringValue the {@code String} parse from.
      * @return parsed instance of {@code PeriodAndDuration}
      */
-    @Nonnull
-    public static PeriodAndDuration parse(@Nonnull  String stringValue) {
+    @Nonnull public static PeriodAndDuration parse(@Nonnull String stringValue) {
         Objects.requireNonNull(stringValue, "parameter stringValue cannot be null");
 
-        if (stringValue.substring(0,3).contains("PT")) {// it is only a duration value as it starts with 'PT', '+PT' or, '-PT'
+        if (stringValue
+                .substring(0, 3)
+                .contains("PT")) { // it is only a duration value as it starts with 'PT', '+PT' or,
+            // '-PT'
             return PeriodAndDuration.ofDuration(Duration.parse(stringValue));
         }
         int timePosition = stringValue.indexOf("T");
-        if (timePosition < 0) {// only a period value as there is no time component
+        if (timePosition < 0) { // only a period value as there is no time component
             return PeriodAndDuration.ofPeriod(Period.parse(stringValue));
         }
 
         String sign = "";
         if (stringValue.charAt(0) == '-') {
             sign = "-";
-        }// no need for checking the `+` sign as this is the default
+        } // no need for checking the `+` sign as this is the default
 
-        Period period = Period.parse(stringValue.substring(0, timePosition));//sign will be passed and parsed
-        Duration duration = Duration.parse(sign + "P" + stringValue.substring(timePosition));// pass the negative if need be
+        Period period =
+                Period.parse(
+                        stringValue.substring(0, timePosition)); // sign will be passed and parsed
+        Duration duration =
+                Duration.parse(
+                        sign
+                                + "P"
+                                + stringValue.substring(
+                                        timePosition)); // pass the negative if need be
         return PeriodAndDuration.of(period, duration);
     }
 
@@ -148,18 +160,19 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
     public int compareTo(@Nonnull PeriodAndDuration periodAndDuration) {
         Objects.requireNonNull(periodAndDuration, "parameter periodAndDuration cannot be null");
 
-        if(this.equals(periodAndDuration)) {
-            return 0;//they are the same/equal
+        if (this.equals(periodAndDuration)) {
+            return 0; // they are the same/equal
         }
 
-        if(this.period.equals(periodAndDuration.getPeriod())) {// same period so just compare the durations
+        if (this.period.equals(
+                periodAndDuration.getPeriod())) { // same period so just compare the durations
             return this.duration.compareTo(periodAndDuration.getDuration());
         }
 
         // just check if the difference in the period is negative as this makes the duration moot
-        if(this.period.minus(periodAndDuration.getPeriod()).isNegative()) {
-            return -1;//this period is smaller. So duration won't count
-        }else {
+        if (this.period.minus(periodAndDuration.getPeriod()).isNegative()) {
+            return -1; // this period is smaller. So duration won't count
+        } else {
             return 1;
         }
     }
@@ -194,7 +207,11 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         throw new UnsupportedTemporalTypeException("Unsupported TemporalUnit of type: " + unit);
     }
 
-    private static final List<TemporalUnit> UNITS = Collections.unmodifiableList(Arrays.<TemporalUnit>asList(YEARS, MONTHS, DAYS, HOURS, MINUTES, SECONDS, NANOS));
+    private static final List<TemporalUnit> UNITS =
+            Collections.unmodifiableList(
+                    Arrays.<TemporalUnit>asList(
+                            YEARS, MONTHS, DAYS, HOURS, MINUTES, SECONDS, NANOS));
+
     /**
      * @return the List of TemporalUnits; not null
      */
@@ -210,7 +227,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
     @Override
     public Temporal addTo(@Nonnull Temporal temporal) {
         Objects.requireNonNull(temporal, "parameter temporal cannot be null");
-        return temporal.plus(period).plus(duration);//just add everything up
+        return temporal.plus(period).plus(duration); // just add everything up
     }
 
     /**
@@ -220,7 +237,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
     @Override
     public Temporal subtractFrom(@Nonnull Temporal temporal) {
         Objects.requireNonNull(temporal, "parameter temporal cannot be null");
-        return temporal.minus(period).minus(duration);//just subtract everything up
+        return temporal.minus(period).minus(duration); // just subtract everything up
     }
 
     /**
@@ -235,7 +252,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
         if (duration.isZero()) {
             return period.toString();
         }
-        //simply concatenate and drop the first `P` in the duration
+        // simply concatenate and drop the first `P` in the duration
         return period + duration.toString().substring(1);
     }
 
@@ -247,6 +264,7 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
     public int hashCode() {
         return period.hashCode() + duration.hashCode();
     }
+
     /**
      * Checks if this instance is equal to the specified {@code PeriodAndDuration}.
      * @param otherPeriodAndDuration  the other Object, null returns false
@@ -254,13 +272,14 @@ public final class PeriodAndDuration implements TemporalAmount, Comparable<Perio
      */
     @Override
     public boolean equals(Object otherPeriodAndDuration) {
-        if(this == otherPeriodAndDuration) {
+        if (this == otherPeriodAndDuration) {
             return true; // same instance
         }
 
         if (otherPeriodAndDuration instanceof PeriodAndDuration) {
             PeriodAndDuration otherInstance = (PeriodAndDuration) otherPeriodAndDuration;
-            return this.period.equals(otherInstance.period) && this.duration.equals(otherInstance.duration);
+            return this.period.equals(otherInstance.period)
+                    && this.duration.equals(otherInstance.duration);
         }
         return false;
     }

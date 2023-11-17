@@ -1,12 +1,10 @@
 package com.microsoft.kiota;
 
-import java.util.HashMap;
-
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParsableFactory;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import java.util.HashMap;
 
 /** Defines the contract for a response handler. */
 public interface ResponseHandler {
@@ -19,6 +17,7 @@ public interface ResponseHandler {
      * @param <ModelType>          The type of the response model object.
      * @return The deserialized response model object.
      */
-    @Nullable
-    <NativeResponseType, ModelType> ModelType handleResponse(@Nonnull final NativeResponseType response, @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+    @Nullable <NativeResponseType, ModelType> ModelType handleResponse(
+            @Nonnull final NativeResponseType response,
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
 }

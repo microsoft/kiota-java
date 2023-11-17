@@ -1,12 +1,11 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-
-import jakarta.annotation.Nonnull;
 
 /**
  * This factory holds a list of all the registered factories for the various types of nodes.
@@ -16,32 +15,44 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
     public ParseNodeFactoryRegistry() {
         // Default constructor for the registry.
     }
+
     /** Default singleton instance of the registry to be used when registering new factories that should be available by default. */
     public static final ParseNodeFactoryRegistry defaultInstance = new ParseNodeFactoryRegistry();
+
     /** List of factories that are registered by content type. */
-    @Nonnull
-    public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
-    @Nonnull
-    public String getValidContentType() {
-        throw new UnsupportedOperationException("The registry supports multiple content types. Get the registered factory instead.");
+    @Nonnull public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
+
+    @Nonnull public String getValidContentType() {
+        throw new UnsupportedOperationException(
+                "The registry supports multiple content types. Get the registered factory"
+                        + " instead.");
     }
-    private static final Pattern contentTypeVendorCleanupPattern = Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern contentTypeVendorCleanupPattern =
+            Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
+
     @Override
-    @Nonnull
-    public ParseNode getParseNode(@Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
+    @Nonnull public ParseNode getParseNode(
+            @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         Objects.requireNonNull(rawResponse, "parameter rawResponse cannot be null");
-        if(contentType.isEmpty()) {
+        if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
         }
         final String vendorSpecificContentType = contentType.split(";")[0];
-        if(contentTypeAssociatedFactories.containsKey(vendorSpecificContentType)) {
-            return contentTypeAssociatedFactories.get(vendorSpecificContentType).getParseNode(vendorSpecificContentType, rawResponse);
+        if (contentTypeAssociatedFactories.containsKey(vendorSpecificContentType)) {
+            return contentTypeAssociatedFactories
+                    .get(vendorSpecificContentType)
+                    .getParseNode(vendorSpecificContentType, rawResponse);
         }
-        final String cleanedContentType = contentTypeVendorCleanupPattern.matcher(vendorSpecificContentType).replaceAll("");
-        if(contentTypeAssociatedFactories.containsKey(cleanedContentType)) {
-            return contentTypeAssociatedFactories.get(cleanedContentType).getParseNode(cleanedContentType, rawResponse);
+        final String cleanedContentType =
+                contentTypeVendorCleanupPattern.matcher(vendorSpecificContentType).replaceAll("");
+        if (contentTypeAssociatedFactories.containsKey(cleanedContentType)) {
+            return contentTypeAssociatedFactories
+                    .get(cleanedContentType)
+                    .getParseNode(cleanedContentType, rawResponse);
         }
-        throw new RuntimeException("Content type " + cleanedContentType + " does not have a factory to be parsed");
+        throw new RuntimeException(
+                "Content type " + cleanedContentType + " does not have a factory to be parsed");
     }
 }

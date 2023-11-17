@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface QueryParameter {
-    /** 
+    /**
      * The name of the parameter in the template
      * @return the name of the parameter in the template
      */

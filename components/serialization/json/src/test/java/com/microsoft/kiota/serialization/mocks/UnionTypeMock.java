@@ -1,22 +1,22 @@
 package com.microsoft.kiota.serialization.mocks;
 
+import com.microsoft.kiota.serialization.ComposedTypeWrapper;
+import com.microsoft.kiota.serialization.Parsable;
+import com.microsoft.kiota.serialization.ParseNode;
+import com.microsoft.kiota.serialization.SerializationWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-
-import com.microsoft.kiota.serialization.ParseNode;
-import com.microsoft.kiota.serialization.SerializationWriter;
-import com.microsoft.kiota.serialization.ComposedTypeWrapper;
-import com.microsoft.kiota.serialization.Parsable;
 
 public class UnionTypeMock implements Parsable, ComposedTypeWrapper {
     private TestEntity _composedType1;
     private SecondTestEntity _composedType2;
     private String _stringValue;
     private java.util.List<TestEntity> _composedType3;
-	@jakarta.annotation.Nonnull
-    public static UnionTypeMock createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
+
+    @jakarta.annotation.Nonnull public static UnionTypeMock createFromDiscriminatorValue(
+            @jakarta.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
         final UnionTypeMock result = new UnionTypeMock();
         final ParseNode mappingValueNode = parseNode.getChildNode("@odata.type");
@@ -29,31 +29,29 @@ public class UnionTypeMock implements Parsable, ComposedTypeWrapper {
             }
         } else if (parseNode.getStringValue() != null) {
             result.setStringValue(parseNode.getStringValue());
-        } else if (parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue) != null) {
-            result.setComposedType3(parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue));
+        } else if (parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue)
+                != null) {
+            result.setComposedType3(
+                    parseNode.getCollectionOfObjectValues(
+                            TestEntity::createFromDiscriminatorValue));
         }
         return result;
     }
 
     @Override
     public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
-        if (getComposedType1() != null)
-            return getComposedType1().getFieldDeserializers();
-        else if (getComposedType2() != null)
-            return getComposedType2().getFieldDeserializers();
+        if (getComposedType1() != null) return getComposedType1().getFieldDeserializers();
+        else if (getComposedType2() != null) return getComposedType2().getFieldDeserializers();
         return new HashMap<>();
     }
 
     @Override
     public void serialize(SerializationWriter writer) {
         Objects.requireNonNull(writer);
-        if(getComposedType1() != null)
-            writer.writeObjectValue(null, getComposedType1());
-        else if(getComposedType2() != null)
-            writer.writeObjectValue(null, getComposedType2());
-        else if(getStringValue() != null)
-            writer.writeStringValue(null, getStringValue());
-        else if(getComposedType3() != null)
+        if (getComposedType1() != null) writer.writeObjectValue(null, getComposedType1());
+        else if (getComposedType2() != null) writer.writeObjectValue(null, getComposedType2());
+        else if (getStringValue() != null) writer.writeStringValue(null, getStringValue());
+        else if (getComposedType3() != null)
             writer.writeCollectionOfObjectValues(null, getComposedType3());
     }
 

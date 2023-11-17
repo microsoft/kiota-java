@@ -1,5 +1,6 @@
 package com.microsoft.kiota;
-/** 
+
+/**
  * Represents the HTTP method used by a request.
  */
 public enum HttpMethod {

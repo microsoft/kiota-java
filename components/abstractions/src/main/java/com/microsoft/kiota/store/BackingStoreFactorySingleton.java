@@ -8,7 +8,7 @@ public class BackingStoreFactorySingleton {
     public BackingStoreFactorySingleton() {
         // default constructor
     }
+
     /** The backing store factory singleton instance. */
-    @Nonnull
-    public static BackingStoreFactory instance = new InMemoryBackingStoreFactory();
+    @Nonnull public static BackingStoreFactory instance = new InMemoryBackingStoreFactory();
 }
