@@ -136,8 +136,7 @@ public class JsonParseNode implements ParseNode {
                                 }
 
                                 @Override
-                                @SuppressWarnings("unchecked")
-                                public T next() {
+                                @SuppressWarnings("unchecked") public T next() {
                                     final JsonElement item = sourceIterator.next();
                                     final Consumer<Parsable> onBefore =
                                             _this.getOnBeforeAssignFieldValues();
@@ -303,8 +302,7 @@ public class JsonParseNode implements ParseNode {
         return getEnumValueInt(rawValue, targetEnum);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends Enum<T>> T getEnumValueInt(
+    @SuppressWarnings("unchecked") private <T extends Enum<T>> T getEnumValueInt(
             @Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
         try {
             return (T) targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);

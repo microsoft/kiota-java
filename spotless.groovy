@@ -20,6 +20,6 @@ spotless {
       .reorderImports(true)
 
     // fix formatting of type annotations
-    formatAnnotations()
+    formatAnnotations().addTypeAnnotation("SuppressWarnings")
   }
 }

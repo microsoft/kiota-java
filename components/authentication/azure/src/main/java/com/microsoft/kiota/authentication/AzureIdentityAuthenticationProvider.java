@@ -12,8 +12,7 @@ public class AzureIdentityAuthenticationProvider extends BaseBearerTokenAuthenti
      * @param allowedHosts The list of allowed hosts for which to request access tokens.
      * @param scopes The scopes to request access tokens for.
      */
-    @SuppressWarnings("LambdaLast")
-    public AzureIdentityAuthenticationProvider(
+    @SuppressWarnings("LambdaLast") public AzureIdentityAuthenticationProvider(
             @Nonnull final TokenCredential tokenCredential,
             @Nonnull final String[] allowedHosts,
             @Nonnull final String... scopes) {
@@ -27,8 +26,7 @@ public class AzureIdentityAuthenticationProvider extends BaseBearerTokenAuthenti
      * @param observabilityOptions The observability options to use.
      * @param scopes The scopes to request access tokens for.
      */
-    @SuppressWarnings("LambdaLast")
-    public AzureIdentityAuthenticationProvider(
+    @SuppressWarnings("LambdaLast") public AzureIdentityAuthenticationProvider(
             @Nonnull final TokenCredential tokenCredential,
             @Nonnull final String[] allowedHosts,
             @Nullable final ObservabilityOptions observabilityOptions,

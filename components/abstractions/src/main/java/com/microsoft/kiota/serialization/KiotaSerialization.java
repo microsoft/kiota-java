@@ -259,8 +259,7 @@ public final class KiotaSerialization {
     }
 
     @Nonnull
-    @SuppressWarnings("unchecked")
-    private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
+    @SuppressWarnings("unchecked") private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
             @Nonnull final Class<T> type) {
         Objects.requireNonNull(type);
         try {

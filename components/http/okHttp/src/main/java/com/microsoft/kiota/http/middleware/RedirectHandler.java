@@ -121,8 +121,7 @@ public class RedirectHandler implements Interceptor {
     // Intercept request and response made to network
     @Override
     @Nonnull
-    @SuppressWarnings("UnknownNullness")
-    public Response intercept(final Chain chain) throws IOException {
+    @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
         if (request == null) {

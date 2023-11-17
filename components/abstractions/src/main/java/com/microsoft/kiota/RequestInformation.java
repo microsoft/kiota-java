@@ -216,8 +216,7 @@ public class RequestInformation {
      * @return The query parameters for the request.
      */
     @Nonnull
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getQueryParameters() {
+    @SuppressWarnings("unchecked") public Map<String, Object> getQueryParameters() {
         return (Map<String, Object>) queryParameters.clone();
     }
 

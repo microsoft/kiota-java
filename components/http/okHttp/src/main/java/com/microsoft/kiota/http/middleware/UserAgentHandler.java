@@ -38,8 +38,7 @@ public class UserAgentHandler implements Interceptor {
 
     /* @inheritdoc */
     @Override
-    @SuppressWarnings("UnknownNullness")
-    public Response intercept(final Chain chain) throws IOException {
+    @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         final Request request = chain.request();
 

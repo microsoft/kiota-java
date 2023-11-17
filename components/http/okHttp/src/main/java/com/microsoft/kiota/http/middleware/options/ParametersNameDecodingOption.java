@@ -15,8 +15,7 @@ public class ParametersNameDecodingOption implements RequestOption {
     @Nonnull public char[] parametersToDecode = {'-', '.', '~', '$'};
 
     /* @inheritdoc */
-    @SuppressWarnings("unchecked")
-    @Override
+    @SuppressWarnings("unchecked") @Override
     @Nonnull
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) ParametersNameDecodingOption.class;

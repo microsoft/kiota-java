@@ -31,8 +31,7 @@ public class ResponseHandlerOption implements RequestOption {
     /** {@inheritDoc} */
     @Override
     @Nonnull
-    @SuppressWarnings("unchecked")
-    public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked") public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) ResponseHandlerOption.class;
     }
 }

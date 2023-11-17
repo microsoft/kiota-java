@@ -36,8 +36,7 @@ public class HeadersInspectionHandler implements Interceptor {
     /** {@inheritDoc} */
     @Nonnull
     @Override
-    @SuppressWarnings("UnknownNullness")
-    public Response intercept(final Chain chain) throws IOException {
+    @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
         HeadersInspectionOption inspectionOption = request.tag(HeadersInspectionOption.class);

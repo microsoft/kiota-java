@@ -114,8 +114,7 @@ public class InMemoryBackingStore implements BackingStore {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    @Nullable public <T> T get(@Nonnull final String key) {
+    @SuppressWarnings("unchecked") @Nullable public <T> T get(@Nonnull final String key) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> wrapper = this.store.get(key);
         final Object value = this.getValueFromWrapper(wrapper);

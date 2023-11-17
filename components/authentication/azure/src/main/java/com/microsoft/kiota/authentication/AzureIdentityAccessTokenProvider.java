@@ -30,8 +30,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
      * @param allowedHosts The list of allowed hosts for which to request access tokens.
      * @param scopes The scopes to request access tokens for.
      */
-    @SuppressWarnings("LambdaLast")
-    public AzureIdentityAccessTokenProvider(
+    @SuppressWarnings("LambdaLast") public AzureIdentityAccessTokenProvider(
             @Nonnull final TokenCredential tokenCredential,
             @Nonnull final String[] allowedHosts,
             @Nonnull final String... scopes) {
@@ -45,8 +44,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
      * @param observabilityOptions The observability options to use.
      * @param scopes The scopes to request access tokens for.
      */
-    @SuppressWarnings("LambdaLast")
-    public AzureIdentityAccessTokenProvider(
+    @SuppressWarnings("LambdaLast") public AzureIdentityAccessTokenProvider(
             @Nonnull final TokenCredential tokenCredential,
             @Nonnull final String[] allowedHosts,
             @Nullable final ObservabilityOptions observabilityOptions,
