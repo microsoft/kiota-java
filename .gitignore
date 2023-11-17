@@ -352,3 +352,6 @@ MigrationBackup/
 .ionide/
 
 .gradle
+
+# spotless tmp file
+**/spotless-register-dependencies
