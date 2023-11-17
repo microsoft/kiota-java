@@ -22,6 +22,7 @@ test {
 
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
+    reports.xml.required = true
 }
 
 jacoco {
@@ -47,12 +48,6 @@ spotbugsTest {
             outputLocation = file("$buildDir/reports/spotbugs/test/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.required
     }
 }
 
