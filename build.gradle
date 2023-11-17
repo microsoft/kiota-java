@@ -1,0 +1,19 @@
+plugins {
+    id "java-library"
+    id "org.sonarqube" version "4.4.1.3373"
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "microsoft_kiota-java"
+    	property "sonar.organization", "microsoft"
+    	property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+subprojects {
+	apply plugin: 'org.sonarqube'
+}
+
+repositories {
+    mavenCentral()
+}
