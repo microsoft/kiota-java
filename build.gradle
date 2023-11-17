@@ -8,7 +8,7 @@ sonar {
         property "sonar.projectKey", "microsoft_kiota-java"
     	property "sonar.organization", "microsoft"
     	property "sonar.host.url", "https://sonarcloud.io"
-		property "sonar.coverage.jacoco.xmlReportPaths", "components/**/build/reports/jacoco/test/jacocoTestReport.xml"
+		property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/components/**/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
 subprojects {
