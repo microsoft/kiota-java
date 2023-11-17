@@ -56,7 +56,8 @@ public class RetryHandlerOption implements RequestOption {
      * @param maxRetries Number of max retires for a request
      * @param delay Delay in seconds between retries
      */
-    @SuppressWarnings("LambdaLast") public RetryHandlerOption(
+    @SuppressWarnings("LambdaLast")
+    public RetryHandlerOption(
             @Nullable final IShouldRetry shouldRetry, int maxRetries, long delay) {
         if (delay > MAX_DELAY)
             throw new IllegalArgumentException("Delay cannot exceed " + MAX_DELAY);
@@ -96,7 +97,8 @@ public class RetryHandlerOption implements RequestOption {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked") @Nonnull public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked")
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RetryHandlerOption.class;
     }
 }

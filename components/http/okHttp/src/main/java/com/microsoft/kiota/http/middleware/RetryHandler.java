@@ -202,7 +202,8 @@ public class RetryHandler implements Interceptor {
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
+    @SuppressWarnings("UnknownNullness")
+    @Nonnull public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
         if (request == null) {

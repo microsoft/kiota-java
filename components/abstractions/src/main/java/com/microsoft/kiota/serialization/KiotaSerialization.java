@@ -246,7 +246,8 @@ public final class KiotaSerialization {
         return deserializeCollection(contentType, value, getFactoryMethodFromType(typeClass));
     }
 
-    @Nonnull @SuppressWarnings("unchecked") private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
+    @SuppressWarnings("unchecked")
+    @Nonnull private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
             @Nonnull final Class<T> type) {
         Objects.requireNonNull(type);
         try {

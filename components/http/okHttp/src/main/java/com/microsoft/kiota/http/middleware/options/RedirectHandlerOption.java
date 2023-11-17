@@ -66,7 +66,8 @@ public class RedirectHandlerOption implements RequestOption {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked") @Override
+    @SuppressWarnings("unchecked")
+    @Override
     @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RedirectHandlerOption.class;
     }

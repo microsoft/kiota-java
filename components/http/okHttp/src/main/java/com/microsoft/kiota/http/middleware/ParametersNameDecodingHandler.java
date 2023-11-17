@@ -40,7 +40,8 @@ public class ParametersNameDecodingHandler implements Interceptor {
      * {@inheritDoc}
      */
     @Override
-    @Nonnull @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
+    @SuppressWarnings("UnknownNullness")
+    @Nonnull public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain);
         final Request request = chain.request();
         ParametersNameDecodingOption nameOption = request.tag(ParametersNameDecodingOption.class);

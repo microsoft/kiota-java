@@ -75,7 +75,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param authenticationProvider the authentication provider to use for authenticating requests.
      * @param parseNodeFactory the parse node factory to use for parsing responses.
      */
-    @SuppressWarnings("LambdaLast") public OkHttpRequestAdapter(
+    @SuppressWarnings("LambdaLast")
+    public OkHttpRequestAdapter(
             @Nonnull final AuthenticationProvider authenticationProvider,
             @Nullable final ParseNodeFactory parseNodeFactory) {
         this(authenticationProvider, parseNodeFactory, null, null, null);
@@ -87,7 +88,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param parseNodeFactory the parse node factory to use for parsing responses.
      * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
      */
-    @SuppressWarnings("LambdaLast") public OkHttpRequestAdapter(
+    @SuppressWarnings("LambdaLast")
+    public OkHttpRequestAdapter(
             @Nonnull final AuthenticationProvider authenticationProvider,
             @Nullable final ParseNodeFactory parseNodeFactory,
             @Nullable final SerializationWriterFactory serializationWriterFactory) {
@@ -101,7 +103,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
      * @param client the http client to use for sending requests.
      */
-    @SuppressWarnings("LambdaLast") public OkHttpRequestAdapter(
+    @SuppressWarnings("LambdaLast")
+    public OkHttpRequestAdapter(
             @Nonnull final AuthenticationProvider authenticationProvider,
             @Nullable final ParseNodeFactory parseNodeFactory,
             @Nullable final SerializationWriterFactory serializationWriterFactory,
@@ -117,7 +120,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param client the http client to use for sending requests.
      * @param observabilityOptions the observability options to use for sending requests.
      */
-    @SuppressWarnings("LambdaLast") public OkHttpRequestAdapter(
+    @SuppressWarnings("LambdaLast")
+    public OkHttpRequestAdapter(
             @Nonnull final AuthenticationProvider authenticationProvider,
             @Nullable final ParseNodeFactory parseNodeFactory,
             @Nullable final SerializationWriterFactory serializationWriterFactory,
@@ -820,7 +824,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked") @Nonnull public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
+    @SuppressWarnings("unchecked")
+    @Nonnull public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
         try (final Scope scope = span.makeCurrent()) {

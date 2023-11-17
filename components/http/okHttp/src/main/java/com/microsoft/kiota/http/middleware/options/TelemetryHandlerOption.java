@@ -20,7 +20,8 @@ public class TelemetryHandlerOption implements RequestOption {
 
     /* @inheritdoc */
     @Override
-    @Nonnull @SuppressWarnings("unchecked") public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked")
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) TelemetryHandlerOption.class;
     }
 }

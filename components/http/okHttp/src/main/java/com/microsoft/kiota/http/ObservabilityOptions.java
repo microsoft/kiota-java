@@ -28,7 +28,8 @@ public class ObservabilityOptions implements RequestOption {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked") @Nonnull public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked")
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) ObservabilityOptions.class;
     }
 

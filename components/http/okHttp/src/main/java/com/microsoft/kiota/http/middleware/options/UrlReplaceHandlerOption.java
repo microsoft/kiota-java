@@ -79,8 +79,9 @@ public class UrlReplaceHandlerOption implements RequestOption {
         return enabled;
     }
 
-    @Nonnull @SuppressWarnings("unchecked") @Override
-    public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked")
+    @Override
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) UrlReplaceHandlerOption.class;
     }
 }
