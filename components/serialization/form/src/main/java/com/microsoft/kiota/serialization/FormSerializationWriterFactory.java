@@ -8,16 +8,14 @@ public class FormSerializationWriterFactory implements SerializationWriterFactor
     /** Instantiates a new factory */
     public FormSerializationWriterFactory() {}
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
 
     private static final String validContentType = "application/x-www-form-urlencoded";
 
     @Override
-    @Nonnull
-    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
+    @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");

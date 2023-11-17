@@ -86,8 +86,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
         this._createdDateTime = value;
     }
 
-    @Nonnull
-    @Override
+    @Nonnull @Override
     public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
         return new HashMap<>() {
             {
@@ -145,14 +144,12 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 
     private final Map<String, Object> _additionalData = new HashMap<>();
 
-    @Nonnull
-    @Override
+    @Nonnull @Override
     public Map<String, Object> getAdditionalData() {
         return _additionalData;
     }
 
-    @jakarta.annotation.Nonnull
-    public static TestEntity createFromDiscriminatorValue(
+    @jakarta.annotation.Nonnull public static TestEntity createFromDiscriminatorValue(
             @jakarta.annotation.Nonnull final ParseNode parseNode) {
         return new TestEntity();
     }

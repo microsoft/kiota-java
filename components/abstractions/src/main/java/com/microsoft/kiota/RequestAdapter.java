@@ -21,8 +21,7 @@ public interface RequestAdapter {
      * Gets the serialization writer factory currently in use for the HTTP core service.
      * @return the serialization writer factory currently in use for the HTTP core service.
      */
-    @Nonnull
-    SerializationWriterFactory getSerializationWriterFactory();
+    @Nonnull SerializationWriterFactory getSerializationWriterFactory();
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized response model.
@@ -112,8 +111,7 @@ public interface RequestAdapter {
      * Gets The base url for every request.
      * @return The base url for every request.
      */
-    @Nonnull
-    String getBaseUrl();
+    @Nonnull String getBaseUrl();
 
     /**
      * Converts the given RequestInformation into a native HTTP request.
@@ -121,6 +119,5 @@ public interface RequestAdapter {
      * @param requestInfo the request info to convert.
      * @return the native HTTP request.
      */
-    @Nonnull
-    <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo);
+    @Nonnull <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo);
 }

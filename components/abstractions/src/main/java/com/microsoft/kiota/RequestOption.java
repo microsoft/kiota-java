@@ -9,6 +9,5 @@ public interface RequestOption {
      * @param <T> Type of the option.
      * @return Class of the option type.
      */
-    @Nonnull
-    public <T extends RequestOption> Class<T> getType();
+    @Nonnull public <T extends RequestOption> Class<T> getType();
 }

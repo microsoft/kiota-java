@@ -214,8 +214,7 @@ public class FormSerializationWriter implements SerializationWriter {
         } else return null;
     }
 
-    @Nonnull
-    public InputStream getSerializedContent() {
+    @Nonnull public InputStream getSerializedContent() {
         try {
             this.writer.flush();
             return new ByteArrayInputStream(this.stream.toByteArray());

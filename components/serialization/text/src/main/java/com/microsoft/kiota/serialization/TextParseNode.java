@@ -107,8 +107,7 @@ public class TextParseNode implements ParseNode {
         throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
 
-    @Nonnull
-    public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
+    @Nonnull public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
 

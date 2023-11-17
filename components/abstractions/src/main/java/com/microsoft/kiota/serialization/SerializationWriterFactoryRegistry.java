@@ -17,12 +17,10 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
             new SerializationWriterFactoryRegistry();
 
     /** List of factories that are registered by content type. */
-    @Nonnull
-    public final HashMap<String, SerializationWriterFactory> contentTypeAssociatedFactories =
+    @Nonnull public final HashMap<String, SerializationWriterFactory> contentTypeAssociatedFactories =
             new HashMap<>();
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         throw new UnsupportedOperationException(
                 "The registry supports multiple content types. Get the registered factory"
                         + " instead.");
@@ -32,8 +30,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
             Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
 
     @Override
-    @Nonnull
-    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
+    @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");

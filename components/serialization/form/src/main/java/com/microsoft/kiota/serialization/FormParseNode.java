@@ -274,8 +274,7 @@ public class FormParseNode implements ParseNode {
         }
     }
 
-    @Nonnull
-    public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
+    @Nonnull public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
         final T item = factory.create(this);
         assignFieldValues(item, item.getFieldDeserializers());

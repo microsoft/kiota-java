@@ -8,6 +8,5 @@ public interface ValuedEnum {
      * Gets the string representation of the enum value.
      * @return the string representation of the enum value.
      */
-    @Nonnull
-    String getValue();
+    @Nonnull String getValue();
 }

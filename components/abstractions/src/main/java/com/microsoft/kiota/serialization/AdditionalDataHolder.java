@@ -9,6 +9,5 @@ public interface AdditionalDataHolder {
      * Gets the additional data for this object that did not belong to the properties.
      * @return The additional data for this object.
      */
-    @Nonnull
-    Map<String, Object> getAdditionalData();
+    @Nonnull Map<String, Object> getAdditionalData();
 }

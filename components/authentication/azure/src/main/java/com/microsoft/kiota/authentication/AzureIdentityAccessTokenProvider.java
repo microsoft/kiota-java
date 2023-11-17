@@ -71,8 +71,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
     private static final String ClaimsKey = "claims";
     private static final String parentSpanKey = "parent-span";
 
-    @Nonnull
-    public String getAuthorizationToken(
+    @Nonnull public String getAuthorizationToken(
             @Nonnull final URI uri,
             @Nullable final Map<String, Object> additionalAuthenticationContext) {
         Span span;
@@ -139,8 +138,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         }
     }
 
-    @Nonnull
-    public AllowedHostsValidator getAllowedHostsValidator() {
+    @Nonnull public AllowedHostsValidator getAllowedHostsValidator() {
         return _hostValidator;
     }
 }

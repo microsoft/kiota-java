@@ -51,8 +51,7 @@ public class ApiException extends RuntimeException {
      * Gets the HTTP response headers for the error response
      * @return The response headers collections from the failed response.
      */
-    @Nonnull
-    public ResponseHeaders getResponseHeaders() {
+    @Nonnull public ResponseHeaders getResponseHeaders() {
         return new ResponseHeaders(responseHeaders);
     }
 

@@ -30,8 +30,7 @@ public class CaseInsensitiveMap implements Map<String, Set<String>> {
      * @param key string to normalize to lower case
      * @return The normalized string
      */
-    @Nonnull
-    protected String normalizeKey(@Nonnull final String key) {
+    @Nonnull protected String normalizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
         return key.toLowerCase(Locale.ROOT);
     }
@@ -68,8 +67,7 @@ public class CaseInsensitiveMap implements Map<String, Set<String>> {
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public Set<String> get(@Nonnull final Object key) {
+    @Nonnull public Set<String> get(@Nonnull final Object key) {
         Objects.requireNonNull(key);
         if (key instanceof String) {
             return internalMap.get(normalizeKey((String) key));
@@ -80,8 +78,7 @@ public class CaseInsensitiveMap implements Map<String, Set<String>> {
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public Set<String> put(@Nonnull final String key, @Nonnull final Set<String> value) {
+    @Nonnull public Set<String> put(@Nonnull final String key, @Nonnull final Set<String> value) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         return internalMap.put(normalizeKey(key), new HashSet<>(value));
@@ -89,8 +86,7 @@ public class CaseInsensitiveMap implements Map<String, Set<String>> {
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public Set<String> remove(@Nonnull final Object key) {
+    @Nonnull public Set<String> remove(@Nonnull final Object key) {
         Objects.requireNonNull(key);
         if (key instanceof String) {
             return internalMap.remove(normalizeKey((String) key));
@@ -119,20 +115,17 @@ public class CaseInsensitiveMap implements Map<String, Set<String>> {
     }
 
     @Override
-    @Nonnull
-    public Set<String> keySet() {
+    @Nonnull public Set<String> keySet() {
         return internalMap.keySet();
     }
 
     @Override
-    @Nonnull
-    public Collection<Set<String>> values() {
+    @Nonnull public Collection<Set<String>> values() {
         return new ArrayList<>(internalMap.values());
     }
 
     @Override
-    @Nonnull
-    public Set<Entry<String, Set<String>>> entrySet() {
+    @Nonnull public Set<Entry<String, Set<String>>> entrySet() {
         final HashSet<Entry<String, Set<String>>> result = new HashSet<>();
         for (final Entry<String, HashSet<String>> entry : internalMap.entrySet()) {
             result.add(

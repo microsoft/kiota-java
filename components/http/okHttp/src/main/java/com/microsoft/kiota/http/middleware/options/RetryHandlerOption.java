@@ -13,8 +13,7 @@ public class RetryHandlerOption implements RequestOption {
     /**
      * Default retry evaluation, always retry.
      */
-    @Nonnull
-    public static final IShouldRetry DEFAULT_SHOULD_RETRY =
+    @Nonnull public static final IShouldRetry DEFAULT_SHOULD_RETRY =
             (delay, executionCount, request, response) -> true;
 
     private int mMaxRetries;
@@ -75,8 +74,7 @@ public class RetryHandlerOption implements RequestOption {
      * Gets the callback evaluating whether a retry should be made.
      * @return should retry callback
      */
-    @Nonnull
-    public IShouldRetry shouldRetry() {
+    @Nonnull public IShouldRetry shouldRetry() {
         return mShouldRetry;
     }
 
@@ -98,8 +96,7 @@ public class RetryHandlerOption implements RequestOption {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked") @Nonnull
-    public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked") @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RetryHandlerOption.class;
     }
 }

@@ -8,6 +8,5 @@ public interface BackingStoreFactory {
      * Creates a new instance of the backing store.
      * @return a new instance of the backing store.
      */
-    @Nonnull
-    BackingStore createBackingStore();
+    @Nonnull BackingStore createBackingStore();
 }

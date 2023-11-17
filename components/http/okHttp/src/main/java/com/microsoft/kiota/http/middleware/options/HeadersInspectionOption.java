@@ -70,8 +70,7 @@ public class HeadersInspectionOption implements RequestOption {
      * Get the request headers
      * @return The request headers
      */
-    @Nonnull
-    public RequestHeaders getRequestHeaders() {
+    @Nonnull public RequestHeaders getRequestHeaders() {
         return this.requestHeaders;
     }
 
@@ -79,15 +78,13 @@ public class HeadersInspectionOption implements RequestOption {
      * Get the response headers
      * @return The response headers
      */
-    @Nonnull
-    public ResponseHeaders getResponseHeaders() {
+    @Nonnull public ResponseHeaders getResponseHeaders() {
         return this.responseHeaders;
     }
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked") @Override
-    @Nonnull
-    public <T extends RequestOption> Class<T> getType() {
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) HeadersInspectionOption.class;
     }
 }

@@ -20,11 +20,9 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
     public static final ParseNodeFactoryRegistry defaultInstance = new ParseNodeFactoryRegistry();
 
     /** List of factories that are registered by content type. */
-    @Nonnull
-    public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
+    @Nonnull public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         throw new UnsupportedOperationException(
                 "The registry supports multiple content types. Get the registered factory"
                         + " instead.");
@@ -34,8 +32,7 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
             Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
 
     @Override
-    @Nonnull
-    public ParseNode getParseNode(
+    @Nonnull public ParseNode getParseNode(
             @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         Objects.requireNonNull(rawResponse, "parameter rawResponse cannot be null");

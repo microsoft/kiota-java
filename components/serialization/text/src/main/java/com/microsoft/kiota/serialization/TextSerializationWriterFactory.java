@@ -8,16 +8,14 @@ public class TextSerializationWriterFactory implements SerializationWriterFactor
     /** Creates a new instance of the factory */
     public TextSerializationWriterFactory() {}
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
 
     private static final String validContentType = "text/plain";
 
     @Override
-    @Nonnull
-    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
+    @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");

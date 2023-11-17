@@ -8,8 +8,7 @@ import java.util.function.Consumer;
 
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return _concrete.getValidContentType();
     }
 
@@ -32,8 +31,7 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
         _onAfter = onAfter;
     }
 
-    @Nonnull
-    public ParseNode getParseNode(
+    @Nonnull public ParseNode getParseNode(
             @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
         Objects.requireNonNull(contentType);
         Objects.requireNonNull(rawResponse);

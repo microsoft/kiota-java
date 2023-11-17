@@ -28,8 +28,7 @@ public class ObservabilityOptions implements RequestOption {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked") @Nonnull
-    public <T extends RequestOption> Class<T> getType() {
+    @SuppressWarnings("unchecked") @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) ObservabilityOptions.class;
     }
 
@@ -37,8 +36,7 @@ public class ObservabilityOptions implements RequestOption {
      * Gets the instrumentation name to use for tracing
      * @return the instrumentation name to use for tracing
      */
-    @Nonnull
-    public String getTracerInstrumentationName() {
+    @Nonnull public String getTracerInstrumentationName() {
         return "com.microsoft.kiota:microsoft-kiota-http-okHttp";
     }
 }

@@ -16,8 +16,7 @@ public class ParseNodeHelper {
      * @param targets The collection of deserializers to merge.
      * @return a merged collection of deserializers.
      */
-    @Nonnull
-    public static Map<String, Consumer<ParseNode>> mergeDeserializersForIntersectionWrapper(
+    @Nonnull public static Map<String, Consumer<ParseNode>> mergeDeserializersForIntersectionWrapper(
             @Nonnull final Parsable... targets) {
         Objects.requireNonNull(targets, "targets cannot be null");
         if (targets.length == 0) {

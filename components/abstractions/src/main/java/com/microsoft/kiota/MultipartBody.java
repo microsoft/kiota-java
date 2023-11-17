@@ -28,8 +28,7 @@ public class MultipartBody implements Parsable {
      * Gets the boundary string for the multipart body.
      * @return the boundary string for the multipart body.
      */
-    @Nonnull
-    public String getBoundary() {
+    @Nonnull public String getBoundary() {
         return boundary;
     }
 
@@ -97,8 +96,7 @@ public class MultipartBody implements Parsable {
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
+    @Nonnull public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
         throw new UnsupportedOperationException("Unimplemented method 'getFieldDeserializers'");
     }
 

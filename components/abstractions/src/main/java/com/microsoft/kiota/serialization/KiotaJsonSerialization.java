@@ -20,8 +20,7 @@ public class KiotaJsonSerialization {
      * @return the serialized value as a stream
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> InputStream serializeAsStream(@Nonnull final T value)
+    @Nonnull public static <T extends Parsable> InputStream serializeAsStream(@Nonnull final T value)
             throws IOException {
         return KiotaSerialization.serializeAsStream(CONTENT_TYPE, value);
     }
@@ -33,8 +32,7 @@ public class KiotaJsonSerialization {
      * @return the serialized value as a string
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> String serializeAsString(@Nonnull final T value)
+    @Nonnull public static <T extends Parsable> String serializeAsString(@Nonnull final T value)
             throws IOException {
         return KiotaSerialization.serializeAsString(CONTENT_TYPE, value);
     }
@@ -46,8 +44,7 @@ public class KiotaJsonSerialization {
      * @return the serialized value as a stream
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> InputStream serializeAsStream(
+    @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
             @Nonnull final Iterable<T> values) throws IOException {
         return KiotaSerialization.serializeAsStream(CONTENT_TYPE, values);
     }
@@ -59,8 +56,7 @@ public class KiotaJsonSerialization {
      * @return the serialized value as a string
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> String serializeAsString(@Nonnull final Iterable<T> values)
+    @Nonnull public static <T extends Parsable> String serializeAsString(@Nonnull final Iterable<T> values)
             throws IOException {
         return KiotaSerialization.serializeAsString(CONTENT_TYPE, values);
     }
@@ -72,8 +68,7 @@ public class KiotaJsonSerialization {
      * @param parsableFactory the factory to use for creating the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final InputStream stream, @Nonnull final ParsableFactory<T> parsableFactory) {
         return KiotaSerialization.deserialize(CONTENT_TYPE, stream, parsableFactory);
     }
@@ -86,8 +81,7 @@ public class KiotaJsonSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final String value, @Nonnull final ParsableFactory<T> parsableFactory)
             throws IOException {
         return KiotaSerialization.deserialize(CONTENT_TYPE, value, parsableFactory);
@@ -101,8 +95,7 @@ public class KiotaJsonSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final String value, @Nonnull final ParsableFactory<T> parsableFactory)
             throws IOException {
         return KiotaSerialization.deserializeCollection(CONTENT_TYPE, value, parsableFactory);
@@ -115,8 +108,7 @@ public class KiotaJsonSerialization {
      * @param parsableFactory the factory to use for creating the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final InputStream stream, @Nonnull final ParsableFactory<T> parsableFactory) {
         return KiotaSerialization.deserializeCollection(CONTENT_TYPE, stream, parsableFactory);
     }
@@ -128,8 +120,7 @@ public class KiotaJsonSerialization {
      * @param typeClass the class of the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final InputStream stream, @Nonnull final Class<T> typeClass) {
         return KiotaSerialization.deserialize(CONTENT_TYPE, stream, typeClass);
     }
@@ -142,8 +133,7 @@ public class KiotaJsonSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final String value, @Nonnull final Class<T> typeClass) throws IOException {
         return KiotaSerialization.deserialize(CONTENT_TYPE, value, typeClass);
     }
@@ -155,8 +145,7 @@ public class KiotaJsonSerialization {
      * @param typeClass the class of the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final InputStream stream, @Nonnull final Class<T> typeClass) {
         return KiotaSerialization.deserializeCollection(CONTENT_TYPE, stream, typeClass);
     }
@@ -169,8 +158,7 @@ public class KiotaJsonSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final String value, @Nonnull final Class<T> typeClass) throws IOException {
         return KiotaSerialization.deserializeCollection(CONTENT_TYPE, value, typeClass);
     }

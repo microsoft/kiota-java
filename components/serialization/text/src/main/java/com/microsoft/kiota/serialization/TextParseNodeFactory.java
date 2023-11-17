@@ -14,16 +14,14 @@ public class TextParseNodeFactory implements ParseNodeFactory {
     /** Creates a new instance of the factory */
     public TextParseNodeFactory() {}
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
 
     private static final String validContentType = "text/plain";
 
     @Override
-    @Nonnull
-    public ParseNode getParseNode(
+    @Nonnull public ParseNode getParseNode(
             @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         Objects.requireNonNull(rawResponse, "parameter rawResponse cannot be null");

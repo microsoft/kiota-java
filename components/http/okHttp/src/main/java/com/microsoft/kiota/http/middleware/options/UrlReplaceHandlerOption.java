@@ -45,8 +45,7 @@ public class UrlReplaceHandlerOption implements RequestOption {
      * Gets the replacement pairs map.
      * @return the replacement pairs map.
      */
-    @Nonnull
-    public Map<String, String> getReplacementPairs() {
+    @Nonnull public Map<String, String> getReplacementPairs() {
         return new HashMap<>(replacementPairs);
     }
 
@@ -80,8 +79,7 @@ public class UrlReplaceHandlerOption implements RequestOption {
         return enabled;
     }
 
-    @Nonnull
-    @SuppressWarnings("unchecked") @Override
+    @Nonnull @SuppressWarnings("unchecked") @Override
     public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) UrlReplaceHandlerOption.class;
     }

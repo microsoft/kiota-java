@@ -19,8 +19,7 @@ public class Compatibility {
      * @return the bytes read from the stream
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static byte[] readAllBytes(@Nonnull final InputStream inputStream) throws IOException {
+    @Nonnull public static byte[] readAllBytes(@Nonnull final InputStream inputStream) throws IOException {
         // InputStream.readAllBytes() is only available to Android API level 33+
         final int bufLen = 1024;
         byte[] buf = new byte[bufLen];

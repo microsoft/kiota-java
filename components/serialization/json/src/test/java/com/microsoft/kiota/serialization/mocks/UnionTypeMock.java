@@ -15,8 +15,7 @@ public class UnionTypeMock implements Parsable, ComposedTypeWrapper {
     private String _stringValue;
     private java.util.List<TestEntity> _composedType3;
 
-    @jakarta.annotation.Nonnull
-    public static UnionTypeMock createFromDiscriminatorValue(
+    @jakarta.annotation.Nonnull public static UnionTypeMock createFromDiscriminatorValue(
             @jakarta.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
         final UnionTypeMock result = new UnionTypeMock();

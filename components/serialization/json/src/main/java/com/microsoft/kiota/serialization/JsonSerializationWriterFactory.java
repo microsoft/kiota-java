@@ -9,8 +9,7 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
     public JsonSerializationWriterFactory() {}
 
     /** {@inheritDoc} */
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
 
@@ -18,8 +17,7 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
+    @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");

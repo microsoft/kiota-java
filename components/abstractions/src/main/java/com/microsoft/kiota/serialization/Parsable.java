@@ -12,8 +12,7 @@ public interface Parsable {
      * Gets the deserialization information for this object.
      * @return The deserialization information for this object where each entry is a property key with its deserialization callback.
      */
-    @Nonnull
-    Map<String, Consumer<ParseNode>> getFieldDeserializers();
+    @Nonnull Map<String, Consumer<ParseNode>> getFieldDeserializers();
 
     /**
      * Writes the objects properties to the current writer.

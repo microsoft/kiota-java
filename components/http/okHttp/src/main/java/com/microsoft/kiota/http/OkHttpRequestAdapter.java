@@ -58,8 +58,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         this.baseUrl = Objects.requireNonNull(baseUrl);
     }
 
-    @Nonnull
-    public String getBaseUrl() {
+    @Nonnull public String getBaseUrl() {
         return baseUrl;
     }
 
@@ -151,8 +150,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
 
-    @Nonnull
-    public SerializationWriterFactory getSerializationWriterFactory() {
+    @Nonnull public SerializationWriterFactory getSerializationWriterFactory() {
         return sWriterFactory;
     }
 
@@ -251,8 +249,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /** The key used for the event when a custom response handler is invoked. */
-    @Nonnull
-    public static final String eventResponseHandlerInvokedKey =
+    @Nonnull public static final String eventResponseHandlerInvokedKey =
             "com.microsoft.kiota.response_handler_invoked";
 
     @Nullable public <ModelType extends Parsable> ModelType send(
@@ -314,8 +311,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         }
     }
 
-    @Nonnull
-    private String getMediaTypeAndSubType(@Nonnull final MediaType mediaType) {
+    @Nonnull private String getMediaTypeAndSubType(@Nonnull final MediaType mediaType) {
         return mediaType.type() + "/" + mediaType.subtype();
     }
 
@@ -583,13 +579,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /** key used for the attribute when the error response has models mappings provided */
-    @Nonnull
-    public static final String errorMappingFoundAttributeName =
+    @Nonnull public static final String errorMappingFoundAttributeName =
             "com.microsoft.kiota.error_mapping_found";
 
     /** Key used for the attribute when an error response body is found */
-    @Nonnull
-    public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
+    @Nonnull public static final String errorBodyFoundAttributeName = "com.microsoft.kiota.error_body_found";
 
     private Response throwIfFailedResponse(
             @Nonnull final Response response,
@@ -751,8 +745,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
 
     /** Key used for events when an authentication challenge is returned by the API */
-    @Nonnull
-    public static final String authenticateChallengedEventKey =
+    @Nonnull public static final String authenticateChallengedEventKey =
             "com.microsoft.kiota.authenticate_challenge_received";
 
     private Response retryCAEResponseIfRequired(
@@ -827,8 +820,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked") @Nonnull
-    public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
+    @SuppressWarnings("unchecked") @Nonnull public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
         try (final Scope scope = span.makeCurrent()) {

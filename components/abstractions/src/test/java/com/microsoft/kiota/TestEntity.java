@@ -11,8 +11,7 @@ import java.util.function.Consumer;
 public class TestEntity implements Parsable {
 
     @Override
-    @Nonnull
-    public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
+    @Nonnull public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
         return new HashMap<String, Consumer<ParseNode>>();
     }
 

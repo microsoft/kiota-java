@@ -156,8 +156,7 @@ public class MultipartSerializationWriter implements SerializationWriter {
         throw new UnsupportedOperationException();
     }
 
-    @Nonnull
-    public InputStream getSerializedContent() {
+    @Nonnull public InputStream getSerializedContent() {
         return new ByteArrayInputStream(this.stream.toByteArray());
     }
 

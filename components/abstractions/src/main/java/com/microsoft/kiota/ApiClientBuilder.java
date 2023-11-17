@@ -58,8 +58,7 @@ public class ApiClientBuilder {
      * @param original The serialization writer to enable the backing store on.
      * @return A new serialization writer with the backing store enabled.
      */
-    @Nonnull
-    public static SerializationWriterFactory enableBackingStoreForSerializationWriterFactory(
+    @Nonnull public static SerializationWriterFactory enableBackingStoreForSerializationWriterFactory(
             @Nonnull final SerializationWriterFactory original) {
         SerializationWriterFactory result = Objects.requireNonNull(original);
         if (original instanceof SerializationWriterFactoryRegistry)
@@ -76,8 +75,7 @@ public class ApiClientBuilder {
      * @param original The parse node factory to enable the backing store on.
      * @return A new parse node factory with the backing store enabled.
      */
-    @Nonnull
-    public static ParseNodeFactory enableBackingStoreForParseNodeFactory(
+    @Nonnull public static ParseNodeFactory enableBackingStoreForParseNodeFactory(
             @Nonnull final ParseNodeFactory original) {
         ParseNodeFactory result = Objects.requireNonNull(original);
         if (original instanceof ParseNodeFactoryRegistry)

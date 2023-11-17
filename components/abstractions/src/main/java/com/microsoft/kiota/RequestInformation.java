@@ -215,8 +215,7 @@ public class RequestInformation {
      * Gets the query parameters for the request.
      * @return The query parameters for the request.
      */
-    @Nonnull
-    @SuppressWarnings("unchecked") public Map<String, Object> getQueryParameters() {
+    @Nonnull @SuppressWarnings("unchecked") public Map<String, Object> getQueryParameters() {
         return (Map<String, Object>) queryParameters.clone();
     }
 
@@ -232,8 +231,7 @@ public class RequestInformation {
      * Gets the request options for this request. Options are unique by type. If an option of the same type is added twice, the last one wins.
      * @return the request options for this request.
      */
-    @Nonnull
-    public Collection<RequestOption> getRequestOptions() {
+    @Nonnull public Collection<RequestOption> getRequestOptions() {
         return requestOptions.values();
     }
 

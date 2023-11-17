@@ -19,8 +19,7 @@ public class KiotaClientFactory {
      * Creates an OkHttpClient Builder with the default configuration and middleware.
      * @return an OkHttpClient Builder instance.
      */
-    @Nonnull
-    public static OkHttpClient.Builder create() {
+    @Nonnull public static OkHttpClient.Builder create() {
         return create(null);
     }
 
@@ -29,8 +28,7 @@ public class KiotaClientFactory {
      * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
      * @return an OkHttpClient Builder instance.
      */
-    @Nonnull
-    public static OkHttpClient.Builder create(@Nullable final Interceptor[] interceptors) {
+    @Nonnull public static OkHttpClient.Builder create(@Nullable final Interceptor[] interceptors) {
         final OkHttpClient.Builder builder =
                 new OkHttpClient.Builder()
                         .connectTimeout(Duration.ofSeconds(100))
@@ -51,8 +49,7 @@ public class KiotaClientFactory {
      * Creates the default interceptors for the client.
      * @return an array of interceptors.
      */
-    @Nonnull
-    public static Interceptor[] createDefaultInterceptors() {
+    @Nonnull public static Interceptor[] createDefaultInterceptors() {
         return new Interceptor[] {
             new RedirectHandler(),
             new RetryHandler(),

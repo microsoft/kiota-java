@@ -74,8 +74,7 @@ public class InMemoryBackingStore implements BackingStore {
         this.store.clear();
     }
 
-    @Nonnull
-    public Map<String, Object> enumerate() {
+    @Nonnull public Map<String, Object> enumerate() {
         final Map<String, Object> result = new HashMap<>();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
@@ -88,8 +87,7 @@ public class InMemoryBackingStore implements BackingStore {
         return result;
     }
 
-    @Nonnull
-    public Iterable<String> enumerateKeysForValuesChangedToNull() {
+    @Nonnull public Iterable<String> enumerateKeysForValuesChangedToNull() {
         final List<String> result = new ArrayList<>();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
@@ -140,8 +138,7 @@ public class InMemoryBackingStore implements BackingStore {
         this.subscriptionStore.remove(subscriptionId);
     }
 
-    @Nonnull
-    public String subscribe(@Nonnull final TriConsumer<String, Object, Object> callback) {
+    @Nonnull public String subscribe(@Nonnull final TriConsumer<String, Object, Object> callback) {
         final String subscriptionId = UUID.randomUUID().toString();
         subscribe(subscriptionId, callback);
         return subscriptionId;

@@ -13,8 +13,7 @@ public interface AccessTokenProvider {
      * @param additionalAuthenticationContext Additional authentication context to pass to the authentication library.
      * @return the access token.
      */
-    @Nonnull
-    String getAuthorizationToken(
+    @Nonnull String getAuthorizationToken(
             @Nonnull final URI uri,
             @Nullable final Map<String, Object> additionalAuthenticationContext);
 
@@ -22,6 +21,5 @@ public interface AccessTokenProvider {
      * Returns the allowed hosts validator.
      * @return The allowed hosts validator.
      */
-    @Nonnull
-    AllowedHostsValidator getAllowedHostsValidator();
+    @Nonnull AllowedHostsValidator getAllowedHostsValidator();
 }

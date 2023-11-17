@@ -16,8 +16,7 @@ public class ParametersNameDecodingOption implements RequestOption {
 
     /* @inheritdoc */
     @SuppressWarnings("unchecked") @Override
-    @Nonnull
-    public <T extends RequestOption> Class<T> getType() {
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) ParametersNameDecodingOption.class;
     }
 }

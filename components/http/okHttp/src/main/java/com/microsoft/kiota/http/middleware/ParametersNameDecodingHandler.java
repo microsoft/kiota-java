@@ -40,8 +40,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
      * {@inheritDoc}
      */
     @Override
-    @Nonnull
-    @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
+    @Nonnull @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain);
         final Request request = chain.request();
         ParametersNameDecodingOption nameOption = request.tag(ParametersNameDecodingOption.class);
@@ -99,8 +98,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
      * @param charactersToDecode the list of characters to decode
      * @return the decoded query string
      */
-    @Nonnull
-    public static String decodeQueryParameters(
+    @Nonnull public static String decodeQueryParameters(
             @Nullable final String original, @Nonnull final char[] charactersToDecode) {
         Objects.requireNonNull(charactersToDecode);
 

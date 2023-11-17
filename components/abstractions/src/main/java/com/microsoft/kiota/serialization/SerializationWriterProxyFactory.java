@@ -8,8 +8,7 @@ import java.util.function.Consumer;
 
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class SerializationWriterProxyFactory implements SerializationWriterFactory {
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return _concrete.getValidContentType();
     }
 
@@ -36,8 +35,7 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
         _onStart = onStartObjectSerialization;
     }
 
-    @Nonnull
-    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
+    @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         final SerializationWriter writer = _concrete.getSerializationWriter(contentType);
         final Consumer<Parsable> originalBefore = writer.getOnBeforeObjectSerialization();
         final Consumer<Parsable> originalAfter = writer.getOnAfterObjectSerialization();

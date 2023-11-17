@@ -43,8 +43,7 @@ public class NativeResponseHandler implements ResponseHandler {
      * Get the error mappings for the response when deserializing failed response bodies.
      * @return The error mappings for failed response bodies.
      */
-    @Nonnull
-    public Map<String, ParsableFactory<? extends Parsable>> getErrorMappings() {
+    @Nonnull public Map<String, ParsableFactory<? extends Parsable>> getErrorMappings() {
         return new HashMap<>(this.errorMappings);
     }
 

@@ -10,8 +10,7 @@ public class InMemoryBackingStoreFactory implements BackingStoreFactory {
     }
 
     @Override
-    @Nonnull
-    public BackingStore createBackingStore() {
+    @Nonnull public BackingStore createBackingStore() {
         return new InMemoryBackingStore();
     }
 }

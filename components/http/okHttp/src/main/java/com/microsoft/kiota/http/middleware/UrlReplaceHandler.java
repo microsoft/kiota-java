@@ -40,8 +40,7 @@ public class UrlReplaceHandler implements Interceptor {
     }
 
     /** {@inheritDoc} */
-    @Nonnull
-    @Override
+    @Nonnull @Override
     public Response intercept(@Nonnull Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = Objects.requireNonNull(chain.request(), "request cannot be null");
@@ -75,8 +74,7 @@ public class UrlReplaceHandler implements Interceptor {
      * Gets the UrlReplaceHandlerOption for the UrlReplaceHandler.
      * @return the UrlReplaceHandlerOption for the UrlReplaceHandler.
      */
-    @Nonnull
-    public UrlReplaceHandlerOption getUrlReplaceHandlerOption() {
+    @Nonnull public UrlReplaceHandlerOption getUrlReplaceHandlerOption() {
         return new UrlReplaceHandlerOption(
                 mUrlReplaceHandlerOption.getReplacementPairs(),
                 mUrlReplaceHandlerOption.isEnabled());
@@ -100,8 +98,7 @@ public class UrlReplaceHandler implements Interceptor {
      * @param replacementPairs the replacement pairs to use.
      * @return the request with the updated url.
      */
-    @Nonnull
-    public static Request replaceRequestUrl(
+    @Nonnull public static Request replaceRequestUrl(
             @Nonnull Request request, @Nonnull Map<String, String> replacementPairs) {
         Request.Builder builder = request.newBuilder();
         try {

@@ -12,8 +12,7 @@ public enum TestEnum implements ValuedEnum {
         this.value = value;
     }
 
-    @jakarta.annotation.Nonnull
-    public String getValue() {
+    @jakarta.annotation.Nonnull public String getValue() {
         return this.value;
     }
 

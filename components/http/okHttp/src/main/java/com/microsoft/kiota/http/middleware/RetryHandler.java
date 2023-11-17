@@ -196,15 +196,13 @@ public class RetryHandler implements Interceptor {
      * Gets the retry options in use by the handler.
      * @return the retry options in use by the handler.
      */
-    @Nonnull
-    public RetryHandlerOption getRetryOptions() {
+    @Nonnull public RetryHandlerOption getRetryOptions() {
         return this.mRetryOption;
     }
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull
-    @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
+    @Nonnull @SuppressWarnings("UnknownNullness") public Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         Request request = chain.request();
         if (request == null) {

@@ -158,8 +158,7 @@ public class TextSerializationWriter implements SerializationWriter {
         } else return null;
     }
 
-    @Nonnull
-    public InputStream getSerializedContent() {
+    @Nonnull public InputStream getSerializedContent() {
         try {
             this.writer.flush();
             return new ByteArrayInputStream(this.stream.toByteArray());

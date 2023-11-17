@@ -26,8 +26,7 @@ public final class KiotaSerialization {
      * @return the serialized value as a stream
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> InputStream serializeAsStream(
+    @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
             @Nonnull final String contentType, @Nonnull final T value) throws IOException {
         try (final SerializationWriter writer = getSerializationWriter(contentType, value)) {
             writer.writeObjectValue("", value);
@@ -43,8 +42,7 @@ public final class KiotaSerialization {
      * @return the serialized value as a string
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> String serializeAsString(
+    @Nonnull public static <T extends Parsable> String serializeAsString(
             @Nonnull final String contentType, @Nonnull final T value) throws IOException {
         try (final InputStream stream = serializeAsStream(contentType, value)) {
             return new String(Compatibility.readAllBytes(stream), CHARSET_NAME);
@@ -59,8 +57,7 @@ public final class KiotaSerialization {
      * @return the serialized value as a stream
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> InputStream serializeAsStream(
+    @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
             @Nonnull final String contentType, @Nonnull final Iterable<T> values)
             throws IOException {
         try (final SerializationWriter writer = getSerializationWriter(contentType, values)) {
@@ -77,8 +74,7 @@ public final class KiotaSerialization {
      * @return the serialized value as a string
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> String serializeAsString(
+    @Nonnull public static <T extends Parsable> String serializeAsString(
             @Nonnull final String contentType, @Nonnull final Iterable<T> values)
             throws IOException {
         try (final InputStream stream = serializeAsStream(contentType, values)) {
@@ -105,8 +101,7 @@ public final class KiotaSerialization {
      * @param parsableFactory the factory to use for creating the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final String contentType,
             @Nonnull final InputStream stream,
             @Nonnull final ParsableFactory<T> parsableFactory) {
@@ -142,8 +137,7 @@ public final class KiotaSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final String contentType,
             @Nonnull final String value,
             @Nonnull final ParsableFactory<T> parsableFactory)
@@ -162,8 +156,7 @@ public final class KiotaSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final String contentType,
             @Nonnull final String value,
             @Nonnull final ParsableFactory<T> parsableFactory)
@@ -181,8 +174,7 @@ public final class KiotaSerialization {
      * @param parsableFactory the factory to use for creating the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final String contentType,
             @Nonnull final InputStream stream,
             @Nonnull final ParsableFactory<T> parsableFactory) {
@@ -198,8 +190,7 @@ public final class KiotaSerialization {
      * @param typeClass the class of the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final String contentType,
             @Nonnull final InputStream stream,
             @Nonnull final Class<T> typeClass) {
@@ -215,8 +206,7 @@ public final class KiotaSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> T deserialize(
+    @Nonnull public static <T extends Parsable> T deserialize(
             @Nonnull final String contentType,
             @Nonnull final String value,
             @Nonnull final Class<T> typeClass)
@@ -232,8 +222,7 @@ public final class KiotaSerialization {
      * @param typeClass the class of the model object
      * @return the deserialized value
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final String contentType,
             @Nonnull final InputStream stream,
             @Nonnull final Class<T> typeClass) {
@@ -249,8 +238,7 @@ public final class KiotaSerialization {
      * @return the deserialized value
      * @throws IOException when the stream cannot be closed or read.
      */
-    @Nonnull
-    public static <T extends Parsable> List<T> deserializeCollection(
+    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
             @Nonnull final String contentType,
             @Nonnull final String value,
             @Nonnull final Class<T> typeClass)
@@ -258,8 +246,7 @@ public final class KiotaSerialization {
         return deserializeCollection(contentType, value, getFactoryMethodFromType(typeClass));
     }
 
-    @Nonnull
-    @SuppressWarnings("unchecked") private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
+    @Nonnull @SuppressWarnings("unchecked") private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
             @Nonnull final Class<T> type) {
         Objects.requireNonNull(type);
         try {

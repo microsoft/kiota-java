@@ -159,8 +159,7 @@ public interface SerializationWriter extends Closeable {
      * Gets the value of the serialized content.
      * @return the value of the serialized content.
      */
-    @Nonnull
-    InputStream getSerializedContent();
+    @Nonnull InputStream getSerializedContent();
 
     /**
      * Writes the specified enum set value to the stream with an optional given key.

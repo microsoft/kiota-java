@@ -14,16 +14,14 @@ public class FormParseNodeFactory implements ParseNodeFactory {
     /** Instantiates a new factory */
     public FormParseNodeFactory() {}
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
 
     private static final String validContentType = "application/x-www-form-urlencoded";
 
     @Override
-    @Nonnull
-    public ParseNode getParseNode(
+    @Nonnull public ParseNode getParseNode(
             @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         Objects.requireNonNull(rawResponse, "parameter rawResponse cannot be null");

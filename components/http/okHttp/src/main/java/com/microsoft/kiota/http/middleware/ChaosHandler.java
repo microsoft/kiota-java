@@ -54,8 +54,7 @@ public class ChaosHandler implements Interceptor {
             "com.microsoft.kiota.chaos_handler_triggered";
 
     @Override
-    @Nonnull
-    public Response intercept(@Nonnull final Chain chain) throws IOException {
+    @Nonnull public Response intercept(@Nonnull final Chain chain) throws IOException {
         Request request = chain.request();
         final Span span = ObservabilityHelper.getSpanForRequest(request, "ChaosHandler_Intercept");
         Scope scope = null;

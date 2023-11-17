@@ -154,8 +154,7 @@ public interface ParseNode {
      * @return the model object value of the node.
      * @param <T> the type of the model object.
      */
-    @Nonnull
-    <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory);
+    @Nonnull <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory);
 
     /**
      * Gets the callback called before the node is deserialized.

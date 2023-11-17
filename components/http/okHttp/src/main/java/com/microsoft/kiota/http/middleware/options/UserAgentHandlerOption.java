@@ -17,8 +17,7 @@ public class UserAgentHandlerOption implements RequestOption {
      * Gets the product name to be used in the user agent header
      * @return the product name
      */
-    @Nonnull
-    public String getProductName() {
+    @Nonnull public String getProductName() {
         return productName;
     }
 
@@ -35,8 +34,7 @@ public class UserAgentHandlerOption implements RequestOption {
      * Gets the product version to be used in the user agent header
      * @return the product version
      */
-    @Nonnull
-    public String getProductVersion() {
+    @Nonnull public String getProductVersion() {
         return productVersion;
     }
 
@@ -67,8 +65,7 @@ public class UserAgentHandlerOption implements RequestOption {
 
     /* @inheritdoc */
     @Override
-    @Nonnull
-    @SuppressWarnings("unchecked") public <T extends RequestOption> Class<T> getType() {
+    @Nonnull @SuppressWarnings("unchecked") public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) UserAgentHandlerOption.class;
     }
 }

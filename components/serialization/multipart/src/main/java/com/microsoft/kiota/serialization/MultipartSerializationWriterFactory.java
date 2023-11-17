@@ -8,16 +8,14 @@ public class MultipartSerializationWriterFactory implements SerializationWriterF
     /** Instantiates a new factory */
     public MultipartSerializationWriterFactory() {}
 
-    @Nonnull
-    public String getValidContentType() {
+    @Nonnull public String getValidContentType() {
         return validContentType;
     }
 
     private static final String validContentType = "multipart/form-data";
 
     @Override
-    @Nonnull
-    public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
+    @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");

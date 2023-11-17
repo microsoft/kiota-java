@@ -11,8 +11,7 @@ public class ObservabilityOptions {
      * Gets the instrumentation name for the tracer
      * @return the instrumentation name for the tracer
      */
-    @Nonnull
-    public String getTracerInstrumentationName() {
+    @Nonnull public String getTracerInstrumentationName() {
         return "com.microsoft.kiota.authentication:microsoft-kiota-authentication-azure";
     }
 }

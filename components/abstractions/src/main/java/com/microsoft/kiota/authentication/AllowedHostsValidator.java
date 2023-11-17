@@ -27,8 +27,7 @@ public class AllowedHostsValidator {
      * Gets the allowed hosts. Read-only.
      * @return the allowed hosts.
      */
-    @Nonnull
-    public Set<String> getAllowedHosts() {
+    @Nonnull public Set<String> getAllowedHosts() {
         return Collections.unmodifiableSet(this.validHosts);
     }
 

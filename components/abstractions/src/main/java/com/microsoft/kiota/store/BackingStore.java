@@ -30,23 +30,20 @@ public interface BackingStore {
      * Enumerates all the values stored in the backing store. Values will be filtered if "ReturnOnlyChangedValues" is true.
      * @return The values available in the backing store.
      */
-    @Nonnull
-    Map<String, Object> enumerate();
+    @Nonnull Map<String, Object> enumerate();
 
     /**
      * Enumerates the keys for all values that changed to null.
      * @return The keys for the values that changed to null.
      */
-    @Nonnull
-    Iterable<String> enumerateKeysForValuesChangedToNull();
+    @Nonnull Iterable<String> enumerateKeysForValuesChangedToNull();
 
     /**
      * Creates a subscription to any data change happening.
      * @param callback Callback to be invoked on data changes where the first parameter is the data key, the second the previous value and the third the new value.
      * @return The subscription Id to use when removing the subscription
      */
-    @Nonnull
-    String subscribe(@Nonnull final TriConsumer<String, Object, Object> callback);
+    @Nonnull String subscribe(@Nonnull final TriConsumer<String, Object, Object> callback);
 
     /**
      * Creates a subscription to any data change happening, allowing to specify the subscription Id.

@@ -61,15 +61,13 @@ public class RedirectHandlerOption implements RequestOption {
      * Gets the callback evaluating whether a redirect should be followed.
      * @return should redirect
      */
-    @Nonnull
-    public IShouldRedirect shouldRedirect() {
+    @Nonnull public IShouldRedirect shouldRedirect() {
         return this.shouldRedirect;
     }
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked") @Override
-    @Nonnull
-    public <T extends RequestOption> Class<T> getType() {
+    @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) RedirectHandlerOption.class;
     }
 }

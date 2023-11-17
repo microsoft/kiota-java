@@ -43,8 +43,7 @@ public final class PeriodAndDuration
      * Gets the period section of the type.
      * @return the period section
      */
-    @Nonnull
-    public Period getPeriod() {
+    @Nonnull public Period getPeriod() {
         return period;
     }
 
@@ -57,8 +56,7 @@ public final class PeriodAndDuration
      * Gets the duration section of the type.
      * @return the duration section
      */
-    @Nonnull
-    public Duration getDuration() {
+    @Nonnull public Duration getDuration() {
         return duration;
     }
 
@@ -80,8 +78,7 @@ public final class PeriodAndDuration
      * @param duration  the {@code Duration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration of(@Nonnull Period period, @Nonnull Duration duration) {
+    @Nonnull public static PeriodAndDuration of(@Nonnull Period period, @Nonnull Duration duration) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(period, duration);
@@ -92,8 +89,7 @@ public final class PeriodAndDuration
      * @param period  the {@code Period}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration ofPeriod(@Nonnull Period period) {
+    @Nonnull public static PeriodAndDuration ofPeriod(@Nonnull Period period) {
         Objects.requireNonNull(period, "parameter period cannot be null");
         return new PeriodAndDuration(period, Duration.ZERO);
     }
@@ -103,8 +99,7 @@ public final class PeriodAndDuration
      * @param duration  the {@code Duration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration ofDuration(@Nonnull Duration duration) {
+    @Nonnull public static PeriodAndDuration ofDuration(@Nonnull Duration duration) {
         Objects.requireNonNull(duration, "parameter duration cannot be null");
         return new PeriodAndDuration(Period.ZERO, duration);
     }
@@ -114,8 +109,7 @@ public final class PeriodAndDuration
      * @param periodAndDuration the {@code PeriodAndDuration}, not null
      * @return the combined {@code PeriodAndDuration}, not null
      */
-    @Nonnull
-    public static PeriodAndDuration ofPeriodAndDuration(
+    @Nonnull public static PeriodAndDuration ofPeriodAndDuration(
             @Nonnull PeriodAndDuration periodAndDuration) {
         Objects.requireNonNull(periodAndDuration, "parameter periodAndDuration cannot be null");
         return new PeriodAndDuration(
@@ -127,8 +121,7 @@ public final class PeriodAndDuration
      * @param stringValue the {@code String} parse from.
      * @return parsed instance of {@code PeriodAndDuration}
      */
-    @Nonnull
-    public static PeriodAndDuration parse(@Nonnull String stringValue) {
+    @Nonnull public static PeriodAndDuration parse(@Nonnull String stringValue) {
         Objects.requireNonNull(stringValue, "parameter stringValue cannot be null");
 
         if (stringValue
