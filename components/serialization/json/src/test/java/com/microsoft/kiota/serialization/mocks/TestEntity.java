@@ -74,7 +74,15 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
         this._endWorkTime = value;
     }
 
-    // TODO enum
+    private MyEnum _myEnum;
+
+    public MyEnum getMyEnum() {
+        return _myEnum;
+    }
+
+    public void setMyEnum(MyEnum value) {
+        this._myEnum = value;
+    }
     private OffsetDateTime _createdDateTime;
 
     public OffsetDateTime getCreatedDateTime() {
@@ -120,6 +128,11 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                             setEndWorkTime(n.getLocalTimeValue());
                         });
                 put(
+                        "myEnum",
+                        (n) -> {
+                            setMyEnum(n.getEnumValue(MyEnum.class));
+                        });
+                put(
                         "createdDateTime",
                         (n) -> {
                             setCreatedDateTime(n.getOffsetDateTimeValue());
@@ -137,6 +150,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
         writer.writePeriodAndDurationValue("workDuration", getWorkDuration());
         writer.writeLocalTimeValue("startWorkTime", getStartWorkTime());
         writer.writeLocalTimeValue("endWorkTime", getEndWorkTime());
+        writer.writeEnumValue("myEnum", getMyEnum());
         writer.writeOffsetDateTimeValue("createdDateTime", getCreatedDateTime());
         writer.writeAdditionalData(getAdditionalData());
     }

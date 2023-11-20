@@ -3,6 +3,7 @@ package com.microsoft.kiota.serialization;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.microsoft.kiota.serialization.mocks.IntersectionTypeMock;
+import com.microsoft.kiota.serialization.mocks.MyEnum;
 import com.microsoft.kiota.serialization.mocks.SecondTestEntity;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import java.io.ByteArrayInputStream;
@@ -64,9 +65,9 @@ class IntersectionWrapperParseTests {
     void ParsesIntersectionTypeComplexProperty3() throws UnsupportedEncodingException {
         final var initialString =
                 "[{\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Ottawa\","
-                    + " \"id\": \"11\"},"
+                    + " \"id\": \"11\",\"myEnum\": \"VALUE2\"},"
                     + " {\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Montreal\","
-                    + " \"id\": \"10\"}]";
+                    + " \"id\": \"10\",\"myEnum\": \"VALUE1\"}]";
         final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
         final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
         final var result =
@@ -78,6 +79,8 @@ class IntersectionWrapperParseTests {
         assertNull(result.getStringValue());
         assertEquals(2, result.getComposedType3().size());
         assertEquals("Ottawa", result.getComposedType3().get(0).getOfficeLocation());
+        assertEquals(MyEnum.MY_VALUE2, result.getComposedType3().get(0).getMyEnum());
+        assertEquals(MyEnum.MY_VALUE1, result.getComposedType3().get(1).getMyEnum());
     }
 
     @Test
@@ -183,6 +186,7 @@ class IntersectionWrapperParseTests {
                                                         {
                                                             setOfficeLocation("Montreal");
                                                             setId("10");
+                                                            setMyEnum(MyEnum.MY_VALUE2);
                                                         }
                                                     });
                                             add(
@@ -190,6 +194,7 @@ class IntersectionWrapperParseTests {
                                                         {
                                                             setOfficeLocation("Ottawa");
                                                             setId("11");
+                                                            setMyEnum(MyEnum.MY_VALUE1);
                                                         }
                                                     });
                                         }
@@ -201,7 +206,7 @@ class IntersectionWrapperParseTests {
             try (final var result = writer.getSerializedContent()) {
                 final String text = new String(result.readAllBytes(), StandardCharsets.UTF_8);
                 assertEquals(
-                        "[{\"id\":\"10\",\"officeLocation\":\"Montreal\"},{\"id\":\"11\",\"officeLocation\":\"Ottawa\"}]",
+                        "[{\"id\":\"10\",\"officeLocation\":\"Montreal\",\"myEnum\":\"VALUE2\"},{\"id\":\"11\",\"officeLocation\":\"Ottawa\",\"myEnum\":\"VALUE1\"}]",
                         text);
             }
         }

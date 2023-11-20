@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -149,6 +150,10 @@ public class JsonParseNode implements ParseNode {
         }
     }
 
+    private <T> List<T> iterateOnArray(JsonArray array) {
+
+    }
+
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         if (currentNode.isJsonNull()) {
@@ -156,7 +161,6 @@ public class JsonParseNode implements ParseNode {
         } else if (currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
-            final JsonParseNode _this = this;
             final List<T> result = new ArrayList<>();
             while (sourceIterator.hasNext()) {
                 final JsonElement item = sourceIterator.next();
