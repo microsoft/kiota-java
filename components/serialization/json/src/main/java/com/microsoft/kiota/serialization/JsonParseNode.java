@@ -271,7 +271,7 @@ public class JsonParseNode implements ParseNode {
                 final JsonElement fieldValue = fieldEntry.getValue();
                 if (fieldValue.isJsonNull()) continue;
                 if (fieldDeserializer != null) {
-                    JsonParseNode itemNode = new JsonParseNode(fieldValue);
+                    final JsonParseNode itemNode = new JsonParseNode(fieldValue);
                     itemNode.setOnBeforeAssignFieldValues(this.onBeforeAssignFieldValues);
                     itemNode.setOnAfterAssignFieldValues(this.onAfterAssignFieldValues);
                     fieldDeserializer.accept(itemNode);
