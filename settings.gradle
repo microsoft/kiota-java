@@ -1,4 +1,5 @@
 rootProject.name = 'kiota-java'
+System.setProperty("sonar.gradle.skipCompile", "true")
 
 String suffix = ""
 if (Boolean.parseBoolean(settings['android'])) {

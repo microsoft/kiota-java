@@ -6,7 +6,6 @@ plugins {
     id 'signing'
     id 'jacoco'
     id 'com.github.spotbugs' version '5.2.3'
-    id "org.sonarqube" version "4.4.1.3373"
     id "com.diffplug.spotless" version "6.22.0"
 }
 
@@ -23,10 +22,11 @@ test {
 
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
+    reports.xml.required = true
 }
 
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.11"
 }
 
 spotbugsMain {
@@ -48,12 +48,6 @@ spotbugsTest {
             outputLocation = file("$buildDir/reports/spotbugs/test/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.required
     }
 }
 
@@ -81,14 +75,6 @@ def pomConfig = {
             distribution "repo"
         }
     }
-}
-
-sonarqube {
-  properties {
-    property "sonar.projectKey", "microsoft_kiota-java"
-    property "sonar.organization", "microsoft"
-    property "sonar.host.url", "https://sonarcloud.io"
-  }
 }
 
 //Publishing tasks-

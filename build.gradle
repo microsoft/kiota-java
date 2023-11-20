@@ -1,0 +1,20 @@
+plugins {
+    id "java-library"
+    id "org.sonarqube" version "4.4.1.3373"
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "microsoft_kiota-java"
+    	property "sonar.organization", "microsoft"
+    	property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/components/**/reports/jacoco/test/jacocoTestReport.xml"
+    }
+}
+subprojects {
+	apply plugin: 'org.sonarqube'
+}
+
+repositories {
+    mavenCentral()
+}
