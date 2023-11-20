@@ -200,8 +200,8 @@ public class JsonParseNode implements ParseNode {
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final List<T> result = new ArrayList<>();
             while (sourceIterator.hasNext()) {
-                JsonElement item = sourceIterator.next();
-                JsonParseNode itemNode = new JsonParseNode(item);
+                final JsonElement item = sourceIterator.next();
+                final JsonParseNode itemNode = new JsonParseNode(item);
                 itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
                 itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
                 result.add(itemNode.getEnumValue(targetEnum));
