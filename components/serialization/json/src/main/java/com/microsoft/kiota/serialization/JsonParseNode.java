@@ -116,6 +116,39 @@ public class JsonParseNode implements ParseNode {
         return PeriodAndDuration.parse(stringValue);
     }
 
+    @Nullable private <T> T getPrimitiveValue(
+            @Nonnull final Class<T> targetClass, @Nonnull final JsonParseNode itemNode) {
+        if (targetClass == Boolean.class) {
+            return (T) itemNode.getBooleanValue();
+        } else if (targetClass == Short.class) {
+            return (T) itemNode.getShortValue();
+        } else if (targetClass == Byte.class) {
+            return (T) itemNode.getByteValue();
+        } else if (targetClass == BigDecimal.class) {
+            return (T) itemNode.getBigDecimalValue();
+        } else if (targetClass == String.class) {
+            return (T) itemNode.getStringValue();
+        } else if (targetClass == Integer.class) {
+            return (T) itemNode.getIntegerValue();
+        } else if (targetClass == Float.class) {
+            return (T) itemNode.getFloatValue();
+        } else if (targetClass == Long.class) {
+            return (T) itemNode.getLongValue();
+        } else if (targetClass == UUID.class) {
+            return (T) itemNode.getUUIDValue();
+        } else if (targetClass == OffsetDateTime.class) {
+            return (T) itemNode.getOffsetDateTimeValue();
+        } else if (targetClass == LocalDate.class) {
+            return (T) itemNode.getLocalDateValue();
+        } else if (targetClass == LocalTime.class) {
+            return (T) itemNode.getLocalTimeValue();
+        } else if (targetClass == PeriodAndDuration.class) {
+            return (T) itemNode.getPeriodAndDurationValue();
+        } else {
+            throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
+        }
+    }
+
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         if (currentNode.isJsonNull()) {
@@ -125,69 +158,12 @@ public class JsonParseNode implements ParseNode {
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
             final List<T> result = new ArrayList<>();
-            final Iterable<T> iterable =
-                    new Iterable<T>() {
-                        @Override
-                        public Iterator<T> iterator() {
-                            return new Iterator<T>() {
-                                @Override
-                                public boolean hasNext() {
-                                    return sourceIterator.hasNext();
-                                }
-
-                                @Override
-                                @SuppressWarnings("unchecked")
-                                public T next() {
-                                    final JsonElement item = sourceIterator.next();
-                                    final Consumer<Parsable> onBefore =
-                                            _this.getOnBeforeAssignFieldValues();
-                                    final Consumer<Parsable> onAfter =
-                                            _this.getOnAfterAssignFieldValues();
-                                    final JsonParseNode itemNode =
-                                            new JsonParseNode(item) {
-                                                {
-                                                    this.setOnBeforeAssignFieldValues(onBefore);
-                                                    this.setOnAfterAssignFieldValues(onAfter);
-                                                }
-                                            };
-                                    if (targetClass == Boolean.class) {
-                                        return (T) itemNode.getBooleanValue();
-                                    } else if (targetClass == Short.class) {
-                                        return (T) itemNode.getShortValue();
-                                    } else if (targetClass == Byte.class) {
-                                        return (T) itemNode.getByteValue();
-                                    } else if (targetClass == BigDecimal.class) {
-                                        return (T) itemNode.getBigDecimalValue();
-                                    } else if (targetClass == String.class) {
-                                        return (T) itemNode.getStringValue();
-                                    } else if (targetClass == Integer.class) {
-                                        return (T) itemNode.getIntegerValue();
-                                    } else if (targetClass == Float.class) {
-                                        return (T) itemNode.getFloatValue();
-                                    } else if (targetClass == Long.class) {
-                                        return (T) itemNode.getLongValue();
-                                    } else if (targetClass == UUID.class) {
-                                        return (T) itemNode.getUUIDValue();
-                                    } else if (targetClass == OffsetDateTime.class) {
-                                        return (T) itemNode.getOffsetDateTimeValue();
-                                    } else if (targetClass == LocalDate.class) {
-                                        return (T) itemNode.getLocalDateValue();
-                                    } else if (targetClass == LocalTime.class) {
-                                        return (T) itemNode.getLocalTimeValue();
-                                    } else if (targetClass == PeriodAndDuration.class) {
-                                        return (T) itemNode.getPeriodAndDurationValue();
-                                    } else {
-                                        throw new RuntimeException(
-                                                "unknown type to deserialize "
-                                                        + targetClass.getName());
-                                    }
-                                }
-                            };
-                        }
-                    };
-
-            for (T elem : iterable) {
-                result.add(elem);
+            while (sourceIterator.hasNext()) {
+                JsonElement item = sourceIterator.next();
+                JsonParseNode itemNode = new JsonParseNode(item);
+                itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
+                itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
+                result.add(getPrimitiveValue(targetClass, itemNode));
             }
             return result;
         } else throw new RuntimeException("invalid state expected to have an array node");
@@ -203,38 +179,12 @@ public class JsonParseNode implements ParseNode {
             final Iterator<JsonElement> sourceIterator = array.iterator();
             final JsonParseNode _this = this;
             final List<T> result = new ArrayList<>();
-            final Iterable<T> iterable =
-                    new Iterable<T>() {
-                        @Override
-                        public Iterator<T> iterator() {
-                            return new Iterator<T>() {
-                                @Override
-                                public boolean hasNext() {
-                                    return sourceIterator.hasNext();
-                                }
-
-                                @Override
-                                public T next() {
-                                    final JsonElement item = sourceIterator.next();
-                                    final Consumer<Parsable> onBefore =
-                                            _this.getOnBeforeAssignFieldValues();
-                                    final Consumer<Parsable> onAfter =
-                                            _this.getOnAfterAssignFieldValues();
-                                    final JsonParseNode itemNode =
-                                            new JsonParseNode(item) {
-                                                {
-                                                    this.setOnBeforeAssignFieldValues(onBefore);
-                                                    this.setOnAfterAssignFieldValues(onAfter);
-                                                }
-                                            };
-                                    return itemNode.getObjectValue(factory);
-                                }
-                            };
-                        }
-                    };
-
-            for (T elem : iterable) {
-                result.add(elem);
+            while (sourceIterator.hasNext()) {
+                JsonElement item = sourceIterator.next();
+                JsonParseNode itemNode = new JsonParseNode(item);
+                itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
+                itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
+                result.add(itemNode.getObjectValue(factory));
             }
             return result;
         } else return null;
@@ -248,40 +198,13 @@ public class JsonParseNode implements ParseNode {
         } else if (currentNode.isJsonArray()) {
             final JsonArray array = currentNode.getAsJsonArray();
             final Iterator<JsonElement> sourceIterator = array.iterator();
-            final JsonParseNode _this = this;
             final List<T> result = new ArrayList<>();
-            final Iterable<T> iterable =
-                    new Iterable<T>() {
-                        @Override
-                        public Iterator<T> iterator() {
-                            return new Iterator<T>() {
-                                @Override
-                                public boolean hasNext() {
-                                    return sourceIterator.hasNext();
-                                }
-
-                                @Override
-                                public T next() {
-                                    final JsonElement item = sourceIterator.next();
-                                    final Consumer<Parsable> onBefore =
-                                            _this.getOnBeforeAssignFieldValues();
-                                    final Consumer<Parsable> onAfter =
-                                            _this.getOnAfterAssignFieldValues();
-                                    final JsonParseNode itemNode =
-                                            new JsonParseNode(item) {
-                                                {
-                                                    this.setOnBeforeAssignFieldValues(onBefore);
-                                                    this.setOnAfterAssignFieldValues(onAfter);
-                                                }
-                                            };
-                                    return itemNode.getEnumValue(targetEnum);
-                                }
-                            };
-                        }
-                    };
-
-            for (T elem : iterable) {
-                result.add(elem);
+            while (sourceIterator.hasNext()) {
+                JsonElement item = sourceIterator.next();
+                JsonParseNode itemNode = new JsonParseNode(item);
+                itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
+                itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
+                result.add(itemNode.getEnumValue(targetEnum));
             }
             return result;
         } else throw new RuntimeException("invalid state expected to have an array node");
@@ -348,15 +271,10 @@ public class JsonParseNode implements ParseNode {
                 final JsonElement fieldValue = fieldEntry.getValue();
                 if (fieldValue.isJsonNull()) continue;
                 if (fieldDeserializer != null) {
-                    final Consumer<Parsable> onBefore = this.onBeforeAssignFieldValues;
-                    final Consumer<Parsable> onAfter = this.onAfterAssignFieldValues;
-                    fieldDeserializer.accept(
-                            new JsonParseNode(fieldValue) {
-                                {
-                                    this.setOnBeforeAssignFieldValues(onBefore);
-                                    this.setOnAfterAssignFieldValues(onAfter);
-                                }
-                            });
+                    JsonParseNode itemNode = new JsonParseNode(fieldValue);
+                    itemNode.setOnBeforeAssignFieldValues(this.onBeforeAssignFieldValues);
+                    itemNode.setOnAfterAssignFieldValues(this.onAfterAssignFieldValues);
+                    fieldDeserializer.accept(itemNode);
                 } else if (itemAdditionalData != null)
                     itemAdditionalData.put(fieldKey, this.tryGetAnything(fieldValue));
             }
@@ -367,16 +285,16 @@ public class JsonParseNode implements ParseNode {
     }
 
     private Object tryGetAnything(final JsonElement element) {
-        if (element.isJsonPrimitive()) {
+        if (element.isJsonNull()) return null;
+        else if (element.isJsonPrimitive()) {
             final JsonPrimitive primitive = element.getAsJsonPrimitive();
             if (primitive.isBoolean()) return primitive.getAsBoolean();
             else if (primitive.isString()) return primitive.getAsString();
-            else if (primitive.isNumber()) return primitive.getAsFloat();
+            else if (primitive.isNumber()) return primitive.getAsDouble();
             else
                 throw new RuntimeException(
                         "Could not get the value during deserialization, unknown primitive type");
-        } else if (element.isJsonNull()) return null;
-        else if (element.isJsonObject() || element.isJsonArray()) return element;
+        } else if (element.isJsonObject() || element.isJsonArray()) return element;
         else
             throw new RuntimeException(
                     "Could not get the value during deserialization, unknown primitive type");
