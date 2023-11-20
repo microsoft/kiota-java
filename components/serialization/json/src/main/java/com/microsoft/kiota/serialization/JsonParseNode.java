@@ -1,6 +1,5 @@
 package com.microsoft.kiota.serialization;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** ParseNode implementation for JSON */
 public class JsonParseNode implements ParseNode {
@@ -150,8 +150,18 @@ public class JsonParseNode implements ParseNode {
         }
     }
 
-    private <T> List<T> iterateOnArray(JsonArray array) {
-
+    private <T> List<T> iterateOnArray(Function<JsonParseNode, T> fn) {
+        JsonArray array = currentNode.getAsJsonArray();
+        final Iterator<JsonElement> sourceIterator = array.iterator();
+        final List<T> result = new ArrayList<>();
+        while (sourceIterator.hasNext()) {
+            final JsonElement item = sourceIterator.next();
+            final JsonParseNode itemNode = new JsonParseNode(item);
+            itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
+            itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
+            result.add(fn.apply(itemNode));
+        }
+        return result;
     }
 
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
@@ -159,17 +169,7 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            final JsonArray array = currentNode.getAsJsonArray();
-            final Iterator<JsonElement> sourceIterator = array.iterator();
-            final List<T> result = new ArrayList<>();
-            while (sourceIterator.hasNext()) {
-                final JsonElement item = sourceIterator.next();
-                final JsonParseNode itemNode = new JsonParseNode(item);
-                itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
-                itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
-                result.add(getPrimitiveValue(targetClass, itemNode));
-            }
-            return result;
+            return iterateOnArray(itemNode -> getPrimitiveValue(targetClass, itemNode));
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 
@@ -179,18 +179,7 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            final JsonArray array = currentNode.getAsJsonArray();
-            final Iterator<JsonElement> sourceIterator = array.iterator();
-            final JsonParseNode _this = this;
-            final List<T> result = new ArrayList<>();
-            while (sourceIterator.hasNext()) {
-                final JsonElement item = sourceIterator.next();
-                final JsonParseNode itemNode = new JsonParseNode(item);
-                itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
-                itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
-                result.add(itemNode.getObjectValue(factory));
-            }
-            return result;
+            return iterateOnArray(itemNode -> itemNode.getObjectValue(factory));
         } else return null;
     }
 
@@ -200,17 +189,7 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            final JsonArray array = currentNode.getAsJsonArray();
-            final Iterator<JsonElement> sourceIterator = array.iterator();
-            final List<T> result = new ArrayList<>();
-            while (sourceIterator.hasNext()) {
-                final JsonElement item = sourceIterator.next();
-                final JsonParseNode itemNode = new JsonParseNode(item);
-                itemNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
-                itemNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
-                result.add(itemNode.getEnumValue(targetEnum));
-            }
-            return result;
+            return iterateOnArray(itemNode -> itemNode.getEnumValue(targetEnum));
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 

@@ -83,6 +83,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
     public void setMyEnum(MyEnum value) {
         this._myEnum = value;
     }
+
     private OffsetDateTime _createdDateTime;
 
     public OffsetDateTime getCreatedDateTime() {
