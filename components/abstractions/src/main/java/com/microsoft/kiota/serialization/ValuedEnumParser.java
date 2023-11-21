@@ -3,6 +3,7 @@ package com.microsoft.kiota.serialization;
 import jakarta.annotation.Nonnull;
 
 /** The interface for a valued enum parser. */
+@FunctionalInterface
 public interface ValuedEnumParser<T extends Enum> {
     /**
      * Gets an enum from it's string value.
