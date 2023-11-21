@@ -8,6 +8,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 /** Service responsible for translating abstract Request Info into concrete native HTTP requests. */
 public interface RequestAdapter {
@@ -80,27 +81,27 @@ public interface RequestAdapter {
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum value.
      * @param requestInfo the request info to execute.
-     * @param targetClass the class of the response model to deserialize the response into.
+     * @param forValue a function that retrieves an enum from the corresponding string.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized primitive response model.
      */
     @Nullable <ModelType extends Enum<ModelType>> ModelType sendEnum(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Class<ModelType> targetClass,
+            @Nonnull final Function<String, ModelType> forValue,
             @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum collection value.
      * @param requestInfo the request info to execute.
-     * @param targetClass the class of the response model to deserialize the response into.
+     * @param forValue a function that retrieves an enum from the corresponding string.
      * @param errorMappings the error factories mapping to use in case of a failed request.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized primitive response model.
      */
     @Nullable <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Class<ModelType> targetClass,
+            @Nonnull final Function<String, ModelType> forValue,
             @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
 
     /**

@@ -3,7 +3,6 @@ package com.microsoft.kiota.serialization;
 import com.microsoft.kiota.PeriodAndDuration;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** ParseNode implementation for text/plain */
 public class TextParseNode implements ParseNode {
@@ -103,7 +103,7 @@ public class TextParseNode implements ParseNode {
     }
 
     @Nullable public <T extends Enum<T>> List<T> getCollectionOfEnumValues(
-            @Nonnull final Class<T> targetEnum) {
+            @Nonnull final Function<String, T> fromValue) {
         throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
 
@@ -111,28 +111,16 @@ public class TextParseNode implements ParseNode {
         throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
 
-    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum) {
+    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Function<String, T> forValue) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
-        return getEnumValueInt(rawValue, targetEnum);
+        return forValue.apply(rawValue);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends Enum<T>> T getEnumValueInt(
-            @Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
-        try {
-            return (T) targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
-        } catch (SecurityException
-                | IllegalAccessException
-                | InvocationTargetException
-                | NoSuchMethodException ex) {
-            return null;
-        }
-    }
-
-    @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum) {
+    @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(
+            @Nonnull final Function<String, T> forValue) {
         throw new UnsupportedOperationException(NO_STRUCTURED_DATA_MESSAGE);
     }
 

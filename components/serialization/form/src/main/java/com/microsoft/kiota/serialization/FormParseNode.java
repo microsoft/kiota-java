@@ -4,7 +4,6 @@ import com.microsoft.kiota.PeriodAndDuration;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** ParseNode implementation for URI form encoded payloads */
 public class FormParseNode implements ParseNode {
@@ -260,8 +260,8 @@ public class FormParseNode implements ParseNode {
     }
 
     @Nullable public <T extends Enum<T>> List<T> getCollectionOfEnumValues(
-            @Nonnull final Class<T> targetEnum) {
-        Objects.requireNonNull(targetEnum, "parameter targetEnum cannot be null");
+            @Nonnull final Function<String, T> fromValue) {
+        Objects.requireNonNull(fromValue, "parameter fromValue cannot be null");
         final String stringValue = getStringValue();
         if (stringValue == null || stringValue.isEmpty()) {
             return null;
@@ -269,7 +269,7 @@ public class FormParseNode implements ParseNode {
             final String[] array = stringValue.split(",");
             final ArrayList<T> result = new ArrayList<>();
             for (final String item : array) {
-                result.add(getEnumValueInt(item, targetEnum));
+                result.add(fromValue.apply(item));
             }
             return result;
         }
@@ -282,41 +282,29 @@ public class FormParseNode implements ParseNode {
         return item;
     }
 
-    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum) {
+    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Function<String, T> forValue) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
-        return getEnumValueInt(rawValue, targetEnum);
+        return forValue.apply(rawValue);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends Enum<T>> T getEnumValueInt(
-            @Nonnull final String rawValue, @Nonnull final Class<T> targetEnum) {
-        try {
-            return (T) targetEnum.getMethod("forValue", String.class).invoke(null, rawValue);
-        } catch (SecurityException
-                | IllegalAccessException
-                | InvocationTargetException
-                | NoSuchMethodException ex) {
-            return null;
-        }
-    }
-
-    @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum) {
+    @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(
+            @Nonnull final Function<String, T> forValue) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
-        final EnumSet<T> result = EnumSet.noneOf(targetEnum);
+        final List<T> result = new ArrayList<>();
         final String[] rawValues = rawValue.split(",");
         for (final String rawValueItem : rawValues) {
-            final T value = getEnumValueInt(rawValueItem, targetEnum);
+            final T value = forValue.apply(rawValueItem);
             if (value != null) {
                 result.add(value);
             }
         }
-        return result;
+        return EnumSet.copyOf(result);
     }
 
     private <T extends Parsable> void assignFieldValues(
