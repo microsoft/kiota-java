@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /** The interface for a valued enum parser. */
 @FunctionalInterface
@@ -10,5 +11,5 @@ public interface ValuedEnumParser<T extends Enum> {
      * @param value the string value of the enum.
      * @return the enum value derived from the string.
      */
-    @Nonnull T forValue(@Nonnull String value);
+    @Nullable T forValue(@Nonnull String value);
 }
