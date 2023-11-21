@@ -96,7 +96,7 @@ public class OkHttpRequestAdapterTest {
                 };
         InputStream response = null;
         try {
-            response = requestAdapter.sendPrimitive(requestInformation, InputStream.class, null);
+            response = requestAdapter.sendPrimitive(requestInformation, null, InputStream.class);
             assertNotNull(response);
             assertEquals(text, new String(response.readAllBytes(), StandardCharsets.UTF_8));
         } finally {
@@ -131,7 +131,7 @@ public class OkHttpRequestAdapterTest {
                     }
                 };
         final var response =
-                requestAdapter.sendPrimitive(requestInformation, InputStream.class, null);
+                requestAdapter.sendPrimitive(requestInformation, null, InputStream.class);
         assertNull(response);
     }
 
@@ -161,7 +161,7 @@ public class OkHttpRequestAdapterTest {
                 };
         final var mockEntity = mock(Parsable.class);
         when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
-        final var response = requestAdapter.send(requestInformation, (node) -> mockEntity, null);
+        final var response = requestAdapter.send(requestInformation, null, (node) -> mockEntity);
         assertNull(response);
     }
 
@@ -200,7 +200,7 @@ public class OkHttpRequestAdapterTest {
         when(mockFactory.getValidContentType()).thenReturn("application/json");
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
-        final var response = requestAdapter.send(requestInformation, (node) -> mockEntity, null);
+        final var response = requestAdapter.send(requestInformation, null, (node) -> mockEntity);
         assertNotNull(response);
     }
 
@@ -242,7 +242,7 @@ public class OkHttpRequestAdapterTest {
         final var exception =
                 assertThrows(
                         ApiException.class,
-                        () -> requestAdapter.send(requestInformation, (node) -> mockEntity, null));
+                        () -> requestAdapter.send(requestInformation, null, (node) -> mockEntity));
         assertNotNull(exception);
         assertEquals(404, exception.getResponseStatusCode());
         assertTrue(exception.getResponseHeaders().containsKey("request-id"));

@@ -27,43 +27,43 @@ public interface RequestAdapter {
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized response model.
      * @param requestInfo the request info to execute.
-     * @param factory the factory to create the parsable object from the type discriminator.
      * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param factory the factory to create the parsable object from the type discriminator.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized response model.
      */
     @SuppressWarnings("LambdaLast")
     @Nullable <ModelType extends Parsable> ModelType send(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final ParsableFactory<ModelType> factory,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ParsableFactory<ModelType> factory);
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized response model collection.
      * @param requestInfo the request info to execute.
-     * @param factory the factory to create the parsable object from the type discriminator.
      * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param factory the factory to create the parsable object from the type discriminator.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized response model collection.
      */
     @SuppressWarnings("LambdaLast")
     @Nullable <ModelType extends Parsable> List<ModelType> sendCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final ParsableFactory<ModelType> factory,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ParsableFactory<ModelType> factory);
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized primitive response model.
      * @param requestInfo the request info to execute.
-     * @param targetClass the class of the response model to deserialize the response into.
      * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param targetClass the class of the response model to deserialize the response into.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized primitive response model.
      */
     @Nullable <ModelType> ModelType sendPrimitive(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Class<ModelType> targetClass,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final Class<ModelType> targetClass);
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized primitive collection response model.
@@ -75,8 +75,8 @@ public interface RequestAdapter {
      */
     @Nullable <ModelType> List<ModelType> sendPrimitiveCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Class<ModelType> targetClass,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final Class<ModelType> targetClass);
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum value.

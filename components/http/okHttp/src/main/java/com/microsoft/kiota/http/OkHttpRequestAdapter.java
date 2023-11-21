@@ -178,8 +178,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     @Nullable public <ModelType extends Parsable> List<ModelType> sendCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final ParsableFactory<ModelType> factory,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ParsableFactory<ModelType> factory) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(factory, nullFactoryParameter);
 
@@ -259,8 +259,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     @Nullable public <ModelType extends Parsable> ModelType send(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final ParsableFactory<ModelType> factory,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ParsableFactory<ModelType> factory) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(factory, nullFactoryParameter);
 
@@ -322,8 +322,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     @Nullable public <ModelType> ModelType sendPrimitive(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Class<ModelType> targetClass,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final Class<ModelType> targetClass) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
@@ -509,8 +509,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     @Nullable public <ModelType> List<ModelType> sendPrimitiveCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Class<ModelType> targetClass,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final Class<ModelType> targetClass) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
 
         final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
