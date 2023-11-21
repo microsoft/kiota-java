@@ -3,12 +3,12 @@ package com.microsoft.kiota;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParsableFactory;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
+import com.microsoft.kiota.serialization.ValuedEnumParser;
 import com.microsoft.kiota.store.BackingStoreFactory;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 
 /** Service responsible for translating abstract Request Info into concrete native HTTP requests. */
 public interface RequestAdapter {
@@ -81,28 +81,28 @@ public interface RequestAdapter {
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum value.
      * @param requestInfo the request info to execute.
-     * @param forValue a function that retrieves an enum from the corresponding string.
      * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param enumParser a parser from string to enum instances.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized primitive response model.
      */
     @Nullable <ModelType extends Enum<ModelType>> ModelType sendEnum(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Function<String, ModelType> forValue,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ValuedEnumParser<ModelType> enumParser);
 
     /**
      * Executes the HTTP request specified by the given RequestInformation and returns the deserialized enum collection value.
      * @param requestInfo the request info to execute.
-     * @param forValue a function that retrieves an enum from the corresponding string.
      * @param errorMappings the error factories mapping to use in case of a failed request.
+     * @param enumParser a parser from string to enum instances.
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized primitive response model.
      */
     @Nullable <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Function<String, ModelType> forValue,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings);
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ValuedEnumParser<ModelType> enumParser);
 
     /**
      * Sets The base url for every request.

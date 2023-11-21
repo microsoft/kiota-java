@@ -11,7 +11,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Interface for a deserialization node in a parse tree. This interface provides an abstraction layer over serialization formats, libraries and implementations.
@@ -111,18 +110,18 @@ public interface ParseNode {
     /**
      * Gets the Enum value of the node.
      * @return the Enum value of the node.
-     * @param forValue a function that given a string returns the corresponding enum
+     * @param enumParser the parser for Enums
      * @param <T> the type of the enum.
      */
-    @Nullable <T extends Enum<T>> T getEnumValue(@Nonnull final Function<String, T> forValue);
+    @Nullable <T extends Enum<T>> T getEnumValue(@Nonnull final ValuedEnumParser<T> enumParser);
 
     /**
      * Gets the EnumSet value of the node.
      * @return the EnumSet value of the node.
-     * @param forValue a function that given a string returns the corresponding enum
+     * @param enumParser the parser for Enums
      * @param <T> the type of the enum.
      */
-    @Nullable <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Function<String, T> forValue);
+    @Nullable <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final ValuedEnumParser<T> enumParser);
 
     /**
      * Gets the collection of primitive values of the node.
@@ -145,10 +144,10 @@ public interface ParseNode {
      * Gets the collection of Enum values of the node.
      * @return the collection of Enum values of the node.
      * @param <T> the type of the enum.
-     * @param forValue a function that given a string returns the corresponding enum
+     * @param enumParser the parser for Enums
      */
     @Nullable <T extends Enum<T>> List<T> getCollectionOfEnumValues(
-            @Nonnull final Function<String, T> forValue);
+            @Nonnull final ValuedEnumParser<T> enumParser);
 
     /**
      * Gets the model object value of the node.

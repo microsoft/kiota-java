@@ -10,6 +10,7 @@ import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.serialization.ParseNodeFactoryRegistry;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
 import com.microsoft.kiota.serialization.SerializationWriterFactoryRegistry;
+import com.microsoft.kiota.serialization.ValuedEnumParser;
 import com.microsoft.kiota.store.BackingStoreFactory;
 import com.microsoft.kiota.store.BackingStoreFactorySingleton;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -38,7 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import okhttp3.*;
@@ -173,7 +173,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     private static final String nullRequestInfoParameter = "parameter requestInfo cannot be null";
-    private static final String nullForValueParameter = "parameter forValue cannot be null";
+    private static final String nullEnumParserParameter = "parameter enumParser cannot be null";
     private static final String nullFactoryParameter = "parameter factory cannot be null";
 
     @Nullable public <ModelType extends Parsable> List<ModelType> sendCollection(
@@ -325,7 +325,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final Class<ModelType> targetClass,
             @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
-        Objects.requireNonNull(targetClass, nullForValueParameter);
+        Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
         final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
@@ -416,10 +416,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     @Nullable public <ModelType extends Enum<ModelType>> ModelType sendEnum(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Function<String, ModelType> forValue,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ValuedEnumParser<ModelType> enumParser) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
-        Objects.requireNonNull(forValue, nullForValueParameter);
+        Objects.requireNonNull(enumParser, nullEnumParserParameter);
         final Span span = startSpan(requestInfo, "sendEnumAsync");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
@@ -442,7 +442,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     .setParent(Context.current().with(span))
                                     .startSpan();
                     try (final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                        final Object result = rootNode.getEnumValue(forValue);
+                        final Object result = rootNode.getEnumValue(enumParser::forValue);
                         setResponseType(result, span);
                         return (ModelType) result;
                     } finally {
@@ -462,10 +462,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     @Nullable public <ModelType extends Enum<ModelType>> List<ModelType> sendEnumCollection(
             @Nonnull final RequestInformation requestInfo,
-            @Nonnull final Function<String, ModelType> forValue,
-            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings) {
+            @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
+            @Nonnull final ValuedEnumParser<ModelType> enumParser) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
-        Objects.requireNonNull(forValue, nullForValueParameter);
+        Objects.requireNonNull(enumParser, nullEnumParserParameter);
         final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
@@ -488,7 +488,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     .setParent(Context.current().with(span))
                                     .startSpan();
                     try (final Scope deserializationScope = deserializationSpan.makeCurrent()) {
-                        final Object result = rootNode.getCollectionOfEnumValues(forValue);
+                        final Object result =
+                                rootNode.getCollectionOfEnumValues(enumParser::forValue);
                         setResponseType(result, span);
                         return (List<ModelType>) result;
                     } finally {

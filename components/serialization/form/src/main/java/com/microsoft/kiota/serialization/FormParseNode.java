@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /** ParseNode implementation for URI form encoded payloads */
 public class FormParseNode implements ParseNode {
@@ -260,8 +259,8 @@ public class FormParseNode implements ParseNode {
     }
 
     @Nullable public <T extends Enum<T>> List<T> getCollectionOfEnumValues(
-            @Nonnull final Function<String, T> fromValue) {
-        Objects.requireNonNull(fromValue, "parameter fromValue cannot be null");
+            @Nonnull final ValuedEnumParser<T> enumParser) {
+        Objects.requireNonNull(enumParser, "parameter enumParser cannot be null");
         final String stringValue = getStringValue();
         if (stringValue == null || stringValue.isEmpty()) {
             return null;
@@ -269,7 +268,7 @@ public class FormParseNode implements ParseNode {
             final String[] array = stringValue.split(",");
             final ArrayList<T> result = new ArrayList<>();
             for (final String item : array) {
-                result.add(fromValue.apply(item));
+                result.add(enumParser.forValue(item));
             }
             return result;
         }
@@ -282,16 +281,16 @@ public class FormParseNode implements ParseNode {
         return item;
     }
 
-    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Function<String, T> forValue) {
+    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final ValuedEnumParser<T> enumParser) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
-        return forValue.apply(rawValue);
+        return enumParser.forValue(rawValue);
     }
 
     @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(
-            @Nonnull final Function<String, T> forValue) {
+            @Nonnull final ValuedEnumParser<T> enumParser) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
@@ -299,7 +298,7 @@ public class FormParseNode implements ParseNode {
         final List<T> result = new ArrayList<>();
         final String[] rawValues = rawValue.split(",");
         for (final String rawValueItem : rawValues) {
-            final T value = forValue.apply(rawValueItem);
+            final T value = enumParser.forValue(rawValueItem);
             if (value != null) {
                 result.add(value);
             }

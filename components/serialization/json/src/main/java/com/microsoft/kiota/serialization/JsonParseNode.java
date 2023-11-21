@@ -183,12 +183,12 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public <T extends Enum<T>> List<T> getCollectionOfEnumValues(
-            @Nonnull final Function<String, T> forValue) {
-        Objects.requireNonNull(forValue, "parameter targetEnum cannot be null");
+            @Nonnull final ValuedEnumParser<T> enumParser) {
+        Objects.requireNonNull(enumParser, "parameter enumParser cannot be null");
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            return iterateOnArray(itemNode -> itemNode.getEnumValue(forValue));
+            return iterateOnArray(itemNode -> itemNode.getEnumValue(enumParser));
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 
@@ -199,16 +199,16 @@ public class JsonParseNode implements ParseNode {
         return item;
     }
 
-    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final Function<String, T> forValue) {
+    @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final ValuedEnumParser<T> enumParser) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
-        return forValue.apply(rawValue);
+        return enumParser.forValue(rawValue);
     }
 
     @Nullable public <T extends Enum<T>> EnumSet<T> getEnumSetValue(
-            @Nonnull final Function<String, T> forValue) {
+            @Nonnull final ValuedEnumParser<T> enumParser) {
         final String rawValue = this.getStringValue();
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
@@ -216,7 +216,7 @@ public class JsonParseNode implements ParseNode {
         final List<T> result = new ArrayList<>();
         final String[] rawValues = rawValue.split(",");
         for (final String rawValueItem : rawValues) {
-            final T value = forValue.apply(rawValueItem);
+            final T value = enumParser.forValue(rawValueItem);
             if (value != null) {
                 result.add(value);
             }
