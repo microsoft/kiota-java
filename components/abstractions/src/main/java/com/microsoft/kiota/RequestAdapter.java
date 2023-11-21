@@ -32,7 +32,6 @@ public interface RequestAdapter {
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized response model.
      */
-    @SuppressWarnings("LambdaLast")
     @Nullable <ModelType extends Parsable> ModelType send(
             @Nonnull final RequestInformation requestInfo,
             @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
@@ -46,7 +45,6 @@ public interface RequestAdapter {
      * @param <ModelType> the type of the response model to deserialize the response into.
      * @return the deserialized response model collection.
      */
-    @SuppressWarnings("LambdaLast")
     @Nullable <ModelType extends Parsable> List<ModelType> sendCollection(
             @Nonnull final RequestInformation requestInfo,
             @Nullable final HashMap<String, ParsableFactory<? extends Parsable>> errorMappings,
