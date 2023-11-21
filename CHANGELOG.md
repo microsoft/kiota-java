@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added Spotless as an automatic formatting tool for the entire codebase
 - Changed some internal implementations of JsonParse for performance and readability reasons
+- [breaking] Removed the usage of reflection for enum deserialization
 
 ## [0.9.2] - 2023-11-16
 
