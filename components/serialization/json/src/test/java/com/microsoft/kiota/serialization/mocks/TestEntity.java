@@ -131,7 +131,7 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "myEnum",
                         (n) -> {
-                            setMyEnum(n.getEnumValue(MyEnum.class));
+                            setMyEnum(n.getEnumValue(MyEnum::forValue));
                         });
                 put(
                         "createdDateTime",

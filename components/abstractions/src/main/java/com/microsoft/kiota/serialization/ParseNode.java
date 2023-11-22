@@ -110,18 +110,18 @@ public interface ParseNode {
     /**
      * Gets the Enum value of the node.
      * @return the Enum value of the node.
-     * @param targetEnum the class of the enum.
+     * @param enumParser the parser for Enums
      * @param <T> the type of the enum.
      */
-    @Nullable <T extends Enum<T>> T getEnumValue(@Nonnull final Class<T> targetEnum);
+    @Nullable <T extends Enum<T>> T getEnumValue(@Nonnull final ValuedEnumParser<T> enumParser);
 
     /**
      * Gets the EnumSet value of the node.
      * @return the EnumSet value of the node.
-     * @param targetEnum the class of the enum.
+     * @param enumParser the parser for Enums
      * @param <T> the type of the enum.
      */
-    @Nullable <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final Class<T> targetEnum);
+    @Nullable <T extends Enum<T>> EnumSet<T> getEnumSetValue(@Nonnull final ValuedEnumParser<T> enumParser);
 
     /**
      * Gets the collection of primitive values of the node.
@@ -144,9 +144,10 @@ public interface ParseNode {
      * Gets the collection of Enum values of the node.
      * @return the collection of Enum values of the node.
      * @param <T> the type of the enum.
-     * @param targetEnum the class of the enum
+     * @param enumParser the parser for Enums
      */
-    @Nullable <T extends Enum<T>> List<T> getCollectionOfEnumValues(@Nonnull final Class<T> targetEnum);
+    @Nullable <T extends Enum<T>> List<T> getCollectionOfEnumValues(
+            @Nonnull final ValuedEnumParser<T> enumParser);
 
     /**
      * Gets the model object value of the node.

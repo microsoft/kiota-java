@@ -1,6 +1,8 @@
 package com.microsoft.kiota.serialization.mocks;
 
 import com.microsoft.kiota.serialization.ValuedEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.Objects;
 
 public enum MyEnum implements ValuedEnum {
@@ -12,11 +14,11 @@ public enum MyEnum implements ValuedEnum {
         this.value = value;
     }
 
-    @jakarta.annotation.Nonnull public String getValue() {
+    @Nonnull public String getValue() {
         return this.value;
     }
 
-    @jakarta.annotation.Nullable public static MyEnum forValue(@jakarta.annotation.Nonnull final String searchValue) {
+    @Nullable public static MyEnum forValue(@jakarta.annotation.Nonnull final String searchValue) {
         Objects.requireNonNull(searchValue);
         switch (searchValue) {
             case "VALUE1":
