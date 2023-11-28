@@ -1,8 +1,10 @@
 package com.microsoft.kiota.authentication;
 
 import com.microsoft.kiota.RequestInformation;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.util.Map;
 
 /** Authenticates the application request. */

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
+
 import org.junit.jupiter.api.Test;
 
 class MultiPartBodyTest {

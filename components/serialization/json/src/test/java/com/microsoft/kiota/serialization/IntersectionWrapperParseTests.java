@@ -6,12 +6,14 @@ import com.microsoft.kiota.serialization.mocks.IntersectionTypeMock;
 import com.microsoft.kiota.serialization.mocks.MyEnum;
 import com.microsoft.kiota.serialization.mocks.SecondTestEntity;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import org.junit.jupiter.api.Test;
 
 class IntersectionWrapperParseTests {
     private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();

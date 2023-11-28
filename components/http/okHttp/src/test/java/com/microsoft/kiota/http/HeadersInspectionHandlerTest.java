@@ -8,15 +8,18 @@ import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.http.middleware.HeadersInspectionHandler;
 import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
-import java.io.IOException;
+
 import okhttp3.Headers;
 import okhttp3.Interceptor.Chain;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import java.io.IOException;
 
 class HeadersInspectionHandlerTest {
     private final Chain mockChain;

@@ -1,6 +1,7 @@
 package com.microsoft.kiota.http.middleware.options;
 
 import com.microsoft.kiota.RequestOption;
+
 import jakarta.annotation.Nonnull;
 
 /** The ParametersEncodingOption request class */

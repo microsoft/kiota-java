@@ -1,6 +1,7 @@
 package com.microsoft.kiota;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.Objects;
 
 /** Parent type for exceptions thrown by the client when receiving failed responses to its requests. */

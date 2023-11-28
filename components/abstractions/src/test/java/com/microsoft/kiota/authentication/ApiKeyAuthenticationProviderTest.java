@@ -3,9 +3,11 @@ package com.microsoft.kiota.authentication;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.microsoft.kiota.RequestInformation;
+
+import org.junit.jupiter.api.Test;
+
 import java.net.URISyntaxException;
 import java.util.HashSet;
-import org.junit.jupiter.api.Test;
 
 public class ApiKeyAuthenticationProviderTest {
     @Test

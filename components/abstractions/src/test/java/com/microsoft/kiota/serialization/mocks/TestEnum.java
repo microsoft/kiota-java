@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization.mocks;
 
 import com.microsoft.kiota.serialization.ValuedEnum;
+
 import java.util.Objects;
 
 public enum TestEnum implements ValuedEnum {

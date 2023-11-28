@@ -1,7 +1,9 @@
 package com.microsoft.kiota.http.middleware.options;
 
 import com.microsoft.kiota.RequestOption;
+
 import jakarta.annotation.Nonnull;
+
 import java.util.Objects;
 
 /** The options for the user agent handler */

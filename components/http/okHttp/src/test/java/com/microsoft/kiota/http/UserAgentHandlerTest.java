@@ -7,15 +7,18 @@ import static org.mockito.Mockito.*;
 
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
-import java.io.IOException;
+
 import okhttp3.Headers;
 import okhttp3.Interceptor.Chain;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import java.io.IOException;
 
 class UserAgentHandlerTest {
     private final Chain mockChain;

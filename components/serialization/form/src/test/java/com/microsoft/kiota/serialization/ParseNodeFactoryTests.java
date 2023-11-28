@@ -3,9 +3,10 @@ package com.microsoft.kiota.serialization;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import org.junit.jupiter.api.Test;
 
 public class ParseNodeFactoryTests {
     private static final FormParseNodeFactory _parseNodeFactory = new FormParseNodeFactory();

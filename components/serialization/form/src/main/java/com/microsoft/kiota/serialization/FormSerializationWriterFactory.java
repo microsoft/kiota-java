@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.Objects;
 
 /** Creates instances of Form Serialization Writers */

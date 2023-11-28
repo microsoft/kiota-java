@@ -2,8 +2,10 @@ package com.microsoft.kiota.serialization;
 
 import com.microsoft.kiota.MultipartBody;
 import com.microsoft.kiota.PeriodAndDuration;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

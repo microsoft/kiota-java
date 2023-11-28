@@ -12,12 +12,14 @@ import static org.mockito.Mockito.when;
 import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
 import com.microsoft.kiota.serialization.mocks.TestEnum;
+
+import org.junit.jupiter.api.Test;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import org.junit.jupiter.api.Test;
 
 class RequestInformationTest {
     @Test

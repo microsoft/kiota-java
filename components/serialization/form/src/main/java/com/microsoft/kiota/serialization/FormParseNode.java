@@ -1,8 +1,10 @@
 package com.microsoft.kiota.serialization;
 
 import com.microsoft.kiota.PeriodAndDuration;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;

@@ -7,11 +7,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import org.junit.jupiter.api.Test;
 
 class DeserializationHelpersTest {
     private static final String _jsonContentType = "application/json";

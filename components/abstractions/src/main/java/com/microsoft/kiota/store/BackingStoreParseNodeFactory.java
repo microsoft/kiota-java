@@ -2,6 +2,7 @@ package com.microsoft.kiota.store;
 
 import com.microsoft.kiota.serialization.ParseNodeFactory;
 import com.microsoft.kiota.serialization.ParseNodeProxyFactory;
+
 import jakarta.annotation.Nonnull;
 
 /** Proxy implementation of ParseNodeFactory for the backing store that automatically sets the state of the backing store when deserializing. */

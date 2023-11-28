@@ -1,12 +1,15 @@
 package com.microsoft.kiota.authentication;
 
 import com.microsoft.kiota.RequestInformation;
+
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;

@@ -10,10 +10,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.junit.jupiter.api.Test;
 
 class SerializationHelpersTest {
     private static final String _jsonContentType = "application/json";

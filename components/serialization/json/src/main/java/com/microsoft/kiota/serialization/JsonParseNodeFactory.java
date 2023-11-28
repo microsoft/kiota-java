@@ -1,7 +1,9 @@
 package com.microsoft.kiota.serialization;
 
 import com.google.gson.JsonParser;
+
 import jakarta.annotation.Nonnull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

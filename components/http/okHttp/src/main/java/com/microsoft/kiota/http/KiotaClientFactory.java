@@ -5,11 +5,14 @@ import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
 import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import java.time.Duration;
+
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+
+import java.time.Duration;
 
 /** This class is used to build the HttpClient instance used by the core service. */
 public class KiotaClientFactory {

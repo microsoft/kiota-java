@@ -1,15 +1,19 @@
 package com.microsoft.kiota.http.middleware;
 
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import java.io.IOException;
-import java.util.Objects;
+
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.Objects;
 
 /** Adds the current library version as a product to the user agent header */
 public class UserAgentHandler implements Interceptor {

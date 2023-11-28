@@ -1,8 +1,10 @@
 package com.microsoft.kiota.serialization.mocks;
 
 import com.microsoft.kiota.serialization.ValuedEnum;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.util.Objects;
 
 public enum MyEnum implements ValuedEnum {

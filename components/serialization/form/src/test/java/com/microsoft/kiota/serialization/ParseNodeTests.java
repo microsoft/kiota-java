@@ -8,10 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.Test;
 
 public class ParseNodeTests {
     private static final String testUserForm =

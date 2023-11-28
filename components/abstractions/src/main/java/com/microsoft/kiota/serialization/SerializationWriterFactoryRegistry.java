@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.regex.Pattern;

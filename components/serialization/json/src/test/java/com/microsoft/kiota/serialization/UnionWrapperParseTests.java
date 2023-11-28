@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.microsoft.kiota.serialization.mocks.SecondTestEntity;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UnionTypeMock;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import org.junit.jupiter.api.Test;
 
 class UnionWrapperParseTests {
     private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();

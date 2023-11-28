@@ -2,8 +2,10 @@ package com.microsoft.kiota.authentication;
 
 import com.microsoft.kiota.Compatibility;
 import com.microsoft.kiota.RequestInformation;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;

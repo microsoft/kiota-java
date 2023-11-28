@@ -1,8 +1,10 @@
 package com.microsoft.kiota.serialization;
 
 import com.microsoft.kiota.PeriodAndDuration;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;

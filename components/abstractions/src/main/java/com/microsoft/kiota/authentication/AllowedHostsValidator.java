@@ -1,6 +1,7 @@
 package com.microsoft.kiota.authentication;
 
 import jakarta.annotation.Nonnull;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;

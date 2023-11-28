@@ -1,6 +1,7 @@
 package com.microsoft.kiota;
 
 import jakarta.annotation.Nullable;
+
 import java.util.Collections;
 
 /** Base class for request configuration */
