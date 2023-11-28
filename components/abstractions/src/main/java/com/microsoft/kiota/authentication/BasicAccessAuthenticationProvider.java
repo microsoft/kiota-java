@@ -1,8 +1,10 @@
 package com.microsoft.kiota.authentication;
 
 import com.microsoft.kiota.RequestInformation;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;

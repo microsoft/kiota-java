@@ -5,6 +5,7 @@ import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParseNode;
 import com.microsoft.kiota.serialization.ParseNodeHelper;
 import com.microsoft.kiota.serialization.SerializationWriter;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

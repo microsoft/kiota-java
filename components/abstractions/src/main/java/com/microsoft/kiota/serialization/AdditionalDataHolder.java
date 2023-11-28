@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.Map;
 
 /** Defines a contract for models that can hold additional data besides the described properties. */

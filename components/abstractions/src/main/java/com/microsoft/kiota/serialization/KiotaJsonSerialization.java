@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;

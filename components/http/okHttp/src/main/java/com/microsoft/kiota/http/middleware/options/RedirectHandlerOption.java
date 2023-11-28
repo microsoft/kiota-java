@@ -1,6 +1,7 @@
 package com.microsoft.kiota.http.middleware.options;
 
 import com.microsoft.kiota.RequestOption;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 

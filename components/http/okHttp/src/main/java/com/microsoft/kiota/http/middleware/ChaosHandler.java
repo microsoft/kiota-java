@@ -2,15 +2,18 @@ package com.microsoft.kiota.http.middleware;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
-import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
+
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * DO NOT USE IN PRODUCTION

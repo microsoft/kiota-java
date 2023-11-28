@@ -1,14 +1,18 @@
 package com.microsoft.kiota.http.middleware;
 
 import com.microsoft.kiota.http.ObservabilityOptions;
+
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.context.Context;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import java.util.Objects;
+
 import okhttp3.Request;
+
+import java.util.Objects;
 
 class ObservabilityHelper {
     static Span getSpanForRequest(@Nonnull final Request request, @Nonnull final String spanName) {

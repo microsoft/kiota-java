@@ -1,6 +1,7 @@
 package com.microsoft.kiota.authentication;
 
 import com.azure.core.credential.TokenCredential;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 

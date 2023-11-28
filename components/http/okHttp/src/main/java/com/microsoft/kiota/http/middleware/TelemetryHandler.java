@@ -1,14 +1,17 @@
 package com.microsoft.kiota.http.middleware;
 
 import com.microsoft.kiota.http.middleware.options.TelemetryHandlerOption;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.function.Function;
+
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * TelemetryHandler implementation using OkHttp3

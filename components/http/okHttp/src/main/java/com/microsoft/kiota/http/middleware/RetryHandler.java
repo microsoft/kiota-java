@@ -2,21 +2,25 @@ package com.microsoft.kiota.http.middleware;
 
 import com.microsoft.kiota.http.middleware.options.IShouldRetry;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /**
  * The middleware responsible for retrying requests when they fail because of transient issues

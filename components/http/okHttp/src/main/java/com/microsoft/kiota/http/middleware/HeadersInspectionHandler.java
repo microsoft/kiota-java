@@ -1,16 +1,21 @@
 package com.microsoft.kiota.http.middleware;
 
 import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Objects;
+
 import kotlin.Pair;
+
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * The middleware responsible for inspecting the request and response headers

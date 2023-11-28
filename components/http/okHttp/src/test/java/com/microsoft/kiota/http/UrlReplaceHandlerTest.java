@@ -5,13 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
-import java.io.IOException;
-import java.util.HashMap;
+
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 class UrlReplaceHandlerTest {
 

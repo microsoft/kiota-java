@@ -5,15 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
 import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
-import java.io.IOException;
-import java.util.stream.Stream;
+
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.io.IOException;
+import java.util.stream.Stream;
 
 public class ParametersNameDecodingHandlerTest {
 

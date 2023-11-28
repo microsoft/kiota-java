@@ -3,12 +3,15 @@ package com.microsoft.kiota;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.ValuedEnum;
+
 import io.github.stduritemplate.StdUriTemplate;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;

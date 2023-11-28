@@ -1,8 +1,10 @@
 package com.microsoft.kiota.store;
 
 import com.microsoft.kiota.TriConsumer;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

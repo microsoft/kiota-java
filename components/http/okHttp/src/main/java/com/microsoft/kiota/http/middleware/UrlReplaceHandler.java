@@ -1,17 +1,21 @@
 package com.microsoft.kiota.http.middleware;
 
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
+
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Objects;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * A middleware to replace the url with the specified replacement pairs.

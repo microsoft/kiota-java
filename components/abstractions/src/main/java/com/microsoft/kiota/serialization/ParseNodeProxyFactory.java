@@ -2,6 +2,7 @@ package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.function.Consumer;

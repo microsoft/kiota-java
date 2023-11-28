@@ -3,10 +3,11 @@ package com.microsoft.kiota;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
-import org.junit.jupiter.api.Test;
 
 class PeriodAndDurationTest {
     @Test

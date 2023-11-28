@@ -3,6 +3,7 @@ package com.microsoft.kiota.http.middleware.options;
 import com.microsoft.kiota.RequestHeaders;
 import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.ResponseHeaders;
+
 import jakarta.annotation.Nonnull;
 
 /**

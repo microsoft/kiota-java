@@ -1,6 +1,7 @@
 package com.microsoft.kiota.http;
 
 import com.microsoft.kiota.RequestOption;
+
 import jakarta.annotation.Nonnull;
 
 /** Holds the tracing, metrics and logging configuration for the request adapter */

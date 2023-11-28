@@ -1,7 +1,9 @@
 package com.microsoft.kiota.serialization;
 
 import com.microsoft.kiota.Compatibility;
+
 import jakarta.annotation.Nonnull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
