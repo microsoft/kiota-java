@@ -20,7 +20,7 @@ jobs:
           java-version: 17
           cache: gradle
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3.1.0
+        uses: android-actions/setup-android@v3.2.0
       - name: Build SDK with Android project configuration
         id: lint
         run: ./gradlew --no-daemon build -Pandroid=true
