@@ -9,7 +9,6 @@ import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 
 import jakarta.annotation.Nonnull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 /** Provides a builder for creating an ApiClient and register the default serializers/deserializers. */
@@ -19,40 +18,24 @@ public class ApiClientBuilder {
 
     /**
      * Registers the default serializer to the registry.
-     * @param factoryClass the class of the factory to be registered.
+     * @param factory the class of the factory to be registered.
      */
     public static void registerDefaultSerializer(
-            @Nonnull final Class<? extends SerializationWriterFactory> factoryClass) {
-        Objects.requireNonNull(factoryClass);
-        try {
-            final SerializationWriterFactory factory = factoryClass.getConstructor().newInstance();
-            SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
-                    factory.getValidContentType(), factory);
-        } catch (InstantiationException
-                | IllegalAccessException
-                | NoSuchMethodException
-                | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+            @Nonnull final SerializationWriterFactory factory) {
+        Objects.requireNonNull(factory);
+        SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
+                factory.getValidContentType(), factory);
     }
 
     /**
      * Registers the default deserializer to the registry.
-     * @param factoryClass the class of the factory to be registered.
+     * @param factory the class of the factory to be registered.
      */
     public static void registerDefaultDeserializer(
-            @Nonnull final Class<? extends ParseNodeFactory> factoryClass) {
-        Objects.requireNonNull(factoryClass);
-        try {
-            final ParseNodeFactory factory = factoryClass.getConstructor().newInstance();
-            ParseNodeFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
-                    factory.getValidContentType(), factory);
-        } catch (InstantiationException
-                | IllegalAccessException
-                | NoSuchMethodException
-                | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+            @Nonnull final ParseNodeFactory factory) {
+        Objects.requireNonNull(factory);
+        ParseNodeFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
+                factory.getValidContentType(), factory);
     }
 
     /**
