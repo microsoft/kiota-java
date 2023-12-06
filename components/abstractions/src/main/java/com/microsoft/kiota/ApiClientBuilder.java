@@ -10,6 +10,7 @@ import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 import jakarta.annotation.Nonnull;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /** Provides a builder for creating an ApiClient and register the default serializers/deserializers. */
 public class ApiClientBuilder {
@@ -18,22 +19,24 @@ public class ApiClientBuilder {
 
     /**
      * Registers the default serializer to the registry.
-     * @param factory the class of the factory to be registered.
+     * @param factorySupplier the supplier of the factory to be registered.
      */
     public static void registerDefaultSerializer(
-            @Nonnull final SerializationWriterFactory factory) {
-        Objects.requireNonNull(factory);
+            @Nonnull final Supplier<SerializationWriterFactory> factorySupplier) {
+        Objects.requireNonNull(factorySupplier);
+        SerializationWriterFactory factory = factorySupplier.get();
         SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
                 factory.getValidContentType(), factory);
     }
 
     /**
      * Registers the default deserializer to the registry.
-     * @param factory the class of the factory to be registered.
+     * @param factorySupplier the supplier of the factory to be registered.
      */
     public static void registerDefaultDeserializer(
-            @Nonnull final ParseNodeFactory factory) {
-        Objects.requireNonNull(factory);
+            @Nonnull final Supplier<ParseNodeFactory> factorySupplier) {
+        Objects.requireNonNull(factorySupplier);
+        ParseNodeFactory factory = factorySupplier.get();
         ParseNodeFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
                 factory.getValidContentType(), factory);
     }
