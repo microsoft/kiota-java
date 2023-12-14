@@ -43,7 +43,7 @@ public class JsonParseNode implements ParseNode {
             final JsonObject object = currentNode.getAsJsonObject();
             final JsonElement childNodeElement = object.get(identifier);
             if (childNodeElement == null) return null;
-            final JsonParseNode result =  new JsonParseNode(childNodeElement);
+            final JsonParseNode result = new JsonParseNode(childNodeElement);
             result.setOnBeforeAssignFieldValues(this.onBeforeAssignFieldValues);
             result.setOnAfterAssignFieldValues(this.onAfterAssignFieldValues);
             return result;
