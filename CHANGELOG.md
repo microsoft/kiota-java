@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.11.1] - 2023-12-14
+
+### Changed
+
+- Fixed a bug where trying to get a child node for a non exsiting property in JSON would fail instead of returning null.
+
 ## [0.11.0] - 2023-12-06
 
 ### Changed
