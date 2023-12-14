@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-public class ParametersNameDecodingHandlerTest {
+class ParametersNameDecodingHandlerTest {
 
     private static Stream<Arguments> originalAndExpectedUrls() {
         return Stream.of(
@@ -34,7 +34,7 @@ public class ParametersNameDecodingHandlerTest {
 
     @ParameterizedTest
     @MethodSource("originalAndExpectedUrls")
-    public void defaultParameterNameDecodingHandlerOnlyDecodesNamesNotValues(
+    void defaultParameterNameDecodingHandlerOnlyDecodesNamesNotValues(
             String original, String expectedResult) throws IOException {
         Interceptor[] interceptors =
                 new Interceptor[] {

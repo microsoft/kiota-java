@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.11.2] - 2023-12-14
+
+### Changed
+
+- Fixed a bug where the URI replacement middleware would mangle base64 encoded IDs.
+
 ## [0.11.1] - 2023-12-14
 
 ### Changed
