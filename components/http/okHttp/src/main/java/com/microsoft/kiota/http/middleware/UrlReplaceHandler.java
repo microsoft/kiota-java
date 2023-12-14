@@ -12,8 +12,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Objects;
 
@@ -103,23 +101,15 @@ public class UrlReplaceHandler implements Interceptor {
      * @return the request with the updated url.
      */
     @Nonnull public static Request replaceRequestUrl(
-            @Nonnull Request request, @Nonnull Map<String, String> replacementPairs) {
-        Request.Builder builder = request.newBuilder();
-        try {
-            // Decoding the url since Request.url is encoded by default.
-            String replacedUrl =
-                    URLDecoder.decode(
-                            request.url().toString(),
-                            "UTF-8"); // Using decode(String,String) method to maintain source
-            // compatibility with Java 8
-            for (Map.Entry<String, String> entry : replacementPairs.entrySet()) {
-                replacedUrl = replacedUrl.replace(entry.getKey(), entry.getValue());
-            }
-            builder.url(replacedUrl);
-            return builder.build();
-
-        } catch (UnsupportedEncodingException e) {
-            return request; // This should never happen since "UTF-8" is a supported encoding.
+            @Nonnull final Request request, @Nonnull final Map<String, String> replacementPairs) {
+        final Request.Builder builder = request.newBuilder();
+        // Decoding the url since Request.url is encoded by default.
+        String replacedUrl = request.url().toString();
+        // compatibility with Java 8
+        for (Map.Entry<String, String> entry : replacementPairs.entrySet()) {
+            replacedUrl = replacedUrl.replace(entry.getKey(), entry.getValue());
         }
+        builder.url(replacedUrl);
+        return builder.build();
     }
 }
