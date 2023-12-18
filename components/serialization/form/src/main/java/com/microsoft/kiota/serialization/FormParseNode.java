@@ -49,6 +49,11 @@ public class FormParseNode implements ParseNode {
         }
     }
 
+    @SuppressWarnings("removal")
+    protected final void finalize() throws Throwable {
+        // this is to prevent finalizer attacks, remove when java 9 is the minimum supported version
+    }
+
     private String sanitizeKey(@Nonnull final String key) {
         Objects.requireNonNull(key);
         try {
