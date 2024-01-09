@@ -14,7 +14,6 @@ import jakarta.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,7 +72,7 @@ public class RequestInformation {
     public <T extends BaseRequestConfiguration> void configure(
             @Nullable final java.util.function.Consumer<T> requestConfiguration,
             @Nonnull final java.util.function.Supplier<T> configurationFactory,
-            @Nullable final java.util.function.Function<T, Object> queryParametersGetter) {
+            @Nullable final java.util.function.Function<T, QueryParameters> queryParametersGetter) {
         Objects.requireNonNull(configurationFactory);
         if (requestConfiguration == null) {
             return;
@@ -152,29 +151,19 @@ public class RequestInformation {
      * Adds query parameters to the request based on the object passed in and its fields.
      * @param parameters The object to add the query parameters from.
      */
-    public void addQueryParameters(@Nullable final Object parameters) {
-        if (parameters == null) return;
-        final Field[] fields = parameters.getClass().getFields();
-        for (final Field field : fields) {
-            try {
-                Object value = field.get(parameters);
-                String name = field.getName();
-                if (field.isAnnotationPresent(QueryParameter.class)) {
-                    final String annotationName = field.getAnnotation(QueryParameter.class).name();
-                    if (annotationName != null && !annotationName.isEmpty()) {
-                        name = annotationName;
-                    }
-                }
+    public void addQueryParameters(@Nullable final QueryParameters parameters) {
+        Map<String, Object> params = parameters.toQueryParameters();
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                Object value = entry.getValue();
                 if (value != null) {
                     value = replaceEnumValue(value);
                     if (value.getClass().isArray()) {
-                        queryParameters.put(name, Arrays.asList((Object[]) value));
+                        queryParameters.put(entry.getKey(), Arrays.asList((Object[]) value));
                     } else if (!value.toString().isEmpty()) {
-                        queryParameters.put(name, value);
+                        queryParameters.put(entry.getKey(), value);
                     }
                 }
-            } catch (IllegalAccessException ex) {
-                // TODO log
             }
         }
     }
