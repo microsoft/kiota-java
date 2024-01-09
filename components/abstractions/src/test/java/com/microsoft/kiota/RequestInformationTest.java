@@ -20,6 +20,8 @@ import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 class RequestInformationTest {
     @Test
@@ -92,7 +94,7 @@ class RequestInformationTest {
     }
 
     @Test
-    void DoesNotSetQueryParametersParametersIfEmptyString() {
+    void SetQueryParametersParametersWhenEmptyString() {
 
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -108,7 +110,7 @@ class RequestInformationTest {
         // Assert
         assertEquals("", queryParameters.search);
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
-        assertFalse(uriResult.toString().contains("search"));
+        assertTrue(uriResult.toString().contains("search"));
     }
 
     @Test
@@ -310,18 +312,23 @@ class RequestInformationTest {
 }
 
 /** The messages in a mailbox or folder. Read-only. Nullable. */
-class GetQueryParameters {
+class GetQueryParameters implements QueryParameters {
     /** Select properties to be returned */
-    @QueryParameter(name = "%24select")
     @jakarta.annotation.Nullable public String[] select;
 
     /** Search items by search phrases */
-    @QueryParameter(name = "%24search")
     @jakarta.annotation.Nullable public String search;
 
-    @QueryParameter(name = "dataset")
     @jakarta.annotation.Nullable public TestEnum dataset;
 
-    @QueryParameter(name = "datasets")
     @jakarta.annotation.Nullable public TestEnum[] datasets;
+
+    @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
+        final Map<String, Object> allQueryParams = new HashMap();
+        allQueryParams.put("%24select", select);
+        allQueryParams.put("%24search", search);
+        allQueryParams.put("dataset", dataset);
+        allQueryParams.put("datasets", datasets);
+        return allQueryParams;
+    }
 }

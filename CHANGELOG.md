@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.12.0] - 2024-01-10
+
+### Changed
+
+- [breaking] Removed the reflective extraction of Query Parameters in favor of plain methods invocations
+
 ## [0.11.2] - 2023-12-14
 
 ### Changed
