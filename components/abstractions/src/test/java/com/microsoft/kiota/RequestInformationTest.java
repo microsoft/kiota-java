@@ -324,7 +324,7 @@ class GetQueryParameters implements QueryParameters {
     @jakarta.annotation.Nullable public TestEnum[] datasets;
 
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
-        Map<String, Object> allQueryParams = new HashMap();
+        final Map<String, Object> allQueryParams = new HashMap();
         allQueryParams.put("%24select", select);
         allQueryParams.put("%24search", search);
         allQueryParams.put("dataset", dataset);
