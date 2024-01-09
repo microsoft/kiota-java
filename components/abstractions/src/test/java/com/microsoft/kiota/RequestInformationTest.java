@@ -94,7 +94,7 @@ class RequestInformationTest {
     }
 
     @Test
-    void DoesNotSetQueryParametersParametersIfEmptyString() {
+    void SetQueryParametersParametersWhenEmptyString() {
 
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -110,7 +110,7 @@ class RequestInformationTest {
         // Assert
         assertEquals("", queryParameters.search);
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
-        assertFalse(uriResult.toString().contains("search"));
+        assertTrue(uriResult.toString().contains("search"));
     }
 
     @Test

@@ -160,7 +160,7 @@ public class RequestInformation {
                     value = replaceEnumValue(value);
                     if (value.getClass().isArray()) {
                         queryParameters.put(entry.getKey(), Arrays.asList((Object[]) value));
-                    } else if (!value.toString().isEmpty()) {
+                    } else {
                         queryParameters.put(entry.getKey(), value);
                     }
                 }
