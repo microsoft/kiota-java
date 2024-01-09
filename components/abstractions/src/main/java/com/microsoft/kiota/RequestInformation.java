@@ -152,6 +152,7 @@ public class RequestInformation {
      * @param parameters The object to add the query parameters from.
      */
     public void addQueryParameters(@Nullable final QueryParameters parameters) {
+        if (parameters == null) return;
         Map<String, Object> params = parameters.toQueryParameters();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null) {
