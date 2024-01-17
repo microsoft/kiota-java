@@ -120,7 +120,7 @@ jobs:
       run: ./gradlew --no-daemon :components:http:okHttp:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
       working-directory: ./
     - name: Release
-      uses: anton-yurchenko/git-release@v5.0
+      uses: anton-yurchenko/git-release@v6.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DRAFT_RELEASE: "false"
