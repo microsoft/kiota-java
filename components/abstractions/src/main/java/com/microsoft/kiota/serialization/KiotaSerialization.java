@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
@@ -182,87 +181,5 @@ public final class KiotaSerialization {
             @Nonnull final ParsableFactory<T> parsableFactory) {
         final ParseNode parseNode = getRootParseNode(contentType, stream, parsableFactory);
         return parseNode.getCollectionOfObjectValues(parsableFactory);
-    }
-
-    /**
-     * Deserializes the given stream to a model object
-     * @param <T> the type of the value to deserialize
-     * @param contentType the content type to use for deserialization
-     * @param stream the stream to deserialize
-     * @param typeClass the class of the model object
-     * @return the deserialized value
-     */
-    @Nonnull public static <T extends Parsable> T deserialize(
-            @Nonnull final String contentType,
-            @Nonnull final InputStream stream,
-            @Nonnull final Class<T> typeClass) {
-        return deserialize(contentType, stream, getFactoryMethodFromType(typeClass));
-    }
-
-    /**
-     * Deserializes the given string to a model object
-     * @param <T> the type of the value to deserialize
-     * @param contentType the content type to use for deserialization
-     * @param value the string to deserialize
-     * @param typeClass the class of the model object
-     * @return the deserialized value
-     * @throws IOException when the stream cannot be closed or read.
-     */
-    @Nonnull public static <T extends Parsable> T deserialize(
-            @Nonnull final String contentType,
-            @Nonnull final String value,
-            @Nonnull final Class<T> typeClass)
-            throws IOException {
-        return deserialize(contentType, value, getFactoryMethodFromType(typeClass));
-    }
-
-    /**
-     * Deserializes the given stream to a collection of model objects
-     * @param <T> the type of the value to deserialize
-     * @param contentType the content type to use for deserialization
-     * @param stream the stream to deserialize
-     * @param typeClass the class of the model object
-     * @return the deserialized value
-     */
-    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
-            @Nonnull final String contentType,
-            @Nonnull final InputStream stream,
-            @Nonnull final Class<T> typeClass) {
-        return deserializeCollection(contentType, stream, getFactoryMethodFromType(typeClass));
-    }
-
-    /**
-     * Deserializes the given string to a collection of model objects
-     * @param <T> the type of the value to deserialize
-     * @param contentType the content type to use for deserialization
-     * @param value the string to deserialize
-     * @param typeClass the class of the model object
-     * @return the deserialized value
-     * @throws IOException when the stream cannot be closed or read.
-     */
-    @Nonnull public static <T extends Parsable> List<T> deserializeCollection(
-            @Nonnull final String contentType,
-            @Nonnull final String value,
-            @Nonnull final Class<T> typeClass)
-            throws IOException {
-        return deserializeCollection(contentType, value, getFactoryMethodFromType(typeClass));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nonnull private static <T extends Parsable> ParsableFactory<T> getFactoryMethodFromType(
-            @Nonnull final Class<T> type) {
-        Objects.requireNonNull(type);
-        try {
-            final Method method = type.getMethod("createFromDiscriminatorValue", ParseNode.class);
-            return node -> {
-                try {
-                    return (T) method.invoke(null, node);
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            };
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

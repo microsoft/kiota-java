@@ -108,7 +108,8 @@ class DeserializationHelpersTest {
                 _jsonContentType, mockParseNodeFactory);
 
         final var result =
-                KiotaSerialization.deserialize(_jsonContentType, strValue, TestEntity.class);
+                KiotaSerialization.deserialize(
+                        _jsonContentType, strValue, TestEntity::createFromDiscriminatorValue);
         assertEquals("123", result.getId());
     }
 
