@@ -6,6 +6,9 @@ on:
     tags: ['v*']
     branches: ['main']
 
+permissions:
+  contents: write
+
 env:
   PREVIEW_TASK: publishMavenPublicationToSonatypeSnapshotRepository
   PUBLISH_TASK: publishMavenPublicationToSonatypeRepository
