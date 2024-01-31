@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Removed methods using reflection from `KiotaSerialization`
+- Improve `AllowedHostsValidator` to throw an error if `https://` or `http://` prefix is present in a allowed host value.
 
 ## [0.12.1] - 2024-01-10
 
