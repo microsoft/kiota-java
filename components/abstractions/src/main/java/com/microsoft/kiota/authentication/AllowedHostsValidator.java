@@ -40,8 +40,13 @@ public class AllowedHostsValidator {
         validHosts = new HashSet<String>();
         if (allowedHosts != null) {
             for (final String host : allowedHosts) {
-                if (host != null && !host.isEmpty())
+                if (host != null && !host.isEmpty()) {
+                    if (host.startsWith("http://") || host.startsWith("https://")) {
+                        throw new IllegalArgumentException(
+                                "host should not contain http or https prefix");
+                    }
                     validHosts.add(host.trim().toLowerCase(Locale.ROOT));
+                }
             }
         }
     }
