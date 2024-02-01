@@ -29,8 +29,9 @@ class AllowedHostValidatorTest {
     void initialisesAllowedHostsSuccessfully() throws URISyntaxException {
         final AllowedHostsValidator validator =
                 new AllowedHostsValidator(
-                        "graph.microsoft.com", "graph.microsoft.us", "canary.graph.microsoft.com");
+                        "graph.microsoft.com", "graph.MICROSOFT.US ", "canary.graph.microsoft.com");
         assertEquals(3, validator.getAllowedHosts().size());
+        assertTrue(validator.getAllowedHosts().contains("graph.microsoft.us"));
         assertTrue(validator.isUrlHostValid(new URI("https://graph.microsoft.com/v1/me")));
     }
 }
