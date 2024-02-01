@@ -1,13 +1,18 @@
 package com.microsoft.kiota.authentication;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class AllowedHostValidatorTest {
+import java.net.URI;
+import java.net.URISyntaxException;
+
+class AllowedHostValidatorTest {
 
     @Test
-    public void throwsExceptionForHttpOrHttpsHosts() {
+    void throwsExceptionForHttpOrHttpsHosts() {
         assertThrows(
                 IllegalArgumentException.class,
                 () ->
@@ -18,5 +23,14 @@ public class AllowedHostValidatorTest {
                 () ->
                         new AllowedHostsValidator(
                                 "http://graph.microsoft.com", "graph.microsoft.com"));
+    }
+
+    @Test
+    void initialisesAllowedHostsSuccessfully() throws URISyntaxException {
+        final AllowedHostsValidator validator =
+                new AllowedHostsValidator(
+                        "graph.microsoft.com", "graph.microsoft.us", "canary.graph.microsoft.com");
+        assertEquals(3, validator.getAllowedHosts().size());
+        assertTrue(validator.isUrlHostValid(new URI("https://graph.microsoft.com/v1/me")));
     }
 }
