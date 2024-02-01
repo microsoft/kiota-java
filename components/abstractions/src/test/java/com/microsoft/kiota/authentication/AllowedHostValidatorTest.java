@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class AllowedHostValidatorTest {
 
     @Test
-    public void ThrowsExceptionForHttpOrHttpsHosts() {
+    public void throwsExceptionForHttpOrHttpsHosts() {
         assertThrows(
                 IllegalArgumentException.class,
                 () ->
