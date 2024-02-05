@@ -101,7 +101,7 @@ class JsonParseNodeTests {
                 ((UntypedString) locationProperties.get("displayName")).getValue());
         assertEquals(50, ((UntypedDouble) locationProperties.get("floorCount")).getValue());
         assertTrue(((UntypedBoolean) locationProperties.get("hasReception")).getValue());
-        assertNull(((UntypedNull) locationProperties.get("contact")).getValue());
+        assertNull((locationProperties.get("contact")).getValue());
         assertNotNull(entity.getKeywords());
         assertInstanceOf(UntypedArray.class, entity.getKeywords()); // creates untyped array
         assertNull(entity.getDetail());

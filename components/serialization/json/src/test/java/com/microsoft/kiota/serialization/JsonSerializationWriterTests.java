@@ -8,6 +8,7 @@ import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class JsonSerializationWriterTests {
@@ -21,6 +22,36 @@ public class JsonSerializationWriterTests {
                 new UntypedObject(
                         new HashMap<>() {
                             {
+                                put(
+                                        "address",
+                                        new UntypedObject(
+                                                new HashMap<>() {
+                                                    {
+                                                        put("city", new UntypedString("Redmond"));
+                                                        put(
+                                                                "postalCode",
+                                                                new UntypedString("98052"));
+                                                        put(
+                                                                "state",
+                                                                new UntypedString("Washington"));
+                                                        put(
+                                                                "street",
+                                                                new UntypedString("NE 36th St"));
+                                                    }
+                                                }));
+                                put(
+                                        "coordinates",
+                                        new UntypedObject(
+                                                new HashMap<>() {
+                                                    {
+                                                        put(
+                                                                "latitude",
+                                                                new UntypedDouble(47.641942d));
+                                                        put(
+                                                                "longitude",
+                                                                new UntypedDouble(-122.127222d));
+                                                    }
+                                                }));
                                 put("displayName", new UntypedString("Microsoft Building 92"));
                                 put("floorCount", new UntypedInteger(50));
                                 put("hasReception", new UntypedBoolean(true));
@@ -29,6 +60,52 @@ public class JsonSerializationWriterTests {
                         });
         untypedTestEntity.setLocation(locationObject);
 
+        var keyWordsCollection =
+                new UntypedArray(
+                        Arrays.asList(
+                                new UntypedObject(
+                                        new HashMap<>() {
+                                            {
+                                                put(
+                                                        "created",
+                                                        new UntypedString("2023-07-26T10:41:26Z"));
+                                                put("label", new UntypedString("Keyword1"));
+                                                put(
+                                                        "termGuid",
+                                                        new UntypedString(
+                                                                "10e9cc83-b5a4-4c8d-8dab-4ada1252dd70"));
+                                                put("wssId", new UntypedLong(345345345L));
+                                            }
+                                        }),
+                                new UntypedObject(
+                                        new HashMap<>() {
+                                            {
+                                                put(
+                                                        "created",
+                                                        new UntypedString("2023-07-26T10:51:26Z"));
+                                                put("label", new UntypedString("Keyword2"));
+                                                put(
+                                                        "termGuid",
+                                                        new UntypedString(
+                                                                "2cae6c6a-9bb8-4a78-afff-81b88e735fef"));
+                                                put("wssId", new UntypedLong(345345345L));
+                                            }
+                                        })));
+
+        untypedTestEntity.setKeywords(keyWordsCollection);
+        untypedTestEntity
+                .getAdditionalData()
+                .put(
+                        "extra",
+                        new UntypedObject(
+                                new HashMap<>() {
+                                    {
+                                        put(
+                                                "createdDateTime",
+                                                new UntypedString("2024-01-15T00:00:00+00:00"));
+                                    }
+                                }));
+
         var jsonSerializer = new JsonSerializationWriter();
         jsonSerializer.writeObjectValue("", untypedTestEntity);
         var contentStream = jsonSerializer.getSerializedContent();
@@ -36,15 +113,16 @@ public class JsonSerializationWriterTests {
 
         // Assert
         var expectedString =
-                "{\"id\":\"1\",\"title\":\"Title\","
-                    + "\"location\":{\"address\":{\"city\":\"Redmond\",\"postalCode\":\"98052\",\"state\":\"Washington\",\"street\":\"NE"
-                    + " 36th St\"},"
-                    + "\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222},\"displayName\":\"Microsoft"
-                    + " Building 92\",\"floorCount\":50,\"hasReception\":true,\"contact\":null},"
+                "{\"id\":\"1\","
+                    + "\"location\":{\"hasReception\":true,\"address\":{\"city\":\"Redmond\",\"street\":\"NE"
+                    + " 36th"
+                    + " St\",\"postalCode\":\"98052\",\"state\":\"Washington\"},\"displayName\":\"Microsoft"
+                    + " Building"
+                    + " 92\",\"floorCount\":50,\"contact\":null,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222}},"
                     + "\"keywords\":["
-                    + "{\"created\":\"2023-07-26T10:41:26Z\",\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\",\"wssId\":6442450941},"
-                    + "{\"created\":\"2023-07-26T10:51:26Z\",\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\",\"wssId\":6442450942}],"
-                    + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00\\u002B00:00\"}}";
+                    + "{\"wssId\":345345345,\"created\":\"2023-07-26T10:41:26Z\",\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\"},"
+                    + "{\"wssId\":345345345,\"created\":\"2023-07-26T10:51:26Z\",\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\"}],"
+                    + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
         assertEquals(expectedString, serializedJsonString);
     }
 }

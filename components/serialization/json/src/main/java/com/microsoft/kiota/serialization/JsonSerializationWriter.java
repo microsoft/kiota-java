@@ -274,7 +274,16 @@ public class JsonSerializationWriter implements SerializationWriter {
                     Stream.of(additionalValuesToMerge)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toList());
-            if (value != null || !nonNullAdditionalValuesToMerge.isEmpty()) {
+            final boolean serializingUntypedNode = value instanceof UntypedNode;
+            if (serializingUntypedNode) {
+                if (onBeforeObjectSerialization != null && value != null) {
+                    onBeforeObjectSerialization.accept(value);
+                }
+                writeUntypedValue(key, (UntypedNode) value);
+                if (onAfterObjectSerialization != null && value != null) {
+                    onAfterObjectSerialization.accept(value);
+                }
+            } else if (value != null || !nonNullAdditionalValuesToMerge.isEmpty()) {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
@@ -312,6 +321,67 @@ public class JsonSerializationWriter implements SerializationWriter {
             }
         } catch (IOException ex) {
             throw new RuntimeException("could not serialize value", ex);
+        }
+    }
+
+    private void writeUntypedValue(String key, UntypedNode value) {
+        final Class<?> valueClass = value.getClass();
+        if (valueClass.equals(UntypedString.class))
+            this.writeStringValue(key, ((UntypedString) value).getValue());
+        else if (valueClass.equals(UntypedNull.class)) this.writeNullValue(key);
+        else if (valueClass.equals(UntypedDecimal.class))
+            this.writeBigDecimalValue(key, ((UntypedDecimal) value).getValue());
+        else if (valueClass.equals(UntypedBoolean.class))
+            this.writeBooleanValue(key, ((UntypedBoolean) value).getValue());
+        else if (valueClass.equals(UntypedFloat.class))
+            this.writeFloatValue(key, ((UntypedFloat) value).getValue());
+        else if (valueClass.equals(UntypedDouble.class))
+            this.writeDoubleValue(key, ((UntypedDouble) value).getValue());
+        else if (valueClass.equals(UntypedLong.class))
+            this.writeLongValue(key, ((UntypedLong) value).getValue());
+        else if (valueClass.equals(UntypedInteger.class))
+            this.writeIntegerValue(key, ((UntypedInteger) value).getValue());
+        else if (valueClass.equals(UntypedObject.class))
+            this.writeUntypedObject(key, (UntypedObject) value);
+        else if (valueClass.equals(UntypedArray.class))
+            this.writeUntypedArray(key, (UntypedArray) value);
+        else throw new RuntimeException("unknown type to serialize " + valueClass.getName());
+    }
+
+    private void writeUntypedObject(String key, UntypedObject value) {
+        if (value != null) {
+            try {
+                if (key != null && !key.isEmpty()) {
+                    writer.name(key);
+                }
+                writer.beginObject();
+                for (final Map.Entry<String, UntypedNode> fieldEntry :
+                        value.getValue().entrySet()) {
+                    final String fieldKey = fieldEntry.getKey();
+                    final UntypedNode fieldValue = fieldEntry.getValue();
+                    this.writeUntypedValue(fieldKey, fieldValue);
+                }
+                writer.endObject();
+            } catch (IOException ex) {
+                throw new RuntimeException("could not serialize value", ex);
+            }
+        }
+    }
+
+    private void writeUntypedArray(String key, UntypedArray value) {
+        if (value != null) {
+            try {
+                if (key != null && !key.isEmpty()) {
+                    writer.name(key);
+                }
+                writer.beginArray();
+                for (final UntypedNode entry : value.getValue()) {
+                    this.writeUntypedValue(null, entry);
+                }
+                writer.endArray();
+            } catch (IOException ex) {
+                throw new RuntimeException("could not serialize value", ex);
+            }
         }
     }
 
@@ -414,6 +484,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 this.writeLocalDateValue(key, (LocalDate) value);
             else if (valueClass.equals(LocalTime.class))
                 this.writeLocalTimeValue(key, (LocalTime) value);
+            else if (value instanceof UntypedNode) this.writeUntypedValue(key, (UntypedNode) value);
             else if (valueClass.equals(PeriodAndDuration.class))
                 this.writePeriodAndDurationValue(key, (PeriodAndDuration) value);
             else if (value instanceof Iterable<?>)

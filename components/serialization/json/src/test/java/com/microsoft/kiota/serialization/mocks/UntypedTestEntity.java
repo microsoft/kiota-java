@@ -83,7 +83,7 @@ public class UntypedTestEntity implements Parsable, AdditionalDataHolder {
         Objects.requireNonNull(writer);
         writer.writeStringValue("id", getId());
         writer.writeObjectValue("location", getLocation());
-        writer.writeObjectValue("keywords", getDetail());
+        writer.writeObjectValue("keywords", getKeywords());
         writer.writeObjectValue("detail", getDetail());
         writer.writeAdditionalData(getAdditionalData());
     }
