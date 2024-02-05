@@ -51,7 +51,7 @@ public class OkHttpRequestAdapterTest {
     @EnumSource(
             value = HttpMethod.class,
             names = {"PUT", "POST", "PATCH"})
-    public void postRequestsShouldHaveEmptyBody(HttpMethod method)
+    void postRequestsShouldHaveEmptyBody(HttpMethod method)
             throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException:
         // method POST must have a request body.
         final AuthenticationProvider authenticationProviderMock =
@@ -117,7 +117,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204})
-    public void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
+    void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -146,7 +146,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204, 205})
-    public void sendReturnsNullOnNoContent(int statusCode) throws Exception {
+    void sendReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -176,7 +176,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203})
-    public void sendReturnsObjectOnContent(int statusCode) throws Exception {
+    void sendReturnsObjectOnContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -220,6 +220,7 @@ public class OkHttpRequestAdapterTest {
                 Arguments.of(400, Arrays.asList("5XX"), false),
                 Arguments.of(503, null, false),
                 Arguments.of(502, Arrays.asList("4XX"), false),
+                Arguments.of(502, Arrays.asList(""), false),
                 // expect deserialized exception
                 Arguments.of(404, Arrays.asList("404"), true),
                 Arguments.of(500, Arrays.asList("500"), true),
@@ -232,7 +233,7 @@ public class OkHttpRequestAdapterTest {
     @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("providesErrorMappings")
-    public void throwsAPIException(
+    void throwsAPIException(
             int responseStatusCode,
             List<String> errorMappingCodes,
             boolean expectDeserializedException)
