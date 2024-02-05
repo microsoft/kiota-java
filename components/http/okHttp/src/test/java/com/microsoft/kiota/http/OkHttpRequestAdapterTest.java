@@ -28,9 +28,10 @@ import okhttp3.ResponseBody;
 
 import okio.Okio;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.stubbing.Answer;
 
@@ -39,15 +40,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class OkHttpRequestAdapterTest {
     @ParameterizedTest
     @EnumSource(
             value = HttpMethod.class,
             names = {"PUT", "POST", "PATCH"})
-    public void PostRequestsShouldHaveEmptyBody(HttpMethod method)
+    void postRequestsShouldHaveEmptyBody(HttpMethod method)
             throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException:
         // method POST must have a request body.
         final AuthenticationProvider authenticationProviderMock =
@@ -70,7 +74,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 206})
-    void SendStreamReturnsUsableStream(int statusCode) throws Exception {
+    void sendStreamReturnsUsableStream(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -113,7 +117,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204})
-    public void SendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
+    void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -142,7 +146,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204, 205})
-    public void SendReturnsNullOnNoContent(int statusCode) throws Exception {
+    void sendReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -172,7 +176,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203})
-    public void SendReturnsObjectOnContent(int statusCode) throws Exception {
+    void sendReturnsObjectOnContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -209,15 +213,38 @@ public class OkHttpRequestAdapterTest {
         assertNotNull(response);
     }
 
-    @Test
-    public void throwsAPIException() throws Exception {
+    private static Stream<Arguments> providesErrorMappings() {
+        return Stream.of(
+                // unexpected error code exception
+                Arguments.of(404, null, false),
+                Arguments.of(400, Arrays.asList("5XX"), false),
+                Arguments.of(503, null, false),
+                Arguments.of(502, Arrays.asList("4XX"), false),
+                Arguments.of(502, Arrays.asList(""), false),
+                // expect deserialized exception
+                Arguments.of(404, Arrays.asList("404"), true),
+                Arguments.of(500, Arrays.asList("500"), true),
+                Arguments.of(404, Arrays.asList("XXX"), true),
+                Arguments.of(500, Arrays.asList("XXX"), true),
+                Arguments.of(404, Arrays.asList("5XX", "XXX"), true),
+                Arguments.of(500, Arrays.asList("4XX", "XXX"), true));
+    }
+
+    @SuppressWarnings("unchecked")
+    @ParameterizedTest
+    @MethodSource("providesErrorMappings")
+    void throwsAPIException(
+            int responseStatusCode,
+            List<String> errorMappingCodes,
+            boolean expectDeserializedException)
+            throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
         final var client =
                 getMockClient(
                         new Response.Builder()
-                                .code(404)
+                                .code(responseStatusCode)
                                 .message("Not Found")
                                 .protocol(Protocol.HTTP_1_1)
                                 .request(new Request.Builder().url("http://localhost").build())
@@ -236,20 +263,33 @@ public class OkHttpRequestAdapterTest {
                 };
         final var mockEntity = mock(Parsable.class);
         when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
+        final var mockParsableFactory = mock(ParsableFactory.class);
+        when(mockParsableFactory.create(any(ParseNode.class))).thenReturn(mockEntity);
         final var mockParseNode = mock(ParseNode.class);
         when(mockParseNode.getObjectValue(any(ParsableFactory.class))).thenReturn(mockEntity);
         final var mockFactory = mock(ParseNodeFactory.class);
         when(mockFactory.getParseNode(any(String.class), any(InputStream.class)))
                 .thenReturn(mockParseNode);
         when(mockFactory.getValidContentType()).thenReturn("application/json");
+
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
+        final var errorMappings =
+                errorMappingCodes == null
+                        ? null
+                        : new HashMap<String, ParsableFactory<? extends Parsable>>();
+        if (errorMappings != null)
+            errorMappingCodes.forEach((mapping) -> errorMappings.put(mapping, mockParsableFactory));
         final var exception =
                 assertThrows(
                         ApiException.class,
-                        () -> requestAdapter.send(requestInformation, null, (node) -> mockEntity));
+                        () ->
+                                requestAdapter.send(
+                                        requestInformation, errorMappings, (node) -> mockEntity));
         assertNotNull(exception);
-        assertEquals(404, exception.getResponseStatusCode());
+        if (expectDeserializedException)
+            verify(mockParseNode, times(1)).getObjectValue(mockParsableFactory);
+        assertEquals(responseStatusCode, exception.getResponseStatusCode());
         assertTrue(exception.getResponseHeaders().containsKey("request-id"));
     }
 
