@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Map `XXX` error status code range to Parsable Exception object if more specific error status code range is not found.
+
 ## [0.12.2] - 2024-02-01
 
 ### Changed
