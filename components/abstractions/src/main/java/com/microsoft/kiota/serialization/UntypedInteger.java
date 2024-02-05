@@ -6,6 +6,7 @@ package com.microsoft.kiota.serialization;
 public class UntypedInteger extends UntypedNode {
     /**
      * The constructor for the UntypedObject
+     * @param intValue The integer to create the node with.
      */
     public UntypedInteger(Integer intValue) {
         value = intValue;

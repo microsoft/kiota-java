@@ -275,12 +275,12 @@ public class JsonSerializationWriter implements SerializationWriter {
                             .filter(Objects::nonNull)
                             .collect(Collectors.toList());
             final boolean serializingUntypedNode = value instanceof UntypedNode;
-            if (serializingUntypedNode) {
-                if (onBeforeObjectSerialization != null && value != null) {
+            if (serializingUntypedNode && value != null) {
+                if (onBeforeObjectSerialization != null) {
                     onBeforeObjectSerialization.accept(value);
                 }
                 writeUntypedValue(key, (UntypedNode) value);
-                if (onAfterObjectSerialization != null && value != null) {
+                if (onAfterObjectSerialization != null) {
                     onAfterObjectSerialization.accept(value);
                 }
             } else if (value != null || !nonNullAdditionalValuesToMerge.isEmpty()) {

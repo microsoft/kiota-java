@@ -6,6 +6,7 @@ package com.microsoft.kiota.serialization;
 public class UntypedFloat extends UntypedNode {
     /**
      * The constructor for the UntypedFloat
+     * @param floatValue The float value to create the node with.
      */
     public UntypedFloat(Float floatValue) {
         value = floatValue;

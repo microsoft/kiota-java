@@ -2,6 +2,8 @@ package com.microsoft.kiota.serialization.mocks;
 
 import com.microsoft.kiota.serialization.*;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -90,7 +92,7 @@ public class UntypedTestEntity implements Parsable, AdditionalDataHolder {
 
     private final Map<String, Object> _additionalData = new HashMap<>();
 
-    @Override
+    @Nonnull @Override
     public Map<String, Object> getAdditionalData() {
         return _additionalData;
     }

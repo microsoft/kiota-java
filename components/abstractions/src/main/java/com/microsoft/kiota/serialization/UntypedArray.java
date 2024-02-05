@@ -6,6 +6,7 @@ package com.microsoft.kiota.serialization;
 public class UntypedArray extends UntypedNode {
     /**
      * The constructor for the UntypedArray
+     * @param collection Collection to initialize with.
      */
     public UntypedArray(Iterable<UntypedNode> collection) {
         value = collection;

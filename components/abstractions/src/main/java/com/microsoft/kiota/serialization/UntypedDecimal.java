@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class UntypedDecimal extends UntypedNode {
     /**
      * The constructor for the UntypedDecimal
+     * @param decimalValue The decimal to create the node with.
      */
     public UntypedDecimal(BigDecimal decimalValue) {
         value = decimalValue;

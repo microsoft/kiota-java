@@ -6,6 +6,7 @@ package com.microsoft.kiota.serialization;
 public class UntypedLong extends UntypedNode {
     /**
      * The constructor for the UntypedLong
+     * @param longValue The long value to create the node with.
      */
     public UntypedLong(Long longValue) {
         value = longValue;

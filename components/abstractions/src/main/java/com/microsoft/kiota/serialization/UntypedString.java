@@ -6,6 +6,7 @@ package com.microsoft.kiota.serialization;
 public class UntypedString extends UntypedNode {
     /**
      * The constructor for the UntypedObject
+     * @param stringValue The string to create the node with.
      */
     public UntypedString(String stringValue) {
         value = stringValue;

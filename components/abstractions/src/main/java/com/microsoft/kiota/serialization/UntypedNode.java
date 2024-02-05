@@ -36,6 +36,7 @@ public class UntypedNode implements Parsable {
 
     /**
      * Creates a new instance of the appropriate class based on discriminator value.
+     * @param parseNode The parse node to crate from
      * @return A new UntypedNode instance.
      */
     public static UntypedNode createFromDiscriminatorValue(@Nonnull final ParseNode parseNode) {

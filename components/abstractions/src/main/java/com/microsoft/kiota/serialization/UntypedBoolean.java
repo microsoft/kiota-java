@@ -6,6 +6,7 @@ package com.microsoft.kiota.serialization;
 public class UntypedBoolean extends UntypedNode {
     /**
      * The constructor for the UntypedBoolean
+     * @param boolValue Boolean to create node with.
      */
     public UntypedBoolean(Boolean boolValue) {
         value = boolValue;

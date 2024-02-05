@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,9 +9,10 @@ import java.util.Map;
 public class UntypedObject extends UntypedNode {
     /**
      * The constructor for the UntypedObject
+     * @param propertiesMap The Map to create the node with
      */
     public UntypedObject(Map<String, UntypedNode> propertiesMap) {
-        properties = propertiesMap;
+        properties = new HashMap<>(propertiesMap);
     }
 
     private final Map<String, UntypedNode> properties;
@@ -21,6 +23,6 @@ public class UntypedObject extends UntypedNode {
      */
     @Override
     public Map<String, UntypedNode> getValue() {
-        return properties;
+        return new HashMap<>(properties);
     }
 }
