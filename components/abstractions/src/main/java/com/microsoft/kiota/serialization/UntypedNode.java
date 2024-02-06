@@ -40,8 +40,7 @@ public class UntypedNode implements Parsable {
      * @param parseNode The parse node to crate from
      * @return A new UntypedNode instance.
      */
-    @Nonnull
-    public static UntypedNode createFromDiscriminatorValue(@Nonnull final ParseNode parseNode) {
+    @Nonnull public static UntypedNode createFromDiscriminatorValue(@Nonnull final ParseNode parseNode) {
         return new UntypedNode();
     }
 }
