@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents an untyped node with integer value.
  */
@@ -8,7 +10,7 @@ public class UntypedInteger extends UntypedNode {
      * The constructor for the UntypedObject
      * @param intValue The integer to create the node with.
      */
-    public UntypedInteger(Integer intValue) {
+    public UntypedInteger(@Nonnull Integer intValue) {
         value = intValue;
     }
 
@@ -19,7 +21,7 @@ public class UntypedInteger extends UntypedNode {
      * @return The integer value of the node.
      */
     @Override
-    public Integer getValue() {
+    @Nonnull public Integer getValue() {
         return value;
     }
 }

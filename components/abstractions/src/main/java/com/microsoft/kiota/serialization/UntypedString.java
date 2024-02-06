@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents an untyped node with string value.
  */
@@ -8,7 +10,7 @@ public class UntypedString extends UntypedNode {
      * The constructor for the UntypedObject
      * @param stringValue The string to create the node with.
      */
-    public UntypedString(String stringValue) {
+    public UntypedString(@Nonnull String stringValue) {
         value = stringValue;
     }
 
@@ -19,7 +21,7 @@ public class UntypedString extends UntypedNode {
      * @return The string value of the node.
      */
     @Override
-    public String getValue() {
+    @Nonnull public String getValue() {
         return value;
     }
 }

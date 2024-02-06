@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents an untyped node with double value.
  */
@@ -8,7 +10,7 @@ public class UntypedDouble extends UntypedNode {
      * The constructor for the UntypedDouble
      * @param doubleValue The Double to create the node with.
      */
-    public UntypedDouble(Double doubleValue) {
+    public UntypedDouble(@Nonnull Double doubleValue) {
         value = doubleValue;
     }
 
@@ -19,7 +21,7 @@ public class UntypedDouble extends UntypedNode {
      * @return The double value of the node.
      */
     @Override
-    public Double getValue() {
+    @Nonnull public Double getValue() {
         return value;
     }
 }

@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents an untyped node with boolean value.
  */
@@ -8,7 +10,7 @@ public class UntypedBoolean extends UntypedNode {
      * The constructor for the UntypedBoolean
      * @param boolValue Boolean to create node with.
      */
-    public UntypedBoolean(Boolean boolValue) {
+    public UntypedBoolean(@Nonnull Boolean boolValue) {
         value = boolValue;
     }
 
@@ -19,7 +21,7 @@ public class UntypedBoolean extends UntypedNode {
      * @return The bool value of the node.
      */
     @Override
-    public Boolean getValue() {
+    @Nonnull public Boolean getValue() {
         return value;
     }
 }

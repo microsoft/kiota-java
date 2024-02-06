@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
+
 import java.math.BigDecimal;
 
 /**
@@ -10,7 +12,7 @@ public class UntypedDecimal extends UntypedNode {
      * The constructor for the UntypedDecimal
      * @param decimalValue The decimal to create the node with.
      */
-    public UntypedDecimal(BigDecimal decimalValue) {
+    public UntypedDecimal(@Nonnull BigDecimal decimalValue) {
         value = decimalValue;
     }
 
@@ -21,7 +23,7 @@ public class UntypedDecimal extends UntypedNode {
      * @return The BigDecimal value of the node.
      */
     @Override
-    public BigDecimal getValue() {
+    @Nonnull public BigDecimal getValue() {
         return value;
     }
 }
