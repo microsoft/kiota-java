@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.0.0] - 2024-02-07
+
+### Changed
+
+- Release 1.0.0 of the Kiota Java Libraries as part of Java-SDK GA release.
 - Map `XXX` error status code range to Parsable Exception object if more specific error status code range is not found.
 
 ## [0.12.2] - 2024-02-01
