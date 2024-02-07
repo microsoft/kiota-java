@@ -21,13 +21,13 @@ Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README
 In `build.gradle` in the `dependencies` section:
 
 ```Groovy
-implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:0.9.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:0.9.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:0.9.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:0.9.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:0.9.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:0.9.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:0.9.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:1.0.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.0.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:1.0.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:1.0.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:1.0.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:1.0.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:1.0.0'
 ```
 
 ### With Maven:
@@ -38,37 +38,37 @@ In `pom.xml` in the `dependencies` section:
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-abstractions</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-authentication-azure</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-http-okHttp</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-json</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-text</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-form</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-multipart</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
 ```
 
