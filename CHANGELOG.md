@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.1.0] - 2024-02-14
+
+- Adds support for untyped nodes.
+
 ## [1.0.0] - 2024-02-07
 
 ### Changed
