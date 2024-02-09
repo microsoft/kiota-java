@@ -16,7 +16,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,6 +28,8 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
     private final List<String> _scopes;
     private final AllowedHostsValidator _hostValidator;
     private final ObservabilityOptions _observabilityOptions;
+    private static final HashSet<String> localhostStrings =
+            new HashSet<>(Arrays.asList("localhost", "[::1]", "::1", "127.0.0.1"));
 
     /**
      * Creates a new instance of AzureIdentityAccessTokenProvider.
@@ -102,7 +106,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
                 return "";
             }
-            if (!uri.getScheme().equalsIgnoreCase("https")) {
+            if (!uri.getScheme().equalsIgnoreCase("https") && !isLocalhostUrl(uri.getHost())) {
                 span.setAttribute("com.microsoft.kiota.authentication.is_url_valid", false);
                 throw new IllegalArgumentException("Only https is supported");
             }
@@ -145,5 +149,10 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
 
     @Nonnull public AllowedHostsValidator getAllowedHostsValidator() {
         return _hostValidator;
+    }
+
+    private static boolean isLocalhostUrl(@Nonnull String host) {
+        Objects.requireNonNull(host);
+        return localhostStrings.contains(host.toLowerCase(Locale.ROOT));
     }
 }
