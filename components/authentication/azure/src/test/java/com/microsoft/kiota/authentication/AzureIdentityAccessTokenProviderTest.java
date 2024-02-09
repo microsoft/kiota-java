@@ -15,7 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
-public class AzureIdentityAccessTokenProviderTest {
+class AzureIdentityAccessTokenProviderTest {
 
     @ParameterizedTest
     @ValueSource(
@@ -32,13 +32,12 @@ public class AzureIdentityAccessTokenProviderTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"http://graph.microsoft.com/me"})
-    void testNonLocalhostHttpUrlIsInvalid(String urlString) {
+    void testNonLocalhostHttpUrlIsInvalid(String urlString) throws URISyntaxException {
         var tokenCredential = mock(TokenCredential.class);
         var accessTokenProvider = new AzureIdentityAccessTokenProvider(tokenCredential, null, "");
+        final var uri = new URI(urlString);
         assertThrows(
                 IllegalArgumentException.class,
-                () ->
-                        accessTokenProvider.getAuthorizationToken(
-                                new URI(urlString), new HashMap<>()));
+                () -> accessTokenProvider.getAuthorizationToken(uri, new HashMap<>()));
     }
 }
