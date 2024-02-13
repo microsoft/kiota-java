@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.0.2] - 2024-02-13
+
+### Changed
+
+- Add default UTC offset when deserializing to OffsetDateTime fails due to a missing time offset value.
+
 ## [1.0.1] - 2024-02-09
 
 ### Changed
