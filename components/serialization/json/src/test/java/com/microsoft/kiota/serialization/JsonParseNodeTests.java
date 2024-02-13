@@ -49,7 +49,7 @@ class JsonParseNodeTests {
     void testInvalidOffsetDateTimeStringThrowsException(final String dateTimeString) {
         final var jsonElement = JsonParser.parseString("\"" + dateTimeString + "\"");
         try {
-            final var result = new JsonParseNode(jsonElement).getOffsetDateTimeValue();
+            new JsonParseNode(jsonElement).getOffsetDateTimeValue();
         } catch (final Exception ex) {
             assertInstanceOf(DateTimeParseException.class, ex);
             assertTrue(ex.getMessage().contains(dateTimeString));
