@@ -21,7 +21,7 @@ class UnionWrapperParseTests {
     private static final String contentType = "application/json";
 
     @Test
-    void ParsesUnionTypeComplexProperty1() throws UnsupportedEncodingException {
+    void parsesUnionTypeComplexProperty1() throws UnsupportedEncodingException {
         final var initialString =
                 "{\"@odata.type\":\"#microsoft.graph.testEntity\",\"officeLocation\":\"Montreal\","
                         + " \"id\": \"opaque\"}";
@@ -38,7 +38,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void ParsesUnionTypeComplexProperty2() throws UnsupportedEncodingException {
+    void parsesUnionTypeComplexProperty2() throws UnsupportedEncodingException {
         final var initialString =
                 "{\"@odata.type\":\"#microsoft.graph.secondTestEntity\",\"officeLocation\":\"Montreal\","
                     + " \"id\": 10}";
@@ -54,7 +54,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void ParsesUnionTypeComplexProperty3() throws UnsupportedEncodingException {
+    void parsesUnionTypeComplexProperty3() throws UnsupportedEncodingException {
         final var initialString =
                 "[{\"@odata.type\":\"#microsoft.graph.TestEntity\",\"officeLocation\":\"Ottawa\","
                     + " \"id\": \"11\"},"
@@ -73,7 +73,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void ParsesUnionTypeStringValue() throws UnsupportedEncodingException {
+    void parsesUnionTypeStringValue() throws UnsupportedEncodingException {
         final var initialString = "\"officeLocation\"";
         final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
         final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
@@ -87,7 +87,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void SerializesUnionTypeStringValue() throws IOException {
+    void serializesUnionTypeStringValue() throws IOException {
         try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
             var model =
                     new UnionTypeMock() {
@@ -105,7 +105,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void SerializesUnionTypeComplexProperty1() throws IOException {
+    void serializesUnionTypeComplexProperty1() throws IOException {
         try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
             var model =
                     new UnionTypeMock() {
@@ -135,7 +135,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void SerializesUnionTypeComplexProperty2() throws IOException {
+    void serializesUnionTypeComplexProperty2() throws IOException {
         try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
             var model =
                     new UnionTypeMock() {
@@ -159,7 +159,7 @@ class UnionWrapperParseTests {
     }
 
     @Test
-    void SerializesUnionTypeComplexProperty3() throws IOException {
+    void serializesUnionTypeComplexProperty3() throws IOException {
         try (final var writer = _serializationWriterFactory.getSerializationWriter(contentType)) {
             var model =
                     new UnionTypeMock() {

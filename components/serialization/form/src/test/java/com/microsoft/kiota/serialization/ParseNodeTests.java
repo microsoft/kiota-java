@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,8 +11,13 @@ import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -98,5 +104,35 @@ public class ParseNodeTests {
         assertEquals(2, numberCollection.size());
         assertEquals(
                 UUID.fromString("48d31887-5fad-4d73-a9f5-3c356e68a038"), numberCollection.get(0));
+    }
+
+    @Test
+    void testParsesDateTimeOffset() {
+        final var dateTimeOffsetString = "2024-02-12T19:47:39+02:00";
+        final var result =
+                new FormParseNode(URLEncoder.encode(dateTimeOffsetString, StandardCharsets.UTF_8))
+                        .getOffsetDateTimeValue();
+        assertEquals(dateTimeOffsetString, result.toString());
+    }
+
+    @Test
+    void testParsesDateTimeStringWithoutOffsetToDateTimeOffset() {
+        final var dateTimeString = "2024-02-12T19:47:39";
+        final var result =
+                new FormParseNode(URLEncoder.encode(dateTimeString, StandardCharsets.UTF_8))
+                        .getOffsetDateTimeValue();
+        assertEquals(dateTimeString + "Z", result.toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2024-02-12T19:47:39 Europe/Paris", "19:47:39"})
+    void testInvalidOffsetDateTimeStringThrowsException(final String dateTimeString) {
+        try {
+            new FormParseNode(URLEncoder.encode(dateTimeString, StandardCharsets.UTF_8))
+                    .getOffsetDateTimeValue();
+        } catch (final Exception ex) {
+            assertInstanceOf(DateTimeParseException.class, ex);
+            assertTrue(ex.getMessage().contains(dateTimeString));
+        }
     }
 }
