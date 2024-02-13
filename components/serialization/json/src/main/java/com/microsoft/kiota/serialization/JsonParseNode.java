@@ -11,8 +11,11 @@ import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.EnumSet;
@@ -95,7 +98,17 @@ public class JsonParseNode implements ParseNode {
     @Nullable public OffsetDateTime getOffsetDateTimeValue() {
         final String stringValue = currentNode.getAsString();
         if (stringValue == null) return null;
-        return OffsetDateTime.parse(stringValue);
+        try {
+            return OffsetDateTime.parse(stringValue);
+        } catch (DateTimeParseException ex) {
+            // Append UTC offset if it's missing
+            try {
+                LocalDateTime localDateTime = LocalDateTime.parse(stringValue);
+                return localDateTime.atOffset(ZoneOffset.UTC);
+            } catch (DateTimeParseException ex2) {
+                throw ex;
+            }
+        }
     }
 
     @Nullable public LocalDate getLocalDateValue() {
