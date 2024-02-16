@@ -219,6 +219,9 @@ public class RequestInformation {
     /** The Request Body. */
     @Nullable public InputStream content;
 
+    /** The Request Body length. */
+    @Nullable public Long contentLength;
+
     @Nonnull private final HashMap<String, RequestOption> requestOptions = new HashMap<>();
 
     /**
@@ -268,10 +271,11 @@ public class RequestInformation {
     /**
      * Sets the request body to be a binary stream.
      * @param value the binary stream
+     * @throws IOException when the stream cannot be read.
      * @deprecated use {@link #setStreamContent(InputStream, String)} instead.
      */
     @Deprecated
-    public void setStreamContent(@Nonnull final InputStream value) {
+    public void setStreamContent(@Nonnull final InputStream value) throws IOException {
         setStreamContent(value, BINARY_CONTENT_TYPE);
     }
 
@@ -279,15 +283,19 @@ public class RequestInformation {
      * Sets the request body to be a binary stream.
      * @param value the binary stream
      * @param contentType the content type of the stream.
+     * @throws IOException when the stream cannot be read.
      */
     public void setStreamContent(
-            @Nonnull final InputStream value, @Nonnull final String contentType) {
+            @Nonnull final InputStream value, @Nonnull final String contentType)
+            throws IOException {
         Objects.requireNonNull(value);
         Objects.requireNonNull(contentType);
         if (contentType.isEmpty()) {
             throw new IllegalArgumentException("contentType cannot be empty");
         }
         this.content = value;
+        this.contentLength = (long) value.available();
+
         headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
     }
 

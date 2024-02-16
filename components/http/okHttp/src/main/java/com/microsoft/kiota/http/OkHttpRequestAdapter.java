@@ -188,7 +188,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(factory, nullFactoryParameter);
 
-        final Span span = startSpan(requestInfo, "sendCollectionAsync");
+        final Span span = startSpan(requestInfo, "sendCollection");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -269,7 +269,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(factory, nullFactoryParameter);
 
-        final Span span = startSpan(requestInfo, "sendAsync");
+        final Span span = startSpan(requestInfo, "send");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -331,7 +331,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final Class<ModelType> targetClass) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
-        final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
+        final Span span = startSpan(requestInfo, "sendPrimitive");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -425,7 +425,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final ValuedEnumParser<ModelType> enumParser) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(enumParser, nullEnumParserParameter);
-        final Span span = startSpan(requestInfo, "sendEnumAsync");
+        final Span span = startSpan(requestInfo, "sendEnum");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -471,7 +471,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final ValuedEnumParser<ModelType> enumParser) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(enumParser, nullEnumParserParameter);
-        final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
+        final Span span = startSpan(requestInfo, "sendEnumCollection");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -518,7 +518,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final Class<ModelType> targetClass) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
 
-        final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
+        final Span span = startSpan(requestInfo, "sendPrimitiveCollection");
         try (final Scope scope = span.makeCurrent()) {
             Response response = getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -835,7 +835,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @SuppressWarnings("unchecked")
     @Nonnull public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
-        final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
+        final Span span = startSpan(requestInfo, "convertToNativeRequest");
         try (final Scope scope = span.makeCurrent()) {
             this.authProvider.authenticateRequest(requestInfo, null);
             return (T) getRequestFromRequestInformation(requestInfo, span, span);
@@ -882,6 +882,16 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     requestInfo.content == null
                             ? null
                             : new RequestBody() {
+                                @Override
+                                public long contentLength() {
+                                    if (requestInfo.contentLength != null) {
+                                        spanForAttributes.setAttribute(
+                                                "http.request_content_length",
+                                                requestInfo.contentLength);
+                                        return requestInfo.contentLength;
+                                    } else return 0;
+                                }
+
                                 @Override
                                 public MediaType contentType() {
                                     final Set<String> contentTypes =
