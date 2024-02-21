@@ -26,9 +26,6 @@ import jakarta.annotation.Nullable;
 
 import okhttp3.*;
 
-import okio.BufferedSink;
-import okio.Okio;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -878,21 +875,18 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             spanForAttributes.setAttribute(SemanticAttributes.SERVER_ADDRESS, requestURL.getHost());
             spanForAttributes.setAttribute(SemanticAttributes.URL_SCHEME, requestURL.getProtocol());
 
-
             RequestBody body = null;
             if (requestInfo.content != null) {
                 final Set<String> contentTypes =
                         requestInfo.headers.containsKey(contentTypeHeaderKey)
                                 ? requestInfo.headers.get(contentTypeHeaderKey)
                                 : new HashSet<>();
-                final String contentType =
-                        contentTypes.toArray(new String[] {})[0];
+                final String contentType = contentTypes.toArray(new String[] {})[0];
                 spanForAttributes.setAttribute("http.request_content_type", contentType);
-                final MediaType mediaType = contentTypes.isEmpty() ? null : MediaType.parse(contentType);
+                final MediaType mediaType =
+                        contentTypes.isEmpty() ? null : MediaType.parse(contentType);
                 byte[] bytes = Compatibility.readAllBytes(requestInfo.content);
-                spanForAttributes.setAttribute(
-                        "http.request_content_length",
-                        bytes.length);
+                spanForAttributes.setAttribute("http.request_content_length", bytes.length);
                 body = RequestBody.create(bytes, mediaType);
             }
 
