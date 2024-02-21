@@ -1,5 +1,6 @@
 package com.microsoft.kiota.http.middleware;
 
+import com.microsoft.kiota.Compatibility;
 import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
 
 import io.opentelemetry.api.trace.Span;
@@ -107,7 +108,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
             @Nullable final String original, @Nonnull final char[] charactersToDecode) {
         Objects.requireNonNull(charactersToDecode);
 
-        if (original == null || original.isBlank() || charactersToDecode.length == 0) {
+        if (original == null || Compatibility.isBlank(original) || charactersToDecode.length == 0) {
             return "";
         }
 
@@ -152,7 +153,7 @@ public class ParametersNameDecodingHandler implements Interceptor {
         return toDecode.stream()
                 .map(
                         tuple ->
-                                tuple.getKey().isBlank()
+                                Compatibility.isBlank(tuple.getKey())
                                         ? tuple.getValue()
                                         : tuple.getValue() + "=" + tuple.getKey())
                 .collect(Collectors.joining("&"));
