@@ -11,11 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-## [1.0.3] - 2023-02-19
+## [1.0.4] - 2023-02-22
 
 ### Changed 
 
 - Added contentLength property to RequestInformation to facilitate in setting the content length of the Okhttp3 RequestBody object within the OkhttpRequestAdapter.
+
+## [1.0.3] - 2024-02-21
+
+### Changed
+
+- Fixed compatibility with Java 8 by replacing `isBlank` with `Compatibility.isBlank`
 
 ## [1.0.2] - 2024-02-13
 
