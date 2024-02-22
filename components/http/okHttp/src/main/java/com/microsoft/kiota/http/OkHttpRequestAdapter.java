@@ -25,6 +25,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import okhttp3.*;
+
 import okio.BufferedSink;
 import okio.Okio;
 
@@ -883,47 +884,52 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     requestInfo.content == null
                             ? null
                             : new RequestBody() {
-                        @Override
-                        public MediaType contentType() {
-                            final Set<String> contentTypes =
-                                    requestInfo.headers.getOrDefault(contentTypeHeaderKey, new HashSet<>());
-                            if (contentTypes.isEmpty()) {
-                                return null;
-                            } else {
-                                final String contentType =
-                                        contentTypes.toArray(new String[] {})[0];
-                                spanForAttributes.setAttribute(
-                                        "http.request_content_type", contentType);
-                                return MediaType.parse(contentType);
-                            }
-                        }
-
-                        @Override
-                        public long contentLength() {
-                            long length;
-                            final Set<String> contentLength = requestInfo.headers.getOrDefault(contentLengthHeaderKey, new HashSet<>());
-                            if (contentLength.isEmpty()) {
-                                try(final ByteArrayInputStream contentStream = (ByteArrayInputStream) requestInfo.content) {
-                                    length = contentStream.available();
-                                } catch (IOException ex) {
-                                    length = -1L;
+                                @Override
+                                public MediaType contentType() {
+                                    final Set<String> contentTypes =
+                                            requestInfo.headers.getOrDefault(
+                                                    contentTypeHeaderKey, new HashSet<>());
+                                    if (contentTypes.isEmpty()) {
+                                        return null;
+                                    } else {
+                                        final String contentType =
+                                                contentTypes.toArray(new String[] {})[0];
+                                        spanForAttributes.setAttribute(
+                                                "http.request_content_type", contentType);
+                                        return MediaType.parse(contentType);
+                                    }
                                 }
-                            }
-                            else {
-                                length = Long.parseLong(contentLength.toArray(new String[]{})[0]);
-                            }
-                            if(length != -1L) {
-                                spanForAttributes.setAttribute(
-                                        SemanticAttributes.HTTP_REQUEST_BODY_SIZE, length);
-                            }
-                            return length;
-                        }
 
-                        @Override
-                        public void writeTo(@Nonnull BufferedSink sink) throws IOException {
-                            sink.writeAll(Okio.source(requestInfo.content));
-                        }
-                    };
+                                @Override
+                                public long contentLength() {
+                                    long length;
+                                    final Set<String> contentLength =
+                                            requestInfo.headers.getOrDefault(
+                                                    contentLengthHeaderKey, new HashSet<>());
+                                    if (contentLength.isEmpty()) {
+                                        try (final ByteArrayInputStream contentStream =
+                                                (ByteArrayInputStream) requestInfo.content) {
+                                            length = contentStream.available();
+                                        } catch (IOException ex) {
+                                            length = -1L;
+                                        }
+                                    } else {
+                                        length =
+                                                Long.parseLong(
+                                                        contentLength.toArray(new String[] {})[0]);
+                                    }
+                                    if (length != -1L) {
+                                        spanForAttributes.setAttribute(
+                                                SemanticAttributes.HTTP_REQUEST_BODY_SIZE, length);
+                                    }
+                                    return length;
+                                }
+
+                                @Override
+                                public void writeTo(@Nonnull BufferedSink sink) throws IOException {
+                                    sink.writeAll(Okio.source(requestInfo.content));
+                                }
+                            };
 
             // https://stackoverflow.com/a/35743536
             if (body == null
