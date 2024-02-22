@@ -25,7 +25,10 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import okhttp3.*;
+import okio.BufferedSink;
+import okio.Okio;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -50,6 +53,7 @@ import java.util.regex.Pattern;
 /** RequestAdapter implementation for OkHttp */
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
     private static final String contentTypeHeaderKey = "Content-Type";
+    private static final String contentLengthHeaderKey = "Content-Length";
     @Nonnull private final Call.Factory client;
     @Nonnull private final AuthenticationProvider authProvider;
     @Nonnull private final ObservabilityOptions obsOptions;
@@ -875,24 +879,51 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             spanForAttributes.setAttribute(SemanticAttributes.SERVER_ADDRESS, requestURL.getHost());
             spanForAttributes.setAttribute(SemanticAttributes.URL_SCHEME, requestURL.getProtocol());
 
-            RequestBody body = null;
-            if (requestInfo.content != null) {
-                final Set<String> contentTypes =
-                        requestInfo.headers.containsKey(contentTypeHeaderKey)
-                                ? requestInfo.headers.get(contentTypeHeaderKey)
-                                : new HashSet<>();
-                final MediaType mediaType;
-                if (!contentTypes.isEmpty()) {
-                    String contentType = contentTypes.toArray(new String[] {})[0];
-                    spanForAttributes.setAttribute("http.request_content_type", contentType);
-                    mediaType = MediaType.parse(contentType);
-                } else {
-                    mediaType = null;
-                }
-                byte[] bytes = Compatibility.readAllBytes(requestInfo.content);
-                spanForAttributes.setAttribute("http.request_content_length", bytes.length);
-                body = RequestBody.create(bytes, mediaType);
-            }
+            RequestBody body =
+                    requestInfo.content == null
+                            ? null
+                            : new RequestBody() {
+                        @Override
+                        public MediaType contentType() {
+                            final Set<String> contentTypes =
+                                    requestInfo.headers.getOrDefault(contentTypeHeaderKey, new HashSet<>());
+                            if (contentTypes.isEmpty()) {
+                                return null;
+                            } else {
+                                final String contentType =
+                                        contentTypes.toArray(new String[] {})[0];
+                                spanForAttributes.setAttribute(
+                                        "http.request_content_type", contentType);
+                                return MediaType.parse(contentType);
+                            }
+                        }
+
+                        @Override
+                        public long contentLength() {
+                            long length;
+                            final Set<String> contentLength = requestInfo.headers.getOrDefault(contentLengthHeaderKey, new HashSet<>());
+                            if (contentLength.isEmpty()) {
+                                try(final ByteArrayInputStream contentStream = (ByteArrayInputStream) requestInfo.content) {
+                                    length = contentStream.available();
+                                } catch (IOException ex) {
+                                    length = -1L;
+                                }
+                            }
+                            else {
+                                length = Long.parseLong(contentLength.toArray(new String[]{})[0]);
+                            }
+                            if(length != -1L) {
+                                spanForAttributes.setAttribute(
+                                        SemanticAttributes.HTTP_REQUEST_BODY_SIZE, length);
+                            }
+                            return length;
+                        }
+
+                        @Override
+                        public void writeTo(@Nonnull BufferedSink sink) throws IOException {
+                            sink.writeAll(Okio.source(requestInfo.content));
+                        }
+                    };
 
             // https://stackoverflow.com/a/35743536
             if (body == null
@@ -922,19 +953,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 requestBuilder.tag(obsOptions.getType(), obsOptions);
             }
             requestBuilder.tag(Span.class, parentSpan);
-            final Request request = requestBuilder.build();
-            final List<String> contentLengthHeader = request.headers().values("Content-Length");
-            if (contentLengthHeader != null && !contentLengthHeader.isEmpty()) {
-                final String firstEntryValue = contentLengthHeader.get(0);
-                if (firstEntryValue != null && !firstEntryValue.isEmpty()) {
-                    spanForAttributes.setAttribute(
-                            SemanticAttributes.HTTP_REQUEST_BODY_SIZE,
-                            Long.parseLong(firstEntryValue));
-                }
-            }
-            return request;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            return requestBuilder.build();
         } finally {
             span.end();
         }
