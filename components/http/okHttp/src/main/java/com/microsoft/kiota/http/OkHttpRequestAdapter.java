@@ -906,9 +906,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
                                                     contentLengthHeaderKey, new HashSet<>());
-                                    if (contentLength.isEmpty()) {
-                                        try (final ByteArrayInputStream contentStream =
-                                                (ByteArrayInputStream) requestInfo.content) {
+                                    if (contentLength.isEmpty() && requestInfo.content instanceof ByteArrayInputStream) {
+                                        final ByteArrayInputStream contentStream = (ByteArrayInputStream) requestInfo.content;
+                                        try  {
                                             length = contentStream.available();
                                         } catch (IOException ex) {
                                             length = -1L;
