@@ -240,7 +240,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     private static final Pattern queryParametersCleanupPattern =
-            Pattern.compile("\\{\\?[^\\}]+}", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("\\{\\?[^\\}]+\\}", Pattern.CASE_INSENSITIVE);
     private final char[] queryParametersToDecodeForTracing = {'-', '.', '~', '$'};
 
     private Span startSpan(
