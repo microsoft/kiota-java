@@ -34,4 +34,11 @@ class AllowedHostValidatorTest {
         assertTrue(validator.getAllowedHosts().contains("graph.microsoft.us"));
         assertTrue(validator.isUrlHostValid(new URI("https://graph.microsoft.com/v1/me")));
     }
+
+    @Test
+    void testDefaultAllowedHostValidatorWorks() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator();
+        assertTrue(validator.getAllowedHosts().isEmpty());
+        assertTrue(validator.isUrlHostValid(new URI("https://graph.microsoft.com/v1/me")));
+    }
 }
