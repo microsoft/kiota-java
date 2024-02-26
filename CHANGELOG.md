@@ -11,11 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-## [1.0.4] - 2023-02-22
+## [1.0.5] - 2023-02-27
 
 ### Changed 
 
 - Added contentLength property to RequestInformation to facilitate in setting the content length of the Okhttp3 RequestBody object within the OkhttpRequestAdapter.
+
+## [1.0.4] - 2024-02-26
+
+### Changed
+
+- Fixed a bug where regex would fail to compile on an Android runtime. [microsoftgraph/msgraph-sdk-java#1851](https://github.com/microsoftgraph/msgraph-sdk-java/issues/1851)
 
 ## [1.0.3] - 2024-02-21
 
