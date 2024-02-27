@@ -7,8 +7,11 @@ import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.List;
@@ -79,7 +82,17 @@ public class TextParseNode implements ParseNode {
     }
 
     @Nullable public OffsetDateTime getOffsetDateTimeValue() {
-        return OffsetDateTime.parse(this.getStringValue());
+        try {
+            return OffsetDateTime.parse(this.getStringValue());
+        } catch (DateTimeParseException ex) {
+            // Append UTC offset if it's missing
+            try {
+                LocalDateTime localDateTime = LocalDateTime.parse(this.getStringValue());
+                return localDateTime.atOffset(ZoneOffset.UTC);
+            } catch (DateTimeParseException ex2) {
+                throw ex;
+            }
+        }
     }
 
     @Nullable public LocalDate getLocalDateValue() {

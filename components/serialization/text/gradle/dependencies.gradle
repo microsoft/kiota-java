@@ -1,12 +1,13 @@
 dependencies {
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
 
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-    
+
     api project(':components:abstractions')
 }

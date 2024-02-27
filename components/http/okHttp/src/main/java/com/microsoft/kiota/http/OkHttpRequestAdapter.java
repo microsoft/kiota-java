@@ -240,7 +240,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     private static final Pattern queryParametersCleanupPattern =
-            Pattern.compile("\\{\\?[^\\}]+}", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("\\{\\?[^\\}]+\\}", Pattern.CASE_INSENSITIVE);
     private final char[] queryParametersToDecodeForTracing = {'-', '.', '~', '$'};
 
     private Span startSpan(
@@ -620,7 +620,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     && errorMappings.containsKey("4XX"))
                             && !(statusCode >= 500
                                     && statusCode < 600
-                                    && errorMappings.containsKey("5XX"))) {
+                                    && errorMappings.containsKey("5XX"))
+                            && !errorMappings.containsKey("XXX")) {
                 spanForAttributes.setAttribute(errorMappingFoundAttributeName, false);
                 final ApiException result =
                         new ApiExceptionBuilder()
@@ -640,8 +641,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     errorMappings.containsKey(statusCodeAsString)
                             ? errorMappings.get(statusCodeAsString)
                             : (statusCode >= 400 && statusCode < 500
-                                    ? errorMappings.get("4XX")
-                                    : errorMappings.get("5XX"));
+                                    ? errorMappings.getOrDefault("4XX", errorMappings.get("XXX"))
+                                    : errorMappings.getOrDefault("5XX", errorMappings.get("XXX")));
             boolean closeResponse = true;
             try {
                 final ParseNode rootNode = getRootParseNode(response, span, span);

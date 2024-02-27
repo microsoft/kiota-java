@@ -11,6 +11,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.0.4] - 2024-02-26
+
+### Changed
+
+- Fixed a bug where regex would fail to compile on an Android runtime. [microsoftgraph/msgraph-sdk-java#1851](https://github.com/microsoftgraph/msgraph-sdk-java/issues/1851)
+
+## [1.0.3] - 2024-02-21
+
+### Changed
+
+- Fixed compatibility with Java 8 by replacing `isBlank` with `Compatibility.isBlank`
+
+## [1.0.2] - 2024-02-13
+
+### Changed
+
+- Add default UTC offset when deserializing to OffsetDateTime fails due to a missing time offset value.
+
+## [1.0.1] - 2024-02-09
+
+### Changed
+
+- Allow authentication for localhost HTTP urls
+
+## [1.0.0] - 2024-02-07
+
+### Changed
+
+- Release 1.0.0 of the Kiota Java Libraries as part of Java-SDK GA release.
+- Map `XXX` error status code range to Parsable Exception object if more specific error status code range is not found.
+
 ## [0.12.2] - 2024-02-01
 
 ### Changed
