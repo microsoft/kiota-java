@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Represents an untyped node with null value.
  */
@@ -16,7 +18,7 @@ public class UntypedNull extends UntypedNode {
      * @return null value.
      */
     @Override
-    public Object getValue() {
+    @Nullable public Object getValue() {
         return null;
     }
 }

@@ -208,8 +208,44 @@ public class JsonParseNode implements ParseNode {
     @Nonnull public <T extends Parsable> T getObjectValue(@Nonnull final ParsableFactory<T> factory) {
         Objects.requireNonNull(factory, "parameter factory cannot be null");
         final T item = factory.create(this);
+        if (item.getClass() == UntypedNode.class) return (T) getUntypedValue();
         assignFieldValues(item, item.getFieldDeserializers());
         return item;
+    }
+
+    @Nonnull private UntypedNode getUntypedValue() {
+        return getUntypedValue(currentNode);
+    }
+
+    @Nonnull private UntypedNode getUntypedValue(JsonElement element) {
+        if (element.isJsonNull()) return new UntypedNull();
+        else if (element.isJsonPrimitive()) {
+            final JsonPrimitive primitive = element.getAsJsonPrimitive();
+            if (primitive.isBoolean()) return new UntypedBoolean(primitive.getAsBoolean());
+            else if (primitive.isString()) return new UntypedString(primitive.getAsString());
+            else if (primitive.isNumber()) return new UntypedDouble(primitive.getAsDouble());
+            else
+                throw new RuntimeException(
+                        "Could not get the value during deserialization, unknown primitive type");
+        } else if (element.isJsonObject()) {
+            HashMap<String, UntypedNode> propertiesMap = new HashMap<>();
+            for (final Map.Entry<String, JsonElement> fieldEntry :
+                    element.getAsJsonObject().entrySet()) {
+                final String fieldKey = fieldEntry.getKey();
+                final JsonElement fieldValue = fieldEntry.getValue();
+                final JsonParseNode childNode = new JsonParseNode(fieldValue);
+                childNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
+                childNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
+                propertiesMap.put(fieldKey, childNode.getUntypedValue());
+            }
+            return new UntypedObject(propertiesMap);
+
+        } else if (element.isJsonArray()) {
+            return new UntypedArray(iterateOnArray(JsonParseNode::getUntypedValue));
+        }
+
+        throw new RuntimeException(
+                "Could not get the value during deserialization, unknown json value type");
     }
 
     @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final ValuedEnumParser<T> enumParser) {
@@ -277,7 +313,7 @@ public class JsonParseNode implements ParseNode {
             else
                 throw new RuntimeException(
                         "Could not get the value during deserialization, unknown primitive type");
-        } else if (element.isJsonObject() || element.isJsonArray()) return element;
+        } else if (element.isJsonObject() || element.isJsonArray()) return getUntypedValue(element);
         else
             throw new RuntimeException(
                     "Could not get the value during deserialization, unknown primitive type");

@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,15 +31,16 @@ public class UntypedNode implements Parsable {
      * Gets the value assigned to untyped node.
      * @return The value assigned to untyped node.
      */
-    public Object getValue() {
+    @Nullable public Object getValue() {
         return null;
     }
 
     /**
      * Creates a new instance of the appropriate class based on discriminator value.
+     * @param parseNode The parse node to crate from
      * @return A new UntypedNode instance.
      */
-    public static UntypedNode createFromDiscriminatorValue(@Nonnull final ParseNode parseNode) {
+    @Nonnull public static UntypedNode createFromDiscriminatorValue(@Nonnull final ParseNode parseNode) {
         return new UntypedNode();
     }
 }

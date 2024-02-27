@@ -1,5 +1,8 @@
 package com.microsoft.kiota.serialization;
 
+import jakarta.annotation.Nonnull;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,9 +11,10 @@ import java.util.Map;
 public class UntypedObject extends UntypedNode {
     /**
      * The constructor for the UntypedObject
+     * @param propertiesMap The Map to create the node with
      */
-    public UntypedObject(Map<String, UntypedNode> propertiesMap) {
-        properties = propertiesMap;
+    public UntypedObject(@Nonnull Map<String, UntypedNode> propertiesMap) {
+        properties = new HashMap<>(propertiesMap);
     }
 
     private final Map<String, UntypedNode> properties;
@@ -20,7 +24,7 @@ public class UntypedObject extends UntypedNode {
      * @return The Map of property keys and their values.
      */
     @Override
-    public Map<String, UntypedNode> getValue() {
-        return properties;
+    @Nonnull public Map<String, UntypedNode> getValue() {
+        return new HashMap<>(properties);
     }
 }
