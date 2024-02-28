@@ -322,8 +322,7 @@ public class OkHttpRequestAdapterTest {
     @Test
     void getRequestFromRequestInformationIncludesContentLength_FilePayload() throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
-        final var testFile = new File(".\\src\\test\\resources\\helloWorld.txt");
-        System.out.println(testFile.getCanonicalPath());
+        final var testFile = new File("./src/test/resources/helloWorld.txt");
         final var requestInformation = new RequestInformation();
 
         requestInformation.setUri(new URI("https://localhost"));
