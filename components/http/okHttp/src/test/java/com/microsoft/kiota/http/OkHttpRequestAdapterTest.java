@@ -299,7 +299,8 @@ public class OkHttpRequestAdapterTest {
         requestInformation.setUri(new URI("https://localhost"));
         ByteArrayInputStream content =
                 new ByteArrayInputStream(
-                        "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}".getBytes());
+                        "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}"
+                                .getBytes(StandardCharsets.UTF_8));
         requestInformation.setStreamContent(content, "application/octet-stream");
         requestInformation.httpMethod = HttpMethod.PUT;
         requestInformation.headers.tryAdd("Content-Length", String.valueOf(content.available()));
@@ -328,21 +329,22 @@ public class OkHttpRequestAdapterTest {
         requestInformation.setUri(new URI("https://localhost"));
         requestInformation.httpMethod = HttpMethod.PUT;
         requestInformation.headers.add("Content-Length", String.valueOf(testFile.length()));
-        requestInformation.setStreamContent(
-                new FileInputStream(testFile), "application/octet-stream");
+        try (FileInputStream content = new FileInputStream(testFile)) {
+            requestInformation.setStreamContent(content, "application/octet-stream");
 
-        final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
-        final var request =
-                adapter.getRequestFromRequestInformation(
-                        requestInformation, mock(Span.class), mock(Span.class));
+            final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+            final var request =
+                    adapter.getRequestFromRequestInformation(
+                            requestInformation, mock(Span.class), mock(Span.class));
 
-        assertEquals(
-                String.valueOf(requestInformation.content.available()),
-                request.headers().get("Content-Length"));
-        assertEquals("application/octet-stream", request.headers().get("Content-Type"));
-        assertNotNull(request.body());
-        assertEquals(request.body().contentLength(), requestInformation.content.available());
-        assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
+            assertEquals(
+                    String.valueOf(requestInformation.content.available()),
+                    request.headers().get("Content-Length"));
+            assertEquals("application/octet-stream", request.headers().get("Content-Type"));
+            assertNotNull(request.body());
+            assertEquals(request.body().contentLength(), requestInformation.content.available());
+            assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
+        }
     }
 
     public static OkHttpClient getMockClient(final Response response) throws IOException {
