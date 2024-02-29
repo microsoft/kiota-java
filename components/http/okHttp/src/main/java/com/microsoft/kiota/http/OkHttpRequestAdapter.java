@@ -29,6 +29,7 @@ import okhttp3.*;
 import okio.BufferedSink;
 import okio.Okio;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -53,6 +54,7 @@ import java.util.regex.Pattern;
 /** RequestAdapter implementation for OkHttp */
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
     private static final String contentTypeHeaderKey = "Content-Type";
+    private static final String contentLengthHeaderKey = "Content-Length";
     @Nonnull private final Call.Factory client;
     @Nonnull private final AuthenticationProvider authProvider;
     @Nonnull private final ObservabilityOptions obsOptions;
@@ -188,7 +190,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(factory, nullFactoryParameter);
 
-        final Span span = startSpan(requestInfo, "sendCollectionAsync");
+        final Span span = startSpan(requestInfo, "sendCollection");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -269,7 +271,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(factory, nullFactoryParameter);
 
-        final Span span = startSpan(requestInfo, "sendAsync");
+        final Span span = startSpan(requestInfo, "send");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -331,7 +333,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final Class<ModelType> targetClass) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(targetClass, "parameter targetClass cannot be null");
-        final Span span = startSpan(requestInfo, "sendPrimitiveAsync");
+        final Span span = startSpan(requestInfo, "sendPrimitive");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -425,7 +427,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final ValuedEnumParser<ModelType> enumParser) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(enumParser, nullEnumParserParameter);
-        final Span span = startSpan(requestInfo, "sendEnumAsync");
+        final Span span = startSpan(requestInfo, "sendEnum");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -471,7 +473,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final ValuedEnumParser<ModelType> enumParser) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
         Objects.requireNonNull(enumParser, nullEnumParserParameter);
-        final Span span = startSpan(requestInfo, "sendEnumCollectionAsync");
+        final Span span = startSpan(requestInfo, "sendEnumCollection");
         try (final Scope scope = span.makeCurrent()) {
             Response response = this.getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -518,7 +520,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final Class<ModelType> targetClass) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
 
-        final Span span = startSpan(requestInfo, "sendPrimitiveCollectionAsync");
+        final Span span = startSpan(requestInfo, "sendPrimitiveCollection");
         try (final Scope scope = span.makeCurrent()) {
             Response response = getHttpResponseMessage(requestInfo, span, span, null);
             final ResponseHandler responseHandler = getResponseHandler(requestInfo);
@@ -835,7 +837,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     @SuppressWarnings("unchecked")
     @Nonnull public <T> T convertToNativeRequest(@Nonnull final RequestInformation requestInfo) {
         Objects.requireNonNull(requestInfo, nullRequestInfoParameter);
-        final Span span = startSpan(requestInfo, "convertToNativeRequestAsync");
+        final Span span = startSpan(requestInfo, "convertToNativeRequest");
         try (final Scope scope = span.makeCurrent()) {
             this.authProvider.authenticateRequest(requestInfo, null);
             return (T) getRequestFromRequestInformation(requestInfo, span, span);
@@ -885,9 +887,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 @Override
                                 public MediaType contentType() {
                                     final Set<String> contentTypes =
-                                            requestInfo.headers.containsKey(contentTypeHeaderKey)
-                                                    ? requestInfo.headers.get(contentTypeHeaderKey)
-                                                    : new HashSet<>();
+                                            requestInfo.headers.getOrDefault(
+                                                    contentTypeHeaderKey, new HashSet<>());
                                     if (contentTypes.isEmpty()) {
                                         return null;
                                     } else {
@@ -897,6 +898,30 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                                 "http.request_content_type", contentType);
                                         return MediaType.parse(contentType);
                                     }
+                                }
+
+                                @Override
+                                public long contentLength() {
+                                    long length;
+                                    final Set<String> contentLength =
+                                            requestInfo.headers.getOrDefault(
+                                                    contentLengthHeaderKey, new HashSet<>());
+                                    if (contentLength.isEmpty()
+                                            && requestInfo.content
+                                                    instanceof ByteArrayInputStream) {
+                                        final ByteArrayInputStream contentStream =
+                                                (ByteArrayInputStream) requestInfo.content;
+                                        length = contentStream.available();
+                                    } else {
+                                        length =
+                                                Long.parseLong(
+                                                        contentLength.toArray(new String[] {})[0]);
+                                    }
+                                    if (length > 0) {
+                                        spanForAttributes.setAttribute(
+                                                SemanticAttributes.HTTP_REQUEST_BODY_SIZE, length);
+                                    }
+                                    return length;
                                 }
 
                                 @Override
@@ -933,17 +958,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 requestBuilder.tag(obsOptions.getType(), obsOptions);
             }
             requestBuilder.tag(Span.class, parentSpan);
-            final Request request = requestBuilder.build();
-            final List<String> contentLengthHeader = request.headers().values("Content-Length");
-            if (contentLengthHeader != null && !contentLengthHeader.isEmpty()) {
-                final String firstEntryValue = contentLengthHeader.get(0);
-                if (firstEntryValue != null && !firstEntryValue.isEmpty()) {
-                    spanForAttributes.setAttribute(
-                            SemanticAttributes.HTTP_REQUEST_BODY_SIZE,
-                            Long.parseLong(firstEntryValue));
-                }
-            }
-            return request;
+            return requestBuilder.build();
         } finally {
             span.end();
         }
