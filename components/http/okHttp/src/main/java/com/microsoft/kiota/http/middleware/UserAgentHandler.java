@@ -40,7 +40,7 @@ public class UserAgentHandler implements Interceptor {
 
     private static final String USER_AGENT_HEADER_NAME = "User-Agent";
 
-    /* @inheritdoc */
+    /** @inheritdoc */
     @Override
     @SuppressWarnings("UnknownNullness")
     public Response intercept(final Chain chain) throws IOException {

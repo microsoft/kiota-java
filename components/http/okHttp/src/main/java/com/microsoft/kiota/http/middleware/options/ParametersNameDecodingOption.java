@@ -15,7 +15,7 @@ public class ParametersNameDecodingOption implements RequestOption {
     /** The list of characters to decode in the request query parameters names before executing the request */
     @Nonnull public char[] parametersToDecode = {'-', '.', '~', '$'};
 
-    /* @inheritdoc */
+    /** @inheritdoc */
     @SuppressWarnings("unchecked")
     @Override
     @Nonnull public <T extends RequestOption> Class<T> getType() {
