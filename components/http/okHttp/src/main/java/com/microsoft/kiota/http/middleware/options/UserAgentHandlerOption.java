@@ -65,7 +65,7 @@ public class UserAgentHandlerOption implements RequestOption {
         enabled = value;
     }
 
-    /** @inheritdoc */
+    /** @inheritDoc */
     @Override
     @SuppressWarnings("unchecked")
     @Nonnull public <T extends RequestOption> Class<T> getType() {
