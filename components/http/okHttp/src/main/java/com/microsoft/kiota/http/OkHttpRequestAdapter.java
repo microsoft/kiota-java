@@ -901,7 +901,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 }
 
                                 @Override
-                                public long contentLength() {
+                                public long contentLength() throws IOException {
                                     long length;
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
