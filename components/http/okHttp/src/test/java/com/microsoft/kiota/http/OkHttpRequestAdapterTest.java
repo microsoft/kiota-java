@@ -28,6 +28,7 @@ import okhttp3.ResponseBody;
 
 import okio.Okio;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -35,9 +36,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.stubbing.Answer;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -291,6 +290,60 @@ public class OkHttpRequestAdapterTest {
             verify(mockParseNode, times(1)).getObjectValue(mockParsableFactory);
         assertEquals(responseStatusCode, exception.getResponseStatusCode());
         assertTrue(exception.getResponseHeaders().containsKey("request-id"));
+    }
+
+    @Test
+    void getRequestFromRequestInformationHasCorrectContentLength_JsonPayload() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var requestInformation = new RequestInformation();
+        requestInformation.setUri(new URI("https://localhost"));
+        ByteArrayInputStream content =
+                new ByteArrayInputStream(
+                        "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}"
+                                .getBytes(StandardCharsets.UTF_8));
+        requestInformation.setStreamContent(content, "application/octet-stream");
+        requestInformation.httpMethod = HttpMethod.PUT;
+        requestInformation.headers.tryAdd("Content-Length", String.valueOf(content.available()));
+
+        final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+        final var request =
+                adapter.getRequestFromRequestInformation(
+                        requestInformation, mock(Span.class), mock(Span.class));
+
+        assertEquals(
+                String.valueOf(requestInformation.content.available()),
+                request.headers().get("Content-Length"));
+        assertEquals("application/octet-stream", request.headers().get("Content-Type"));
+        assertNotNull(request.body());
+        assertEquals(request.body().contentLength(), requestInformation.content.available());
+        assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
+    }
+
+    @Test
+    void getRequestFromRequestInformationIncludesContentLength_FilePayload() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var testFile = new File("./src/test/resources/helloWorld.txt");
+        final var requestInformation = new RequestInformation();
+
+        requestInformation.setUri(new URI("https://localhost"));
+        requestInformation.httpMethod = HttpMethod.PUT;
+        requestInformation.headers.add("Content-Length", String.valueOf(testFile.length()));
+        try (FileInputStream content = new FileInputStream(testFile)) {
+            requestInformation.setStreamContent(content, "application/octet-stream");
+
+            final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+            final var request =
+                    adapter.getRequestFromRequestInformation(
+                            requestInformation, mock(Span.class), mock(Span.class));
+
+            assertEquals(
+                    String.valueOf(requestInformation.content.available()),
+                    request.headers().get("Content-Length"));
+            assertEquals("application/octet-stream", request.headers().get("Content-Type"));
+            assertNotNull(request.body());
+            assertEquals(request.body().contentLength(), requestInformation.content.available());
+            assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
+        }
     }
 
     public static OkHttpClient getMockClient(final Response response) throws IOException {
