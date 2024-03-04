@@ -11,10 +11,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class JsonSerializationWriterTests {
+class JsonSerializationWriterTests {
 
     @Test
-    public void writesSampleObjectValueWithUntypedProperties() throws IOException {
+    void writesSampleObjectValueWithUntypedProperties() throws IOException {
         // Arrange
         var untypedTestEntity = new UntypedTestEntity();
         untypedTestEntity.setId("1");

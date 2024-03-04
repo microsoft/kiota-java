@@ -96,7 +96,7 @@ class JsonParseNodeTests {
     }
 
     @Test
-    public void GetEntityWithUntypedNodesFromJson() throws UnsupportedEncodingException {
+    void GetEntityWithUntypedNodesFromJson() throws UnsupportedEncodingException {
         final var rawResponse = new ByteArrayInputStream(testUntypedJson.getBytes("UTF-8"));
         final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
         // Act

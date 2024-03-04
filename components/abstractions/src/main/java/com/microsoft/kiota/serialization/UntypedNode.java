@@ -25,7 +25,9 @@ public class UntypedNode implements Parsable {
      * Serializes the current object
      */
     @Override
-    public void serialize(@Nonnull SerializationWriter writer) {}
+    public void serialize(@Nonnull SerializationWriter writer) {
+        // no properties to serialize. This is handled by custom serialization logic.
+    }
 
     /**
      * Gets the value assigned to untyped node.
