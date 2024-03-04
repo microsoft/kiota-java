@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.0.6] - 2023-03-04
+
+### Changed 
+
+- Fixed a regression with the content length request header from 1.0.5.
+
 ## [1.0.5] - 2023-02-28
 
 ### Changed 
