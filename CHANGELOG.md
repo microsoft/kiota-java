@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.1.0] - 2024-02-14
+
+### Added
+
+- Adds support for untyped nodes.
+
 ## [1.0.6] - 2023-03-04
 
 ### Changed 
@@ -22,12 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed 
 
 - Added contentLength property to RequestInformation to facilitate in setting the content length of the Okhttp3 RequestBody object within the OkhttpRequestAdapter.
-
-## [1.1.0] - 2024-02-14
-
-### Added
-
-- Adds support for untyped nodes.
 
 ## [1.0.4] - 2024-02-26
 
