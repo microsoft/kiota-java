@@ -34,7 +34,8 @@ public class UntypedNode implements Parsable {
      * @return The value assigned to untyped node.
      */
     @Nullable public Object getValue() {
-        return null;
+        throw new UnsupportedOperationException(
+                "getValue is implemented for derived types of UntypedNode");
     }
 
     /**
