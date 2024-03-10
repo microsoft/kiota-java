@@ -66,9 +66,9 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
             _scopes = Arrays.asList(scopes);
         }
         if (allowedHosts == null || allowedHosts.length == 0) {
-            _hostValidator = new AllowedHostsValidator();
+            this._hostValidator = new AllowedHostsValidator();
         } else {
-            _hostValidator = new AllowedHostsValidator(allowedHosts);
+            this._hostValidator = new AllowedHostsValidator(allowedHosts);
         }
         if (observabilityOptions == null) {
             _observabilityOptions = new ObservabilityOptions();
@@ -147,7 +147,8 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         }
     }
 
-    @Nonnull public AllowedHostsValidator getAllowedHostsValidator() {
+    @Nonnull 
+    public AllowedHostsValidator getAllowedHostsValidator() {
         return _hostValidator;
     }
 
