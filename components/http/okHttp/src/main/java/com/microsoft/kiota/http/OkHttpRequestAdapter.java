@@ -841,7 +841,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try (final Scope scope = span.makeCurrent()) {
             this.authProvider.authenticateRequest(requestInfo, null);
             return (T) getRequestFromRequestInformation(requestInfo, span, span);
-        } catch (URISyntaxException | MalformedURLException ex) {
+        } catch (URISyntaxException | IOException ex) {
             span.recordException(ex);
             throw new RuntimeException(ex);
         } finally {
@@ -863,7 +863,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final RequestInformation requestInfo,
             @Nonnull final Span parentSpan,
             @Nonnull final Span spanForAttributes)
-            throws URISyntaxException, MalformedURLException {
+            throws URISyntaxException, MalformedURLException, IOException {
         final Span span =
                 GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName())
                         .spanBuilder("getRequestFromRequestInformation")
@@ -952,7 +952,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 requestBuilder.tag(obsOptions.getType(), obsOptions);
             }
             requestBuilder.tag(Span.class, parentSpan);
-            return requestBuilder.build();
+            final Request request = requestBuilder.build();
+            if (request.body() != null && request.body().contentLength() > 0) {
+                spanForAttributes.setAttribute(
+                        SemanticAttributes.HTTP_REQUEST_BODY_SIZE, request.body().contentLength());
+            }
+            return request;
         } finally {
             span.end();
         }
