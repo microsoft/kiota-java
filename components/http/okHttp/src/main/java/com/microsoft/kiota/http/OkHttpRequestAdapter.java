@@ -907,30 +907,20 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public long contentLength() throws IOException {
-                                    long length;
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
                                                     contentLengthHeaderKey, new HashSet<>());
-                                    if (contentLength.isEmpty()
-                                            && requestInfo.content
+                                    if (!contentLength.isEmpty()) {
+                                        return Long.parseLong(
+                                                        contentLength.toArray(new String[] {})[0]);
+                                    }
+                                    if (requestInfo.content
                                                     instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
                                                 (ByteArrayInputStream) requestInfo.content;
-                                        length = contentStream.available();
-                                    } else {
-                                        length =
-                                                Long.parseLong(
-                                                        contentLength.toArray(new String[] {})[0]);
+                                        return contentStream.available();
                                     }
-                                    if (length <= 0) {
-                                        length = super.contentLength();
-                                    }
-                                    if (length > 0) {
-                                        spanForAttributes.setAttribute(
-                                                HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE,
-                                                length);
-                                    }
-                                    return length;
+                                    return super.contentLength();
                                 }
 
                                 @Override
