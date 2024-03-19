@@ -912,10 +912,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                                     contentLengthHeaderKey, new HashSet<>());
                                     if (!contentLength.isEmpty()) {
                                         return Long.parseLong(
-                                                        contentLength.toArray(new String[] {})[0]);
+                                                contentLength.toArray(new String[] {})[0]);
                                     }
-                                    if (requestInfo.content
-                                                    instanceof ByteArrayInputStream) {
+                                    if (requestInfo.content instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
                                                 (ByteArrayInputStream) requestInfo.content;
                                         return contentStream.available();
@@ -958,9 +957,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             }
             requestBuilder.tag(Span.class, parentSpan);
             final Request request = requestBuilder.build();
-            if (request.body() != null && request.body().contentLength() > 0) {
-                spanForAttributes.setAttribute(
-                        SemanticAttributes.HTTP_REQUEST_BODY_SIZE, request.body().contentLength());
+            if (request != null) {
+                RequestBody requestBody = request.body();
+                if (requestBody != null) {
+                    long contentLength = requestBody.contentLength();
+                    if (contentLength >= 0) {
+                        spanForAttributes.setAttribute(
+                                SemanticAttributes.HTTP_REQUEST_BODY_SIZE, contentLength);
+                    }
+                }
             }
             return request;
         } finally {

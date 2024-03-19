@@ -311,9 +311,7 @@ public class OkHttpRequestAdapterTest {
                 adapter.getRequestFromRequestInformation(
                         requestInformation, mock(Span.class), mock(Span.class));
 
-        assertEquals(
-                String.valueOf(contentLength),
-                request.headers().get("Content-Length"));
+        assertEquals(String.valueOf(contentLength), request.headers().get("Content-Length"));
         assertEquals("application/json", request.headers().get("Content-Type"));
         assertNotNull(request.body());
         assertEquals(request.body().contentLength(), contentLength);
@@ -338,9 +336,7 @@ public class OkHttpRequestAdapterTest {
                     adapter.getRequestFromRequestInformation(
                             requestInformation, mock(Span.class), mock(Span.class));
 
-            assertEquals(
-                    String.valueOf(contentLength),
-                    request.headers().get("Content-Length"));
+            assertEquals(String.valueOf(contentLength), request.headers().get("Content-Length"));
             assertEquals("application/octet-stream", request.headers().get("Content-Type"));
             assertNotNull(request.body());
             assertEquals(request.body().contentLength(), contentLength);
@@ -349,7 +345,8 @@ public class OkHttpRequestAdapterTest {
     }
 
     @Test
-    void getRequestFromRequestInformationWithoutContentLengthOverrideForStreamBody() throws Exception {
+    void getRequestFromRequestInformationWithoutContentLengthOverrideForStreamBody()
+            throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         final var testFile = new File("./src/test/resources/helloWorld.txt");
         final var requestInformation = new RequestInformation();
@@ -372,7 +369,8 @@ public class OkHttpRequestAdapterTest {
     }
 
     @Test
-    void getRequestFromRequestInformationWithoutContentLengthOverrideForJsonPayload() throws Exception {
+    void getRequestFromRequestInformationWithoutContentLengthOverrideForJsonPayload()
+            throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         final var requestInformation = new RequestInformation();
         requestInformation.setUri(new URI("https://localhost"));
@@ -396,12 +394,12 @@ public class OkHttpRequestAdapterTest {
     }
 
     @Test
-    void getRequestFromRequestInformationWithoutContentLengthOverrideWithEmptyPayload() throws Exception {
+    void getRequestFromRequestInformationWithoutContentLengthOverrideWithEmptyPayload()
+            throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         final var requestInformation = new RequestInformation();
         requestInformation.setUri(new URI("https://localhost"));
-        ByteArrayInputStream content =
-                new ByteArrayInputStream(new byte[0]);
+        ByteArrayInputStream content = new ByteArrayInputStream(new byte[0]);
         requestInformation.httpMethod = HttpMethod.PUT;
         requestInformation.content = content;
 
