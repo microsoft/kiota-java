@@ -63,7 +63,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         if (scopes == null) {
             _scopes = new ArrayList<String>();
         } else {
-            _scopes = Arrays.asList(scopes);
+            _scopes = new ArrayList<>(Arrays.asList(scopes));
         }
         if (allowedHosts == null || allowedHosts.length == 0) {
             _hostValidator = new AllowedHostsValidator();

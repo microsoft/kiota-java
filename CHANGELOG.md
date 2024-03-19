@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Fixed a bug where not providing scopes to `AzureIdentityAccessTokenProvider` failed with `UnsupportedOperationException` when attempting to fetch the token. [microsoftgraph/msgraph-sdk-java#1882](https://github.com/microsoftgraph/msgraph-sdk-java/issues/1882)  
+
 ## [1.0.6] - 2023-03-04
 
 ### Changed 
