@@ -100,6 +100,6 @@ public class AzureIdentityAccessTokenProviderTest {
                 new URI("https://graph.microsoft.com"), new HashMap<>());
 
         List<String> actualScopes = tokenRequestContextArgumentCaptor.getValue().getScopes();
-        assertLinesMatch(actualScopes, Arrays.asList(expectedScopes));
+        assertLinesMatch(Arrays.asList(expectedScopes), actualScopes);
     }
 }
