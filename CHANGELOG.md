@@ -11,12 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-## [1.0.7] - 2023-03-18
-
+## [1.1.2] - 2023-03-21
 
 ### Changed
 
 - Fixed exception thrown when setting content length on stream request bodies.
+
+## [1.1.0] - 2024-02-14
+
+### Added
+
+- Adds support for untyped nodes.
 
 ## [1.0.6] - 2023-03-04
 

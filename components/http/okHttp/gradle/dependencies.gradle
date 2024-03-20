@@ -9,8 +9,8 @@ dependencies {
 
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'io.opentelemetry:opentelemetry-api:1.35.0'
-    implementation 'io.opentelemetry:opentelemetry-context:1.35.0'
+    implementation 'io.opentelemetry:opentelemetry-api:1.36.0'
+    implementation 'io.opentelemetry:opentelemetry-context:1.36.0'
     implementation 'io.opentelemetry.semconv:opentelemetry-semconv:1.23.1-alpha'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
     api 'com.squareup.okhttp3:okhttp:4.12.0'
