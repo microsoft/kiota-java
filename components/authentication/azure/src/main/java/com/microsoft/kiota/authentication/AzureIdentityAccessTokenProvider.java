@@ -63,7 +63,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         if (scopes == null) {
             _scopes = new ArrayList<String>();
         } else {
-            _scopes = Arrays.asList(scopes);
+            _scopes = new ArrayList<>(Arrays.asList(scopes));
         }
         if (allowedHosts == null || allowedHosts.length == 0) {
             _hostValidator = new AllowedHostsValidator();
@@ -128,13 +128,18 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
                     "com.microsoft.kiota.authentication.additional_claims_provided",
                     decodedClaim != null && !decodedClaim.isEmpty());
 
-            final TokenRequestContext context = new TokenRequestContext();
-            if (_scopes.isEmpty()) {
-                _scopes.add(uri.getScheme() + "://" + uri.getHost() + "/.default");
+            List<String> scopes;
+            if (!_scopes.isEmpty()) {
+                scopes = new ArrayList<>(_scopes);
+            } else {
+                scopes = new ArrayList<>();
+                scopes.add(uri.getScheme() + "://" + uri.getHost() + "/.default");
             }
-            context.setScopes(_scopes);
+
+            final TokenRequestContext context = new TokenRequestContext();
+            context.setScopes(scopes);
             span.setAttribute(
-                    "com.microsoft.kiota.authentication.scopes", String.join("|", _scopes));
+                    "com.microsoft.kiota.authentication.scopes", String.join("|", scopes));
             if (decodedClaim != null && !decodedClaim.isEmpty()) {
                 context.setClaims(decodedClaim);
             }
