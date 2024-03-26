@@ -93,7 +93,7 @@ public class InMemoryBackingStore implements BackingStore {
 
             if (value != null) {
                 result.put(entry.getKey(), wrapper.getValue1());
-            } else if (wrapper.getValue0()) {
+            } else if (Boolean.TRUE.equals(wrapper.getValue0())) {
                 result.put(entry.getKey(), null);
             }
         }
@@ -115,8 +115,7 @@ public class InMemoryBackingStore implements BackingStore {
     private Object getValueFromWrapper(final String entryKey, final Pair<Boolean, Object> wrapper) {
         if (wrapper != null) {
             final Boolean hasChanged = wrapper.getValue0();
-            if (!this.returnOnlyChangedValues
-                    || (this.returnOnlyChangedValues && hasChanged != null && hasChanged)) {
+            if (!this.returnOnlyChangedValues || Boolean.TRUE.equals(hasChanged)) {
                 ensureCollectionPropertyIsConsistent(entryKey, wrapper.getValue1());
                 if (wrapper.getValue1() instanceof Pair) {
                     Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
