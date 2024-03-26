@@ -6,6 +6,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class InMemoryBackingStore implements BackingStore {
         }
 
         public Pair<A, B> setValue0(A value0) {
-            return new Pair(value0, value1);
+            return new Pair<>(value0, value1);
         }
 
         public B getValue1() {
@@ -41,7 +42,7 @@ public class InMemoryBackingStore implements BackingStore {
         }
 
         public Pair<A, B> setValue1(B value1) {
-            return new Pair(value0, value1);
+            return new Pair<>(value0, value1);
         }
     }
 
@@ -55,7 +56,15 @@ public class InMemoryBackingStore implements BackingStore {
         this.isInitializationCompleted = value;
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(Boolean.valueOf(!value));
+            if (wrapper.getValue1() instanceof BackedModel) {
+                BackedModel backedModel = (BackedModel) wrapper.getValue1();
+                backedModel
+                        .getBackingStore()
+                        .setIsInitializationCompleted(value); // propagate initialization
+            }
+            ensureCollectionPropertyIsConsistent(
+                    entry.getKey(), this.store.get(entry.getKey()).getValue1());
+            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(!value);
             entry.setValue(updatedValue);
         }
     }
@@ -80,10 +89,12 @@ public class InMemoryBackingStore implements BackingStore {
         final Map<String, Object> result = new HashMap<>();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            final Object value = this.getValueFromWrapper(wrapper);
+            final Object value = this.getValueFromWrapper(entry.getKey(), wrapper);
 
             if (value != null) {
                 result.put(entry.getKey(), wrapper.getValue1());
+            } else if (wrapper.getValue0()) {
+                result.put(entry.getKey(), null);
             }
         }
         return result;
@@ -101,13 +112,16 @@ public class InMemoryBackingStore implements BackingStore {
         return result;
     }
 
-    private Object getValueFromWrapper(final Pair<Boolean, Object> wrapper) {
+    private Object getValueFromWrapper(final String entryKey, final Pair<Boolean, Object> wrapper) {
         if (wrapper != null) {
             final Boolean hasChanged = wrapper.getValue0();
             if (!this.returnOnlyChangedValues
-                    || (this.returnOnlyChangedValues
-                            && hasChanged != null
-                            && hasChanged.booleanValue())) {
+                    || (this.returnOnlyChangedValues && hasChanged != null && hasChanged)) {
+                ensureCollectionPropertyIsConsistent(entryKey, wrapper.getValue1());
+                if (wrapper.getValue1() instanceof Pair) {
+                    Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
+                    return collectionTuple.getValue0();
+                }
                 return wrapper.getValue1();
             }
         }
@@ -118,7 +132,7 @@ public class InMemoryBackingStore implements BackingStore {
     @Nullable public <T> T get(@Nonnull final String key) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> wrapper = this.store.get(key);
-        final Object value = this.getValueFromWrapper(wrapper);
+        final Object value = this.getValueFromWrapper(key, wrapper);
         try {
             return (T) value;
         } catch (ClassCastException ex) {
@@ -128,11 +142,39 @@ public class InMemoryBackingStore implements BackingStore {
 
     public <T> void set(@Nonnull final String key, @Nullable final T value) {
         Objects.requireNonNull(key);
-        final Pair<Boolean, Object> valueToAdd =
-                new Pair(Boolean.valueOf(this.isInitializationCompleted), value);
+        Pair<Boolean, Object> valueToAdd = new Pair<>(this.isInitializationCompleted, value);
+        if (value instanceof Collection) {
+            valueToAdd = valueToAdd.setValue1(new Pair<>(value, ((Collection<?>) value).size()));
+            final Collection<Object> items = (Collection<Object>) value;
+            setupNestedSubscriptions(items, key, value);
+        } else if (value instanceof Map) {
+            valueToAdd = valueToAdd.setValue1(new Pair<>(value, ((Map<?, ?>) value).size()));
+            final Map<?, Object> items = (Map<?, Object>) value;
+            setupNestedSubscriptions(items.values(), key, value);
+        } else if (value instanceof BackedModel) {
+            final BackedModel backedModel = (BackedModel) value;
+            backedModel
+                    .getBackingStore()
+                    .subscribe(
+                            key,
+                            (keyString, oldObject, newObject) -> {
+                                backedModel
+                                        .getBackingStore()
+                                        .setIsInitializationCompleted(
+                                                false); // All its properties are dirty as the model
+                                // has been touched.
+                                set(key, value);
+                            }); // use property name(key) as subscriptionId to prevent excess
+            // subscription creation in the event this is called again
+        }
+
         final Pair<Boolean, Object> oldValue = this.store.put(key, valueToAdd);
         for (final TriConsumer<String, Object, Object> callback : this.subscriptionStore.values()) {
-            callback.accept(key, oldValue.getValue1(), value);
+            if (oldValue != null) {
+                callback.accept(key, oldValue.getValue1(), value);
+            } else {
+                callback.accept(key, null, value);
+            }
         }
     }
 
@@ -153,5 +195,54 @@ public class InMemoryBackingStore implements BackingStore {
         Objects.requireNonNull(callback);
         Objects.requireNonNull(subscriptionId);
         this.subscriptionStore.put(subscriptionId, callback);
+    }
+
+    private void setupNestedSubscriptions(
+            final Collection<Object> items, final String key, final Object value) {
+        for (final Object item : items) {
+            if (item instanceof BackedModel) {
+                final BackedModel backedModel = (BackedModel) item;
+                backedModel.getBackingStore().setIsInitializationCompleted(false);
+                backedModel
+                        .getBackingStore()
+                        .subscribe(key, (keyString, oldObject, newObject) -> set(key, value));
+            }
+        }
+    }
+
+    private void ensureCollectionPropertyIsConsistent(final String key, final Object storeItem) {
+        if (storeItem instanceof Pair) { // check if we put in a collection annotated with the size
+            final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) storeItem;
+            Object[] items;
+            if (collectionTuple.getValue0() instanceof Collection) {
+                items = ((Collection<Object>) collectionTuple.getValue0()).toArray();
+            } else { // it is a map
+                items = ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
+            }
+
+            for (final Object item : items) {
+                touchNestedProperties(item); // call get on nested properties
+            }
+
+            if (collectionTuple.getValue1()
+                    != items.length) { // and the size has changed since we last updated
+                set(
+                        key,
+                        collectionTuple.getValue0()); // ensure the store is notified the collection
+                // property is "dirty"
+            }
+        }
+        touchNestedProperties(storeItem); // call get on nested properties
+    }
+
+    private void touchNestedProperties(final Object nestedObject) {
+        if (nestedObject instanceof BackedModel) {
+            // Call Get<>() on nested properties so that this method may be called recursively to
+            // ensure collections are consistent
+            final BackedModel backedModel = (BackedModel) nestedObject;
+            for (final String itemKey : backedModel.getBackingStore().enumerate().keySet()) {
+                backedModel.getBackingStore().get(itemKey);
+            }
+        }
     }
 }
