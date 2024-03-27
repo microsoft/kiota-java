@@ -841,7 +841,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try (final Scope scope = span.makeCurrent()) {
             this.authProvider.authenticateRequest(requestInfo, null);
             return (T) getRequestFromRequestInformation(requestInfo, span, span);
-        } catch (URISyntaxException | MalformedURLException ex) {
+        } catch (URISyntaxException | IOException ex) {
             span.recordException(ex);
             throw new RuntimeException(ex);
         } finally {
@@ -863,7 +863,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             @Nonnull final RequestInformation requestInfo,
             @Nonnull final Span parentSpan,
             @Nonnull final Span spanForAttributes)
-            throws URISyntaxException, MalformedURLException {
+            throws URISyntaxException, MalformedURLException, IOException {
         final Span span =
                 GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName())
                         .spanBuilder("getRequestFromRequestInformation")
@@ -902,29 +902,19 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public long contentLength() throws IOException {
-                                    long length;
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
                                                     contentLengthHeaderKey, new HashSet<>());
-                                    if (contentLength.isEmpty()
-                                            && requestInfo.content
-                                                    instanceof ByteArrayInputStream) {
+                                    if (!contentLength.isEmpty()) {
+                                        return Long.parseLong(
+                                                contentLength.toArray(new String[] {})[0]);
+                                    }
+                                    if (requestInfo.content instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
                                                 (ByteArrayInputStream) requestInfo.content;
-                                        length = contentStream.available();
-                                    } else {
-                                        length =
-                                                Long.parseLong(
-                                                        contentLength.toArray(new String[] {})[0]);
+                                        return contentStream.available();
                                     }
-                                    if (length <= 0) {
-                                        length = super.contentLength();
-                                    }
-                                    if (length > 0) {
-                                        spanForAttributes.setAttribute(
-                                                SemanticAttributes.HTTP_REQUEST_BODY_SIZE, length);
-                                    }
-                                    return length;
+                                    return super.contentLength();
                                 }
 
                                 @Override
@@ -961,7 +951,18 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 requestBuilder.tag(obsOptions.getType(), obsOptions);
             }
             requestBuilder.tag(Span.class, parentSpan);
-            return requestBuilder.build();
+            final Request request = requestBuilder.build();
+            if (request != null) {
+                RequestBody requestBody = request.body();
+                if (requestBody != null) {
+                    long contentLength = requestBody.contentLength();
+                    if (contentLength >= 0) {
+                        spanForAttributes.setAttribute(
+                                SemanticAttributes.HTTP_REQUEST_BODY_SIZE, contentLength);
+                    }
+                }
+            }
+            return request;
         } finally {
             span.end();
         }
