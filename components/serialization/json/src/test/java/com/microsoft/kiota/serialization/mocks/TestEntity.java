@@ -9,7 +9,9 @@ import com.microsoft.kiota.serialization.SerializationWriter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -23,6 +25,16 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
 
     public void setId(String _id) {
         this._id = _id;
+    }
+
+    private List<String> _phones;
+
+    public List<String> getPhones() {
+        return _phones;
+    }
+
+    public void setPhones(List<String> _phones) {
+        this._phones = new ArrayList<String>(_phones);
     }
 
     private String _officeLocation;
@@ -85,6 +97,16 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
         this._myEnum = value;
     }
 
+    private List<MyEnum> _enumCollection;
+
+    public List<MyEnum> getEnumCollection() {
+        return _enumCollection;
+    }
+
+    public void setEnumCollection(List<MyEnum> value) {
+        this._enumCollection = new ArrayList<MyEnum>(value);
+    }
+
     private OffsetDateTime _createdDateTime;
 
     public OffsetDateTime getCreatedDateTime() {
@@ -135,9 +157,19 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                             setMyEnum(n.getEnumValue(MyEnum::forValue));
                         });
                 put(
+                        "enumCollection",
+                        (n) -> {
+                            setEnumCollection(n.getCollectionOfEnumValues(MyEnum::forValue));
+                        });
+                put(
                         "createdDateTime",
                         (n) -> {
                             setCreatedDateTime(n.getOffsetDateTimeValue());
+                        });
+                put(
+                        "phones",
+                        (n) -> {
+                            setPhones(n.getCollectionOfPrimitiveValues(String.class));
                         });
             }
         };
@@ -153,7 +185,9 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
         writer.writeLocalTimeValue("startWorkTime", getStartWorkTime());
         writer.writeLocalTimeValue("endWorkTime", getEndWorkTime());
         writer.writeEnumValue("myEnum", getMyEnum());
+        writer.writeCollectionOfEnumValues("enumCollection", getEnumCollection());
         writer.writeOffsetDateTimeValue("createdDateTime", getCreatedDateTime());
+        writer.writeCollectionOfPrimitiveValues("phones", getPhones());
         writer.writeAdditionalData(getAdditionalData());
     }
 

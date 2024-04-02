@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [1.1.3] - 2024-04-02
+
+### Changed
+
+- Fixes a bug in the seriliazer that would `IllegalStateException` for json arrays in the additional data.
+
 ## [1.1.2] - 2024-03-26
 
 ### Changed
