@@ -1,10 +1,11 @@
 package com.microsoft.kiota;
 
-import jakarta.annotation.Nullable;
-
 import java.util.Collections;
+import java.util.List;
 
-/** Base class for request configuration */
+/**
+ * Base class for request configuration
+ */
 public abstract class BaseRequestConfiguration {
     /**
      * Default constructor
@@ -13,9 +14,13 @@ public abstract class BaseRequestConfiguration {
         // default empty constructor
     }
 
-    /** Request headers */
-    @Nullable public RequestHeaders headers = new RequestHeaders();
+    /**
+     * Request headers
+     */
+    public RequestHeaders headers = new RequestHeaders();
 
-    /** Request options */
-    @Nullable public java.util.List<RequestOption> options = Collections.emptyList();
+    /**
+     * Request options
+     */
+    public List<RequestOption> options = Collections.emptyList();
 }
