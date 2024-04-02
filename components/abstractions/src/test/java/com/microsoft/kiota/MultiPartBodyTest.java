@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
 
@@ -66,6 +67,26 @@ class MultiPartBodyTest {
         multipartBody.removePart("FOO");
         final Object result = multipartBody.getPartValue("foo");
         assertNull(result);
+    }
+
+    @Test
+    void notAddFilename() {
+        final MultipartBody multipartBody = new MultipartBody();
+        final SerializationWriter writer = mock(SerializationWriter.class);
+        multipartBody.requestAdapter = mock(RequestAdapter.class);
+        multipartBody.addOrReplacePart("foo", "bar", "baz");
+        multipartBody.serialize(writer);
+        verify(writer).writeStringValue("Content-Disposition", "form-data; name=\"foo\"");
+    }
+
+    @Test
+    void addFilename() {
+        final MultipartBody multipartBody = new MultipartBody();
+        final SerializationWriter writer = mock(SerializationWriter.class);
+        multipartBody.requestAdapter = mock(RequestAdapter.class);
+        multipartBody.addOrReplacePart("foo", "bar", "baz", "image.png");
+        multipartBody.serialize(writer);
+        verify(writer).writeStringValue("Content-Disposition", "form-data; name=\"foo\"; filename=\"image.png\"");
     }
     // serialize method is being tested in the serialization library
 }

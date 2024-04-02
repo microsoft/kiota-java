@@ -48,6 +48,20 @@ public class MultipartBody implements Parsable {
      */
     public <T> void addOrReplacePart(
             @Nonnull final String name, @Nonnull final String contentType, @Nonnull final T value) {
+        addOrReplacePart(name, contentType, value, null);
+    }
+
+    /**
+     * Adds or replaces a part in the multipart body.
+     *
+     * @param <T> the type of the part to add or replace.
+     * @param name the name of the part to add or replace.
+     * @param contentType the content type of the part to add or replace.
+     * @param value the value of the part to add or replace.
+     * @param filename the value of the filename directive.
+     */
+    public <T> void addOrReplacePart(
+            @Nonnull final String name, @Nonnull final String contentType, @Nonnull final T value, @Nullable String filename) {
         Objects.requireNonNull(value);
         if (Compatibility.isBlank(contentType))
             throw new IllegalArgumentException("contentType cannot be blank or empty");
@@ -55,12 +69,11 @@ public class MultipartBody implements Parsable {
             throw new IllegalArgumentException("name cannot be blank or empty");
 
         final String normalizedName = normalizePartName(name);
-        originalNames.put(normalizedName, name);
-        parts.put(normalizedName, new AbstractMap.SimpleEntry<>(contentType, value));
+        Part part = new Part(name, value, contentType, filename);
+        parts.put(normalizedName, part);
     }
 
-    private final Map<String, Map.Entry<String, Object>> parts = new HashMap<>();
-    private final Map<String, String> originalNames = new HashMap<>();
+    private final Map<String, Part> parts = new HashMap<>();
 
     private String normalizePartName(@Nonnull final String original) {
         return original.toLowerCase(Locale.ROOT);
@@ -75,7 +88,7 @@ public class MultipartBody implements Parsable {
         if (Compatibility.isBlank(partName))
             throw new IllegalArgumentException("partName cannot be blank or empty");
         final String normalizedName = normalizePartName(partName);
-        final Map.Entry<String, Object> candidate = parts.get(normalizedName);
+        final Part candidate = parts.get(normalizedName);
         if (candidate == null) return null;
         return candidate.getValue();
     }
@@ -90,10 +103,7 @@ public class MultipartBody implements Parsable {
             throw new IllegalArgumentException("partName cannot be blank or empty");
         final String normalizedName = normalizePartName(partName);
         final Object candidate = parts.remove(normalizedName);
-        if (candidate == null) return false;
-
-        originalNames.remove(normalizedName);
-        return true;
+        return candidate != null;
     }
 
     /** {@inheritDoc} */
@@ -111,18 +121,23 @@ public class MultipartBody implements Parsable {
         if (parts.isEmpty()) throw new IllegalStateException("multipart body cannot be empty");
         final SerializationWriterFactory serializationFactory = ra.getSerializationWriterFactory();
         boolean isFirst = true;
-        for (final Map.Entry<String, Map.Entry<String, Object>> partEntry : parts.entrySet()) {
+        for (final Map.Entry<String, Part> partEntry : parts.entrySet()) {
             try {
+                Part part = partEntry.getValue();
                 if (isFirst) isFirst = false;
                 else writer.writeStringValue("", "");
                 writer.writeStringValue("", "--" + getBoundary());
-                final String partContentType = partEntry.getValue().getKey();
+                final String partContentType = part.getContentType();
                 writer.writeStringValue("Content-Type", partContentType);
-                writer.writeStringValue(
-                        "Content-Disposition",
-                        "form-data; name=\"" + originalNames.get(partEntry.getKey()) + "\"");
+
+                String contentDisposition = "form-data; name=\"" + part.getName() + "\"";
+                if (part.getFilename() != null && !part.getFilename().trim().isEmpty()) {
+                    contentDisposition += "; filename=\"" + part.getFilename() + "\"";
+                }
+                writer.writeStringValue("Content-Disposition", contentDisposition);
+
                 writer.writeStringValue("", "");
-                final Object objectValue = partEntry.getValue().getValue();
+                final Object objectValue = part.getValue();
                 if (objectValue instanceof Parsable) {
                     try (final SerializationWriter partWriter =
                             serializationFactory.getSerializationWriter(partContentType)) {
@@ -150,5 +165,35 @@ public class MultipartBody implements Parsable {
         }
         writer.writeStringValue("", "");
         writer.writeStringValue("", "--" + boundary + "--");
+    }
+
+    private static class Part {
+        private final String name;
+        private final Object value;
+        private final String contentType;
+        private final String filename;
+
+        private Part(String name, Object value, String contentType, String filename) {
+            this.name = name;
+            this.value = value;
+            this.contentType = contentType;
+            this.filename = filename;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
     }
 }
