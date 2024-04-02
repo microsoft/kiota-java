@@ -3,6 +3,7 @@ package com.microsoft.kiota.serialization;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.JsonParser;
+import com.microsoft.kiota.serialization.mocks.MyEnum;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 
@@ -19,7 +20,8 @@ class JsonParseNodeTests {
     private static final String contentType = "application/json";
 
     private static final String testJsonString =
-            "{\"displayName\":\"My Group\",\"id\":\"11111111-1111-1111-1111-111111111111"
+            "{\"displayName\":\"My"
+                + " Group\",\"phones\":[\"+1234567890\"],\"myEnum\":\"VALUE1\",\"enumCollection\":[\"VALUE1\"],\"id\":\"11111111-1111-1111-1111-111111111111"
                 + "\",\"members@delta\":[{\"@odata.type\":\"#microsoft.graph.user\",\"id\":\"22222222-2222-2222-2222-222222222222\"}]}";
     private static final String testUntypedJson =
             "{\r\n"
@@ -107,6 +109,9 @@ class JsonParseNodeTests {
         // Act
         var entity = parseNode.getObjectValue(TestEntity::createFromDiscriminatorValue);
         assertEquals("11111111-1111-1111-1111-111111111111", entity.getId());
+        assertEquals(1, entity.getPhones().size());
+        assertEquals(MyEnum.MY_VALUE1, entity.getMyEnum());
+        assertEquals(1, entity.getEnumCollection().size());
         final var arrayValue = (UntypedArray) entity.getAdditionalData().get("members@delta");
         assertEquals(1, arrayValue.getValue().spliterator().estimateSize());
     }
