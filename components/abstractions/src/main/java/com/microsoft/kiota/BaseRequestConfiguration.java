@@ -1,5 +1,7 @@
 package com.microsoft.kiota;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -17,10 +19,10 @@ public abstract class BaseRequestConfiguration {
     /**
      * Request headers
      */
-    public RequestHeaders headers = new RequestHeaders();
+    @Nonnull public RequestHeaders headers = new RequestHeaders();
 
     /**
      * Request options
      */
-    public List<RequestOption> options = Collections.emptyList();
+    @Nonnull public List<RequestOption> options = Collections.emptyList();
 }
