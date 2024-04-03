@@ -163,8 +163,8 @@ public class JsonParseNode implements ParseNode {
         }
     }
 
-    private <T> List<T> iterateOnArray(Function<JsonParseNode, T> fn) {
-        JsonArray array = currentNode.getAsJsonArray();
+    private <T> List<T> iterateOnArray(JsonElement jsonElement, Function<JsonParseNode, T> fn) {
+        JsonArray array = jsonElement.getAsJsonArray();
         final Iterator<JsonElement> sourceIterator = array.iterator();
         final List<T> result = new ArrayList<>();
         while (sourceIterator.hasNext()) {
@@ -182,7 +182,8 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            return iterateOnArray(itemNode -> getPrimitiveValue(targetClass, itemNode));
+            return iterateOnArray(
+                    currentNode, itemNode -> getPrimitiveValue(targetClass, itemNode));
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 
@@ -192,7 +193,7 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            return iterateOnArray(itemNode -> itemNode.getObjectValue(factory));
+            return iterateOnArray(currentNode, itemNode -> itemNode.getObjectValue(factory));
         } else return null;
     }
 
@@ -202,7 +203,7 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            return iterateOnArray(itemNode -> itemNode.getEnumValue(enumParser));
+            return iterateOnArray(currentNode, itemNode -> itemNode.getEnumValue(enumParser));
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 
@@ -242,7 +243,7 @@ public class JsonParseNode implements ParseNode {
             return new UntypedObject(propertiesMap);
 
         } else if (element.isJsonArray()) {
-            return new UntypedArray(iterateOnArray(JsonParseNode::getUntypedValue));
+            return new UntypedArray(iterateOnArray(element, JsonParseNode::getUntypedValue));
         }
 
         throw new RuntimeException(

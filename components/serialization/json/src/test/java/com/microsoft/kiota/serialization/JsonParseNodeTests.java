@@ -3,6 +3,8 @@ package com.microsoft.kiota.serialization;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.JsonParser;
+import com.microsoft.kiota.serialization.mocks.MyEnum;
+import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,11 @@ import java.time.format.DateTimeParseException;
 class JsonParseNodeTests {
     private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
     private static final String contentType = "application/json";
+
+    private static final String testJsonString =
+            "{\"displayName\":\"My"
+                + " Group\",\"phones\":[\"+1234567890\"],\"myEnum\":\"VALUE1\",\"enumCollection\":[\"VALUE1\"],\"id\":\"11111111-1111-1111-1111-111111111111"
+                + "\",\"members@delta\":[{\"@odata.type\":\"#microsoft.graph.user\",\"id\":\"22222222-2222-2222-2222-222222222222\"}]}";
     private static final String testUntypedJson =
             "{\r\n"
                 + "    \"@odata.context\":"
@@ -93,6 +100,20 @@ class JsonParseNodeTests {
             assertInstanceOf(DateTimeParseException.class, ex);
             assertTrue(ex.getMessage().contains(dateTimeString));
         }
+    }
+
+    @Test
+    void getEntityWithArrayInAdditionalData() throws UnsupportedEncodingException {
+        final var rawResponse = new ByteArrayInputStream(testJsonString.getBytes("UTF-8"));
+        final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
+        // Act
+        var entity = parseNode.getObjectValue(TestEntity::createFromDiscriminatorValue);
+        assertEquals("11111111-1111-1111-1111-111111111111", entity.getId());
+        assertEquals(1, entity.getPhones().size());
+        assertEquals(MyEnum.MY_VALUE1, entity.getMyEnum());
+        assertEquals(1, entity.getEnumCollection().size());
+        final var arrayValue = (UntypedArray) entity.getAdditionalData().get("members@delta");
+        assertEquals(1, arrayValue.getValue().spliterator().estimateSize());
     }
 
     @Test
