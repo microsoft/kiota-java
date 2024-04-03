@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Introduces a `filename` directive in the `MultipartBody`.
+- Introduces a `filename` directive in the `MultipartBody`.
 
 ### Changed
 
