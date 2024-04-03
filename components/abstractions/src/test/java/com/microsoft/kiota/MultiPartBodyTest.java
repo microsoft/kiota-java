@@ -86,7 +86,9 @@ class MultiPartBodyTest {
         multipartBody.requestAdapter = mock(RequestAdapter.class);
         multipartBody.addOrReplacePart("foo", "bar", "baz", "image.png");
         multipartBody.serialize(writer);
-        verify(writer).writeStringValue("Content-Disposition", "form-data; name=\"foo\"; filename=\"image.png\"");
+        verify(writer)
+                .writeStringValue(
+                        "Content-Disposition", "form-data; name=\"foo\"; filename=\"image.png\"");
     }
     // serialize method is being tested in the serialization library
 }

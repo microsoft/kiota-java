@@ -61,7 +61,10 @@ public class MultipartBody implements Parsable {
      * @param filename the value of the filename directive.
      */
     public <T> void addOrReplacePart(
-            @Nonnull final String name, @Nonnull final String contentType, @Nonnull final T value, @Nullable String filename) {
+            @Nonnull final String name,
+            @Nonnull final String contentType,
+            @Nonnull final T value,
+            @Nullable String filename) {
         Objects.requireNonNull(value);
         if (Compatibility.isBlank(contentType))
             throw new IllegalArgumentException("contentType cannot be blank or empty");
