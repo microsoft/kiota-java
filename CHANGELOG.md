@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Replaces `@Nullable` annotations to `@Nonnull` in the `BaseRequestConfiguration`.
+
 ## [1.1.3] - 2024-04-02
 
 ### Changed
