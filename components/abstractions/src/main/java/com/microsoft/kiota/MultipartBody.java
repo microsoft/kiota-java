@@ -170,7 +170,7 @@ public class MultipartBody implements Parsable {
         writer.writeStringValue("", "--" + boundary + "--");
     }
 
-    private static class Part {
+    private class Part {
         private final String name;
         private final Object value;
         private final String contentType;
