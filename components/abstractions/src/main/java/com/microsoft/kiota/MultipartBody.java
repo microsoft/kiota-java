@@ -176,7 +176,7 @@ public class MultipartBody implements Parsable {
         private final String contentType;
         private final String filename;
 
-        private Part(String name, Object value, String contentType, String filename) {
+        Part(String name, Object value, String contentType, String filename) {
             this.name = name;
             this.value = value;
             this.contentType = contentType;
