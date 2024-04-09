@@ -9,7 +9,7 @@ dependencies {
 
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'io.opentelemetry:opentelemetry-api:1.36.0'
+    implementation 'io.opentelemetry:opentelemetry-api:1.37.0'
     implementation 'io.opentelemetry:opentelemetry-context:1.37.0'
     implementation 'io.opentelemetry.semconv:opentelemetry-semconv:1.24.0-alpha'
     implementation 'io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.24.0-alpha'
