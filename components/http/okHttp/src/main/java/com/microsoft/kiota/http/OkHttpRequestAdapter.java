@@ -37,7 +37,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -862,13 +861,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param spanForAttributes the span for the attributes.
      * @return the created request instance.
      * @throws URISyntaxException if the URI is invalid.
-     * @throws MalformedURLException if the URL is invalid.
+     * @throws IOException if the URL is invalid.
      */
     protected @Nonnull Request getRequestFromRequestInformation(
             @Nonnull final RequestInformation requestInfo,
             @Nonnull final Span parentSpan,
             @Nonnull final Span spanForAttributes)
-            throws URISyntaxException, MalformedURLException, IOException {
+            throws URISyntaxException, IOException {
         final Span span =
                 GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName())
                         .spanBuilder("getRequestFromRequestInformation")
@@ -963,7 +962,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     long contentLength = requestBody.contentLength();
                     if (contentLength >= 0) {
                         spanForAttributes.setAttribute(
-                                SemanticAttributes.HTTP_REQUEST_BODY_SIZE, contentLength);
+                                HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE, contentLength);
                     }
                 }
             }
