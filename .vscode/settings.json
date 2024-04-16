@@ -3,6 +3,6 @@
 		"inheritdoc",
 		"kiota"
 	],
-	"java.configuration.updateBuildConfiguration": "automatic",
+	"java.configuration.updateBuildConfiguration": "interactive",
 	"java.compile.nullAnalysis.mode": "automatic"
 }
