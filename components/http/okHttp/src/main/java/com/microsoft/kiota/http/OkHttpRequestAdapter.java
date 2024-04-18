@@ -913,9 +913,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                         return Long.parseLong(
                                                 contentLength.toArray(new String[] {})[0]);
                                     }
+                                    // super.contentLength() is not relied on since it defaults to
+                                    // -1L, causing wrong telemetry added to the attributes.
                                     if (requestInfo.content instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
                                                 (ByteArrayInputStream) requestInfo.content;
+                                        // using available() on a byte-array backed input stream is
+                                        // reliable because array size is defined.
                                         return contentStream.available();
                                     }
                                     return super.contentLength();
