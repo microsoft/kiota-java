@@ -1,7 +1,6 @@
 package com.microsoft.kiota.http;
 
-import static io.opentelemetry.api.common.AttributeKey.longKey;
-import static io.opentelemetry.api.common.AttributeKey.stringKey;
+import static com.microsoft.kiota.http.TelemetrySemanticConventions.*;
 
 import com.microsoft.kiota.*;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
@@ -721,16 +720,16 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 final int contentLengthHeaderValueAsInt =
                         Integer.parseInt(contentLengthHeaderValue);
                 spanForAttributes.setAttribute(
-                        longKey("http.response.body.size"), contentLengthHeaderValueAsInt);
+                        EXPERIMENTAL_HTTP_RESPONSE_BODY_SIZE, contentLengthHeaderValueAsInt);
             }
             final String contentTypeHeaderValue = getHeaderValue(response, "Content-Length");
             if (contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
                 spanForAttributes.setAttribute(
                         "http.response_content_type", contentTypeHeaderValue);
             }
-            spanForAttributes.setAttribute(longKey("http.response.status_code"), response.code());
+            spanForAttributes.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
             spanForAttributes.setAttribute(
-                    stringKey("network.protocol.version"),
+                    NETWORK_PROTOCOL_VERSION,
                     response.protocol().toString().toUpperCase(Locale.ROOT));
             return this.retryCAEResponseIfRequired(
                     response, requestInfo, span, spanForAttributes, claims);
@@ -786,7 +785,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 }
                 closeResponse(true, response);
                 span.addEvent(authenticateChallengedEventKey);
-                spanForAttributes.setAttribute(longKey("http.request.resend_count"), 1);
+                spanForAttributes.setAttribute(HTTP_REQUEST_RESEND_COUNT, 1);
                 return this.getHttpResponseMessage(
                         requestInfo, span, spanForAttributes, responseClaims);
             }
@@ -870,15 +869,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         .setParent(Context.current().with(parentSpan))
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
-            spanForAttributes.setAttribute(
-                    stringKey("http.request.method"), requestInfo.httpMethod.toString());
+            spanForAttributes.setAttribute(HTTP_REQUEST_METHOD, requestInfo.httpMethod.toString());
             final URL requestURL = requestInfo.getUri().toURL();
             if (obsOptions.getIncludeEUIIAttributes()) {
-                spanForAttributes.setAttribute(stringKey("url.full"), requestURL.toString());
+                spanForAttributes.setAttribute(URL_FULL, requestURL.toString());
             }
-            spanForAttributes.setAttribute("http.port", requestURL.getPort());
-            spanForAttributes.setAttribute(stringKey("server.address"), requestURL.getHost());
-            spanForAttributes.setAttribute(stringKey("url.scheme"), requestURL.getProtocol());
+            spanForAttributes.setAttribute(SERVER_PORT, requestURL.getPort());
+            spanForAttributes.setAttribute(SERVER_ADDRESS, requestURL.getHost());
+            spanForAttributes.setAttribute(URL_SCHEME, requestURL.getProtocol());
 
             RequestBody body =
                     requestInfo.content == null
