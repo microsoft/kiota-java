@@ -301,22 +301,21 @@ public class OkHttpRequestAdapterTest {
                 new ByteArrayInputStream(
                         "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}"
                                 .getBytes(StandardCharsets.UTF_8));
-        requestInformation.setStreamContent(content, "application/octet-stream");
+        requestInformation.setStreamContent(content, "application/json");
         requestInformation.httpMethod = HttpMethod.PUT;
-        requestInformation.headers.tryAdd("Content-Length", String.valueOf(content.available()));
+        final var contentLength = content.available();
+        requestInformation.headers.tryAdd("Content-Length", String.valueOf(contentLength));
 
         final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
         final var request =
                 adapter.getRequestFromRequestInformation(
                         requestInformation, mock(Span.class), mock(Span.class));
 
-        assertEquals(
-                String.valueOf(requestInformation.content.available()),
-                request.headers().get("Content-Length"));
-        assertEquals("application/octet-stream", request.headers().get("Content-Type"));
+        assertEquals(String.valueOf(contentLength), request.headers().get("Content-Length"));
+        assertEquals("application/json", request.headers().get("Content-Type"));
         assertNotNull(request.body());
-        assertEquals(request.body().contentLength(), requestInformation.content.available());
-        assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
+        assertEquals(request.body().contentLength(), contentLength);
+        assertEquals(request.body().contentType(), MediaType.parse("application/json"));
     }
 
     @Test
@@ -327,7 +326,8 @@ public class OkHttpRequestAdapterTest {
 
         requestInformation.setUri(new URI("https://localhost"));
         requestInformation.httpMethod = HttpMethod.PUT;
-        requestInformation.headers.add("Content-Length", String.valueOf(testFile.length()));
+        final var contentLength = testFile.length();
+        requestInformation.headers.add("Content-Length", String.valueOf(contentLength));
         try (FileInputStream content = new FileInputStream(testFile)) {
             requestInformation.setStreamContent(content, "application/octet-stream");
 
@@ -336,14 +336,80 @@ public class OkHttpRequestAdapterTest {
                     adapter.getRequestFromRequestInformation(
                             requestInformation, mock(Span.class), mock(Span.class));
 
-            assertEquals(
-                    String.valueOf(requestInformation.content.available()),
-                    request.headers().get("Content-Length"));
+            assertEquals(String.valueOf(contentLength), request.headers().get("Content-Length"));
             assertEquals("application/octet-stream", request.headers().get("Content-Type"));
             assertNotNull(request.body());
-            assertEquals(request.body().contentLength(), requestInformation.content.available());
+            assertEquals(request.body().contentLength(), contentLength);
             assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
         }
+    }
+
+    @Test
+    void getRequestFromRequestInformationWithoutContentLengthOverrideForStreamBody()
+            throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var testFile = new File("./src/test/resources/helloWorld.txt");
+        final var requestInformation = new RequestInformation();
+
+        requestInformation.setUri(new URI("https://localhost"));
+        requestInformation.httpMethod = HttpMethod.PUT;
+        try (FileInputStream content = new FileInputStream(testFile)) {
+            requestInformation.setStreamContent(content, "application/octet-stream");
+
+            final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+            final var request =
+                    adapter.getRequestFromRequestInformation(
+                            requestInformation, mock(Span.class), mock(Span.class));
+
+            assertEquals("application/octet-stream", request.headers().get("Content-Type"));
+            assertNotNull(request.body());
+            assertEquals(-1L, request.body().contentLength());
+            assertEquals(request.body().contentType(), MediaType.parse("application/octet-stream"));
+        }
+    }
+
+    @Test
+    void getRequestFromRequestInformationWithoutContentLengthOverrideForJsonPayload()
+            throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var requestInformation = new RequestInformation();
+        requestInformation.setUri(new URI("https://localhost"));
+        ByteArrayInputStream content =
+                new ByteArrayInputStream(
+                        "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}"
+                                .getBytes(StandardCharsets.UTF_8));
+        requestInformation.setStreamContent(content, "application/json");
+        requestInformation.httpMethod = HttpMethod.PUT;
+        final var contentLength = content.available();
+
+        final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+        final var request =
+                adapter.getRequestFromRequestInformation(
+                        requestInformation, mock(Span.class), mock(Span.class));
+
+        assertEquals("application/json", request.headers().get("Content-Type"));
+        assertNotNull(request.body());
+        assertEquals(contentLength, request.body().contentLength());
+        assertEquals(MediaType.parse("application/json"), request.body().contentType());
+    }
+
+    @Test
+    void getRequestFromRequestInformationWithoutContentLengthOverrideWithEmptyPayload()
+            throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var requestInformation = new RequestInformation();
+        requestInformation.setUri(new URI("https://localhost"));
+        ByteArrayInputStream content = new ByteArrayInputStream(new byte[0]);
+        requestInformation.httpMethod = HttpMethod.PUT;
+        requestInformation.content = content;
+
+        final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+        final var request =
+                adapter.getRequestFromRequestInformation(
+                        requestInformation, mock(Span.class), mock(Span.class));
+
+        assertNull(request.headers().get("Content-Type"));
+        assertEquals(0, request.body().contentLength());
     }
 
     public static OkHttpClient getMockClient(final Response response) throws IOException {
