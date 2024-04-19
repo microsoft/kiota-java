@@ -960,7 +960,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                     long contentLength = requestBody.contentLength();
                     if (contentLength >= 0) {
                         spanForAttributes.setAttribute(
-                                longKey(EXPERIMENTAL_HTTP_REQUEST_BODY_SIZE), contentLength);
+                                EXPERIMENTAL_HTTP_REQUEST_BODY_SIZE, contentLength);
                     }
                 }
             }
