@@ -37,7 +37,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -846,7 +845,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try (final Scope scope = span.makeCurrent()) {
             this.authProvider.authenticateRequest(requestInfo, null);
             return (T) getRequestFromRequestInformation(requestInfo, span, span);
-        } catch (URISyntaxException | MalformedURLException ex) {
+        } catch (URISyntaxException | IOException ex) {
             span.recordException(ex);
             throw new RuntimeException(ex);
         } finally {
@@ -862,13 +861,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param spanForAttributes the span for the attributes.
      * @return the created request instance.
      * @throws URISyntaxException if the URI is invalid.
-     * @throws MalformedURLException if the URL is invalid.
+     * @throws IOException if the URL is invalid.
      */
     protected @Nonnull Request getRequestFromRequestInformation(
             @Nonnull final RequestInformation requestInfo,
             @Nonnull final Span parentSpan,
             @Nonnull final Span spanForAttributes)
-            throws URISyntaxException, MalformedURLException {
+            throws URISyntaxException, IOException {
         final Span span =
                 GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName())
                         .spanBuilder("getRequestFromRequestInformation")
@@ -907,30 +906,23 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public long contentLength() throws IOException {
-                                    long length;
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
                                                     contentLengthHeaderKey, new HashSet<>());
-                                    if (contentLength.isEmpty()
-                                            && requestInfo.content
-                                                    instanceof ByteArrayInputStream) {
+                                    if (!contentLength.isEmpty()) {
+                                        return Long.parseLong(
+                                                contentLength.toArray(new String[] {})[0]);
+                                    }
+                                    // super.contentLength() is not relied on since it defaults to
+                                    // -1L, causing wrong telemetry added to the attributes.
+                                    if (requestInfo.content instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
                                                 (ByteArrayInputStream) requestInfo.content;
-                                        length = contentStream.available();
-                                    } else {
-                                        length =
-                                                Long.parseLong(
-                                                        contentLength.toArray(new String[] {})[0]);
+                                        // using available() on a byte-array backed input stream is
+                                        // reliable because array size is defined.
+                                        return contentStream.available();
                                     }
-                                    if (length <= 0) {
-                                        length = super.contentLength();
-                                    }
-                                    if (length > 0) {
-                                        spanForAttributes.setAttribute(
-                                                HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE,
-                                                length);
-                                    }
-                                    return length;
+                                    return super.contentLength();
                                 }
 
                                 @Override
@@ -967,7 +959,18 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 requestBuilder.tag(obsOptions.getType(), obsOptions);
             }
             requestBuilder.tag(Span.class, parentSpan);
-            return requestBuilder.build();
+            final Request request = requestBuilder.build();
+            if (request != null) {
+                RequestBody requestBody = request.body();
+                if (requestBody != null) {
+                    long contentLength = requestBody.contentLength();
+                    if (contentLength >= 0) {
+                        spanForAttributes.setAttribute(
+                                HttpIncubatingAttributes.HTTP_REQUEST_BODY_SIZE, contentLength);
+                    }
+                }
+            }
+            return request;
         } finally {
             span.end();
         }

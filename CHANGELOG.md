@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+## [1.1.5]
+
+### Changed
+
+- Fixed exception thrown when setting content length on stream request bodies.
+
 ## [1.1.4] - 2024-04-04
 
 ### Added
@@ -33,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Fixed a bug where not providing scopes to `AzureIdentityAccessTokenProvider` failed with `UnsupportedOperationException` when attempting to fetch the token. [microsoftgraph/msgraph-sdk-java#1882](https://github.com/microsoftgraph/msgraph-sdk-java/issues/1882)  
+- Fixed a bug where not providing scopes to `AzureIdentityAccessTokenProvider` failed with `UnsupportedOperationException` when attempting to fetch the token. [microsoftgraph/msgraph-sdk-java#1882](https://github.com/microsoftgraph/msgraph-sdk-java/issues/1882)
 
 ## [1.1.0] - 2024-02-14
 
@@ -43,13 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.6] - 2023-03-04
 
-### Changed 
+### Changed
 
 - Fixed a regression with the content length request header from 1.0.5.
 
 ## [1.0.5] - 2023-02-28
 
-### Changed 
+### Changed
 
 - Added contentLength property to RequestInformation to facilitate in setting the content length of the Okhttp3 RequestBody object within the OkhttpRequestAdapter.
 
@@ -210,7 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Add PeriodAndDuration constructor to create new object from a PeriodAndDuration object.  
+- Add PeriodAndDuration constructor to create new object from a PeriodAndDuration object.
 
 ## [0.7.0] - 2023-08-18
 
@@ -222,7 +232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Javax annotations replaced in favor of Jakarta annotations. 
+- Javax annotations replaced in favor of Jakarta annotations.
 
 ## [0.5.0] - 2023-07-26
 
@@ -269,8 +279,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Adds a NativeResponseHandler to abstractions. 
-- Adds setResponseHandler method to RequestInformation class in abstractions. 
+- Adds a NativeResponseHandler to abstractions.
+- Adds setResponseHandler method to RequestInformation class in abstractions.
 
 ## [0.4.1] - 2023-03-29
 
@@ -373,11 +383,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added ResponseHandlerOption class. 
+- Added ResponseHandlerOption class.
 
 ### Changed
 
-- Removed responseHandler parameter from RequestAdapter sendAsync methods. 
+- Removed responseHandler parameter from RequestAdapter sendAsync methods.
 - Compatibility for Android level 26.
 
 ## [0.0.5] - 2022-09-15
