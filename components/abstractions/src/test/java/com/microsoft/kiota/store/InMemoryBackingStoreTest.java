@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class InMemoryBackingStoreTest {
     @Test
@@ -391,5 +393,32 @@ class InMemoryBackingStoreTest {
         var businessPhones =
                 (List<String>) colleaguesList.get(0).getBackingStore().get("businessPhones");
         assertEquals(1, businessPhones.size());
+    }
+
+    @Test
+    void TestsBackingStoreEmbeddedWithMultipleNestedModelsCollectionsAndAdditionalData() {
+        // Arrange dummy user with initialized backing store
+        AtomicInteger invocationCount = new AtomicInteger();
+        var testUser = new TestEntity();
+        testUser.getBackingStore().subscribe(
+                "testSubscription",
+                (keyString, oldObject, newObject) -> {
+                    invocationCount.getAndIncrement();
+                });
+        testUser.setId("84c747c1-d2c0-410d-ba50-fc23e0b4abbe");// invocation 1
+
+        var colleagues = new ArrayList<TestEntity>();
+        for (int i = 0; i < 10; i++) {
+            var colleague = new TestEntity();
+            colleague.setId(UUID.randomUUID().toString());
+            colleague.setBusinessPhones(Arrays.asList(new String[]{"+1 234 567 891"}));
+            colleague.getAdditionalData().put("count",i);
+            colleagues.add(colleague);
+        }
+        testUser.setColleagues(colleagues);// invocation 2
+
+        testUser.getBackingStore().setIsInitializationCompleted(true);// initialize
+
+        assertEquals(2 , invocationCount);// only for setting the id and the colleagues
     }
 }
