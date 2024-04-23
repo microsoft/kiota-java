@@ -116,7 +116,10 @@ public class InMemoryBackingStore implements BackingStore {
         if (wrapper != null) {
             final Boolean hasChanged = wrapper.getValue0();
             if (!this.returnOnlyChangedValues || Boolean.TRUE.equals(hasChanged)) {
-                ensureCollectionPropertyIsConsistent(entryKey, wrapper.getValue1());
+                if (Boolean.FALSE.equals(
+                        hasChanged)) { // no need property has already been flagged.
+                    ensureCollectionPropertyIsConsistent(entryKey, wrapper.getValue1());
+                }
                 if (wrapper.getValue1() instanceof Pair) {
                     Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
                     return collectionTuple.getValue0();
