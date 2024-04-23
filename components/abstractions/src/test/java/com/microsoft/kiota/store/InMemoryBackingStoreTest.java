@@ -420,6 +420,6 @@ class InMemoryBackingStoreTest {
 
         testUser.getBackingStore().setIsInitializationCompleted(true); // initialize
 
-        assertEquals(2, invocationCount); // only for setting the id and the colleagues
+        assertEquals(2, invocationCount.get()); // only for setting the id and the colleagues
     }
 }
