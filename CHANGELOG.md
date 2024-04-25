@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.8] - 2024-04-25
+
+### Changed
+
+- Fixed a bug where options could not be added to request information. [#1238](https://github.com/microsoft/kiota-java/issues/1238)
+
 ## [1.1.7] - 2024-04-23
 
 ### Changed

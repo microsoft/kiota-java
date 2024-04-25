@@ -2,7 +2,7 @@ package com.microsoft.kiota;
 
 import jakarta.annotation.Nonnull;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,5 +24,5 @@ public abstract class BaseRequestConfiguration {
     /**
      * Request options
      */
-    @Nonnull public List<RequestOption> options = Collections.emptyList();
+    @Nonnull public List<RequestOption> options = new ArrayList<RequestOption>();
 }
