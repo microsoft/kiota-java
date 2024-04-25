@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.9] - 2024-04-26
+
+### Changed
+
+- Normalize UUID path/query parameter values to string
+
 ## [1.1.8] - 2024-04-25
 
 ### Changed
