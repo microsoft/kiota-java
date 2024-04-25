@@ -18,12 +18,13 @@ public class BaseRequestConfigurationTest {
         TestRequestConfiguration requestConfiguration = new TestRequestConfiguration();
         assertNotNull(requestConfiguration.options);
 
-        RequestOption requestOption = new RequestOption() {
-            @Override
-            public <T extends RequestOption> Class<T> getType() {
-                return null;
-            }
-        };
+        RequestOption requestOption =
+                new RequestOption() {
+                    @Override
+                    public <T extends RequestOption> Class<T> getType() {
+                        return null;
+                    }
+                };
         // options should be mutable list
         requestConfiguration.options.add(requestOption);
         assertEquals(1, requestConfiguration.options.size());
