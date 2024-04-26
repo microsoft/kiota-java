@@ -150,6 +150,38 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsPathParametersOfUUIDType() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/users/{id}";
+
+        // Act
+        var id = java.util.UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e");
+        requestInfo.pathParameters.put("id", id);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("users/f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"));
+    }
+
+    @Test
+    void SetsQueryParametersOfUUIDType() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/users{?id}";
+
+        // Act
+        var id = java.util.UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e");
+        requestInfo.addQueryParameter("id", id);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("?id=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"));
+    }
+
+    @Test
     void SetsParsableContent() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();

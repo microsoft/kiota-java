@@ -118,7 +118,7 @@ public class RequestInformation {
             Map<String, Object> params =
                     new HashMap<>(pathParameters.size() + queryParameters.size());
             for (final Map.Entry<String, Object> pathParam : pathParameters.entrySet()) {
-                params.put(pathParam.getKey(), replaceEnumValue(pathParam.getValue()));
+                params.put(pathParam.getKey(), getSanitizedValues(pathParam.getValue()));
             }
             params.putAll(queryParameters);
 
@@ -158,30 +158,9 @@ public class RequestInformation {
             if (entry.getKey() != null && entry.getValue() != null) {
                 Object value = entry.getValue();
                 if (value != null) {
-                    value = replaceEnumValue(value);
-                    if (value.getClass().isArray()) {
-                        queryParameters.put(entry.getKey(), Arrays.asList((Object[]) value));
-                    } else {
-                        queryParameters.put(entry.getKey(), value);
-                    }
+                    queryParameters.put(entry.getKey(), getSanitizedValues(value));
                 }
             }
-        }
-    }
-
-    private Object replaceEnumValue(@Nonnull final Object source) {
-        if (source instanceof ValuedEnum) {
-            return ((ValuedEnum) source).getValue();
-        } else if (source.getClass().isArray()
-                && ((Object[]) source).length > 0
-                && ((Object[]) source)[0] instanceof ValuedEnum) {
-            final ArrayList<String> result = new ArrayList<>();
-            for (final Object item : (Object[]) source) {
-                result.add(((ValuedEnum) item).getValue());
-            }
-            return result;
-        } else {
-            return source;
         }
     }
 
@@ -192,7 +171,7 @@ public class RequestInformation {
      */
     public void addQueryParameter(@Nonnull final String name, @Nullable final Object value) {
         Objects.requireNonNull(name);
-        queryParameters.put(name, value);
+        queryParameters.put(name, getSanitizedValues(value));
     }
 
     /**
@@ -474,6 +453,28 @@ public class RequestInformation {
             }
         } finally {
             span.end();
+        }
+    }
+
+    private static Object getSanitizedValues(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.getClass().isArray()) {
+            if (((Object[]) value).length > 0 && ((Object[]) value)[0] instanceof ValuedEnum) {
+                final ArrayList<String> result = new ArrayList<>();
+                for (final Object item : (Object[]) value) {
+                    result.add(((ValuedEnum) item).getValue());
+                }
+                return result;
+            }
+            return Arrays.asList((Object[]) value);
+        } else if (value instanceof ValuedEnum) {
+            return ((ValuedEnum) value).getValue();
+        } else if (value instanceof UUID) {
+            return value.toString();
+        } else {
+            return value;
         }
     }
 }
