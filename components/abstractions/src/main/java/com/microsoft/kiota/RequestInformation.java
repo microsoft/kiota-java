@@ -457,6 +457,9 @@ public class RequestInformation {
     }
 
     private static Object getSanitizedValues(Object value) {
+        if (value == null) {
+            return null;
+        }
         if (value.getClass().isArray()) {
             if (((Object[]) value).length > 0 && ((Object[]) value)[0] instanceof ValuedEnum) {
                 final ArrayList<String> result = new ArrayList<>();
