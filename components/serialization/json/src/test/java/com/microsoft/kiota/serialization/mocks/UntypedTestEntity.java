@@ -50,6 +50,16 @@ public class UntypedTestEntity implements Parsable, AdditionalDataHolder {
         this._detail = _detail;
     }
 
+    private UntypedNode _table;
+
+    public UntypedNode getTable() {
+        return _table;
+    }
+
+    public void setTable(UntypedNode _table) {
+        this._table = _table;
+    }
+
     @Override
     public Map<String, Consumer<ParseNode>> getFieldDeserializers() {
         return new HashMap<>() {
@@ -76,6 +86,11 @@ public class UntypedTestEntity implements Parsable, AdditionalDataHolder {
                         (n) -> {
                             setDetail(n.getObjectValue(UntypedNode::createFromDiscriminatorValue));
                         });
+                put(
+                        "table",
+                        (n) -> {
+                            setTable(n.getObjectValue(UntypedNode::createFromDiscriminatorValue));
+                        });
             }
         };
     }
@@ -87,6 +102,7 @@ public class UntypedTestEntity implements Parsable, AdditionalDataHolder {
         writer.writeObjectValue("location", getLocation());
         writer.writeObjectValue("keywords", getKeywords());
         writer.writeObjectValue("detail", getDetail());
+        writer.writeObjectValue("table", getDetail());
         writer.writeAdditionalData(getAdditionalData());
     }
 
