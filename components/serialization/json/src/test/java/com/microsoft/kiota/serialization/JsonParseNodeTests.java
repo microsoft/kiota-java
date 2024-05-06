@@ -60,6 +60,7 @@ class JsonParseNodeTests {
                 + "        }\r\n"
                 + "    ],\r\n"
                 + "    \"detail\": null,\r\n"
+                + "    \"table\": [[1,2,3],[4,5,6],[7,8,9]],\r\n"
                 + "    \"extra\": {\r\n"
                 + "        \"createdDateTime\":\"2024-01-15T00:00:00\\u002B00:00\"\r\n"
                 + "    }\r\n"
@@ -160,5 +161,15 @@ class JsonParseNodeTests {
         assertNull(entity.getDetail());
         var extra = entity.getAdditionalData().get("extra");
         assertNotNull(extra);
+        assertNotNull(entity.getTable());
+        var table = (UntypedArray) entity.getTable(); // the table is a collection
+        for (var value : table.getValue()) {
+            var row = (UntypedArray) value;
+            assertNotNull(row); // The values are a nested collection
+            for (var item : row.getValue()) {
+                var rowItem = (UntypedDouble) item;
+                assertNotNull(rowItem); // The values are UntypedInteger
+            }
+        }
     }
 }
