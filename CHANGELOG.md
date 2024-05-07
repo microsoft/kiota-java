@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.10] - 2024-05-06
+
+### Changed
+
+- Fixing a bug where the type associated the opentelemetry metric attribute `server.port` was defined as a string instead of a long. [#1241](https://github.com/microsoft/kiota-java/issues/1241)
+
 ## [1.1.9] - 2024-04-26
 
 ### Changed

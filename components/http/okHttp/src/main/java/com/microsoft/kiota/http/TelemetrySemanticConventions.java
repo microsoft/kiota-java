@@ -19,7 +19,7 @@ public class TelemetrySemanticConventions {
     public static final AttributeKey URL_FULL = stringKey("url.full"); // stable
     public static final AttributeKey URL_SCHEME = stringKey("url.scheme"); // stable
     public static final AttributeKey SERVER_ADDRESS = stringKey("server.address"); // stable
-    public static final AttributeKey SERVER_PORT = stringKey("server.port"); // stable
+    public static final AttributeKey SERVER_PORT = longKey("server.port"); // stable
 
     public static final AttributeKey EXPERIMENTAL_HTTP_RESPONSE_BODY_SIZE =
             longKey("http.response.body.size"); // experimental
