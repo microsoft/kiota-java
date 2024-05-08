@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.11] - 2024-05-07
+
+### Changed
+
+- Downgraded jakarta annotation api dependency from 3.0.0 to 2.1.1 for Java 8 backward compatibility
+
 ## [1.1.10] - 2024-05-06
 
 ### Changed
