@@ -26,4 +26,7 @@ public final class TelemetrySemanticConventions {
             longKey("http.response.body.size"); // experimental
     public static final AttributeKey<Long> EXPERIMENTAL_HTTP_REQUEST_BODY_SIZE =
             longKey("http.request.body.size"); // experimental
+
+    public static final AttributeKey<String> CUSTOM_HTTP_RESPONSE_CONTENT_TYPE = stringKey("http.response_content_type"); // custom
+    public static final AttributeKey<String> CUSTOM_HTTP_REQUEST_CONTENT_TYPE = stringKey("http.request_content_type"); // custom
 }
