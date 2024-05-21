@@ -723,11 +723,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 spanForAttributes.setAttribute(
                         EXPERIMENTAL_HTTP_RESPONSE_BODY_SIZE, contentLengthHeaderValueAsLong);
             }
-            final String contentTypeHeaderValue =
-                    getHeaderValue(response, CONTENT_TYPE_HEADER_KEY);
+            final String contentTypeHeaderValue = getHeaderValue(response, CONTENT_TYPE_HEADER_KEY);
             if (contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
                 spanForAttributes.setAttribute(
-                    CUSTOM_HTTP_RESPONSE_CONTENT_TYPE, contentTypeHeaderValue);
+                        CUSTOM_HTTP_RESPONSE_CONTENT_TYPE, contentTypeHeaderValue);
             }
             spanForAttributes.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
             spanForAttributes.setAttribute(
@@ -895,7 +894,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                         final String contentType =
                                                 contentTypes.toArray(new String[] {})[0];
                                         spanForAttributes.setAttribute(
-                                            CUSTOM_HTTP_REQUEST_CONTENT_TYPE, contentType);
+                                                CUSTOM_HTTP_REQUEST_CONTENT_TYPE, contentType);
                                         return MediaType.parse(contentType);
                                     }
                                 }
