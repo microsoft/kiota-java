@@ -8,7 +8,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-    api 'com.google.code.gson:gson:2.10.1'
+    api 'com.google.code.gson:gson:2.11.0'
 
     api project(':components:abstractions')
 }
