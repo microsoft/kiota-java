@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.12] - 2024-05-21
+
+### Changed
+
+- Fixed a bug where large responses would make the client fail. [microsoftgraph/msgraph-sdk-java#2009](https://github.com/microsoftgraph/msgraph-sdk-java/issues/2009)
+
 ## [1.1.11] - 2024-05-07
 
 ### Changed

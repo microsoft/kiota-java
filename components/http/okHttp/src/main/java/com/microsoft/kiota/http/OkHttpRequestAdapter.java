@@ -53,8 +53,8 @@ import java.util.regex.Pattern;
 
 /** RequestAdapter implementation for OkHttp */
 public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter {
-    private static final String contentTypeHeaderKey = "Content-Type";
-    private static final String contentLengthHeaderKey = "Content-Length";
+    private static final String CONTENT_LENGTH_HEADER_KEY = "Content-Length";
+    private static final String CONTENT_TYPE_HEADER_KEY = "Content-Type";
     @Nonnull private final Call.Factory client;
     @Nonnull private final AuthenticationProvider authProvider;
     @Nonnull private final ObservabilityOptions obsOptions;
@@ -715,17 +715,18 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     getRequestFromRequestInformation(
                                             requestInfo, span, spanForAttributes))
                             .execute();
-            final String contentLengthHeaderValue = getHeaderValue(response, "Content-Length");
+            final String contentLengthHeaderValue =
+                    getHeaderValue(response, CONTENT_LENGTH_HEADER_KEY);
             if (contentLengthHeaderValue != null && !contentLengthHeaderValue.isEmpty()) {
-                final int contentLengthHeaderValueAsInt =
-                        Integer.parseInt(contentLengthHeaderValue);
+                final long contentLengthHeaderValueAsLong =
+                        Long.parseLong(contentLengthHeaderValue);
                 spanForAttributes.setAttribute(
-                        EXPERIMENTAL_HTTP_RESPONSE_BODY_SIZE, contentLengthHeaderValueAsInt);
+                        EXPERIMENTAL_HTTP_RESPONSE_BODY_SIZE, contentLengthHeaderValueAsLong);
             }
-            final String contentTypeHeaderValue = getHeaderValue(response, "Content-Length");
+            final String contentTypeHeaderValue = getHeaderValue(response, CONTENT_TYPE_HEADER_KEY);
             if (contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
                 spanForAttributes.setAttribute(
-                        "http.response_content_type", contentTypeHeaderValue);
+                        CUSTOM_HTTP_RESPONSE_CONTENT_TYPE, contentTypeHeaderValue);
             }
             spanForAttributes.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
             spanForAttributes.setAttribute(
@@ -886,14 +887,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 public MediaType contentType() {
                                     final Set<String> contentTypes =
                                             requestInfo.headers.getOrDefault(
-                                                    contentTypeHeaderKey, new HashSet<>());
+                                                    CONTENT_TYPE_HEADER_KEY, new HashSet<>());
                                     if (contentTypes.isEmpty()) {
                                         return null;
                                     } else {
                                         final String contentType =
                                                 contentTypes.toArray(new String[] {})[0];
                                         spanForAttributes.setAttribute(
-                                                "http.request_content_type", contentType);
+                                                CUSTOM_HTTP_REQUEST_CONTENT_TYPE, contentType);
                                         return MediaType.parse(contentType);
                                     }
                                 }
@@ -902,7 +903,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 public long contentLength() throws IOException {
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
-                                                    contentLengthHeaderKey, new HashSet<>());
+                                                    CONTENT_LENGTH_HEADER_KEY, new HashSet<>());
                                     if (!contentLength.isEmpty()) {
                                         return Long.parseLong(
                                                 contentLength.toArray(new String[] {})[0]);
