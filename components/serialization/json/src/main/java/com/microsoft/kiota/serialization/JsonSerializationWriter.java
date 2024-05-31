@@ -489,6 +489,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 this.writePeriodAndDurationValue(key, (PeriodAndDuration) value);
             else if (value instanceof Iterable<?>)
                 this.writeCollectionOfPrimitiveValues(key, (Iterable<?>) value);
+            else if (value instanceof Parsable) this.writeObjectValue(key, (Parsable) value);
             else if (!valueClass.isPrimitive()) this.writeNonParsableObject(key, value);
             else throw new RuntimeException("unknown type to serialize " + valueClass.getName());
         }

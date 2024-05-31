@@ -3,15 +3,43 @@ package com.microsoft.kiota.serialization;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.microsoft.kiota.Compatibility;
+import com.microsoft.kiota.serialization.mocks.MyEnum;
+import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 class JsonSerializationWriterTests {
+
+    @Test
+    void writesSampleObjectValueWithParsableInAddtionalData() throws IOException {
+        var testEntity = new TestEntity();
+        testEntity.setId("test_id");
+        var phones = new ArrayList<String>();
+        phones.add("123456789");
+        testEntity.setPhones(phones);
+        var managerAdditionalData = new TestEntity();
+        managerAdditionalData.setId("manager_id");
+        managerAdditionalData.setMyEnum(MyEnum.MY_VALUE1);
+
+        testEntity
+                .getAdditionalData()
+                .put("manager", managerAdditionalData); // place a parsable in the addtionaldata
+
+        var jsonSerializer = new JsonSerializationWriter();
+        jsonSerializer.writeObjectValue("", testEntity);
+        var contentStream = jsonSerializer.getSerializedContent();
+        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+        // Assert
+        var expectedString =
+                "{\"id\":\"test_id\",\"phones\":[\"123456789\"],\"manager\":{\"id\":\"manager_id\",\"myEnum\":\"VALUE1\"}}";
+        assertEquals(expectedString, serializedJsonString);
+    }
 
     @Test
     void writesSampleObjectValueWithUntypedProperties() throws IOException {
