@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.13] - 2024-05-31
+
+### Changed
+
+- Fixed a bug where Parsable instances in the `additionalData` would lead to failed serialization with an `IllegalStateException`. [microsoftgraph/msgraph-sdk-java#1969](https://github.com/microsoftgraph/msgraph-sdk-java/issues/1969)
+
 ## [1.1.12] - 2024-05-21
 
 ### Changed
