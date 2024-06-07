@@ -8,7 +8,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'io.github.std-uritemplate:std-uritemplate:0.0.57'
+    implementation 'io.github.std-uritemplate:std-uritemplate:0.0.58'
     implementation 'io.opentelemetry:opentelemetry-api:1.38.0'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
