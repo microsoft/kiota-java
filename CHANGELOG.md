@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.14] - 2024-06-10
+
+### Changed
+
+- Fixed a bug where `Double` instances in the `additionalData` would lead to failed serialization with an `IllegalStateException`.
+
 ## [1.1.13] - 2024-05-31
 
 ### Changed

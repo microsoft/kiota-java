@@ -13,11 +13,59 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 class JsonSerializationWriterTests {
 
     @Test
-    void writesSampleObjectValueWithParsableInAddtionalData() throws IOException {
+    void writesSampleObjectValueWithPrimitivesInAdditionalData() throws IOException {
+        var testEntity = new TestEntity();
+
+        Double accountBalance = 330.7;
+        testEntity
+                .getAdditionalData()
+                .put("accountBalance", accountBalance); // place a double in the additional data
+
+        testEntity
+                .getAdditionalData()
+                .put("nickName", "Peter Pan"); // place a string in the additional data
+
+        int reportsCount = 4;
+        testEntity
+                .getAdditionalData()
+                .put("reportsCount", reportsCount); // place a int in the additional data
+
+        float averageScore = 78.142F;
+        testEntity
+                .getAdditionalData()
+                .put("averageScore", averageScore); // place a float in the additional data
+
+        boolean hasDependents = true;
+        testEntity
+                .getAdditionalData()
+                .put("hasDependents", hasDependents); // place a bool in the additional data
+
+        List<String> aliases = new ArrayList<>();
+        aliases.add("alias1");
+        aliases.add("alias2");
+
+        testEntity
+                .getAdditionalData()
+                .put("aliases", aliases); // place a collection in the additional data
+
+        var jsonSerializer = new JsonSerializationWriter();
+        jsonSerializer.writeObjectValue("", testEntity);
+        var contentStream = jsonSerializer.getSerializedContent();
+        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+        // Assert
+        var expectedString =
+                "{\"aliases\":[\"alias1\",\"alias2\"],\"nickName\":\"Peter"
+                    + " Pan\",\"hasDependents\":true,\"accountBalance\":330.7,\"reportsCount\":4,\"averageScore\":78.142}";
+        assertEquals(expectedString, serializedJsonString);
+    }
+
+    @Test
+    void writesSampleObjectValueWithParsableInAdditionalData() throws IOException {
         var testEntity = new TestEntity();
         testEntity.setId("test_id");
         var phones = new ArrayList<String>();

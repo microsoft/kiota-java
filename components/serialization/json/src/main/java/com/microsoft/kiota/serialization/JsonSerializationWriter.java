@@ -475,6 +475,7 @@ public class JsonSerializationWriter implements SerializationWriter {
             else if (valueClass.equals(BigDecimal.class))
                 this.writeBigDecimalValue(key, (BigDecimal) value);
             else if (valueClass.equals(Float.class)) this.writeFloatValue(key, (Float) value);
+            else if (valueClass.equals(Double.class)) this.writeDoubleValue(key, (Double) value);
             else if (valueClass.equals(Long.class)) this.writeLongValue(key, (Long) value);
             else if (valueClass.equals(Integer.class)) this.writeIntegerValue(key, (Integer) value);
             else if (valueClass.equals(UUID.class)) this.writeUUIDValue(key, (UUID) value);
