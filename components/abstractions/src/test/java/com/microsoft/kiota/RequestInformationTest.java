@@ -188,10 +188,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
-        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
-        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
-        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
         requestInfo.setContentFromParsable(
                 requestAdapterMock, "application/json", new TestEntity());
 
@@ -207,10 +204,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
-        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
-        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
-        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
         requestInfo.setContentFromParsable(
                 requestAdapterMock, "application/json", new TestEntity[] {new TestEntity()});
 
@@ -225,10 +219,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
-        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
-        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
-        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
         requestInfo.setContentFromScalarCollection(
                 requestAdapterMock, "application/json", new String[] {"foo"});
 
@@ -243,10 +234,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.POST;
         requestInfo.urlTemplate = "http://localhost/users";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
-        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
-        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
-        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
         requestInfo.setContentFromScalar(requestAdapterMock, "application/json", "foo");
 
         verify(writerMock, times(1)).writeStringValue(any(), anyString());
@@ -260,10 +248,7 @@ class RequestInformationTest {
         requestInfo.urlTemplate =
                 "http://localhost/{URITemplate}/ParameterMapping?IsCaseSensitive={IsCaseSensitive}";
         final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
-        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
-        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
-        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
 
         final MultipartBody multipartBody = new MultipartBody();
         multipartBody.requestAdapter = requestAdapterMock;
@@ -341,6 +326,14 @@ class RequestInformationTest {
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/1,2", uri.toString());
     }
+    public final RequestAdapter createMockRequestAdapter(SerializationWriter writerMock){
+        final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
+        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
+        RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
+        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        return  requestAdapterMock;
+    }
+
 }
 
 /** The messages in a mailbox or folder. Read-only. Nullable. */
