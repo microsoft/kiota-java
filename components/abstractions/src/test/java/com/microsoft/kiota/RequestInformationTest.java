@@ -326,14 +326,19 @@ class RequestInformationTest {
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/1,2", uri.toString());
     }
-    public final RequestAdapter createMockRequestAdapter(SerializationWriter writerMock){
+    public final SerializationWriterFactory createMockSerializationWriterFactory(SerializationWriter writer){
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
-        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writerMock);
-        RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
-        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factoryMock);
+        when(factoryMock.getSerializationWriter(anyString())).thenReturn(writer);
+        return  factoryMock;
+    }
+    public final RequestAdapter createMockRequestAdapter(SerializationWriterFactory factory){
+        final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
+        when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factory);
         return  requestAdapterMock;
     }
-
+    public final RequestAdapter createMockRequestAdapter(SerializationWriter writer){
+        return  createMockRequestAdapter(createMockSerializationWriterFactory(writer));
+    }
 }
 
 /** The messages in a mailbox or folder. Read-only. Nullable. */
