@@ -326,18 +326,22 @@ class RequestInformationTest {
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/1,2", uri.toString());
     }
-    public final SerializationWriterFactory createMockSerializationWriterFactory(SerializationWriter writer){
+
+    public final SerializationWriterFactory createMockSerializationWriterFactory(
+            SerializationWriter writer) {
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
         when(factoryMock.getSerializationWriter(anyString())).thenReturn(writer);
-        return  factoryMock;
+        return factoryMock;
     }
-    public final RequestAdapter createMockRequestAdapter(SerializationWriterFactory factory){
+
+    public final RequestAdapter createMockRequestAdapter(SerializationWriterFactory factory) {
         final RequestAdapter requestAdapterMock = mock(RequestAdapter.class);
         when(requestAdapterMock.getSerializationWriterFactory()).thenReturn(factory);
-        return  requestAdapterMock;
+        return requestAdapterMock;
     }
-    public final RequestAdapter createMockRequestAdapter(SerializationWriter writer){
-        return  createMockRequestAdapter(createMockSerializationWriterFactory(writer));
+
+    public final RequestAdapter createMockRequestAdapter(SerializationWriter writer) {
+        return createMockRequestAdapter(createMockSerializationWriterFactory(writer));
     }
 }
 
