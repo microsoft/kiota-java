@@ -6,6 +6,10 @@ if (Boolean.parseBoolean(settings['android'])) {
   logger.info('Building Android compatibility projects')
   suffix = ":android"
 }
+if (Boolean.parseBoolean(settings['java8'])) {
+  logger.info('Building Java 8 compatibility projects')
+  suffix = ":java-8"
+}
 
 include ':components:abstractions' + suffix
 include ':components:serialization:form' + suffix
