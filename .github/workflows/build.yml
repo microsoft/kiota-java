@@ -10,18 +10,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
     - uses: actions/checkout@v4
     - name: Setup JDK
       uses: actions/setup-java@v4
-      with: 
+      with:
         java-version: 17
         distribution: 'temurin'
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
     - name: Build with Gradle
-      run: ./gradlew --no-daemon build
+      run: ./gradlew --no-daemon build -Pjava8=true
     - name: Upload Unit Test Results
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
