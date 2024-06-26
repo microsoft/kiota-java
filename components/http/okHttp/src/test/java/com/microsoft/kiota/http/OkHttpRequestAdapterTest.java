@@ -167,8 +167,7 @@ public class OkHttpRequestAdapterTest {
                         httpMethod = HttpMethod.GET;
                     }
                 };
-        final var mockEntity = mock(Parsable.class);
-        when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
+        final var mockEntity = creatMockEntity();
         final var response = requestAdapter.send(requestInformation, null, (node) -> mockEntity);
         assertNull(response);
     }
@@ -198,14 +197,9 @@ public class OkHttpRequestAdapterTest {
                         httpMethod = HttpMethod.GET;
                     }
                 };
-        final var mockEntity = mock(Parsable.class);
-        when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
-        final var mockParseNode = mock(ParseNode.class);
-        when(mockParseNode.getObjectValue(any(ParsableFactory.class))).thenReturn(mockEntity);
-        final var mockFactory = mock(ParseNodeFactory.class);
-        when(mockFactory.getParseNode(any(String.class), any(InputStream.class)))
-                .thenReturn(mockParseNode);
-        when(mockFactory.getValidContentType()).thenReturn("application/json");
+        final var mockEntity = creatMockEntity();
+        final var mockParseNode = creatMockParseNode(mockEntity);
+        final var mockFactory = creatMockParseNodeFactory(mockParseNode, "application/json");
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
         final var response = requestAdapter.send(requestInformation, null, (node) -> mockEntity);
@@ -260,16 +254,11 @@ public class OkHttpRequestAdapterTest {
                         httpMethod = HttpMethod.GET;
                     }
                 };
-        final var mockEntity = mock(Parsable.class);
-        when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
+        final var mockEntity = creatMockEntity();
         final var mockParsableFactory = mock(ParsableFactory.class);
         when(mockParsableFactory.create(any(ParseNode.class))).thenReturn(mockEntity);
-        final var mockParseNode = mock(ParseNode.class);
-        when(mockParseNode.getObjectValue(any(ParsableFactory.class))).thenReturn(mockEntity);
-        final var mockFactory = mock(ParseNodeFactory.class);
-        when(mockFactory.getParseNode(any(String.class), any(InputStream.class)))
-                .thenReturn(mockParseNode);
-        when(mockFactory.getValidContentType()).thenReturn("application/json");
+        final var mockParseNode = creatMockParseNode(mockEntity);
+        final var mockFactory = creatMockParseNodeFactory(mockParseNode, "application/json");
 
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
@@ -429,5 +418,26 @@ public class OkHttpRequestAdapterTest {
         when(mockClient.dispatcher()).thenReturn(dispatcher);
         when(mockClient.newCall(any())).thenReturn(remoteCall);
         return mockClient;
+    }
+
+    public Parsable creatMockEntity() {
+        final var mockEntity = mock(Parsable.class);
+        when(mockEntity.getFieldDeserializers()).thenReturn(new HashMap<>());
+        return mockEntity;
+    }
+
+    public ParseNode creatMockParseNode(Parsable entity) {
+        final var mockParseNode = mock(ParseNode.class);
+        when(mockParseNode.getObjectValue(any(ParsableFactory.class))).thenReturn(entity);
+        return mockParseNode;
+    }
+
+    public ParseNodeFactory creatMockParseNodeFactory(
+            ParseNode mockParseNode, String validContentType) {
+        final var mockFactory = mock(ParseNodeFactory.class);
+        when(mockFactory.getParseNode(any(String.class), any(InputStream.class)))
+                .thenReturn(mockParseNode);
+        when(mockFactory.getValidContentType()).thenReturn(validContentType);
+        return mockFactory;
     }
 }
