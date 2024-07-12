@@ -12,6 +12,7 @@ updates:
     - "/components/http/okHttp"
   schedule:
     interval: daily
+    time: "09:00" # 9am UTC
   open-pull-requests-limit: 10
 - package-ecosystem: gradle
   directories:
@@ -24,6 +25,7 @@ updates:
     - "/components/http/okHttp/android"
   schedule:
     interval: daily
+    time: "10:00" # 10am UTC. Checked after the core modules to prevent duplicate PRs updating dependencies.gradle files
   open-pull-requests-limit: 10
 - package-ecosystem: github-actions
   directory: "/"
