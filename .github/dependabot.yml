@@ -1,72 +1,14 @@
 version: 2
 updates:
 - package-ecosystem: gradle
-  directory: "/components/abstractions"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/form"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/json"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/text"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/multipart"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/authentication/azure"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/http/okHttp"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/abstractions/android"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/form/android"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/json/android"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/text/android"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/serialization/multipart/android"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/authentication/azure/android"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: gradle
-  directory: "/components/http/okHttp/android"
+  directories:
+    - "/components/abstractions/android"
+    - "/components/serialization/form/android"
+    - "/components/serialization/json/android"
+    - "/components/serialization/text/android"
+    - "/components/serialization/multipart/android"
+    - "/components/authentication/azure/android"
+    - "/components/http/okHttp/android"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
