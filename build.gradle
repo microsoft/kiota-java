@@ -16,8 +16,6 @@ sonar {
 
 subprojects {
     apply plugin: 'org.sonarqube'
-    apply plugin: 'com.github.spotbugs'
-    apply plugin: 'com.diffplug.spotless'
 }
 
 repositories {
