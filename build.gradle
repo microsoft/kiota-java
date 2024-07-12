@@ -1,6 +1,8 @@
 plugins {
     id "java-library"
     id "org.sonarqube" version "4.4.1.3373"
+    id 'com.github.spotbugs' version '6.0.18'
+    id "com.diffplug.spotless" version "6.25.0"
 }
 
 sonar {
@@ -11,8 +13,11 @@ sonar {
 		property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/components/**/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
+
 subprojects {
 	apply plugin: 'org.sonarqube'
+    apply plugin: 'com.github.spotbugs'
+    apply plugin: 'com.diffplug.spotless'
 }
 
 repositories {
