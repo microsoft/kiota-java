@@ -8,11 +8,7 @@ buildscript {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     }
 
-    dependencies {
-        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.17.5"
-        classpath "com.android.tools.build:gradle:8.5.0"
-        classpath "com.github.ben-manes:gradle-versions-plugin:0.51.0"
-    }
+    apply from: '../../../gradle/dependencies-android.gradle'
 }
 
 repositories {

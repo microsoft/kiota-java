@@ -1,0 +1,8 @@
+// Shared build-script dependencies for Android projects
+buildscript {
+    dependencies {
+        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.17.5"
+        classpath "com.android.tools.build:gradle:8.5.0"
+        classpath "com.github.ben-manes:gradle-versions-plugin:0.51.0"
+    }
+}
