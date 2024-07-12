@@ -2,6 +2,19 @@ version: 2
 updates:
 - package-ecosystem: gradle
   directories:
+    - "/"
+    - "/components/abstractions"
+    - "/components/serialization/form"
+    - "/components/serialization/json"
+    - "/components/serialization/text"
+    - "/components/serialization/multipart"
+    - "/components/authentication/azure"
+    - "/components/http/okHttp"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+- package-ecosystem: gradle
+  directories:
     - "/components/abstractions/android"
     - "/components/serialization/form/android"
     - "/components/serialization/json/android"
