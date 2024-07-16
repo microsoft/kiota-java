@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  PREVIEW_TASK: publishMavenPublicationToSonatypeSnapshotRepository
+  PREVIEW_TASK: 'publishToSonatype'
   PUBLISH_TASK: publishMavenPublicationToSonatypeRepository
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup JDK
       uses: actions/setup-java@v4
-      with: 
+      with:
         java-version: 17
         distribution: 'temurin'
         cache: gradle
@@ -31,14 +31,14 @@ jobs:
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
-      env:  
+      env:
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
         OUTPUT_PATH: 'local.properties'
       working-directory: ./
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
-      env: 
+      env:
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
         OUTPUT_PATH: 'secring.gpg'
       working-directory: ./
@@ -60,6 +60,11 @@ jobs:
     - name: Publish Preview
       run: ./gradlew --no-daemon $PREVIEW_TASK
       working-directory: ./
+    # - name: Validate Staging Repository contents
+    # - name: Close Staging Repository
+
+
+
   release-to-maven-central:
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
@@ -68,7 +73,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup JDK
       uses: actions/setup-java@v4
-      with: 
+      with:
         java-version: 17
         distribution: 'temurin'
         cache: gradle
@@ -77,14 +82,14 @@ jobs:
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
-      env:  
+      env:
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
-        OUTPUT_PATH: 'local.properties' 
+        OUTPUT_PATH: 'local.properties'
       working-directory: ./
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
-      env: 
+      env:
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
         OUTPUT_PATH: 'secring.gpg'
       working-directory: ./
