@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  PREVIEW_TASK: 'publishToSonatype'
+  PREVIEW_TASK: publishToSonatype
   PUBLISH_TASK: publishMavenPublicationToSonatypeRepository
 
 jobs:
@@ -18,6 +18,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: maven_central_snapshot
+    defaults:
+      run:
+        working-directory: ./
     steps:
     - uses: actions/checkout@v4
     - name: Setup JDK
@@ -34,14 +37,12 @@ jobs:
       env:
         ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
         OUTPUT_PATH: 'local.properties'
-      working-directory: ./
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
       env:
         ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
         OUTPUT_PATH: 'secring.gpg'
-      working-directory: ./
     - name: Copy secring
       run: |
         Copy-Item secring.gpg components/abstractions/ -Verbose
@@ -53,16 +54,31 @@ jobs:
         Copy-Item secring.gpg components/http/okHttp/ -Verbose
         Copy-Item secring.gpg components/bundle/ -Verbose
       shell: pwsh
-      working-directory: ./
-    - name: Build with Gradle
-      run: ./gradlew --no-daemon build
-      working-directory: ./
-    - name: Publish Preview
+    - name: Publish to local Maven cache
+      run: ./gradlew --no-daemon publishToMavenLocal
+    - name: Get current SNAPSHOT version
+      shell: pwsh
+      run: |
+        $contents = Get-Content gradle.properties -Raw
+        $major = $contents | Select-String -Pattern 'mavenMajorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+        $minor = $contents | Select-String -Pattern 'mavenMinorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+        $patch = $contents | Select-String -Pattern 'mavenPatchVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+        $version = "$major.$minor.$patch-SNAPSHOT"
+        echo "Current version is $version"
+        echo "PACKAGE_VERSION=$version" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+    - name: Inspect contents of local Maven cache
+      shell: pwsh
+      run: |
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $PACKAGE_VERSION
+    - name: Publish to Snapshot Repository
       run: ./gradlew --no-daemon $PREVIEW_TASK
       working-directory: ./
-    # - name: Validate Staging Repository contents
-    # - name: Close Staging Repository
-
 
 
   release-to-maven-central:
