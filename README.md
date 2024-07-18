@@ -28,6 +28,7 @@ implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:1.1.14'
 implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:1.1.14'
 implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:1.1.14'
 implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:1.1.14'
+implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 ```
 
 ### With Maven:
@@ -69,6 +70,11 @@ In `pom.xml` in the `dependencies` section:
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-multipart</artifactId>
       <version>1.1.14</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>2.1.1</version>
     </dependency>
 ```
 
