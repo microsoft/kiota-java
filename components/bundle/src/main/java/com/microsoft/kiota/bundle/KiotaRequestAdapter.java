@@ -29,6 +29,7 @@ public class KiotaRequestAdapter extends OkHttpRequestAdapter {
      * @param client the http client to use for sending requests.
      * @param observabilityOptions the observability options to use for sending requests.
      */
+    @SuppressWarnings("LambdaLast")
     public KiotaRequestAdapter(
             @Nonnull final AuthenticationProvider authenticationProvider,
             @Nullable final ParseNodeFactory parseNodeFactory,
