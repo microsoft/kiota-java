@@ -18,3 +18,5 @@ include ':components:serialization:text' + suffix
 include ':components:serialization:multipart' + suffix
 include ':components:authentication:azure' + suffix
 include ':components:http:okHttp' + suffix
+include ':components:bundle' + suffix
+
