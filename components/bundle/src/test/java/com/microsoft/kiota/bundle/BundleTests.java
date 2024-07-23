@@ -9,7 +9,7 @@ import com.microsoft.kiota.serialization.SerializationWriterFactoryRegistry;
 
 import org.junit.jupiter.api.Test;
 
-public class BundleTests {
+class BundleTests {
     @Test
     void throwsErrorNullAuthenticationProvider() throws Exception {
         var exception =
