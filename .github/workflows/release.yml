@@ -51,6 +51,7 @@ jobs:
         Copy-Item secring.gpg components/serialization/json/ -Verbose
         Copy-Item secring.gpg components/serialization/multipart/ -Verbose
         Copy-Item secring.gpg components/http/okHttp/ -Verbose
+        Copy-Item secring.gpg components/bundle/ -Verbose
       shell: pwsh
       working-directory: ./
     - name: Build with Gradle
@@ -96,6 +97,7 @@ jobs:
         Copy-Item secring.gpg components/serialization/json/ -Verbose
         Copy-Item secring.gpg components/serialization/multipart/ -Verbose
         Copy-Item secring.gpg components/http/okHttp/ -Verbose
+        Copy-Item secring.gpg components/bundle/ -Verbose
       shell: pwsh
       working-directory: ./
     - name: Build with Gradle
@@ -121,6 +123,9 @@ jobs:
       working-directory: ./
     - name: Publish Release okHttp
       run: ./gradlew --no-daemon :components:http:okHttp:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+      working-directory: ./
+    - name: Publish Release bundle
+      run: ./gradlew --no-daemon :components:bundle:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
       working-directory: ./
     - name: Release
       uses: anton-yurchenko/git-release@v6.0

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-07-25
+
+### Changed
+
+- Adds bundle package for Kiota [#1420](https://github.com/microsoft/kiota-java/issues/1420).
+
 ## [1.1.14] - 2024-06-10
 
 ### Changed
