@@ -11,8 +11,8 @@ dependencies {
 
     api project(':components:abstractions')
     api project(':components:http:okHttp')
-    api project(':components:serialization:json')
-    api project(':components:serialization:text')
-    api project(':components:serialization:multipart')
-    api project(':components:serialization:form')
+    implementation project(':components:serialization:json')
+    implementation project(':components:serialization:text')
+    implementation project(':components:serialization:multipart')
+    implementation project(':components:serialization:form')
 }
