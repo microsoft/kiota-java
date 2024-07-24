@@ -66,6 +66,19 @@ class InMemoryBackingStoreTest {
     }
 
     @Test
+    void RemovesValuePreviouslyInStore() {
+        // Arrange
+        var testBackingStore = new InMemoryBackingStore();
+        // Act
+        testBackingStore.set("name", "Peter Pan");
+        assertFalse(testBackingStore.enumerate().isEmpty());
+        testBackingStore.remove("name");
+        // Assert
+        assertNull(testBackingStore.get("name"));
+        assertTrue(testBackingStore.enumerate().isEmpty());
+    }
+
+    @Test
     void TestsBackingStoreEmbeddedInModel() {
         // Arrange dummy user with initialized backingstore
         var testUser = new TestEntity();

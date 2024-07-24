@@ -185,6 +185,11 @@ public class InMemoryBackingStore implements BackingStore {
         this.subscriptionStore.remove(subscriptionId);
     }
 
+    public void remove(@Nonnull String key) {
+        Objects.requireNonNull(key);
+        this.store.remove(key);
+    }
+
     @Nonnull public String subscribe(@Nonnull final TriConsumer<String, Object, Object> callback) {
         final String subscriptionId = UUID.randomUUID().toString();
         subscribe(subscriptionId, callback);

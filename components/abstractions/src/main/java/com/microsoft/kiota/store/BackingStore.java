@@ -63,6 +63,12 @@ public interface BackingStore {
     void unsubscribe(@Nonnull final String subscriptionId);
 
     /**
+     * Removes a value from the backing store, allowing removing a previously set value. Doesn't trigger any subscription.
+     * @param key The key for which the value should be removed
+     */
+    void remove(@Nonnull final String key);
+
+    /**
      * Clears the data stored in the backing store. Doesn't trigger any subscription.
      */
     void clear();
