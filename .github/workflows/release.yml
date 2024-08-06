@@ -143,6 +143,7 @@ jobs:
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $PACKAGE_VERSION
     - name: Publish Release abstractions #publishing all components at once often results in split staging repos which fails to release
       run: ./gradlew --no-daemon :components:abstractions:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
     - name: Publish Release serialization form
