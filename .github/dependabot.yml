@@ -10,6 +10,7 @@ updates:
     - "/components/serialization/multipart"
     - "/components/authentication/azure"
     - "/components/http/okHttp"
+    - "/components/bundle"
   schedule:
     interval: daily
     time: "09:00" # 9am UTC
@@ -23,6 +24,7 @@ updates:
     - "/components/serialization/multipart/android"
     - "/components/authentication/azure/android"
     - "/components/http/okHttp/android"
+    - "/components/bundle/android"
   schedule:
     interval: daily
     time: "10:00" # 10am UTC. Checked after the core modules to prevent duplicate PRs updating dependencies.gradle files
