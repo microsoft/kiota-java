@@ -102,35 +102,6 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            url = 'https://oss.sonatype.org/content/repositories/snapshots'
-            name = 'sonatypeSnapshot'
-
-            credentials {
-                if (project.rootProject.file('local.properties').exists()) {
-                    Properties properties = new Properties()
-                    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                    username = properties.getProperty('sonatypeUsername')
-                    password = properties.getProperty('sonatypePassword')
-                }
-            }
-        }
-
-        maven {
-            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-            name = 'sonatype'
-
-            credentials {
-                if (project.rootProject.file('local.properties').exists()) {
-                    Properties properties = new Properties()
-                    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                    username = properties.getProperty('sonatypeUsername')
-                    password = properties.getProperty('sonatypePassword')
-                }
-            }
-        }
-    }
 }
 
 signing {
