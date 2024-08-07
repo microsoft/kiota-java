@@ -3,14 +3,15 @@ plugins {
     id "org.sonarqube" version "5.1.0.4882"
     id 'com.github.spotbugs' version '6.0.19'
     id "com.diffplug.spotless" version "6.25.0"
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 sonar {
     properties {
         property "sonar.projectKey", "microsoft_kiota-java"
-    	property "sonar.organization", "microsoft"
-    	property "sonar.host.url", "https://sonarcloud.io"
-		property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/components/**/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.organization", "microsoft"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/components/**/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
 
@@ -21,3 +22,19 @@ subprojects {
 repositories {
     mavenCentral()
 }
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            if (project.rootProject.file('local.properties').exists()) {
+                Properties properties = new Properties()
+                properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                username = properties.getProperty('sonatypeUsername')
+                password = properties.getProperty('sonatypePassword')
+            }
+        }
+    }
+}
+
+group = project.property('mavenGroupId')
+version = "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
