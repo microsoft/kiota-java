@@ -28,6 +28,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
     private final List<String> _scopes;
     private final AllowedHostsValidator _hostValidator;
     private final ObservabilityOptions _observabilityOptions;
+    private final boolean _isCaeEnabled;
     private static final HashSet<String> localhostStrings =
             new HashSet<>(Arrays.asList("localhost", "[::1]", "::1", "127.0.0.1"));
 
@@ -58,6 +59,24 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
             @Nonnull final String[] allowedHosts,
             @Nullable final ObservabilityOptions observabilityOptions,
             @Nonnull final String... scopes) {
+        this(tokenCredential, allowedHosts, observabilityOptions, true, scopes);
+    }
+
+    /**
+     * Creates a new instance of AzureIdentityAccessTokenProvider.
+     * @param tokenCredential The Azure.Identity.TokenCredential implementation to use.
+     * @param allowedHosts The list of allowed hosts for which to request access tokens.
+     * @param observabilityOptions The observability options to use.
+     * @param isCaeEnabled A flag to enable or disable the Continuous Access Evaluation.
+     * @param scopes The scopes to request access tokens for.
+     */
+    @SuppressWarnings("LambdaLast")
+    public AzureIdentityAccessTokenProvider(
+            @Nonnull final TokenCredential tokenCredential,
+            @Nonnull final String[] allowedHosts,
+            @Nullable final ObservabilityOptions observabilityOptions,
+            final boolean isCaeEnabled,
+            @Nonnull final String... scopes) {
         creds = Objects.requireNonNull(tokenCredential, "parameter tokenCredential cannot be null");
 
         if (scopes == null) {
@@ -75,6 +94,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         } else {
             _observabilityOptions = observabilityOptions;
         }
+        _isCaeEnabled = isCaeEnabled;
     }
 
     private static final String ClaimsKey = "claims";
@@ -138,6 +158,7 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
 
             final TokenRequestContext context = new TokenRequestContext();
             context.setScopes(scopes);
+            context.setCaeEnabled(_isCaeEnabled);
             span.setAttribute(
                     "com.microsoft.kiota.authentication.scopes", String.join("|", scopes));
             if (decodedClaim != null && !decodedClaim.isEmpty()) {

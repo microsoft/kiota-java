@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2024-08-08
+
+### Changed
+
+- Continuous Access Evaluation is now enabled by default for Azure Identity.
+
 ## [1.2.0] - 2024-07-25
 
 ### Changed
