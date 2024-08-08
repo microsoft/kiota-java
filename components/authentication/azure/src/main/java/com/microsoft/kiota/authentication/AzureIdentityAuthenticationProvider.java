@@ -36,6 +36,7 @@ public class AzureIdentityAuthenticationProvider extends BaseBearerTokenAuthenti
             @Nonnull final String... scopes) {
         this(tokenCredential, allowedHosts, observabilityOptions, true, scopes);
     }
+
     /**
      * Creates a new instance of AzureIdentityAuthenticationProvider.
      * @param tokenCredential The Azure.Identity.TokenCredential implementation to use.
