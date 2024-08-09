@@ -69,13 +69,13 @@ jobs:
     - name: Inspect contents of local Maven cache
       shell: pwsh
       run: |
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
     - name: Publish to Snapshot Repository
       run: ./gradlew --no-daemon $PREVIEW_TASK
       working-directory: ./
@@ -132,18 +132,18 @@ jobs:
         $patch = $contents | Select-String -Pattern 'mavenPatchVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
         $version = "$major.$minor.$patch-SNAPSHOT"
         echo "Current version is $version"
-        echo "PACKAGE_VERSION=$version" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        echo "PACKAGE_VERSION=$version" >> $Env:GITHUB_ENV
     - name: Inspect contents of local Maven cache
       shell: pwsh
       run: |
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
     - name: Publish Release abstractions #publishing all components at once often results in split staging repos which fails to release
       run: ./gradlew --no-daemon :components:abstractions:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
     - name: Publish Release serialization form
