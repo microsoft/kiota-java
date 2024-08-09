@@ -7,17 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.0] - 2024-08-08
-
-### Changed
-
-- Continuous Access Evaluation is now enabled by default for Azure Identity.
-
-## [1.2.0] - 2024-07-25
+## [1.2.0] - 2024-08-09
 
 ### Changed
 
 - Adds bundle package for Kiota [#1420](https://github.com/microsoft/kiota-java/issues/1420).
+- Continuous Access Evaluation is now enabled by default for Azure Identity.
 
 ## [1.1.14] - 2024-06-10
 
