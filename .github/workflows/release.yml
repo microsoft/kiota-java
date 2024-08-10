@@ -76,12 +76,12 @@ jobs:
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
+        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
     - name: Publish to Snapshot Repository
       run: ./gradlew --no-daemon $PREVIEW_TASK
       working-directory: ./
 
-
-  release-to-maven-central:
+  validate-package-contents:
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: maven_central
@@ -144,22 +144,311 @@ jobs:
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
-    - name: Publish Release abstractions #publishing all components at once often results in split staging repos which fails to release
+
+  release-abstractions-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: validate-package-contents
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/abstractions/ -Verbose
+      shell: pwsh
+    - name: Publish Release abstractions
       run: ./gradlew --no-daemon :components:abstractions:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization form
-      run: ./gradlew --no-daemon :components:serialization:form:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization json
-      run: ./gradlew --no-daemon :components:serialization:json:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization text
-      run: ./gradlew --no-daemon :components:serialization:text:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization multipart
-      run: ./gradlew --no-daemon :components:serialization:multipart:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-authentication-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [validate-package-contents, release-abstractions-maven-central]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/authentication/azure/ -Verbose
+      shell: pwsh
     - name: Publish Release authentication azure
       run: ./gradlew --no-daemon :components:authentication:azure:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-http-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [validate-package-contents, release-abstractions-maven-central]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/http/okHttp/ -Verbose
+      shell: pwsh
     - name: Publish Release okHttp
       run: ./gradlew --no-daemon :components:http:okHttp:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-serialization-form-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [validate-package-contents, release-abstractions-maven-central]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/serialization/form/ -Verbose
+      shell: pwsh
+    - name: Publish Release serialization form
+      run: ./gradlew --no-daemon :components:serialization:form:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-serialization-json-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [validate-package-contents, release-abstractions-maven-central]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/serialization/json/ -Verbose
+      shell: pwsh
+    - name: Publish Release serialization json
+      run: ./gradlew --no-daemon :components:serialization:json:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-serialization-text-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [validate-package-contents, release-abstractions-maven-central]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/serialization/text/ -Verbose
+      shell: pwsh
+    - name: Publish Release serialization text
+      run: ./gradlew --no-daemon :components:serialization:text:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-serialization-multipart-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [validate-package-contents, release-abstractions-maven-central]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/serialization/multipart/ -Verbose
+      shell: pwsh
+    - name: Publish Release serialization multipart
+      run: ./gradlew --no-daemon :components:serialization:multipart:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-bundle-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [
+      validate-package-contents,
+      release-abstractions-maven-central,
+      release-http-maven-central,
+      release-serialization-form-maven-central,
+      release-serialization-json-maven-central,
+      release-serialization-text-maven-central,
+      release-serialization-multipart-maven-central
+    ]
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/bundle/ -Verbose
+      shell: pwsh
     - name: Publish Release bundle
       run: ./gradlew --no-daemon :components:bundle:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-to-github:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: [
+      release-abstractions-maven-central,
+      release-authentication-maven-central,
+      release-http-maven-central,
+      release-serialization-form-maven-central,
+      release-serialization-json-maven-central,
+      release-serialization-text-maven-central,
+      release-serialization-multipart-maven-central,
+      release-bundle-maven-central
+    ]
+    steps:
+    - uses: actions/checkout@v4
     - name: Release
       uses: anton-yurchenko/git-release@v6.0
       env:
