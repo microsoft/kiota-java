@@ -12,6 +12,8 @@ permissions:
 env:
   PREVIEW_TASK: publishToSonatype
   PUBLISH_TASK: publishToSonatype closeSonatypeStagingRepository
+  JAVA_VERSION: 21
+  JAVA_DIST: 'temurin'
 
 jobs:
   release-to-maven-central-snapshot:
@@ -26,8 +28,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST }}
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
@@ -93,8 +95,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
@@ -158,8 +160,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -193,8 +195,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -228,8 +230,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -263,8 +265,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -298,8 +300,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -333,8 +335,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -368,8 +370,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
@@ -411,8 +413,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
