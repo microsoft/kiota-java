@@ -408,18 +408,16 @@ jobs:
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: maven_central
-    needs: [
-      release-abstractions-maven-central,
-      release-authentication-maven-central,
-      release-http-maven-central,
-      release-serialization-form-maven-central,
-      release-serialization-json-maven-central,
-      release-serialization-text-maven-central,
-      release-serialization-multipart-maven-central,
-      release-bundle-maven-central
-    ]
     steps:
     - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
+        cache: gradle
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon build
     - name: Release
       uses: anton-yurchenko/git-release@v6.0
       env:
