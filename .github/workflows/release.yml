@@ -11,13 +11,16 @@ permissions:
 
 env:
   PREVIEW_TASK: publishToSonatype
-  PUBLISH_TASK: publishToSonatype closeSonatypeStagingRepository
+  PUBLISH_TASK: publishToSonatype closeAndReleaseSonatypeStagingRepository
+  JAVA_VERSION: 21
+  JAVA_DIST: 'temurin'
 
 jobs:
   release-to-maven-central-snapshot:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: maven_central_snapshot
+    needs: validate-package-contents
     defaults:
       run:
         working-directory: ./
@@ -26,8 +29,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST }}
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
@@ -54,37 +57,13 @@ jobs:
         Copy-Item secring.gpg components/http/okHttp/ -Verbose
         Copy-Item secring.gpg components/bundle/ -Verbose
       shell: pwsh
-    - name: Publish to local Maven cache
-      run: ./gradlew --no-daemon publishToMavenLocal
-    - name: Get current SNAPSHOT version
-      shell: pwsh
-      run: |
-        $contents = Get-Content gradle.properties -Raw
-        $major = $contents | Select-String -Pattern 'mavenMajorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-        $minor = $contents | Select-String -Pattern 'mavenMinorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-        $patch = $contents | Select-String -Pattern 'mavenPatchVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-        $version = "$major.$minor.$patch-SNAPSHOT"
-        echo "Current version is $version"
-        echo "PACKAGE_VERSION=$version" >> $Env:GITHUB_ENV
-    - name: Inspect contents of local Maven cache
-      shell: pwsh
-      run: |
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
-        .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
     - name: Publish to Snapshot Repository
       run: ./gradlew --no-daemon $PREVIEW_TASK
       working-directory: ./
 
-
-  release-to-maven-central:
-    if: contains(github.ref, 'refs/tags/v')
+  validate-package-contents:
     runs-on: ubuntu-latest
-    environment: maven_central
+    environment: ${{ contains(github.ref, 'refs/tags/v') && 'maven_central' || 'maven_central_snapshot' }}
     defaults:
       run:
         working-directory: ./
@@ -93,8 +72,8 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: 17
-        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
         cache: gradle
     - name: Detect Secrets
       uses: RobertFischer/detect-secrets-action@v2.0.0
@@ -144,22 +123,69 @@ jobs:
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
-    - name: Publish Release abstractions #publishing all components at once often results in split staging repos which fails to release
-      run: ./gradlew --no-daemon :components:abstractions:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization form
-      run: ./gradlew --no-daemon :components:serialization:form:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization json
-      run: ./gradlew --no-daemon :components:serialization:json:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization text
-      run: ./gradlew --no-daemon :components:serialization:text:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release serialization multipart
-      run: ./gradlew --no-daemon :components:serialization:multipart:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release authentication azure
-      run: ./gradlew --no-daemon :components:authentication:azure:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release okHttp
-      run: ./gradlew --no-daemon :components:http:okHttp:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
-    - name: Publish Release bundle
-      run: ./gradlew --no-daemon :components:bundle:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-maven-central:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: maven_central
+    needs: validate-package-contents
+    defaults:
+      run:
+        working-directory: ./
+    strategy:
+      matrix:
+        component-path: [
+          abstractions,
+          authentication/azure,
+          http/okHttp,
+          serialization/form,
+          serialization/json,
+          serialization/text,
+          serialization/multipart,
+          bundle
+        ]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
+        cache: gradle
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.LOCAL_PROPERTIES }}
+        OUTPUT_PATH: 'local.properties'
+    - name: Download file
+      run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
+      shell: pwsh
+      env:
+        ENCODED_VALUE: ${{ secrets.SECRING_GPG }}
+        OUTPUT_PATH: 'secring.gpg'
+    - name: Copy secring
+      run: |
+        Copy-Item secring.gpg components/${{ matrix.component-path }}/ -Verbose
+      shell: pwsh
+    - name: Publish Release abstractions
+      run: |
+        componentTaskPath=$(echo ${{ matrix.component-path }} | tr / :)
+        ./gradlew --no-daemon :components:$componentTaskPath:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+
+  release-to-github:
+    if: contains(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DIST}}
+        cache: gradle
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon build
     - name: Release
       uses: anton-yurchenko/git-release@v6.0
       env:
@@ -168,3 +194,5 @@ jobs:
         PRE_RELEASE: "false"
         CHANGELOG_FILE: "CHANGELOG.md"
         ALLOW_EMPTY_CHANGELOG: "true"
+      with:
+        args: components/**/build/libs/*.jar
