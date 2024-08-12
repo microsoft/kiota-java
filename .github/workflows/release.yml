@@ -176,7 +176,6 @@ jobs:
   release-to-github:
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    environment: maven_central
     steps:
     - uses: actions/checkout@v4
     - name: Setup JDK
