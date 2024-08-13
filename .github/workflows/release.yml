@@ -32,8 +32,10 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: ${{ env.JAVA_DIST }}
         cache: gradle
-    - name: Detect Secrets
-      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Detect secrets
+      run: |
+        pip install detect-secrets
+        git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh
@@ -75,8 +77,10 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: ${{ env.JAVA_DIST}}
         cache: gradle
-    - name: Detect Secrets
-      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Detect secrets
+      run: |
+        pip install detect-secrets
+        git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
     - name: Download file
       run: .\scripts\decodeAndWrite.ps1 -encodedValue $env:ENCODED_VALUE -outputPath $env:OUTPUT_PATH
       shell: pwsh

@@ -18,8 +18,10 @@ jobs:
         java-version: 17
         distribution: 'temurin'
         cache: gradle
-    - name: Detect Secrets
-      uses: RobertFischer/detect-secrets-action@v2.0.0
+    - name: Detect secrets
+      run: |
+        pip install detect-secrets
+        git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
     - name: Build with Gradle
       run: ./gradlew --no-daemon build -Pjava8=true
     - name: Upload Unit Test Results
