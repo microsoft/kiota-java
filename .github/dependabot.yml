@@ -15,6 +15,13 @@ updates:
     interval: daily
     time: "09:00" # 9am UTC
   open-pull-requests-limit: 10
+  groups:
+    junit-dependencies:
+      patterns:
+        - "*junit*"
+    open-telemetry:
+      patterns:
+        - "*opentelemetry*"
 - package-ecosystem: gradle
   directories:
     - "/components/abstractions/android"
@@ -34,3 +41,10 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  groups:
+    junit-dependencies:
+      patterns:
+        - "*junit*"
+    open-telemetry:
+      patterns:
+        - "*opentelemetry*"
