@@ -900,6 +900,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 }
 
                                 @Override
+                                public boolean isOneShot() {
+                                    return true;
+                                }
+
+                                @Override
                                 public long contentLength() throws IOException {
                                     final Set<String> contentLength =
                                             requestInfo.headers.getOrDefault(
