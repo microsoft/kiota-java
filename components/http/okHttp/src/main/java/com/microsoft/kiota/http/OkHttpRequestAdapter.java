@@ -901,7 +901,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public boolean isOneShot() {
-                                    return true;
+                                    return !requestInfo.content.markSupported();
                                 }
 
                                 @Override
@@ -928,6 +928,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                 @Override
                                 public void writeTo(@Nonnull BufferedSink sink) throws IOException {
                                     sink.writeAll(Okio.source(requestInfo.content));
+                                    if (!isOneShot()) {
+                                        requestInfo.content.reset();
+                                    }
                                 }
                             };
 
