@@ -6,6 +6,7 @@ dependencies {
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
+    testImplementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.

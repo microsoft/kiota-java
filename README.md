@@ -21,14 +21,14 @@ Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README
 In `build.gradle` in the `dependencies` section:
 
 ```Groovy
-implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:1.2.0'
-implementation 'com.microsoft.kiota:microsoft-kiota-bundle:1.2.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:1.3.0'
+implementation 'com.microsoft.kiota:microsoft-kiota-bundle:1.3.0'
 implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 ```
 
@@ -40,37 +40,37 @@ In `pom.xml` in the `dependencies` section:
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-abstractions</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-authentication-azure</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-http-okHttp</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-json</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-text</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-form</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-multipart</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>

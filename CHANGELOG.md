@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2024-08-22
+
+### Changed
+
+- Ensure interceptors don't drain request body stream before network call [#2037](https://github.com/microsoftgraph/msgraph-sdk-java/issues/2037)
+
 ## [1.2.0] - 2024-08-09
 
 ### Changed
