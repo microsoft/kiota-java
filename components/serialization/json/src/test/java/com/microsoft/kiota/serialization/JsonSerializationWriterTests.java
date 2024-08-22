@@ -190,10 +190,10 @@ class JsonSerializationWriterTests {
         // Assert
         var expectedString =
                 "{\"id\":\"1\","
-                    + "\"location\":{\"hasReception\":true,\"address\":{\"state\":\"Washington\",\"city\":\"Redmond\",\"street\":\"NE"
+                    + "\"location\":{\"hasReception\":true,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222},"
+                    + "\"address\":{\"state\":\"Washington\",\"city\":\"Redmond\",\"street\":\"NE"
                     + " 36th St\",\"postalCode\":\"98052\"},\"displayName\":\"Microsoft Building"
-                    + " 92\",\"floorCount\":50,\"contact\":null,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222}},"
-                    + "\"keywords\":["
+                    + " 92\",\"floorCount\":50,\"contact\":null},\"keywords\":["
                     + "{\"wssId\":345345345,\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\",\"created\":\"2023-07-26T10:41:26Z\"},"
                     + "{\"wssId\":345345345,\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\",\"created\":\"2023-07-26T10:51:26Z\"}],"
                     + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
