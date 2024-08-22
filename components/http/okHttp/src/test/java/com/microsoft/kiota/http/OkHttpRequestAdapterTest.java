@@ -493,7 +493,7 @@ public class OkHttpRequestAdapterTest {
         requestInformation.setResponseHandler(nativeResponseHandler);
 
         var mockEntity = creatMockEntity();
-        requestAdapter.send(requestInformation, null, (node) -> mockEntity);
+        requestAdapter.send(requestInformation, null, node -> mockEntity);
         var nativeResponse = (Response) nativeResponseHandler.getValue();
         assertNotNull(nativeResponse);
         assertEquals(requestBodyJson, nativeResponse.body().source().readUtf8());
@@ -528,7 +528,7 @@ public class OkHttpRequestAdapterTest {
         try (FileInputStream content = new FileInputStream(testFile)) {
             requestInformation.setStreamContent(content, "application/octet-stream");
             var mockEntity = creatMockEntity();
-            requestAdapter.send(requestInformation, null, (node) -> mockEntity);
+            requestAdapter.send(requestInformation, null, node -> mockEntity);
             var nativeResponse = (Response) nativeResponseHandler.getValue();
             assertNotNull(nativeResponse);
             assertEquals(contentLength, nativeResponse.body().source().readByteArray().length);
