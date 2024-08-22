@@ -53,15 +53,17 @@ class JsonSerializationWriterTests {
                 .getAdditionalData()
                 .put("aliases", aliases); // place a collection in the additional data
 
-        var jsonSerializer = new JsonSerializationWriter();
-        jsonSerializer.writeObjectValue("", testEntity);
-        var contentStream = jsonSerializer.getSerializedContent();
-        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
-        // Assert
-        var expectedString =
-                "{\"aliases\":[\"alias1\",\"alias2\"],\"nickName\":\"Peter"
-                    + " Pan\",\"hasDependents\":true,\"accountBalance\":330.7,\"reportsCount\":4,\"averageScore\":78.142}";
-        assertEquals(expectedString, serializedJsonString);
+        try (final var jsonSerializer = new JsonSerializationWriter()) {
+            jsonSerializer.writeObjectValue("", testEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+            // Assert
+            var expectedString =
+                    "{\"aliases\":[\"alias1\",\"alias2\"],\"nickName\":\"Peter"
+                        + " Pan\",\"hasDependents\":true,\"accountBalance\":330.7,\"reportsCount\":4,\"averageScore\":78.142}";
+            assertEquals(expectedString, serializedJsonString);
+        }
     }
 
     @Test
@@ -79,14 +81,16 @@ class JsonSerializationWriterTests {
                 .getAdditionalData()
                 .put("manager", managerAdditionalData); // place a parsable in the addtionaldata
 
-        var jsonSerializer = new JsonSerializationWriter();
-        jsonSerializer.writeObjectValue("", testEntity);
-        var contentStream = jsonSerializer.getSerializedContent();
-        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
-        // Assert
-        var expectedString =
-                "{\"id\":\"test_id\",\"phones\":[\"123456789\"],\"manager\":{\"id\":\"manager_id\",\"myEnum\":\"VALUE1\"}}";
-        assertEquals(expectedString, serializedJsonString);
+        try (final var jsonSerializer = new JsonSerializationWriter()) {
+            jsonSerializer.writeObjectValue("", testEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+            // Assert
+            var expectedString =
+                    "{\"id\":\"test_id\",\"phones\":[\"123456789\"],\"manager\":{\"id\":\"manager_id\",\"myEnum\":\"VALUE1\"}}";
+            assertEquals(expectedString, serializedJsonString);
+        }
     }
 
     @Test
@@ -182,21 +186,23 @@ class JsonSerializationWriterTests {
                                     }
                                 }));
 
-        var jsonSerializer = new JsonSerializationWriter();
-        jsonSerializer.writeObjectValue("", untypedTestEntity);
-        var contentStream = jsonSerializer.getSerializedContent();
-        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+        try (final var jsonSerializer = new JsonSerializationWriter()) {
+            jsonSerializer.writeObjectValue("", untypedTestEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
 
-        // Assert
-        var expectedString =
-                "{\"id\":\"1\","
-                    + "\"location\":{\"hasReception\":true,\"address\":{\"state\":\"Washington\",\"city\":\"Redmond\",\"street\":\"NE"
-                    + " 36th St\",\"postalCode\":\"98052\"},\"displayName\":\"Microsoft Building"
-                    + " 92\",\"floorCount\":50,\"contact\":null,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222}},"
-                    + "\"keywords\":["
-                    + "{\"wssId\":345345345,\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\",\"created\":\"2023-07-26T10:41:26Z\"},"
-                    + "{\"wssId\":345345345,\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\",\"created\":\"2023-07-26T10:51:26Z\"}],"
-                    + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
-        assertEquals(expectedString, serializedJsonString);
+            // Assert
+            var expectedString =
+                    "{\"id\":\"1\","
+                        + "\"location\":{\"hasReception\":true,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222},"
+                        + "\"address\":{\"state\":\"Washington\",\"city\":\"Redmond\",\"street\":\"NE"
+                        + " 36th St\",\"postalCode\":\"98052\"},\"displayName\":\"Microsoft"
+                        + " Building 92\",\"floorCount\":50,\"contact\":null},\"keywords\":["
+                        + "{\"wssId\":345345345,\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\",\"created\":\"2023-07-26T10:41:26Z\"},"
+                        + "{\"wssId\":345345345,\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\",\"created\":\"2023-07-26T10:51:26Z\"}],"
+                        + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
+            assertEquals(expectedString, serializedJsonString);
+        }
     }
 }
