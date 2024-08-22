@@ -12,7 +12,7 @@ permissions:
 env:
   PREVIEW_TASK: publishToSonatype
   PUBLISH_TASK: publishToSonatype closeAndReleaseSonatypeStagingRepository
-  JAVA_VERSION: 21
+  JAVA_VERSION: 17
   JAVA_DIST: 'temurin'
 
 jobs:
