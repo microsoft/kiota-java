@@ -116,15 +116,6 @@ public class BaseCollectionPaginationCountResponse
     }
 
     /**
-     * Sets the backingStore property value. Stores model information.
-     * @param value Value to set for the backingStore property.
-     */
-    public void setBackingStore(@jakarta.annotation.Nonnull final BackingStore value) {
-        Objects.requireNonNull(value);
-        this.backingStore = value;
-    }
-
-    /**
      * Sets the @odata.count property value. The OdataCount property
      * @param value Value to set for the @odata.count property.
      */
