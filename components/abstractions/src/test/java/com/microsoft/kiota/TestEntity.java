@@ -109,7 +109,8 @@ public class TestEntity implements Parsable, AdditionalDataHolder, BackedModel {
 
     }
 
-    public static TestEntity createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
+    public static TestEntity createFromDiscriminatorValue(
+            @jakarta.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
         return new TestEntity();
     }

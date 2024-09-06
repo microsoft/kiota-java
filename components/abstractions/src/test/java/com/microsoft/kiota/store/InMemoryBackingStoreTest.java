@@ -452,6 +452,10 @@ class InMemoryBackingStoreTest {
         assertEquals(1, changedValues.size());
         assertEquals("value", changedValues.keySet().toArray()[0]);
         assertEquals(10, ((List<?>) changedValues.values().toArray()[0]).size());
-        assertTrue(((TestEntity)((List<?>)changedValues.values().toArray()[0]).get(0)).getBackingStore().enumerate().containsKey("manager"));
+        assertTrue(
+                ((TestEntity) ((List<?>) changedValues.values().toArray()[0]).get(0))
+                        .getBackingStore()
+                        .enumerate()
+                        .containsKey("manager"));
     }
 }
