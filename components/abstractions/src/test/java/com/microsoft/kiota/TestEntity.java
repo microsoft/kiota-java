@@ -13,6 +13,7 @@ import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class TestEntity implements Parsable, AdditionalDataHolder, BackedModel {
@@ -106,5 +107,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder, BackedModel {
     public void serialize(@Nonnull SerializationWriter writer) {
         // TODO Auto-generated method stub
 
+    }
+
+    public static TestEntity createFromDiscriminatorValue(@jakarta.annotation.Nonnull final ParseNode parseNode) {
+        Objects.requireNonNull(parseNode);
+        return new TestEntity();
     }
 }

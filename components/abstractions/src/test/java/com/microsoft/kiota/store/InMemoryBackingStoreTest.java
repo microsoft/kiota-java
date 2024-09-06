@@ -3,6 +3,7 @@ package com.microsoft.kiota.store;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.microsoft.kiota.TestEntity;
+import com.microsoft.kiota.TestEntityCollectionResponse;
 
 import org.junit.jupiter.api.Test;
 
@@ -421,5 +422,36 @@ class InMemoryBackingStoreTest {
         testUser.getBackingStore().setIsInitializationCompleted(true); // initialize
 
         assertEquals(2, invocationCount.get()); // only for setting the id and the colleagues
+    }
+
+    @Test
+    void TestsBackingStoreUpdateToItemInNestedCollectionWithAnotherBackedModel() {
+        // Arrange dummy user with initialized backing store
+        var colleagues = new ArrayList<TestEntity>();
+        for (int i = 0; i < 10; i++) {
+            var colleague = new TestEntity();
+            colleague.setId(UUID.randomUUID().toString());
+            colleague.setBusinessPhones(Arrays.asList(new String[] {"+1 234 567 891"}));
+            colleague.getAdditionalData().put("count", i);
+            colleagues.add(colleague);
+            colleague.getBackingStore().setIsInitializationCompleted(true);
+        }
+
+        var testUserCollectionResponse = new TestEntityCollectionResponse();
+        testUserCollectionResponse.setValue(colleagues);
+        testUserCollectionResponse.getBackingStore().setIsInitializationCompleted(true);
+
+        // Act on the data by making a change
+        var manager = new TestEntity();
+        manager.setId("2fe22fe5-1132-42cf-90f9-1dc17e325a74");
+        manager.getBackingStore().setIsInitializationCompleted(true);
+        testUserCollectionResponse.getValue().get(0).setManager(manager);
+
+        // Assert by retrieving only changed values
+        var changedValues = testUserCollectionResponse.getBackingStore().enumerate();
+        assertEquals(1, changedValues.size());
+        assertEquals("value", changedValues.keySet().toArray()[0]);
+        assertEquals(10, ((List<?>) changedValues.values().toArray()[0]).size());
+        assertTrue(((TestEntity)((List<?>)changedValues.values().toArray()[0]).get(0)).getBackingStore().enumerate().containsKey("manager"));
     }
 }
