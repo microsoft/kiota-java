@@ -61,9 +61,12 @@ public class InMemoryBackingStore implements BackingStore {
                 backedModel
                         .getBackingStore()
                         .setIsInitializationCompleted(value); // propagate initialization
+            } else {
+                // setIsInitializationCompleted() called above already checks for collection
+                // consistency for BackedModels
+                ensureCollectionPropertyIsConsistent(
+                        entry.getKey(), this.store.get(entry.getKey()).getValue1());
             }
-            ensureCollectionPropertyIsConsistent(
-                    entry.getKey(), this.store.get(entry.getKey()).getValue1());
             final Pair<Boolean, Object> updatedValue = wrapper.setValue0(!value);
             entry.setValue(updatedValue);
         }
@@ -89,10 +92,10 @@ public class InMemoryBackingStore implements BackingStore {
         final Map<String, Object> result = new HashMap<>();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            final Object value = this.getValueFromWrapper(entry.getKey(), wrapper);
+            final Object value = this.get(entry.getKey());
 
             if (value != null) {
-                result.put(entry.getKey(), wrapper.getValue1());
+                result.put(entry.getKey(), value);
             } else if (Boolean.TRUE.equals(wrapper.getValue0())) {
                 result.put(entry.getKey(), null);
             }
@@ -242,9 +245,8 @@ public class InMemoryBackingStore implements BackingStore {
             // Call Get<>() on nested properties so that this method may be called recursively to
             // ensure collections are consistent
             final BackedModel backedModel = (BackedModel) nestedObject;
-            for (final String itemKey : backedModel.getBackingStore().enumerate().keySet()) {
-                backedModel.getBackingStore().get(itemKey);
-            }
+            // enumerate() calls get<>() on all properties
+            backedModel.getBackingStore().enumerate();
         }
     }
 }
