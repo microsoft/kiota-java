@@ -30,7 +30,7 @@ public class BackingStoreSerializationWriterProxyFactory extends SerializationWr
                         final BackingStore backingStore = backedModel.getBackingStore();
                         if (backingStore != null) {
                             backingStore.setReturnOnlyChangedValues(false);
-                            backingStore.setIsInitializationCompleted(true);
+                            // backingStore.setIsInitializationCompleted(true);
                         }
                     }
                 },

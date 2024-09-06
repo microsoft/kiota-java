@@ -51,9 +51,15 @@ public class InMemoryBackingStore implements BackingStore {
     private final Map<String, Pair<Boolean, Object>> store = new HashMap<>();
     private final Map<String, TriConsumer<String, Object, Object>> subscriptionStore =
             new HashMap<>();
+    private final String parentSubscriptionId = "x-parent-subscriptionId";
 
     public void setIsInitializationCompleted(final boolean value) {
         this.isInitializationCompleted = value;
+
+        // Propagate status to current store & store's nested items
+        // Handles case where there are already existing items in the store
+        // e.g. generated models initialize additional data & OData type in the constructors
+        markDirtyStatusOfAllProperties(!value);
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
             if (wrapper.getValue1() instanceof BackedModel) {
@@ -62,10 +68,37 @@ public class InMemoryBackingStore implements BackingStore {
                         .getBackingStore()
                         .setIsInitializationCompleted(value); // propagate initialization
             }
-            ensureCollectionPropertyIsConsistent(
-                    entry.getKey(), this.store.get(entry.getKey()).getValue1());
-            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(!value);
-            entry.setValue(updatedValue);
+            if (wrapper.getValue1() instanceof Pair) {
+                Pair<Object, Integer> pair = (Pair<Object, Integer>) wrapper.getValue1();
+
+                if (pair.getValue0() instanceof Collection || pair.getValue0() instanceof Map) {
+                    // Update pair size without changing property's dirty tracking
+                    Integer previousSize = (Integer) pair.getValue1();
+                    Integer currentSize;
+                    Collection<Object> items;
+
+                    if (pair.getValue0() instanceof Collection) {
+                        currentSize = ((Collection<?>) pair.getValue0()).size();
+                        items = (Collection<Object>) pair.getValue0();
+                    } else {
+                        currentSize = ((Map<?, ?>) pair.getValue0()).size();
+                        items = ((Map<?, Object>) pair.getValue0()).values();
+                    }
+                    if (previousSize != currentSize) {
+                        Pair<Object, Integer> updatedValue = pair.setValue1(currentSize);
+                        entry.setValue(new Pair<>(entry.getValue().getValue0(), updatedValue));
+                    }
+
+                    // propagate initialization
+                    for (Object item : items) {
+                        if (item instanceof BackedModel) {
+                            BackingStore store = ((BackedModel) item).getBackingStore();
+                            store.setIsInitializationCompleted(value);
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -75,6 +108,12 @@ public class InMemoryBackingStore implements BackingStore {
 
     public void setReturnOnlyChangedValues(final boolean value) {
         this.returnOnlyChangedValues = value;
+
+        if (value) {
+            if (isNestedBackedModel()) {
+                markDirtyStatusOfAllProperties(true);
+            }
+        }
     }
 
     public boolean getReturnOnlyChangedValues() {
@@ -85,16 +124,28 @@ public class InMemoryBackingStore implements BackingStore {
         this.store.clear();
     }
 
+    /**
+     * Enumerates the properties in the store
+     * Checks collection values for consistency and updates the store if necessary
+     * If the property has changed, the value is returned.
+     * If parent property has changed, all values of child backing stores are returned.
+     */
     @Nonnull public Map<String, Object> enumerate() {
         final Map<String, Object> result = new HashMap<>();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
-            final Pair<Boolean, Object> wrapper = entry.getValue();
-            final Object value = this.getValueFromWrapper(entry.getKey(), wrapper);
+            // Get() checks consistency of collection types and returns the value if it has changed
+            // & returnOnlyChangedValues is true, else null
+            Object value = get(entry.getKey());
+            if (!getReturnOnlyChangedValues()) {
+                result.put(entry.getKey(), value);
+                continue;
+            }
 
-            if (value != null) {
-                result.put(entry.getKey(), wrapper.getValue1());
-            } else if (Boolean.TRUE.equals(wrapper.getValue0())) {
-                result.put(entry.getKey(), null);
+            // get() may return null to mean that the value has not changed
+            // check if value has changed but changed to null
+            if (value != null || entry.getValue().getValue0()) {
+                // value exists and has changed
+                result.put(entry.getKey(), value);
             }
         }
         return result;
@@ -114,18 +165,11 @@ public class InMemoryBackingStore implements BackingStore {
 
     private Object getValueFromWrapper(final String entryKey, final Pair<Boolean, Object> wrapper) {
         if (wrapper != null) {
-            final Boolean hasChanged = wrapper.getValue0();
-            if (!this.returnOnlyChangedValues || Boolean.TRUE.equals(hasChanged)) {
-                if (Boolean.FALSE.equals(
-                        hasChanged)) { // no need property has already been flagged.
-                    ensureCollectionPropertyIsConsistent(entryKey, wrapper.getValue1());
-                }
-                if (wrapper.getValue1() instanceof Pair) {
-                    Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
-                    return collectionTuple.getValue0();
-                }
-                return wrapper.getValue1();
+            if (wrapper.getValue1() instanceof Pair) {
+                Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
+                return collectionTuple.getValue0();
             }
+            return wrapper.getValue1();
         }
         return null;
     }
@@ -134,50 +178,106 @@ public class InMemoryBackingStore implements BackingStore {
     @Nullable public <T> T get(@Nonnull final String key) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> wrapper = this.store.get(key);
-        final Object value = this.getValueFromWrapper(key, wrapper);
+        Object value = this.getValueFromWrapper(key, wrapper);
+
+        if (!getReturnOnlyChangedValues()) {
+            if (value == null) {
+                return null;
+            }
+            try {
+                return (T) value;
+            } catch (ClassCastException ex) {
+                return null;
+            }
+        }
+
+        // Double check collections are consistent in nested BackedModels
+        if (value instanceof BackedModel) {
+            ensureCollectionPropertiesAreConsistent(((BackedModel) value).getBackingStore());
+        }
+        if (value instanceof Collection || value instanceof Map) {
+            // Check that current value is consistent if value is not dirty
+            boolean isPropertyDirty = wrapper.getValue0();
+            if (!isPropertyDirty) {
+                // set() checks size and updates dirty tracking status
+                set(key, value);
+                value = this.getValueFromWrapper(key, this.store.get(key));
+            }
+
+            // Double check collections are consistent in nested BackedModels
+            Collection<Object> items;
+            if (value instanceof Collection) {
+                items = ((Collection<Object>) value);
+            } else {
+                items = ((Map<?, Object>) value).values();
+            }
+            for (Object item : items) {
+                if (item instanceof BackedModel) {
+                    BackingStore store = ((BackedModel) item).getBackingStore();
+                    ensureCollectionPropertiesAreConsistent(store);
+                }
+            }
+        }
+
+        // Fetch latest value if it has been updated
+        Pair<Boolean, Object> latestWrapper = this.store.get(key);
+        Object latestValue = this.getValueFromWrapper(key, wrapper);
+
+        // Return null if value hasn't changed.
+        if (Boolean.FALSE.equals(latestWrapper.getValue0())) {
+            return null;
+        }
+
         try {
-            return (T) value;
+            return (T) latestValue;
         } catch (ClassCastException ex) {
             return null;
         }
     }
 
+    /**
+     * Used to add a property key and value to the store
+     * Used to mark an existing property as dirty if the key already exists. Propagates this state up to the parent BackedModels
+     * by calling subscriptions. Propagates this state down to nested BackedModels and nested collections of BackedModels
+     */
     public <T> void set(@Nonnull final String key, @Nullable final T value) {
         Objects.requireNonNull(key);
+
         Pair<Boolean, Object> valueToAdd = new Pair<>(this.isInitializationCompleted, value);
         if (value instanceof Collection) {
             valueToAdd = valueToAdd.setValue1(new Pair<>(value, ((Collection<?>) value).size()));
-            final Collection<Object> items = (Collection<Object>) value;
-            setupNestedSubscriptions(items, key, value);
         } else if (value instanceof Map) {
             valueToAdd = valueToAdd.setValue1(new Pair<>(value, ((Map<?, ?>) value).size()));
-            final Map<?, Object> items = (Map<?, Object>) value;
-            setupNestedSubscriptions(items.values(), key, value);
-        } else if (value instanceof BackedModel) {
-            final BackedModel backedModel = (BackedModel) value;
-            backedModel
-                    .getBackingStore()
-                    .subscribe(
-                            key,
-                            (keyString, oldObject, newObject) -> {
-                                backedModel
-                                        .getBackingStore()
-                                        .setIsInitializationCompleted(
-                                                false); // All its properties are dirty as the model
-                                // has been touched.
-                                set(key, value);
-                            }); // use property name(key) as subscriptionId to prevent excess
-            // subscription creation in the event this is called again
         }
 
-        final Pair<Boolean, Object> oldValue = this.store.put(key, valueToAdd);
-        for (final TriConsumer<String, Object, Object> callback : this.subscriptionStore.values()) {
-            if (oldValue != null) {
-                callback.accept(key, oldValue.getValue1(), value);
-            } else {
-                callback.accept(key, null, value);
+        if (this.store.containsKey(key)) {
+            // Check if the size of the collection has changed and mark property as dirty
+            if (value instanceof Collection || value instanceof Map) {
+                if (this.store.get(key).getValue1() instanceof Pair) {
+                    Pair<T, Integer> valuePair = (Pair<T, Integer>) this.store.get(key).getValue1();
+                    Integer previousSize = (Integer) valuePair.getValue1();
+                    Integer currentSize = ((Pair<?, Integer>) valueToAdd.getValue1()).getValue1();
+                    if (previousSize != currentSize || valuePair.getValue0() != value) {
+                        // Mark property as dirty
+                        valueToAdd = valueToAdd.setValue0(true);
+                    } else {
+                        valueToAdd = valueToAdd.setValue0(false);
+                        // Update store with new value
+                        this.store.put(key, valueToAdd);
+                        setupNestedSubscriptions(key, value);
+                        // Don't trigger subscriptions if the size hasn't changed
+                        // Parent properties will be wrongly marked as dirty by
+                        // isInitializationCompleted
+                        return;
+                    }
+                }
             }
         }
+
+        // Update store with new value
+        final Pair<Boolean, Object> oldValue = this.store.put(key, valueToAdd);
+        setupNestedSubscriptions(key, value);
+        triggerSubscriptions(key, oldValue, value);
     }
 
     public void unsubscribe(@Nonnull final String subscriptionId) {
@@ -199,52 +299,134 @@ public class InMemoryBackingStore implements BackingStore {
         this.subscriptionStore.put(subscriptionId, callback);
     }
 
+    private <T> void setupNestedSubscriptions(final String key, final T value) {
+        // Propagate subscriptions to nested objects
+        if (value instanceof Collection || value instanceof Map) {
+            Collection<Object> items;
+            if (value instanceof Collection) {
+                items = ((Collection<Object>) value);
+            } else {
+                items = ((Map<?, Object>) value).values();
+            }
+            for (Object item : items) {
+                if (item instanceof BackedModel) {
+                    BackingStore store = ((BackedModel) item).getBackingStore();
+                    setupNestedSubscriptions(store, key, value);
+                }
+            }
+        }
+        if (value instanceof BackedModel) {
+            setupNestedSubscriptions(((BackedModel) value).getBackingStore(), key, value);
+        }
+    }
+
+    /**
+     * Traverses hierarchy of BackedModels registering a subscription
+     *
+     * @param backingStore
+     * @param key
+     * @param value
+     */
     private void setupNestedSubscriptions(
-            final Collection<Object> items, final String key, final Object value) {
-        for (final Object item : items) {
-            if (item instanceof BackedModel) {
-                final BackedModel backedModel = (BackedModel) item;
-                backedModel.getBackingStore().setIsInitializationCompleted(false);
-                backedModel
-                        .getBackingStore()
-                        .subscribe(key, (keyString, oldObject, newObject) -> set(key, value));
+            final BackingStore backingStore, final String key, final Object value) {
+
+        setupDirtyTrackingSubscription(backingStore, key, value);
+
+        boolean previousReturnOnlyChangedValues = backingStore.getReturnOnlyChangedValues();
+        // ensure all values are returned
+        backingStore.setReturnOnlyChangedValues(false);
+
+        for (final Map.Entry<String, Object> entry : backingStore.enumerate().entrySet()) {
+            if (entry.getValue() != null) {
+                if (entry.getValue() instanceof BackedModel) {
+                    BackingStore store = ((BackedModel) entry.getValue()).getBackingStore();
+                    setupNestedSubscriptions(store, key, value);
+                }
+                if (entry.getValue() instanceof Collection || entry.getValue() instanceof Map) {
+                    Object[] items;
+                    if (entry.getValue() instanceof Collection) {
+                        items = ((Collection<?>) entry.getValue()).toArray();
+                    } else {
+                        items = ((Map<?, Object>) entry.getValue()).values().toArray();
+                    }
+                    for (Object item : items) {
+                        if (item instanceof BackedModel) {
+                            BackingStore store = ((BackedModel) item).getBackingStore();
+                            setupNestedSubscriptions(store, key, value);
+                        }
+                    }
+                }
+            }
+        }
+        backingStore.setReturnOnlyChangedValues(previousReturnOnlyChangedValues);
+    }
+
+    private void setupDirtyTrackingSubscription(
+            final BackingStore backingStore, final String key, final Object value) {
+        if (backingStore != null) {
+            backingStore.subscribe(
+                    // use property name(key) as subscriptionId to prevent excess
+                    // subscription creation in the event this is called again
+                    parentSubscriptionId, (keyString, oldObject, newObject) -> set(key, value));
+        }
+    }
+
+    private void ensureCollectionPropertiesAreConsistent(BackingStore backingStore) {
+        boolean previousReturnOnlyChangedValues = backingStore.getReturnOnlyChangedValues();
+        // ensure all values are returned
+        backingStore.setReturnOnlyChangedValues(false);
+
+        for (final Map.Entry<String, Object> entry : backingStore.enumerate().entrySet()) {
+            if (entry.getValue() != null) {
+                if (entry.getValue() instanceof BackedModel) {
+                    BackingStore store = ((BackedModel) entry.getValue()).getBackingStore();
+                    ensureCollectionPropertiesAreConsistent(store);
+                }
+                if (entry.getValue() instanceof Collection || entry.getValue() instanceof Map) {
+                    // call set() again to mark property as dirty if the collection has changed
+                    // set() also triggers necessary subscriptions
+                    backingStore.set(entry.getKey(), entry.getValue());
+
+                    Object[] items;
+                    if (entry.getValue() instanceof Collection) {
+                        items = ((Collection<?>) entry.getValue()).toArray();
+                    } else {
+                        items = ((Map<?, Object>) entry.getValue()).values().toArray();
+                    }
+                    for (Object item : items) {
+                        if (item instanceof BackedModel) {
+                            BackingStore store = ((BackedModel) item).getBackingStore();
+                            ensureCollectionPropertiesAreConsistent(store);
+                        }
+                    }
+                }
+            }
+        }
+
+        backingStore.setReturnOnlyChangedValues(previousReturnOnlyChangedValues);
+    }
+
+    private void triggerSubscriptions(
+            final String key, final Pair<Boolean, Object> oldValue, final Object value) {
+        // Trigger subscriptions to parent items if necessary
+        for (final TriConsumer<String, Object, Object> callback : this.subscriptionStore.values()) {
+            if (oldValue != null) {
+                callback.accept(key, oldValue.getValue1(), value);
+            } else {
+                callback.accept(key, null, value);
             }
         }
     }
 
-    private void ensureCollectionPropertyIsConsistent(final String key, final Object storeItem) {
-        if (storeItem instanceof Pair) { // check if we put in a collection annotated with the size
-            final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) storeItem;
-            Object[] items;
-            if (collectionTuple.getValue0() instanceof Collection) {
-                items = ((Collection<Object>) collectionTuple.getValue0()).toArray();
-            } else { // it is a map
-                items = ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
-            }
-
-            for (final Object item : items) {
-                touchNestedProperties(item); // call get on nested properties
-            }
-
-            if (collectionTuple.getValue1()
-                    != items.length) { // and the size has changed since we last updated
-                set(
-                        key,
-                        collectionTuple.getValue0()); // ensure the store is notified the collection
-                // property is "dirty"
-            }
-        }
-        touchNestedProperties(storeItem); // call get on nested properties
+    private boolean isNestedBackedModel() {
+        return this.subscriptionStore.containsKey(parentSubscriptionId);
     }
 
-    private void touchNestedProperties(final Object nestedObject) {
-        if (nestedObject instanceof BackedModel) {
-            // Call Get<>() on nested properties so that this method may be called recursively to
-            // ensure collections are consistent
-            final BackedModel backedModel = (BackedModel) nestedObject;
-            for (final String itemKey : backedModel.getBackingStore().enumerate().keySet()) {
-                backedModel.getBackingStore().get(itemKey);
-            }
+    private void markDirtyStatusOfAllProperties(boolean dirty) {
+        for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
+            Pair<Boolean, Object> value = entry.getValue();
+            final Pair<Boolean, Object> updatedValue = value.setValue0(dirty);
+            entry.setValue(updatedValue);
         }
     }
 }

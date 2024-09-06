@@ -324,7 +324,7 @@ class InMemoryBackingStoreTest {
         testUser.setColleagues(colleagues);
 
         testUser.getBackingStore().setIsInitializationCompleted(true);
-        testUser.getColleagues().get(0).getBackingStore().setIsInitializationCompleted(true);
+        // testUser.getColleagues().get(0).getBackingStore().setIsInitializationCompleted(true);
         // Act on the data by making a change in the nested Ibackedmodel collection item
         testUser.getColleagues().get(0).getBusinessPhones().add("+9 876 543 219");
         // Assert by retrieving only changed values
