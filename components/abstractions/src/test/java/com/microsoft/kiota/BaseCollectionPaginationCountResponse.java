@@ -69,12 +69,12 @@ public class BaseCollectionPaginationCountResponse
                 new HashMap<String, java.util.function.Consumer<ParseNode>>(2);
         deserializerMap.put(
                 "@odata.count",
-                (n) -> {
+                n -> {
                     this.setOdataCount(n.getLongValue());
                 });
         deserializerMap.put(
                 "@odata.nextLink",
-                (n) -> {
+                n -> {
                     this.setOdataNextLink(n.getStringValue());
                 });
         return deserializerMap;
