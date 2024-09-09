@@ -56,7 +56,8 @@ public class InMemoryBackingStore implements BackingStore {
         this.isInitializationCompleted = value;
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(!value);
+            Pair<Boolean, Object> updatedValue =
+                    new Pair<Boolean, Object>(!value, wrapper.getValue1());
 
             if (wrapper.getValue1() instanceof BackedModel) {
                 BackedModel backedModel = (BackedModel) wrapper.getValue1();
@@ -81,7 +82,9 @@ public class InMemoryBackingStore implements BackingStore {
 
                 if (collectionTuple.getValue1()
                         != items.length) { // and the size has changed since we last updated
-                    updatedValue.setValue1(collectionTuple.setValue1(items.length));
+                    updatedValue =
+                            new Pair<Boolean, Object>(
+                                    !value, new Pair<>(collectionTuple.getValue0(), items.length));
                 }
             }
             entry.setValue(updatedValue);
@@ -131,20 +134,13 @@ public class InMemoryBackingStore implements BackingStore {
         return result;
     }
 
-    private Object getValueFromWrapper(final String entryKey, final Pair<Boolean, Object> wrapper) {
+    private Object getValueFromWrapper(final Pair<Boolean, Object> wrapper) {
         if (wrapper != null) {
-            final Boolean hasChanged = wrapper.getValue0();
-            if (!this.returnOnlyChangedValues || Boolean.TRUE.equals(hasChanged)) {
-                if (Boolean.FALSE.equals(
-                        hasChanged)) { // no need property has already been flagged.
-                    ensureCollectionPropertyIsConsistent(entryKey, wrapper.getValue1());
-                }
-                if (wrapper.getValue1() instanceof Pair) {
-                    Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
-                    return collectionTuple.getValue0();
-                }
-                return wrapper.getValue1();
+            if (wrapper.getValue1() instanceof Pair) {
+                Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
+                return collectionTuple.getValue0();
             }
+            return wrapper.getValue1();
         }
         return null;
     }
@@ -153,7 +149,17 @@ public class InMemoryBackingStore implements BackingStore {
     @Nullable public <T> T get(@Nonnull final String key) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> wrapper = this.store.get(key);
-        final Object value = this.getValueFromWrapper(key, wrapper);
+        final Object value = this.getValueFromWrapper(wrapper);
+
+        boolean hasChanged = wrapper.getValue0();
+        if (getReturnOnlyChangedValues() && !hasChanged) {
+            ensureCollectionPropertyIsConsistent(key, wrapper.getValue1());
+            hasChanged = this.store.get(key).getValue0();
+            if (!hasChanged) {
+                return null;
+            }
+        }
+
         try {
             return (T) value;
         } catch (ClassCastException ex) {
