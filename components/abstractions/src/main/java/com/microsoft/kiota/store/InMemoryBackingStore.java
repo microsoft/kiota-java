@@ -56,18 +56,34 @@ public class InMemoryBackingStore implements BackingStore {
         this.isInitializationCompleted = value;
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
+            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(!value);
+
             if (wrapper.getValue1() instanceof BackedModel) {
                 BackedModel backedModel = (BackedModel) wrapper.getValue1();
                 backedModel
                         .getBackingStore()
                         .setIsInitializationCompleted(value); // propagate initialization
-            } else {
+            }
+            if (wrapper.getValue1() instanceof Pair) {
                 // setIsInitializationCompleted() called above already checks for collection
                 // consistency for BackedModels
-                ensureCollectionPropertyIsConsistent(
-                        entry.getKey(), this.store.get(entry.getKey()).getValue1());
+                final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
+                Object[] items;
+                if (collectionTuple.getValue0() instanceof Collection) {
+                    items = ((Collection<Object>) collectionTuple.getValue0()).toArray();
+                } else { // it is a map
+                    items = ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
+                }
+
+                for (final Object item : items) {
+                    touchNestedProperties(item); // call get on nested properties
+                }
+
+                if (collectionTuple.getValue1()
+                        != items.length) { // and the size has changed since we last updated
+                    updatedValue.setValue1(collectionTuple.setValue1(items.length));
+                }
             }
-            final Pair<Boolean, Object> updatedValue = wrapper.setValue0(!value);
             entry.setValue(updatedValue);
         }
     }

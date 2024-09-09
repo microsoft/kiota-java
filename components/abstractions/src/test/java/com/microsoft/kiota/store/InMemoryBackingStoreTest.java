@@ -439,15 +439,19 @@ class InMemoryBackingStoreTest {
 
         var testUserCollectionResponse = new TestEntityCollectionResponse();
         testUserCollectionResponse.setValue(colleagues);
+        // After set(), while adding nested subscriptions, all values in the collection now have
+        // initializationCompleted=false & their properties are all dirty
         testUserCollectionResponse.getBackingStore().setIsInitializationCompleted(true);
 
         // Act on the data by making a change
         var manager = new TestEntity();
         manager.setId("2fe22fe5-1132-42cf-90f9-1dc17e325a74");
         manager.getBackingStore().setIsInitializationCompleted(true);
-        testUserCollectionResponse.getValue().get(0).setManager(manager);
+        var collectionValues = testUserCollectionResponse.getValue();
+        collectionValues.get(0).setManager(manager);
 
         // Assert by retrieving only changed values
+        testUserCollectionResponse.getBackingStore().setReturnOnlyChangedValues(true);
         var changedValues = testUserCollectionResponse.getBackingStore().enumerate();
         assertEquals(1, changedValues.size());
         assertEquals("value", changedValues.keySet().toArray()[0]);
