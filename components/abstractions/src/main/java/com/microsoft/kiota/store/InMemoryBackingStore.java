@@ -56,8 +56,7 @@ public class InMemoryBackingStore implements BackingStore {
         this.isInitializationCompleted = value;
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            Pair<Boolean, Object> updatedValue =
-                    new Pair<>(!value, wrapper.getValue1());
+            Pair<Boolean, Object> updatedValue = new Pair<>(!value, wrapper.getValue1());
 
             if (wrapper.getValue1() instanceof BackedModel) {
                 BackedModel backedModel = (BackedModel) wrapper.getValue1();
@@ -84,9 +83,7 @@ public class InMemoryBackingStore implements BackingStore {
                         != items.length) { // and the size has changed since we last updated
                     updatedValue =
                             new Pair<>(
-                                !value,
-                                new Pair<>(collectionTuple.getValue0(), items.length)
-                            );
+                                    !value, new Pair<>(collectionTuple.getValue0(), items.length));
                 }
             }
             entry.setValue(updatedValue);
