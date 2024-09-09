@@ -149,6 +149,9 @@ public class InMemoryBackingStore implements BackingStore {
     @Nullable public <T> T get(@Nonnull final String key) {
         Objects.requireNonNull(key);
         final Pair<Boolean, Object> wrapper = this.store.get(key);
+        if (wrapper == null) {
+            return null;
+        }
         final Object value = this.getValueFromWrapper(wrapper);
 
         boolean hasChanged = wrapper.getValue0();
