@@ -235,8 +235,8 @@ public class InMemoryBackingStore implements BackingStore {
     }
 
     private void ensureCollectionPropertiesAreConsistent() {
-        HashMap<String, Object> currentStoreDirtyCollections = new HashMap<>();
-        List<BackedModel> nestedBackedModelsToEnumerate = new ArrayList<>();
+        final HashMap<String, Object> currentStoreDirtyCollections = new HashMap<>();
+        final List<BackedModel> nestedBackedModelsToEnumerate = new ArrayList<>();
 
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
@@ -260,7 +260,7 @@ public class InMemoryBackingStore implements BackingStore {
         }
 
         // Only update parent properties that haven't been marked as dirty by the nested models
-        for (Map.Entry<String, Object> entry : currentStoreDirtyCollections.entrySet()) {
+        for (final Map.Entry<String, Object> entry : currentStoreDirtyCollections.entrySet()) {
             // Always set() if there were no nested models
             if (nestedBackedModelsToEnumerate.isEmpty()) {
                 set(entry.getKey(), entry.getValue());
