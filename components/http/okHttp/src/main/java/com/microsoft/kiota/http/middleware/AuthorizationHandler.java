@@ -1,19 +1,20 @@
 package com.microsoft.kiota.http.middleware;
 
+import static com.microsoft.kiota.http.TelemetrySemanticConventions.HTTP_REQUEST_RESEND_COUNT;
+
 import com.microsoft.kiota.RequestInformation;
 import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
 import com.microsoft.kiota.http.ContinuousAccessEvaluationClaims;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static com.microsoft.kiota.http.TelemetrySemanticConventions.HTTP_REQUEST_RESEND_COUNT;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -71,7 +72,8 @@ public class AuthorizationHandler implements Interceptor {
             span.addEvent("com.microsoft.kiota.handler.authorization.challenge_received");
 
             // We cannot replay one-shot requests after claims challenge
-            boolean isRequestBodyOneShot = request != null && request.body() != null && request.body().isOneShot();
+            boolean isRequestBodyOneShot =
+                    request != null && request.body() != null && request.body().isOneShot();
             if (isRequestBodyOneShot) {
                 return response;
             }
@@ -100,7 +102,7 @@ public class AuthorizationHandler implements Interceptor {
         final RequestInformation requestInformation = getRequestInformation(request);
         authenticationProvider.authenticateRequest(
                 requestInformation, additionalAuthenticationContext);
-        // Update native request with headers added to requestInformation
+        // Update native request with auth header added to requestInformation
         if (requestInformation.headers.containsKey(authorizationHeaderKey)) {
             span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
             Set<String> authorizationHeaderValues =
