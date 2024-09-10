@@ -58,7 +58,7 @@ public class InMemoryBackingStore implements BackingStore {
         ensureCollectionPropertiesAreConsistent();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            Pair<Boolean, Object> updatedValue = new Pair<>(!value, wrapper.getValue1());
+            final Pair<Boolean, Object> updatedValue = new Pair<>(!value, wrapper.getValue1());
             entry.setValue(updatedValue);
 
             if (wrapper.getValue1() instanceof BackedModel) {
