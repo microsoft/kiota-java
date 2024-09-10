@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fix InMemoryBackingStore by preventing updates to underlying store's Map while iterating over it [#2106](https://github.com/microsoftgraph/msgraph-sdk-java/issues/2106)
- - Use concurrent HashMap for In memory backing store registry to avoid race conditions.
+- Use concurrent HashMap for In memory backing store registry to avoid race conditions.
 
 ## [1.3.0] - 2024-08-22
 

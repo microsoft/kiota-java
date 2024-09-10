@@ -462,4 +462,20 @@ class InMemoryBackingStoreTest {
                         .enumerate()
                         .containsKey("manager"));
     }
+
+    @Test
+    void testLargeArraysPerformsWell() {
+        // Arrange
+        var testBackingStore = new InMemoryBackingStore();
+        // Act
+        assertTrue(testBackingStore.enumerate().isEmpty());
+        var testArray = new int[100000000];
+        testBackingStore.set("values", testArray);
+        long startTimeMillis = System.currentTimeMillis();
+        testBackingStore.setIsInitializationCompleted(true);
+        long timeTakenMillis = System.currentTimeMillis() - startTimeMillis;
+
+        // Assert
+        assertTrue(timeTakenMillis < 1);
+    }
 }
