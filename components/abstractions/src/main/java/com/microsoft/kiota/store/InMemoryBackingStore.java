@@ -54,9 +54,11 @@ public class InMemoryBackingStore implements BackingStore {
 
     public void setIsInitializationCompleted(final boolean value) {
         this.isInitializationCompleted = value;
+        ensureCollectionPropertiesAreConsistent();
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
             Pair<Boolean, Object> updatedValue = new Pair<>(!value, wrapper.getValue1());
+            entry.setValue(updatedValue);
 
             if (wrapper.getValue1() instanceof BackedModel) {
                 BackedModel backedModel = (BackedModel) wrapper.getValue1();
@@ -65,28 +67,18 @@ public class InMemoryBackingStore implements BackingStore {
                         .setIsInitializationCompleted(value); // propagate initialization
             }
             if (wrapper.getValue1() instanceof Pair) {
-                // setIsInitializationCompleted() called above already checks for collection
-                // consistency for BackedModels
                 final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
-                Object[] items;
-                if (collectionTuple.getValue0() instanceof Collection) {
-                    items = ((Collection<Object>) collectionTuple.getValue0()).toArray();
-                } else { // it is a map
-                    items = ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
-                }
+                Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
 
                 for (final Object item : items) {
-                    touchNestedProperties(item); // call get on nested properties
-                }
+                    if (!(item instanceof BackedModel)) break;
 
-                if (collectionTuple.getValue1()
-                        != items.length) { // and the size has changed since we last updated
-                    updatedValue =
-                            new Pair<>(
-                                    !value, new Pair<>(collectionTuple.getValue0(), items.length));
+                    BackedModel backedModel = (BackedModel) item;
+                    backedModel
+                            .getBackingStore()
+                            .setIsInitializationCompleted(value); // propagate initialization
                 }
             }
-            entry.setValue(updatedValue);
         }
     }
 
@@ -155,7 +147,7 @@ public class InMemoryBackingStore implements BackingStore {
 
         boolean hasChanged = wrapper.getValue0();
         if (getReturnOnlyChangedValues() && !hasChanged) {
-            ensureCollectionPropertyIsConsistent(key, wrapper.getValue1());
+            ensureCollectionPropertiesAreConsistent();
             hasChanged = this.store.get(key).getValue0();
             if (!hasChanged) {
                 return null;
@@ -239,38 +231,50 @@ public class InMemoryBackingStore implements BackingStore {
         }
     }
 
-    private void ensureCollectionPropertyIsConsistent(final String key, final Object storeItem) {
-        if (storeItem instanceof Pair) { // check if we put in a collection annotated with the size
-            final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) storeItem;
-            Object[] items;
-            if (collectionTuple.getValue0() instanceof Collection) {
-                items = ((Collection<Object>) collectionTuple.getValue0()).toArray();
-            } else { // it is a map
-                items = ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
-            }
+    private void ensureCollectionPropertiesAreConsistent() {
+        HashMap<String, Object> currentStoreDirtyCollections = new HashMap<>();
+        List<BackedModel> nestedBackedModelsToEnumerate = new ArrayList<>();
 
-            for (final Object item : items) {
-                touchNestedProperties(item); // call get on nested properties
-            }
-
-            if (collectionTuple.getValue1()
-                    != items.length) { // and the size has changed since we last updated
-                set(
-                        key,
-                        collectionTuple.getValue0()); // ensure the store is notified the collection
-                // property is "dirty"
+        for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
+            final Pair<Boolean, Object> wrapper = entry.getValue();
+            if (wrapper.getValue1() instanceof Pair) {
+                final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
+                Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
+                for (Object item : items) {
+                    if (!(item instanceof BackedModel)) break;
+                    nestedBackedModelsToEnumerate.add((BackedModel) item);
+                }
+                if (collectionTuple.getValue1()
+                        != items.length) { // and the size has changed since we last updated
+                    currentStoreDirtyCollections.put(entry.getKey(), collectionTuple.getValue0());
+                }
             }
         }
-        touchNestedProperties(storeItem); // call get on nested properties
+
+        // Enumerate nested backed models first since they may trigger the parent to be dirty
+        for (BackedModel nestedBackedModel : nestedBackedModelsToEnumerate) {
+            nestedBackedModel.getBackingStore().enumerate();
+        }
+
+        // Only update parent properties that haven't been marked as dirty by the nested models
+        for (Map.Entry<String, Object> entry : currentStoreDirtyCollections.entrySet()) {
+            // Always set() if there were no nested models
+            if (nestedBackedModelsToEnumerate.isEmpty()) {
+                set(entry.getKey(), entry.getValue());
+                continue;
+            }
+            boolean hasChanged = this.store.get(entry.getKey()).getValue0();
+            if (!hasChanged) {
+                set(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
-    private void touchNestedProperties(final Object nestedObject) {
-        if (nestedObject instanceof BackedModel) {
-            // Call Get<>() on nested properties so that this method may be called recursively to
-            // ensure collections are consistent
-            final BackedModel backedModel = (BackedModel) nestedObject;
-            // enumerate() calls get<>() on all properties
-            backedModel.getBackingStore().enumerate();
+    private Object[] getObjectArrayFromCollectionWrapper(final Pair<?, Integer> collectionTuple) {
+        if (collectionTuple.getValue0() instanceof Collection) {
+            return ((Collection<Object>) collectionTuple.getValue0()).toArray();
+        } else { // it is a map
+            return ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
         }
     }
 }
