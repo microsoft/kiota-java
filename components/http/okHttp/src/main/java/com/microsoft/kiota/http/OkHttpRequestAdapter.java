@@ -753,11 +753,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return null;
     }
 
-    private static final Pattern bearerPattern =
-            Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
-    private static final Pattern claimsPattern =
-            Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-
     /** Key used for events when an authentication challenge is returned by the API */
     @Nonnull public static final String authenticateChallengedEventKey =
             "com.microsoft.kiota.authenticate_challenge_received";
@@ -804,26 +799,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 && (claims == null || claims.isEmpty())
                 && // we avoid infinite loops and retry only once
                 (requestInfo.content == null || requestInfo.content.markSupported())) {
-            final List<String> authenticateHeader = response.headers("WWW-Authenticate");
-            if (!authenticateHeader.isEmpty()) {
-                String rawHeaderValue = null;
-                for (final String authenticateEntry : authenticateHeader) {
-                    final Matcher matcher = bearerPattern.matcher(authenticateEntry);
-                    if (matcher.matches()) {
-                        rawHeaderValue = authenticateEntry.replaceFirst("^Bearer\\s", "");
-                        break;
-                    }
-                }
-                if (rawHeaderValue != null) {
-                    final String[] parameters = rawHeaderValue.split(",");
-                    for (final String parameter : parameters) {
-                        final Matcher matcher = claimsPattern.matcher(parameter);
-                        if (matcher.matches()) {
-                            return matcher.group(1);
-                        }
-                    }
-                }
-            }
+            return ContinuousAccessEvaluationClaims.getClaimsFromResponse(response);
         }
         return null;
     }
