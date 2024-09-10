@@ -67,7 +67,7 @@ public class InMemoryBackingStore implements BackingStore {
                         .getBackingStore()
                         .setIsInitializationCompleted(value); // propagate initialization
             }
-            if (wrapper.getValue1() instanceof Pair) {
+            if (isCollectionValue(wrapper)) {
                 final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
                 Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
 
@@ -127,14 +127,14 @@ public class InMemoryBackingStore implements BackingStore {
     }
 
     private Object getValueFromWrapper(final Pair<Boolean, Object> wrapper) {
-        if (wrapper != null) {
-            if (wrapper.getValue1() instanceof Pair) {
-                Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
-                return collectionTuple.getValue0();
-            }
-            return wrapper.getValue1();
+        if (wrapper == null) {
+            return null;
         }
-        return null;
+        if (isCollectionValue(wrapper)) {
+            Pair<?, ?> collectionTuple = (Pair<?, ?>) wrapper.getValue1();
+            return collectionTuple.getValue0();
+        }
+        return wrapper.getValue1();
     }
 
     @SuppressWarnings("unchecked")
@@ -148,8 +148,10 @@ public class InMemoryBackingStore implements BackingStore {
 
         boolean hasChanged = wrapper.getValue0();
         if (getReturnOnlyChangedValues() && !hasChanged) {
-            ensureCollectionPropertiesAreConsistent();
-            hasChanged = this.store.get(key).getValue0();
+            if (isCollectionValue(wrapper)) {
+                ensureCollectionPropertiesAreConsistent();
+                hasChanged = this.store.get(key).getValue0();
+            }
             if (!hasChanged) {
                 return null;
             }
@@ -238,7 +240,7 @@ public class InMemoryBackingStore implements BackingStore {
 
         for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
             final Pair<Boolean, Object> wrapper = entry.getValue();
-            if (wrapper.getValue1() instanceof Pair) {
+            if (isCollectionValue(wrapper)) {
                 final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
                 Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
                 for (Object item : items) {
@@ -272,10 +274,21 @@ public class InMemoryBackingStore implements BackingStore {
     }
 
     private Object[] getObjectArrayFromCollectionWrapper(final Pair<?, Integer> collectionTuple) {
-        if (collectionTuple.getValue0() instanceof Collection) {
-            return ((Collection<Object>) collectionTuple.getValue0()).toArray();
-        } else { // it is a map
-            return ((Map<?, Object>) collectionTuple.getValue0()).values().toArray();
+        if (collectionTuple == null) {
+            throw new IllegalArgumentException("collectionTuple cannot be null");
         }
+        if (collectionTuple.getValue0() instanceof Collection) {
+            final Collection<?> items = (Collection<?>) collectionTuple.getValue0();
+            return items.toArray();
+        }
+        if (collectionTuple.getValue0() instanceof Map) {
+            final Map<?, ?> items = (Map<?, ?>) collectionTuple.getValue0();
+            return items.values().toArray();
+        }
+        throw new IllegalArgumentException("collectionTuple must be a Collection or a Map");
+    }
+
+    private boolean isCollectionValue(final Pair<Boolean, Object> wrapper) {
+        return wrapper.getValue1() instanceof Pair;
     }
 }
