@@ -243,7 +243,7 @@ public class InMemoryBackingStore implements BackingStore {
             if (isCollectionValue(wrapper)) {
                 final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
                 Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
-                for (Object item : items) {
+                for (final Object item : items) {
                     if (!(item instanceof BackedModel)) break;
                     nestedBackedModelsToEnumerate.add((BackedModel) item);
                 }
