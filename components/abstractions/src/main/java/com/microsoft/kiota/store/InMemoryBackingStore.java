@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** In-memory implementation of the backing store. Allows for dirty tracking of changes. */
 public class InMemoryBackingStore implements BackingStore {
@@ -48,9 +49,9 @@ public class InMemoryBackingStore implements BackingStore {
 
     private boolean isInitializationCompleted = true;
     private boolean returnOnlyChangedValues;
-    private final Map<String, Pair<Boolean, Object>> store = new HashMap<>();
+    private final Map<String, Pair<Boolean, Object>> store = new ConcurrentHashMap<>();
     private final Map<String, TriConsumer<String, Object, Object>> subscriptionStore =
-            new HashMap<>();
+            new ConcurrentHashMap<>();
 
     public void setIsInitializationCompleted(final boolean value) {
         this.isInitializationCompleted = value;
