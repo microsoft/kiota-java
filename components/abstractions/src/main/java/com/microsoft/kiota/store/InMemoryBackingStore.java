@@ -70,14 +70,19 @@ public class InMemoryBackingStore implements BackingStore {
             if (isCollectionValue(wrapper)) {
                 final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
                 Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
+                final boolean isCollection = collectionTuple.getValue0() instanceof Collection;
 
-                for (final Object item : items) {
-                    if (!(item instanceof BackedModel)) break;
-
-                    BackedModel backedModel = (BackedModel) item;
-                    backedModel
-                            .getBackingStore()
-                            .setIsInitializationCompleted(value); // propagate initialization
+                // No need to iterate over collection if first item is not BackedModel
+                if ((isCollection && items.length != 0 && items[0] instanceof BackedModel)
+                        || !isCollection) {
+                    for (final Object item : items) {
+                        if (item instanceof BackedModel) {
+                            BackedModel backedModel = (BackedModel) item;
+                            backedModel
+                                    .getBackingStore()
+                                    .setIsInitializationCompleted(value); // propagate initialization
+                        }
+                    }
                 }
             }
         }
@@ -89,6 +94,32 @@ public class InMemoryBackingStore implements BackingStore {
 
     public void setReturnOnlyChangedValues(final boolean value) {
         this.returnOnlyChangedValues = value;
+        // propagate to nested backed models
+        for (final Map.Entry<String, Pair<Boolean, Object>> entry : this.store.entrySet()) {
+            final Pair<Boolean, Object> wrapper = entry.getValue();
+            if (wrapper.getValue1() instanceof BackedModel) {
+                final BackedModel item = (BackedModel) wrapper.getValue1();
+                item.getBackingStore().setReturnOnlyChangedValues(value);
+            }
+            if (isCollectionValue(wrapper)) {
+                final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
+                Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
+                final boolean isCollection = collectionTuple.getValue0() instanceof Collection;
+
+                // No need to iterate over collection if first item is not BackedModel
+                if ((isCollection && items.length != 0 && items[0] instanceof BackedModel)
+                        || !isCollection) {
+                    for (final Object item : items) {
+                        if (item instanceof BackedModel) {
+                            BackedModel backedModel = (BackedModel) item;
+                            backedModel
+                                    .getBackingStore()
+                                    .setReturnOnlyChangedValues(value);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public boolean getReturnOnlyChangedValues() {
@@ -243,9 +274,16 @@ public class InMemoryBackingStore implements BackingStore {
             if (isCollectionValue(wrapper)) {
                 final Pair<?, Integer> collectionTuple = (Pair<?, Integer>) wrapper.getValue1();
                 Object[] items = getObjectArrayFromCollectionWrapper(collectionTuple);
-                for (final Object item : items) {
-                    if (!(item instanceof BackedModel)) break;
-                    nestedBackedModelsToEnumerate.add((BackedModel) item);
+                final boolean isCollection = collectionTuple.getValue0() instanceof Collection;
+                // No need to iterate over collection if first item is not BackedModel
+                if ((isCollection && items.length != 0 && items[0] instanceof BackedModel)
+                        || !isCollection) {
+                    for (final Object item : items) {
+                        if (item instanceof BackedModel) {
+                            final BackedModel backedModel = (BackedModel) item;
+                            nestedBackedModelsToEnumerate.add(backedModel);
+                        }
+                    }
                 }
                 if (collectionTuple.getValue1()
                         != items.length) { // and the size has changed since we last updated
