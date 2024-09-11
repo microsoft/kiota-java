@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -477,5 +479,122 @@ class InMemoryBackingStoreTest {
 
         // Assert
         assertTrue(timeTakenMillis < 1);
+    }
+
+    @Test
+    void testInitializationCompletedIsPropagatedToMapItems() {
+        var colleagues = new HashMap<String, Object>();
+        for (int i = 0; i < 10; i++) {
+            var colleague = new TestEntity();
+            colleague.setId(UUID.randomUUID().toString());
+            colleague.setBusinessPhones(Arrays.asList(new String[] {"+1 234 567 891"}));
+            colleague.getAdditionalData().put("count", i);
+            colleagues.put(colleague.getId(), colleague);
+            colleague.getBackingStore().setIsInitializationCompleted(false);
+        }
+
+        var testUser = new TestEntity();
+        testUser.setId("1");
+        testUser.setAdditionalData(colleagues);
+
+        testUser.getBackingStore().setIsInitializationCompleted(true);
+        for (Map.Entry<String, Object> colleague : testUser.getAdditionalData().entrySet()) {
+            var backedModel = (BackedModel) colleague.getValue();
+            assertTrue(backedModel.getBackingStore().getIsInitializationCompleted());
+        }
+    }
+
+    @Test
+    void testInitializationCompletedIsPropagatedToCollectionItems() {
+        var colleagues = new ArrayList<TestEntity>();
+        for (int i = 0; i < 10; i++) {
+            var colleague = new TestEntity();
+            colleague.setId(UUID.randomUUID().toString());
+            colleague.setBusinessPhones(Arrays.asList(new String[] {"+1 234 567 891"}));
+            colleague.getAdditionalData().put("count", i);
+            colleagues.add(colleague);
+            colleague.getBackingStore().setIsInitializationCompleted(false);
+        }
+
+        var testUser = new TestEntityCollectionResponse();
+        testUser.setValue(colleagues);
+
+        testUser.getBackingStore().setIsInitializationCompleted(true);
+        for (TestEntity colleague : testUser.getValue()) {
+            assertTrue(colleague.getBackingStore().getIsInitializationCompleted());
+        }
+
+    }
+
+    @Test
+    void testCollectionPropertyConsistencyChecksSizeChangesInAllNestedItemsInCollection() {
+        var colleagues = new ArrayList<TestEntity>();
+        for (int i = 0; i < 10; i++) {
+            var colleague = new TestEntity();
+            colleague.setId(UUID.randomUUID().toString());
+            colleague.setBusinessPhones(Arrays.asList(new String[] {"+1 234 567 891"}));
+            var manager = new TestEntity();
+            manager.setId(UUID.randomUUID().toString());
+            colleague.getAdditionalData().put("count", i);
+            colleague.getAdditionalData().put("random", "randomString");
+            colleague.getAdditionalData().put("manager", manager);
+            colleagues.add(colleague);
+            colleague.getBackingStore().setIsInitializationCompleted(true);
+        }
+
+        var testUser = new TestEntity();
+        testUser.setId(UUID.randomUUID().toString());
+        testUser.setColleagues(colleagues);
+        testUser.getBackingStore().setIsInitializationCompleted(true);
+
+        testUser.getBackingStore().setReturnOnlyChangedValues(true);
+        assertEquals(0, testUser.getBackingStore().enumerate().size());
+        assertNull(testUser.getColleagues()); // null since value is not dirty
+
+        // Update nested backed model
+        testUser.getBackingStore().setReturnOnlyChangedValues(false);
+        testUser.getColleagues().get(9).getAdditionalData().put("moreRandom", 123);
+
+        // collection consistency should loop through all nested backed models in the collection and find one with a dirty additional data map
+        testUser.getBackingStore().setReturnOnlyChangedValues(true);
+        assertNotNull(testUser.getColleagues());
+        var changedValues = testUser.getBackingStore().enumerate();
+        assertEquals(1, changedValues.size());
+    }
+
+    @Test
+    void testCollectionPropertyConsistencyChecksEnumeratesNestedBackedModelsInAllNestedCollections() {
+        var colleagues = new ArrayList<TestEntity>();
+        for (int i = 0; i < 10; i++) {
+            var colleague = new TestEntity();
+            colleague.setId(UUID.randomUUID().toString());
+            colleague.setBusinessPhones(Arrays.asList(new String[] {"+1 234 567 891"}));
+            var manager = new TestEntity();
+            manager.setId(UUID.randomUUID().toString());
+            colleague.getAdditionalData().put("count", i);
+            colleague.getAdditionalData().put("random", "randomString");
+            colleague.getAdditionalData().put("manager", manager);
+            colleagues.add(colleague);
+            colleague.getBackingStore().setIsInitializationCompleted(true);
+        }
+
+        var testUser = new TestEntity();
+        testUser.setId(UUID.randomUUID().toString());
+        testUser.setColleagues(colleagues);
+        testUser.getBackingStore().setIsInitializationCompleted(true);
+
+        testUser.getBackingStore().setReturnOnlyChangedValues(true);
+        assertEquals(0, testUser.getBackingStore().enumerate().size());
+        assertNull(testUser.getColleagues()); // null since value is not dirty
+
+        // Update nested backed model
+        testUser.getBackingStore().setReturnOnlyChangedValues(false);
+        ((TestEntity) testUser.getColleagues().get(9).getAdditionalData().get("manager")).getAdditionalData().put("moreRandom", 123);
+
+        // collection consistency should loop through all nested backed models in the collection and find one with a dirty additional data map
+        testUser.getBackingStore().setReturnOnlyChangedValues(true);
+        var changedValues = testUser.getBackingStore().enumerate();
+        assertNotNull(testUser.getColleagues());
+        assertEquals(1, changedValues.size());
     }
 }
