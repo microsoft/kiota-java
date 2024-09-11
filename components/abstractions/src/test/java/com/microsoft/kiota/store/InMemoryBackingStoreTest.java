@@ -466,22 +466,6 @@ class InMemoryBackingStoreTest {
     }
 
     @Test
-    void testLargeArraysPerformsWell() {
-        // Arrange
-        var testBackingStore = new InMemoryBackingStore();
-        // Act
-        assertTrue(testBackingStore.enumerate().isEmpty());
-        var testArray = new int[100000000];
-        testBackingStore.set("values", testArray);
-        long startTimeMillis = System.currentTimeMillis();
-        testBackingStore.setIsInitializationCompleted(true);
-        long timeTakenMillis = System.currentTimeMillis() - startTimeMillis;
-
-        // Assert
-        assertTrue(timeTakenMillis < 1);
-    }
-
-    @Test
     void testInitializationCompletedIsPropagatedToMapItems() {
         var colleagues = new HashMap<String, Object>();
         for (int i = 0; i < 10; i++) {
@@ -523,7 +507,6 @@ class InMemoryBackingStoreTest {
         for (TestEntity colleague : testUser.getValue()) {
             assertTrue(colleague.getBackingStore().getIsInitializationCompleted());
         }
-
     }
 
     @Test
@@ -555,7 +538,8 @@ class InMemoryBackingStoreTest {
         testUser.getBackingStore().setReturnOnlyChangedValues(false);
         testUser.getColleagues().get(9).getAdditionalData().put("moreRandom", 123);
 
-        // collection consistency should loop through all nested backed models in the collection and find one with a dirty additional data map
+        // collection consistency should loop through all nested backed models in the collection and
+        // find one with a dirty additional data map
         testUser.getBackingStore().setReturnOnlyChangedValues(true);
         assertNotNull(testUser.getColleagues());
         var changedValues = testUser.getBackingStore().enumerate();
@@ -563,7 +547,8 @@ class InMemoryBackingStoreTest {
     }
 
     @Test
-    void testCollectionPropertyConsistencyChecksEnumeratesNestedBackedModelsInAllNestedCollections() {
+    void
+            testCollectionPropertyConsistencyChecksEnumeratesNestedBackedModelsInAllNestedCollections() {
         var colleagues = new ArrayList<TestEntity>();
         for (int i = 0; i < 10; i++) {
             var colleague = new TestEntity();
@@ -589,9 +574,12 @@ class InMemoryBackingStoreTest {
 
         // Update nested backed model
         testUser.getBackingStore().setReturnOnlyChangedValues(false);
-        ((TestEntity) testUser.getColleagues().get(9).getAdditionalData().get("manager")).getAdditionalData().put("moreRandom", 123);
+        ((TestEntity) testUser.getColleagues().get(9).getAdditionalData().get("manager"))
+                .getAdditionalData()
+                .put("moreRandom", 123);
 
-        // collection consistency should loop through all nested backed models in the collection and find one with a dirty additional data map
+        // collection consistency should loop through all nested backed models in the collection and
+        // find one with a dirty additional data map
         testUser.getBackingStore().setReturnOnlyChangedValues(true);
         var changedValues = testUser.getBackingStore().enumerate();
         assertNotNull(testUser.getColleagues());

@@ -80,7 +80,8 @@ public class InMemoryBackingStore implements BackingStore {
                             BackedModel backedModel = (BackedModel) item;
                             backedModel
                                     .getBackingStore()
-                                    .setIsInitializationCompleted(value); // propagate initialization
+                                    .setIsInitializationCompleted(
+                                            value); // propagate initialization
                         }
                     }
                 }
@@ -112,9 +113,7 @@ public class InMemoryBackingStore implements BackingStore {
                     for (final Object item : items) {
                         if (item instanceof BackedModel) {
                             BackedModel backedModel = (BackedModel) item;
-                            backedModel
-                                    .getBackingStore()
-                                    .setReturnOnlyChangedValues(value);
+                            backedModel.getBackingStore().setReturnOnlyChangedValues(value);
                         }
                     }
                 }
