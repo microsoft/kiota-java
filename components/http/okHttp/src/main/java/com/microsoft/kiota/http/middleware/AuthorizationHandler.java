@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public class AuthorizationHandler implements Interceptor {
 
-    private final BaseBearerTokenAuthenticationProvider authenticationProvider;
+    @Nonnull private final BaseBearerTokenAuthenticationProvider authenticationProvider;
     private static final String authorizationHeaderKey = "Authorization";
 
     /**
