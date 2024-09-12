@@ -175,7 +175,7 @@ jobs:
     - name: Publish Release abstractions
       run: |
         componentTaskPath=$(echo ${{ matrix.component-path }} | tr / :)
-        ./gradlew --no-daemon :components:$componentTaskPath:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
+        ./gradlew -i --no-daemon :components:$componentTaskPath:$PUBLISH_TASK -PmavenCentralSnapshotArtifactSuffix=""
 
   release-to-github:
     if: contains(github.ref, 'refs/tags/v')
