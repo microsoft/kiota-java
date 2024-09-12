@@ -137,6 +137,7 @@ jobs:
       run:
         working-directory: ./
     strategy:
+      max-parallel: 1
       matrix:
         component-path: [
           abstractions,
