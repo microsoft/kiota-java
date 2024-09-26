@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Helper class to extract the claims from the WWW-Authenticate header in a response.
+ * https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-continuous-access-evaluation
+ */
 public final class ContinuousAccessEvaluationClaims {
 
     private static final Pattern bearerPattern =
@@ -18,6 +22,11 @@ public final class ContinuousAccessEvaluationClaims {
 
     private static final String wwwAuthenticateHeader = "WWW-Authenticate";
 
+    /**
+     * Extracts the claims from the WWW-Authenticate header in a response.
+     * @param response the response to extract the claims from.
+     * @return the claims
+     */
     public static @Nullable String getClaimsFromResponse(@Nonnull Response response) {
         if (response == null || response.code() != 401) {
             return null;
