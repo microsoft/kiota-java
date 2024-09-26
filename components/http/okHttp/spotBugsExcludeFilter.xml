@@ -29,7 +29,7 @@
 	</Match>
 	<Match>
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
-		<Class name="com.microsoft.kiota.http.HeadersInspectionHandlerTest" />
+		<Class name="com.microsoft.kiota.http.middleware.HeadersInspectionHandlerTest" />
 	</Match>
 	<Match>
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
@@ -37,6 +37,6 @@
 	</Match>
 	<Match>
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
-		<Class name="com.microsoft.kiota.http.UserAgentHandlerTest" />
+		<Class name="com.microsoft.kiota.http.middleware.UserAgentHandlerTest" />
 	</Match>
 </FindBugsFilter>

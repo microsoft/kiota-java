@@ -16,6 +16,7 @@ import jakarta.annotation.Nullable;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import java.io.IOException;
@@ -38,8 +39,11 @@ public class AuthorizationHandler implements Interceptor {
      * Instantiates a new AuthorizationHandler.
      * @param authenticationProvider the authentication provider.
      */
-    public AuthorizationHandler(@Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
-        this.authenticationProvider = Objects.requireNonNull(authenticationProvider, "AuthenticationProvider cannot be null");
+    public AuthorizationHandler(
+            @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
+        this.authenticationProvider =
+                Objects.requireNonNull(
+                        authenticationProvider, "AuthenticationProvider cannot be null");
     }
 
     @Override
@@ -48,9 +52,10 @@ public class AuthorizationHandler implements Interceptor {
         final Request request = chain.request();
 
         final Span span =
-                GlobalOpenTelemetry.getTracer((new ObservabilityOptions()).getTracerInstrumentationName())
-                            .spanBuilder("AuthorizationHandler_Intercept")
-                            .startSpan();
+                GlobalOpenTelemetry.getTracer(
+                                (new ObservabilityOptions()).getTracerInstrumentationName())
+                        .spanBuilder("AuthorizationHandler_Intercept")
+                        .startSpan();
         Scope scope = null;
         if (span != null) {
             scope = span.makeCurrent();
@@ -61,13 +66,16 @@ public class AuthorizationHandler implements Interceptor {
             // Auth provider already added auth header
             if (request.headers().names().contains(authorizationHeaderKey)) {
                 if (span != null)
-                    span.setAttribute("com.microsoft.kiota.handler.authorization.token_present", true);
+                    span.setAttribute(
+                            "com.microsoft.kiota.handler.authorization.token_present", true);
                 return chain.proceed(request);
             }
 
             final HashMap<String, Object> additionalContext = new HashMap<>();
             additionalContext.put("parent-span", span);
-            final Response response = chain.proceed(authenticateRequest(request, additionalContext, span));
+            final Request authenticatedRequest =
+                    authenticateRequest(request, additionalContext, span);
+            final Response response = chain.proceed(authenticatedRequest);
 
             if (response != null && response.code() != HttpURLConnection.HTTP_UNAUTHORIZED) {
                 return response;
@@ -82,9 +90,8 @@ public class AuthorizationHandler implements Interceptor {
             span.addEvent("com.microsoft.kiota.handler.authorization.challenge_received");
 
             // We cannot replay one-shot requests after claims challenge
-            boolean isRequestBodyOneShot =
-                    request != null && request.body() != null && request.body().isOneShot();
-            if (isRequestBodyOneShot) {
+            RequestBody requestBody = request.body();
+            if (requestBody != null && requestBody.isOneShot()) {
                 return response;
             }
 
@@ -92,7 +99,9 @@ public class AuthorizationHandler implements Interceptor {
             additionalContext.put("claims", claims);
             // Retry claims challenge only once
             span.setAttribute(HTTP_REQUEST_RESEND_COUNT, 1);
-            return chain.proceed(authenticateRequest(request, additionalContext, span));
+            final Request authenticatedRequestAfterCAE =
+                    authenticateRequest(request, additionalContext, span);
+            return chain.proceed(authenticatedRequestAfterCAE);
         } finally {
             if (scope != null) {
                 scope.close();
@@ -103,16 +112,19 @@ public class AuthorizationHandler implements Interceptor {
         }
     }
 
-    private Request authenticateRequest(
+    private @Nonnull Request authenticateRequest(
             @Nonnull final Request request,
             @Nullable final Map<String, Object> additionalAuthenticationContext,
             @Nonnull final Span span) {
 
-        final AccessTokenProvider accessTokenProvider = authenticationProvider.getAccessTokenProvider();
+        final AccessTokenProvider accessTokenProvider =
+                authenticationProvider.getAccessTokenProvider();
         if (!accessTokenProvider.getAllowedHostsValidator().isUrlHostValid(request.url().uri())) {
             return request;
         }
-        final String accessToken = accessTokenProvider.getAuthorizationToken(request.url().uri(), additionalAuthenticationContext);
+        final String accessToken =
+                accessTokenProvider.getAuthorizationToken(
+                        request.url().uri(), additionalAuthenticationContext);
         if (accessToken != null && !accessToken.isEmpty()) {
             span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
             Request.Builder requestBuilder = request.newBuilder();
