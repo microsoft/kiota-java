@@ -1,9 +1,9 @@
-package com.microsoft.kiota.http;
+package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
+import com.microsoft.kiota.http.KiotaClientFactory;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
 
 import okhttp3.Interceptor;

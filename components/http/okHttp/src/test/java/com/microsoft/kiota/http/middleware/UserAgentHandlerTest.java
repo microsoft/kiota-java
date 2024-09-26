@@ -1,11 +1,10 @@
-package com.microsoft.kiota.http;
+package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
-import com.microsoft.kiota.http.middleware.UserAgentHandler;
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 
 import okhttp3.Headers;
