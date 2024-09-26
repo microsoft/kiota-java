@@ -53,7 +53,7 @@ public class KiotaClientFactory {
     }
 
     @Nonnull public static OkHttpClient.Builder create(
-            @Nonnull BaseBearerTokenAuthenticationProvider authenticationProvider) {
+            @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
         List<Interceptor> interceptors = Arrays.asList(createDefaultInterceptors());
         interceptors.add(new AuthorizationHandler(authenticationProvider));
         return create((Interceptor[]) interceptors.toArray());

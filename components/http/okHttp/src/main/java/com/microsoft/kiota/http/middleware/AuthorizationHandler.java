@@ -2,7 +2,7 @@ package com.microsoft.kiota.http.middleware;
 
 import static com.microsoft.kiota.http.TelemetrySemanticConventions.HTTP_REQUEST_RESEND_COUNT;
 
-import com.microsoft.kiota.RequestInformation;
+import com.microsoft.kiota.authentication.AccessTokenProvider;
 import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
 import com.microsoft.kiota.http.ContinuousAccessEvaluationClaims;
 
@@ -21,8 +21,12 @@ import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
+/**
+ * This interceptor is responsible for adding the Authorization header to the request
+ * if the header is not already present. It also handles Continuous Access Evaluation (CAE) claims
+ * challenges if the token request was made using this interceptor. It does this using the provided AuthenticationProvider
+ */
 public class AuthorizationHandler implements Interceptor {
 
     private final BaseBearerTokenAuthenticationProvider authenticationProvider;
@@ -32,8 +36,8 @@ public class AuthorizationHandler implements Interceptor {
      * Instantiates a new AuthorizationHandler.
      * @param authenticationProvider the authentication provider.
      */
-    public AuthorizationHandler(BaseBearerTokenAuthenticationProvider authenticationProvider) {
-        this.authenticationProvider = authenticationProvider;
+    public AuthorizationHandler(@Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
+        this.authenticationProvider = Objects.requireNonNull(null, "AuthenticationProvider cannot be null");
     }
 
     @Override
@@ -96,32 +100,19 @@ public class AuthorizationHandler implements Interceptor {
     }
 
     private void authenticateRequest(
-            @Nonnull Request request,
-            @Nullable Map<String, Object> additionalAuthenticationContext,
-            @Nonnull Span span) {
-        final RequestInformation requestInformation = getRequestInformation(request);
-        authenticationProvider.authenticateRequest(
-                requestInformation, additionalAuthenticationContext);
-        // Update native request with auth header added to requestInformation
-        if (requestInformation.headers.containsKey(authorizationHeaderKey)) {
-            span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
-            Set<String> authorizationHeaderValues =
-                    requestInformation.headers.get(authorizationHeaderKey);
-            if (!authorizationHeaderValues.isEmpty()) {
-                Request.Builder requestBuilder = request.newBuilder();
-                for (String value : authorizationHeaderValues) {
-                    requestBuilder.addHeader(authorizationHeaderKey, value);
-                }
-            }
-        }
-    }
+            @Nonnull final Request request,
+            @Nullable final Map<String, Object> additionalAuthenticationContext,
+            @Nonnull final Span span) {
 
-    private RequestInformation getRequestInformation(final Request request) {
-        RequestInformation requestInformation = new RequestInformation();
-        requestInformation.setUri(request.url().uri());
-        for (String headerName : request.headers().names()) {
-            requestInformation.headers.add(headerName, request.header(headerName));
+        final AccessTokenProvider accessTokenProvider = authenticationProvider.getAccessTokenProvider();
+        if (!accessTokenProvider.getAllowedHostsValidator().isUrlHostValid(request.url().uri())) {
+            return;
         }
-        return requestInformation;
+        final String accessToken = accessTokenProvider.getAuthorizationToken(request.url().uri(), additionalAuthenticationContext);
+        if (accessToken != null && !accessToken.isEmpty()) {
+            span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
+            Request.Builder requestBuilder = request.newBuilder();
+            requestBuilder.addHeader(authorizationHeaderKey, "Bearer " + accessToken);
+        }
     }
 }

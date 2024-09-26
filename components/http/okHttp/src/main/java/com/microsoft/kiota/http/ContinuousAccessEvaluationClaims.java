@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ContinuousAccessEvaluationClaims {
+public final class ContinuousAccessEvaluationClaims {
 
     private static final Pattern bearerPattern =
             Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
