@@ -5,7 +5,9 @@ import static com.microsoft.kiota.http.TelemetrySemanticConventions.HTTP_REQUEST
 import com.microsoft.kiota.authentication.AccessTokenProvider;
 import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
 import com.microsoft.kiota.http.ContinuousAccessEvaluationClaims;
+import com.microsoft.kiota.http.ObservabilityOptions;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
 
@@ -37,7 +39,7 @@ public class AuthorizationHandler implements Interceptor {
      * @param authenticationProvider the authentication provider.
      */
     public AuthorizationHandler(@Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
-        this.authenticationProvider = Objects.requireNonNull(null, "AuthenticationProvider cannot be null");
+        this.authenticationProvider = Objects.requireNonNull(authenticationProvider, "AuthenticationProvider cannot be null");
     }
 
     @Override
@@ -46,7 +48,9 @@ public class AuthorizationHandler implements Interceptor {
         final Request request = chain.request();
 
         final Span span =
-                ObservabilityHelper.getSpanForRequest(request, "AuthorizationHandler_Intercept");
+                GlobalOpenTelemetry.getTracer((new ObservabilityOptions()).getTracerInstrumentationName())
+                            .spanBuilder("AuthorizationHandler_Intercept")
+                            .startSpan();
         Scope scope = null;
         if (span != null) {
             scope = span.makeCurrent();
@@ -56,19 +60,21 @@ public class AuthorizationHandler implements Interceptor {
         try {
             // Auth provider already added auth header
             if (request.headers().names().contains(authorizationHeaderKey)) {
-                span.setAttribute("com.microsoft.kiota.handler.authorization.token_present", true);
+                if (span != null)
+                    span.setAttribute("com.microsoft.kiota.handler.authorization.token_present", true);
                 return chain.proceed(request);
             }
 
-            authenticateRequest(request, null, span);
-            Response response = chain.proceed(chain.request());
+            final HashMap<String, Object> additionalContext = new HashMap<>();
+            additionalContext.put("parent-span", span);
+            final Response response = chain.proceed(authenticateRequest(request, additionalContext, span));
 
             if (response != null && response.code() != HttpURLConnection.HTTP_UNAUTHORIZED) {
                 return response;
             }
 
             // Attempt CAE claims challenge
-            String claims = ContinuousAccessEvaluationClaims.getClaimsFromResponse(response);
+            final String claims = ContinuousAccessEvaluationClaims.getClaimsFromResponse(response);
             if (claims == null || claims.isEmpty()) {
                 return response;
             }
@@ -83,12 +89,10 @@ public class AuthorizationHandler implements Interceptor {
             }
 
             response.close();
-            final HashMap<String, Object> additionalContext = new HashMap<>();
             additionalContext.put("claims", claims);
             // Retry claims challenge only once
-            authenticateRequest(request, additionalContext, span);
             span.setAttribute(HTTP_REQUEST_RESEND_COUNT, 1);
-            return chain.proceed(request);
+            return chain.proceed(authenticateRequest(request, additionalContext, span));
         } finally {
             if (scope != null) {
                 scope.close();
@@ -99,20 +103,22 @@ public class AuthorizationHandler implements Interceptor {
         }
     }
 
-    private void authenticateRequest(
+    private Request authenticateRequest(
             @Nonnull final Request request,
             @Nullable final Map<String, Object> additionalAuthenticationContext,
             @Nonnull final Span span) {
 
         final AccessTokenProvider accessTokenProvider = authenticationProvider.getAccessTokenProvider();
         if (!accessTokenProvider.getAllowedHostsValidator().isUrlHostValid(request.url().uri())) {
-            return;
+            return request;
         }
         final String accessToken = accessTokenProvider.getAuthorizationToken(request.url().uri(), additionalAuthenticationContext);
         if (accessToken != null && !accessToken.isEmpty()) {
             span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
             Request.Builder requestBuilder = request.newBuilder();
             requestBuilder.addHeader(authorizationHeaderKey, "Bearer " + accessToken);
+            return requestBuilder.build();
         }
+        return request;
     }
 }
