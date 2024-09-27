@@ -33,7 +33,7 @@ import java.util.Objects;
 public class AuthorizationHandler implements Interceptor {
 
     @Nonnull private final BaseBearerTokenAuthenticationProvider authenticationProvider;
-    private static final String authorizationHeaderKey = "Authorization";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
 
     /**
      * Instantiates a new AuthorizationHandler.
@@ -65,7 +65,7 @@ public class AuthorizationHandler implements Interceptor {
 
         try {
             // Auth provider already added auth header
-            if (request.headers().names().contains(authorizationHeaderKey)) {
+            if (request.headers().names().contains(AUTHORIZATION_HEADER)) {
                 if (span != null)
                     span.setAttribute(
                             "com.microsoft.kiota.handler.authorization.token_present", true);
@@ -132,7 +132,7 @@ public class AuthorizationHandler implements Interceptor {
         if (accessToken != null && !accessToken.isEmpty()) {
             span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
             final Request.Builder requestBuilder = request.newBuilder();
-            requestBuilder.addHeader(authorizationHeaderKey, "Bearer " + accessToken);
+            requestBuilder.addHeader(AUTHORIZATION_HEADER, "Bearer " + accessToken);
             return requestBuilder.build();
         }
         return request;

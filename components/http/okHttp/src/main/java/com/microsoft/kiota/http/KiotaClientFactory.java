@@ -73,7 +73,7 @@ public class KiotaClientFactory {
      */
     @Nonnull public static OkHttpClient.Builder create(
             @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
-        ArrayList<Interceptor> interceptors = createDefaultInterceptorsAsList();
+        ArrayList<Interceptor> interceptors = new ArrayList<>(createDefaultInterceptorsAsList());
         interceptors.add(new AuthorizationHandler(authenticationProvider));
         return create(interceptors);
     }
@@ -96,7 +96,7 @@ public class KiotaClientFactory {
      * Creates the default interceptors for the client.
      * @return an array of interceptors.
      */
-    @Nonnull public static ArrayList<Interceptor> createDefaultInterceptorsAsList() {
+    @Nonnull public static List<Interceptor> createDefaultInterceptorsAsList() {
         return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
 }

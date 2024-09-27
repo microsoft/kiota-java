@@ -21,7 +21,9 @@ public final class ContinuousAccessEvaluationClaims {
     private static final Pattern claimsPattern =
             Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
 
-    private static final String wwwAuthenticateHeader = "WWW-Authenticate";
+    private static final String WWW_AUTHENTICATE_HEADER = "WWW-Authenticate";
+
+    private ContinuousAccessEvaluationClaims() {}
 
     /**
      * Extracts the claims from the WWW-Authenticate header in a response.
@@ -33,7 +35,7 @@ public final class ContinuousAccessEvaluationClaims {
         if (response.code() != 401) {
             return null;
         }
-        final List<String> authenticateHeader = response.headers(wwwAuthenticateHeader);
+        final List<String> authenticateHeader = response.headers(WWW_AUTHENTICATE_HEADER);
         if (!authenticateHeader.isEmpty()) {
             String rawHeaderValue = null;
             for (final String authenticateEntry : authenticateHeader) {

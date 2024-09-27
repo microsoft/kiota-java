@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 class UrlReplaceHandlerTest {
 
-    private static final String defaultUsersWithTokenUrl =
+    private static final String DEFAULT_URL_WITH_TOKEN =
             "https://graph.microsoft.com/v1.0/users/TokenToReplace";
     private static final HashMap<String, String> defaultReplacementPairs = new HashMap<>();
 
@@ -27,12 +27,12 @@ class UrlReplaceHandlerTest {
         Interceptor[] interceptors =
                 new Interceptor[] {new UrlReplaceHandler(new UrlReplaceHandlerOption())};
         final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
-        final Request request = new Request.Builder().url(defaultUsersWithTokenUrl).build();
+        final Request request = new Request.Builder().url(DEFAULT_URL_WITH_TOKEN).build();
         final Response response = client.newCall(request).execute();
 
         assertNotNull(response);
         assertEquals(
-                defaultUsersWithTokenUrl,
+                DEFAULT_URL_WITH_TOKEN,
                 response.request()
                         .url()
                         .toString()); // url should remain the same without replacement pairs
@@ -46,7 +46,7 @@ class UrlReplaceHandlerTest {
                     new UrlReplaceHandler(new UrlReplaceHandlerOption(defaultReplacementPairs))
                 };
         final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
-        final Request request = new Request.Builder().url(defaultUsersWithTokenUrl).build();
+        final Request request = new Request.Builder().url(DEFAULT_URL_WITH_TOKEN).build();
         final Response response = client.newCall(request).execute();
         final String expectedNewUrl = "https://graph.microsoft.com/v1.0/me";
 

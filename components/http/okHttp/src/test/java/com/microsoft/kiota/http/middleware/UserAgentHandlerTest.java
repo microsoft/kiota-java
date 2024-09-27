@@ -59,8 +59,8 @@ class UserAgentHandlerTest {
         final UserAgentHandler handler = new UserAgentHandler();
         final Request request = new Request.Builder().url("http://localhost").build();
         when(mockChain.request()).thenReturn(request);
+        handler.intercept(mockChain);
         Response response = handler.intercept(mockChain);
-        response = handler.intercept(mockChain);
         final Request result = response.request();
         assertNotNull(response);
         assertNotNull(result);

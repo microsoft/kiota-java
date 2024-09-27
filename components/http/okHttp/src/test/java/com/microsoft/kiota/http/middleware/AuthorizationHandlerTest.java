@@ -27,14 +27,14 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Arrays;
 
-public class AuthorizationHandlerTest {
+class AuthorizationHandlerTest {
 
-    private static final String token = "token";
-    private static final String tokenAfterCAE = "tokenAfterCAE";
-    private static final String authHeader = "Authorization";
-    private static final String prevAuthHeaderValue = "Bearer 123";
-    private static final String newAuthHeaderValue = "Bearer " + token;
-    private static final String claimsChallengeHeaderValue =
+    private static final String ACCESS_TOKEN_STRING = "token";
+    private static final String TOKEN_AFTER_CAE = "TOKEN_AFTER_CAE";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String PREV_AUTHORIZATION_HEADER_VALUE = "Bearer 123";
+    private static final String NEW_AUTHORIZATION_HEADER_VALUE = "Bearer " + ACCESS_TOKEN_STRING;
+    private static final String CLAIMS_CHALLENGE_HEADER_VALUE =
             "Bearer  authorization_uri=\"https://login.windows.net/common/oauth2/authorize\","
                 + "error=\"insufficient_claims\","
                 + "claims=\"eyJhY2Nlc3NfdG9rZW4iOnsibmJmIjp7ImVzc2VudGlhbCI6dHJ1ZSwgInZhbHVlIjoiMTYwNDEwNjY1MSJ9fX0=\"";
@@ -51,8 +51,9 @@ public class AuthorizationHandlerTest {
                 new AuthorizationHandler(getMockAuthenticationProvider());
         Response response = handler.intercept(mockChain);
 
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals(prevAuthHeaderValue, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals(
+                PREV_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
     }
 
     @Test
@@ -64,8 +65,9 @@ public class AuthorizationHandlerTest {
                 new AuthorizationHandler(getMockAuthenticationProvider());
         Response response = handler.intercept(mockChain);
 
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals(
+                NEW_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
     }
 
     @Test
@@ -77,7 +79,7 @@ public class AuthorizationHandlerTest {
         final AuthorizationHandler handler = new AuthorizationHandler(authProvider);
         Response response = handler.intercept(mockChain);
 
-        assertTrue(!response.request().headers().names().contains(authHeader));
+        assertTrue(!response.request().headers().names().contains(AUTHORIZATION_HEADER));
     }
 
     @Test
@@ -90,8 +92,8 @@ public class AuthorizationHandlerTest {
         final AuthorizationHandler handler = new AuthorizationHandler(authProvider);
         Response response = handler.intercept(mockChain);
 
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals("Bearer " + tokenAfterCAE, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals("Bearer " + TOKEN_AFTER_CAE, response.request().header(AUTHORIZATION_HEADER));
     }
 
     @Test
@@ -111,8 +113,9 @@ public class AuthorizationHandlerTest {
         assertEquals(request.method(), response.request().method());
         assertTrue(response.request().headers().names().contains("content-type"));
         assertEquals("application/json", response.request().header("content-type"));
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals(
+                NEW_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
     }
 
     @Test
@@ -130,8 +133,9 @@ public class AuthorizationHandlerTest {
         final AuthorizationHandler handler = new AuthorizationHandler(authProvider);
         Response response = handler.intercept(mockChain);
 
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals(
+                NEW_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
     }
 
     @Test
@@ -145,8 +149,9 @@ public class AuthorizationHandlerTest {
         final AuthorizationHandler handler = new AuthorizationHandler(authProvider);
         Response response = handler.intercept(mockChain);
 
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals(
+                NEW_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
         assertEquals(401, response.code());
     }
 
@@ -162,8 +167,9 @@ public class AuthorizationHandlerTest {
                 new Request.Builder().url("https://graph.microsoft.com/v1.0/me").build();
         Response response = okHttpClient.newCall(request).execute();
 
-        assertTrue(response.request().headers().names().contains(authHeader));
-        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+        assertTrue(response.request().headers().names().contains(AUTHORIZATION_HEADER));
+        assertEquals(
+                NEW_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
     }
 
     private Chain getMockChain(Request mockRequest, Response mockResponse) throws IOException {
@@ -188,7 +194,7 @@ public class AuthorizationHandlerTest {
                 new AllowedHostsValidator("graph.microsoft.com");
         when(mockAccessTokenProvider.getAllowedHostsValidator()).thenReturn(allowedHostsValidator);
         when(mockAccessTokenProvider.getAuthorizationToken(any(URI.class), anyMap()))
-                .thenReturn(token, tokenAfterCAE);
+                .thenReturn(ACCESS_TOKEN_STRING, TOKEN_AFTER_CAE);
         final BaseBearerTokenAuthenticationProvider mockAuthenticationProvider =
                 mock(BaseBearerTokenAuthenticationProvider.class);
         when(mockAuthenticationProvider.getAccessTokenProvider())
@@ -200,7 +206,7 @@ public class AuthorizationHandlerTest {
         final Response mockResponse = mock(Response.class);
         when(mockResponse.code()).thenReturn(HttpURLConnection.HTTP_UNAUTHORIZED);
         when(mockResponse.headers("WWW-Authenticate"))
-                .thenReturn(Arrays.asList(claimsChallengeHeaderValue));
+                .thenReturn(Arrays.asList(CLAIMS_CHALLENGE_HEADER_VALUE));
         when(mockResponse.request()).thenReturn(request);
         return mockResponse;
     }
