@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -71,6 +72,23 @@ class RequestInformationTest {
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertTrue(uriResult.toString().contains("fromDateTime='2022-08-01T00%3A00%3A00Z'"));
         assertTrue(uriResult.toString().contains("toDateTime='2022-08-02T00%3A00%3A00Z'"));
+    }
+
+    @Test
+    void SetsPathParametersOfLocalDateType() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/getCalendarView(startLocalDate='{startLocalDate}',endLocalDate='{endLocalDate}')";
+
+        final LocalDate startLocalDate = LocalDate.of(2022, 8, 1);
+        final LocalDate endLocalDate = LocalDate.of(2022, 8, 2);
+
+        requestInfo.pathParameters.put("startLocalDate", startLocalDate);
+        requestInfo.pathParameters.put("endLocalDate", endLocalDate);
+
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("startLocalDate='2022-08-01'"));
+        assertTrue(uriResult.toString().contains("endLocalDate='2022-08-02'"));
     }
 
     @Test
