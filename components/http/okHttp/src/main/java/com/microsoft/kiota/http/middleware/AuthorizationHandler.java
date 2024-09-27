@@ -90,7 +90,7 @@ public class AuthorizationHandler implements Interceptor {
             span.addEvent("com.microsoft.kiota.handler.authorization.challenge_received");
 
             // We cannot replay one-shot requests after claims challenge
-            RequestBody requestBody = request.body();
+            final RequestBody requestBody = request.body();
             if (requestBody != null && requestBody.isOneShot()) {
                 return response;
             }
@@ -127,7 +127,7 @@ public class AuthorizationHandler implements Interceptor {
                         request.url().uri(), additionalAuthenticationContext);
         if (accessToken != null && !accessToken.isEmpty()) {
             span.setAttribute("com.microsoft.kiota.handler.authorization.token_obtained", true);
-            Request.Builder requestBuilder = request.newBuilder();
+            final Request.Builder requestBuilder = request.newBuilder();
             requestBuilder.addHeader(authorizationHeaderKey, "Bearer " + accessToken);
             return requestBuilder.build();
         }
