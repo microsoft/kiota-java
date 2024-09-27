@@ -47,7 +47,7 @@ public class AuthorizationHandler implements Interceptor {
     }
 
     @Override
-    public Response intercept(final Chain chain) throws IOException {
+    public @Nonnull Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         final Request request = chain.request();
 
@@ -115,7 +115,7 @@ public class AuthorizationHandler implements Interceptor {
     private @Nonnull Request authenticateRequest(
             @Nonnull final Request request,
             @Nullable final Map<String, Object> additionalAuthenticationContext,
-            @Nonnull final Span span) {
+            final Span span) {
 
         final AccessTokenProvider accessTokenProvider =
                 authenticationProvider.getAccessTokenProvider();

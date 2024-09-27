@@ -10,8 +10,10 @@ import static org.mockito.Mockito.when;
 import com.microsoft.kiota.authentication.AccessTokenProvider;
 import com.microsoft.kiota.authentication.AllowedHostsValidator;
 import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
+import com.microsoft.kiota.http.KiotaClientFactory;
 
 import okhttp3.Interceptor.Chain;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -127,6 +129,38 @@ public class AuthorizationHandlerTest {
         final BaseBearerTokenAuthenticationProvider authProvider = getMockAuthenticationProvider();
         final AuthorizationHandler handler = new AuthorizationHandler(authProvider);
         Response response = handler.intercept(mockChain);
+
+        assertTrue(response.request().headers().names().contains(authHeader));
+        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+    }
+
+    @Test
+    void testDoesNotAttemptCAEChallengeIfNoClaimsPresent() throws IOException {
+        final Request request =
+                new Request.Builder().url("https://graph.microsoft.com/v1.0/me").build();
+        final Response mockResponse = mock(Response.class);
+        when(mockResponse.code()).thenReturn(HttpURLConnection.HTTP_UNAUTHORIZED);
+        final Chain mockChain = getMockChain(request, mockResponse);
+        final BaseBearerTokenAuthenticationProvider authProvider = getMockAuthenticationProvider();
+        final AuthorizationHandler handler = new AuthorizationHandler(authProvider);
+        Response response = handler.intercept(mockChain);
+
+        assertTrue(response.request().headers().names().contains(authHeader));
+        assertEquals(newAuthHeaderValue, response.request().header(authHeader));
+        assertEquals(401, response.code());
+    }
+
+    @Test
+    void testAuthorizationHandlerAddedByClientFactory() throws IOException {
+        final BaseBearerTokenAuthenticationProvider authProvider = getMockAuthenticationProvider();
+        OkHttpClient okHttpClient =
+                KiotaClientFactory.create(authProvider)
+                        .addInterceptor(new MockResponseHandler())
+                        .build();
+
+        final Request request =
+                new Request.Builder().url("https://graph.microsoft.com/v1.0/me").build();
+        Response response = okHttpClient.newCall(request).execute();
 
         assertTrue(response.request().headers().names().contains(authHeader));
         assertEquals(newAuthHeaderValue, response.request().header(authHeader));

@@ -15,6 +15,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,15 +54,25 @@ public class KiotaClientFactory {
     }
 
     /**
+     * Creates an OkHttpClient Builder with the default configuration and middleware.
+     * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(@Nullable final List<Interceptor> interceptors) {
+        return create(
+                (new ArrayList<>(interceptors)).toArray(new Interceptor[interceptors.size()]));
+    }
+
+    /**
      * Creates an OkHttpClient Builder with the default configuration and middleware including the AuthorizationHandler.
      * @param authenticationProvider authentication provider to use for the AuthorizationHandler.
      * @return an OkHttpClient Builder instance.
      */
     @Nonnull public static OkHttpClient.Builder create(
             @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
-        List<Interceptor> interceptors = Arrays.asList(createDefaultInterceptors());
+        ArrayList<Interceptor> interceptors = createDefaultInterceptorsAsList();
         interceptors.add(new AuthorizationHandler(authenticationProvider));
-        return create((Interceptor[]) interceptors.toArray());
+        return create(interceptors);
     }
 
     /**
@@ -76,5 +87,13 @@ public class KiotaClientFactory {
             new UserAgentHandler(),
             new HeadersInspectionHandler()
         };
+    }
+
+    /**
+     * Creates the default interceptors for the client.
+     * @return an array of interceptors.
+     */
+    @Nonnull public static ArrayList<Interceptor> createDefaultInterceptorsAsList() {
+        return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
 }

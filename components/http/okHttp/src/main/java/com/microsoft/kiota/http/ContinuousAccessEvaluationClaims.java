@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import okhttp3.Response;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +29,8 @@ public final class ContinuousAccessEvaluationClaims {
      * @return the claims
      */
     public static @Nullable String getClaimsFromResponse(@Nonnull Response response) {
-        if (response == null || response.code() != 401) {
+        Objects.requireNonNull(response, "parameter response cannot be null");
+        if (response.code() != 401) {
             return null;
         }
         final List<String> authenticateHeader = response.headers(wwwAuthenticateHeader);
