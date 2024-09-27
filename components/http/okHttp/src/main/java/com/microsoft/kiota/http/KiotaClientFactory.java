@@ -59,6 +59,9 @@ public class KiotaClientFactory {
      * @return an OkHttpClient Builder instance.
      */
     @Nonnull public static OkHttpClient.Builder create(@Nullable final List<Interceptor> interceptors) {
+        if (interceptors == null) {
+            return create();
+        }
         return create(
                 (new ArrayList<>(interceptors)).toArray(new Interceptor[interceptors.size()]));
     }

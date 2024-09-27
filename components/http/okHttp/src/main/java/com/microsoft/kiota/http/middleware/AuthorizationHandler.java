@@ -47,6 +47,7 @@ public class AuthorizationHandler implements Interceptor {
     }
 
     @Override
+    @SuppressWarnings("UnknownNullness")
     public @Nonnull Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
         final Request request = chain.request();
@@ -87,7 +88,8 @@ public class AuthorizationHandler implements Interceptor {
                 return response;
             }
 
-            span.addEvent("com.microsoft.kiota.handler.authorization.challenge_received");
+            if (span != null)
+                span.addEvent("com.microsoft.kiota.handler.authorization.challenge_received");
 
             // We cannot replay one-shot requests after claims challenge
             final RequestBody requestBody = request.body();
@@ -98,7 +100,9 @@ public class AuthorizationHandler implements Interceptor {
             response.close();
             additionalContext.put("claims", claims);
             // Retry claims challenge only once
-            span.setAttribute(HTTP_REQUEST_RESEND_COUNT, 1);
+            if (span != null) {
+                span.setAttribute(HTTP_REQUEST_RESEND_COUNT, 1);
+            }
             final Request authenticatedRequestAfterCAE =
                     authenticateRequest(request, additionalContext, span);
             return chain.proceed(authenticatedRequestAfterCAE);
