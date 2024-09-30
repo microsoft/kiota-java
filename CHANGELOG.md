@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2024-09-30
+
+### Added
+- Adds an `AuthorizationHandler` that authenticates requests using a provided `BaseBearerTokenAuthenticationProvider`. Opting in to use this middleware can be done
+via `KiotaClientFactory.create(authProvider)`.
+
+
 ## [1.4.0] - 2024-09-11
 
 ### Changed
