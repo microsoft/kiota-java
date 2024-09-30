@@ -5,7 +5,7 @@ dependencies {
 
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testImplementation 'org.mockito:mockito-core:5.13.0'
+    testImplementation 'org.mockito:mockito-core:5.14.0'
 
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
