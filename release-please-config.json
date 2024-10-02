@@ -1,0 +1,26 @@
+{
+    "bootstrap-sha": "b82a08523d0bb5d9e27f87f10924296ca745f236",
+    "exclude-paths": [
+        ".git",
+        ".devcontainer",
+        ".github",
+        ".gradle",
+        ".vscode",
+        "scripts",
+        "gradle"
+    ],
+    "release-type": "simple",
+    "include-component-in-tag": false,
+    "include-v-in-tag": true,
+    "packages": {
+        ".": {
+            "changelog-path": "CHANGELOG.md",
+            "extra-files": [
+                "gradle.properties",
+                "README.md",
+                "components/http/okHttp/src/main/java/com/microsoft/kiota/http/middleware/options/UserAgentHandlerOption.java"
+            ]
+        }
+    },
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
