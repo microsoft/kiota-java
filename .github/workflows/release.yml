@@ -129,7 +129,7 @@ jobs:
         .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
 
   release-maven-central:
-    if: contains(github.ref, 'refs/tags/v')
+    if: ${{ contains(github.ref, 'refs/tags/v') && github.actor == 'release-please[bot]' }}
     runs-on: ubuntu-latest
     environment: maven_central
     needs: validate-package-contents
@@ -191,15 +191,11 @@ jobs:
         cache: gradle
     - name: Build with Gradle
       run: ./gradlew --no-daemon build
-    - name: Release
-      uses: anton-yurchenko/git-release@v6.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        DRAFT_RELEASE: "false"
-        PRE_RELEASE: "false"
-        CHANGELOG_FILE: "CHANGELOG.md"
-        ALLOW_EMPTY_CHANGELOG: "true"
+    - name: GitHub Release
+      uses: softprops/action-gh-release@v2
       with:
-        args: |
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fail_on_unmatched_files: true
+        files: |
           components/**/build/libs/*.jar
           components/**/**/build/libs/*.jar
