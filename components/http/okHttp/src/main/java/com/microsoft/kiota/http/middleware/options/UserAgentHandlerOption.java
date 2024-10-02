@@ -15,6 +15,7 @@ public class UserAgentHandlerOption implements RequestOption {
     @Nonnull private String productName = "kiota-java";
     // x-release-please-start-version
     @Nonnull private String productVersion = "1.5.0";
+
     // x-release-please-end
 
     /**
