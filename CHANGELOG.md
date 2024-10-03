@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1](https://github.com/microsoft/kiota-java/compare/v1.5.0...v1.5.1) (2024-10-03)
+
+
+### Bug Fixes
+
+* attempt to trigger release ([954b8e5](https://github.com/microsoft/kiota-java/commit/954b8e5b1a86058c93d226b2d19755b87943140c))
+* attempt to trigger release ([8914f9c](https://github.com/microsoft/kiota-java/commit/8914f9c81764fd7e52cc20af4a630c66248ca5f6))
+* upgrades to std uri template and additional date formats management ([df6208a](https://github.com/microsoft/kiota-java/commit/df6208a518744e2b41353219f295dc6941e51147))
+
 ## [1.5.0] - 2024-09-30
 
 ### Added
