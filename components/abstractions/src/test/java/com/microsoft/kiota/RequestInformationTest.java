@@ -17,9 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +88,45 @@ class RequestInformationTest {
         assertTrue(uriResult.toString().contains("startLocalDate='2022-08-01'"));
         assertTrue(uriResult.toString().contains("endLocalDate='2022-08-02'"));
     }
+
+    @Test
+    void SetsPathParametersOfLocalTimeType() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/getDailyCalendarView(startTime='{startTime}',endTime='{endTime}')";
+
+        // Act
+        final LocalTime startLocalTime = LocalTime.of(0, 1, 1);
+        final LocalTime endLocalTime = LocalTime.of(2, 2, 0);
+        requestInfo.pathParameters.put("startTime", startLocalTime);
+        requestInfo.pathParameters.put("endTime", endLocalTime);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("startTime='00%3A01%3A01'"));
+        assertTrue(uriResult.toString().contains("endTime='02%3A02%3A00'"));
+    }
+
+    @Test
+    void SetsPathParametersOfPeriodAndDurationType() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/getRestaurantSeating(mealDuration='{mealDuration}',seatingDuration='{seatingDuration}')";
+
+        // Act
+        final PeriodAndDuration startLocalTime = PeriodAndDuration.of(Period.of(1, 2, 3), Duration.ofHours(10)) ;
+        final PeriodAndDuration endLocalTime = PeriodAndDuration.parse("PT30M");
+        requestInfo.pathParameters.put("mealDuration", startLocalTime);
+        requestInfo.pathParameters.put("seatingDuration", endLocalTime);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("mealDuration='P1Y2M3DT10H'"));
+        assertTrue(uriResult.toString().contains("seatingDuration='PT30M'"));
+    }
+
 
     @Test
     void ExpandQueryParametersAfterPathParams() {
