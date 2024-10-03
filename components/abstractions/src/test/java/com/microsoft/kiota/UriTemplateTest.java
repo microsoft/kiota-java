@@ -24,9 +24,7 @@ public class UriTemplateTest {
                     "async",
                     true,
                     "page",
-                    10,
-                    "date",
-                    OffsetDateTime.of(2023, 2, 13, 18, 49, 00, 00, ZoneOffset.UTC));
+                    10);
 
     // Tests inspired from:
     // https://github.com/micronaut-projects/micronaut-core/blob/02992a905cf9a2279b7fe8e49927ff080cb937d5/http/src/test/groovy/io/micronaut/http/uri/UriTemplateSpec.groovy
