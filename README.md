@@ -4,13 +4,13 @@
 
 The Kiota Java Libraries for Java are:
 
-- [abstractions] Defining the basic constructs Kiota projects need once an SDK has been generated from an OpenAPI definition
-- [authentication/azure] Implementing Azure authentication mechanisms
-- [http/okHttp] Implementing a default OkHttp client
-- [serialization/form] Implementing default serialization for forms
-- [serialization/json] Implementing default serialization for json
-- [serialization/text] Implementing default serialization for text
-- [serialization/multipart] Implementing default serialization for multipart
+- [abstractions](./components/abstractions) Defining the basic constructs Kiota projects need once an SDK has been generated from an OpenAPI definition
+- [authentication/azure](./components/authentication/azure) Implementing Azure authentication mechanisms
+- [http/okHttp](./components/http/okHttp) Implementing a default OkHttp client
+- [serialization/form](./components/serialization/form) Implementing default serialization for forms
+- [serialization/json](./components/serialization/json) Implementing default serialization for json
+- [serialization/text](./components/serialization/text) Implementing default serialization for text
+- [serialization/multipart](./components/serialization/multipart) Implementing default serialization for multipart
 
 Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README.md).
 
