@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -473,6 +474,14 @@ public class RequestInformation {
             return ((ValuedEnum) value).getValue();
         } else if (value instanceof UUID) {
             return value.toString();
+        } else if (value instanceof OffsetDateTime) {
+            return ((OffsetDateTime) value).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else if (value instanceof LocalDate) {
+            return ((LocalDate) value).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        } else if (value instanceof LocalTime) {
+            return ((LocalTime) value).format(DateTimeFormatter.ISO_LOCAL_TIME);
+        } else if (value instanceof PeriodAndDuration) {
+            return ((PeriodAndDuration) value).toString();
         } else {
             return value;
         }

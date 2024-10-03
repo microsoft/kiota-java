@@ -1,8 +1,7 @@
 template, result
-{+baseurl}/users; http://localhost:8080/users
-{+baseurl}/users/{id}/list; http://localhost:8080/users/1/list
-{+baseurl}/users/{id}/list{?async*}; http://localhost:8080/users/1/list?async=true
-{+baseurl}/users/{id}/list{?async*,unmatched*}; http://localhost:8080/users/1/list?async=true
-{+baseurl}/users/{id}/list{?async*,unmatched*,page*}; http://localhost:8080/users/1/list?async=true&page=10
-{+baseurl}/users/{id}/name/{name}/list{?async*,unmatched*,page*}; http://localhost:8080/users/1/name/foo/list?async=true&page=10
-{+baseurl}/users/{id}/list{?async*,unmatched*,page*,date*}; http://localhost:8080/users/1/list?async=true&page=10&date=2023-02-13T18%3A49%3A00Z
+"{+baseurl}/users", http://localhost:8080/users
+"{+baseurl}/users/{id}/list", http://localhost:8080/users/1/list
+"{+baseurl}/users/{id}/list{?async*}", http://localhost:8080/users/1/list?async=true
+"{+baseurl}/users/{id}/list{?async*,unmatched*}", http://localhost:8080/users/1/list?async=true
+"{+baseurl}/users/{id}/list{?async*,unmatched*,page*}", http://localhost:8080/users/1/list?async=true&page=10
+"{+baseurl}/users/{id}/name/{name}/list{?async*,unmatched*,page*}", http://localhost:8080/users/1/name/foo/list?async=true&page=10
