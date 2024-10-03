@@ -50,4 +50,8 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
             }
         }
     }
+
+    public @Nonnull AccessTokenProvider getAccessTokenProvider() {
+        return this.accessTokenProvider;
+    }
 }

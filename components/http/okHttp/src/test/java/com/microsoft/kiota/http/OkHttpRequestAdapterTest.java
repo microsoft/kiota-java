@@ -9,6 +9,7 @@ import com.microsoft.kiota.HttpMethod;
 import com.microsoft.kiota.NativeResponseHandler;
 import com.microsoft.kiota.RequestInformation;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
+import com.microsoft.kiota.http.middleware.MockResponseHandler;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParsableFactory;
 import com.microsoft.kiota.serialization.ParseNode;
@@ -20,7 +21,6 @@ import io.opentelemetry.api.trace.Span;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Dispatcher;
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -573,34 +573,5 @@ public class OkHttpRequestAdapterTest {
                 .thenReturn(mockParseNode);
         when(mockFactory.getValidContentType()).thenReturn(validContentType);
         return mockFactory;
-    }
-
-    // Returns request body as response body
-    static class MockResponseHandler implements Interceptor {
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            final var request = chain.request();
-            final var requestBody = request.body();
-            if (request != null && requestBody != null) {
-                final var buffer = new Buffer();
-                requestBody.writeTo(buffer);
-                return new Response.Builder()
-                        .code(200)
-                        .message("OK")
-                        .protocol(Protocol.HTTP_1_1)
-                        .request(request)
-                        .body(
-                                ResponseBody.create(
-                                        buffer.readByteArray(),
-                                        MediaType.parse("application/json")))
-                        .build();
-            }
-            return new Response.Builder()
-                    .code(200)
-                    .message("OK")
-                    .protocol(Protocol.HTTP_1_1)
-                    .request(request)
-                    .build();
-        }
     }
 }
