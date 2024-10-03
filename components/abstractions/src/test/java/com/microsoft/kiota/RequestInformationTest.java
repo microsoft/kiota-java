@@ -76,7 +76,8 @@ class RequestInformationTest {
     void SetsPathParametersOfLocalDateType() {
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
-        requestInfo.urlTemplate = "http://localhost/getCalendarView(startLocalDate='{startLocalDate}',endLocalDate='{endLocalDate}')";
+        requestInfo.urlTemplate =
+                "http://localhost/getCalendarView(startLocalDate='{startLocalDate}',endLocalDate='{endLocalDate}')";
 
         final LocalDate startLocalDate = LocalDate.of(2022, 8, 1);
         final LocalDate endLocalDate = LocalDate.of(2022, 8, 2);
@@ -94,7 +95,8 @@ class RequestInformationTest {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
-        requestInfo.urlTemplate = "http://localhost/getDailyCalendarView(startTime='{startTime}',endTime='{endTime}')";
+        requestInfo.urlTemplate =
+                "http://localhost/getDailyCalendarView(startTime='{startTime}',endTime='{endTime}')";
 
         // Act
         final LocalTime startLocalTime = LocalTime.of(0, 1, 1);
@@ -113,10 +115,12 @@ class RequestInformationTest {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
-        requestInfo.urlTemplate = "http://localhost/getRestaurantSeating(mealDuration='{mealDuration}',seatingDuration='{seatingDuration}')";
+        requestInfo.urlTemplate =
+                "http://localhost/getRestaurantSeating(mealDuration='{mealDuration}',seatingDuration='{seatingDuration}')";
 
         // Act
-        final PeriodAndDuration startLocalTime = PeriodAndDuration.of(Period.of(1, 2, 3), Duration.ofHours(10)) ;
+        final PeriodAndDuration startLocalTime =
+                PeriodAndDuration.of(Period.of(1, 2, 3), Duration.ofHours(10));
         final PeriodAndDuration endLocalTime = PeriodAndDuration.parse("PT30M");
         requestInfo.pathParameters.put("mealDuration", startLocalTime);
         requestInfo.pathParameters.put("seatingDuration", endLocalTime);
@@ -126,7 +130,6 @@ class RequestInformationTest {
         assertTrue(uriResult.toString().contains("mealDuration='P1Y2M3DT10H'"));
         assertTrue(uriResult.toString().contains("seatingDuration='PT30M'"));
     }
-
 
     @Test
     void ExpandQueryParametersAfterPathParams() {

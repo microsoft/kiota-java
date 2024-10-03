@@ -7,8 +7,6 @@ import io.github.stduritemplate.StdUriTemplate;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Map;
 
 public class UriTemplateTest {
