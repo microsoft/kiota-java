@@ -478,7 +478,7 @@ public class RequestInformation {
             return ((OffsetDateTime) value).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         } else if (value instanceof LocalDate) {
             return ((LocalDate) value).format(DateTimeFormatter.ISO_LOCAL_DATE);
-        } else if (value instanceof  LocalTime) {
+        } else if (value instanceof LocalTime) {
             return ((LocalTime) value).format(DateTimeFormatter.ISO_LOCAL_TIME);
         } else if (value instanceof PeriodAndDuration) {
             return ((PeriodAndDuration) value).toString();
