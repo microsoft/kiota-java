@@ -13,7 +13,7 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
         return _concrete.getValidContentType();
     }
 
-    private final SerializationWriterFactory _concrete;
+    protected final SerializationWriterFactory _concrete;
     private final Consumer<Parsable> _onBefore;
     private final Consumer<Parsable> _onAfter;
     private final BiConsumer<Parsable, SerializationWriter> _onStart;

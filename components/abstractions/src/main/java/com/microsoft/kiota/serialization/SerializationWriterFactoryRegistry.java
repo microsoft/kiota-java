@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
+
 import jakarta.annotation.Nonnull;
 
 import java.util.HashMap;
@@ -36,20 +38,92 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
         }
-        final String vendorSpecificContentType = contentType.split(";")[0];
+        final ContentTypeWrapper contentTypeWrapper = new ContentTypeWrapper(contentType);
+        final SerializationWriterFactory serializationWriterFactory =
+                getSerializationWriterFactory(contentTypeWrapper);
+        return serializationWriterFactory.getSerializationWriter(
+                contentTypeWrapper.cleanedContentType);
+    }
+
+    /**
+     * Get a Serialization Writer with backing store configured with serializeOnlyChangedValues
+     * @param contentType
+     * @param serializeOnlyChangedValues control backing store functionality
+     * @return the serialization writer
+     */
+    @Nonnull public SerializationWriter getSerializationWriter(
+            @Nonnull final String contentType, final boolean serializeOnlyChangedValues) {
+        if (!serializeOnlyChangedValues) {
+            final ContentTypeWrapper contentTypeWrapper = new ContentTypeWrapper(contentType);
+            final SerializationWriterFactory factory =
+                    getSerializationWriterFactory(contentTypeWrapper);
+            if (factory instanceof BackingStoreSerializationWriterProxyFactory) {
+                return ((BackingStoreSerializationWriterProxyFactory) factory)
+                        .getSerializationWriter(
+                                contentTypeWrapper.cleanedContentType, serializeOnlyChangedValues);
+            }
+        }
+        return getSerializationWriter(contentType);
+    }
+
+    /**
+     * Gets a SerializationWriterFactory that is mapped to a cleaned content type string
+     * @param contentTypeWrapper wrapper object carrying initial content type and result of parsing it
+     * @return the serialization writer factory
+     * @throws RuntimeException when no mapped factory is found
+     */
+    @Nonnull private SerializationWriterFactory getSerializationWriterFactory(
+            @Nonnull final ContentTypeWrapper contentTypeWrapper) {
+        final String vendorSpecificContentType =
+                getVendorSpecificContentType(contentTypeWrapper.contentType);
         if (contentTypeAssociatedFactories.containsKey(vendorSpecificContentType)) {
-            return contentTypeAssociatedFactories
-                    .get(vendorSpecificContentType)
-                    .getSerializationWriter(vendorSpecificContentType);
+            contentTypeWrapper.cleanedContentType = vendorSpecificContentType;
+            return contentTypeAssociatedFactories.get(contentTypeWrapper.cleanedContentType);
         }
         final String cleanedContentType =
-                contentTypeVendorCleanupPattern.matcher(vendorSpecificContentType).replaceAll("");
+                getCleanedVendorSpecificContentType(contentTypeWrapper.cleanedContentType);
         if (contentTypeAssociatedFactories.containsKey(cleanedContentType)) {
-            return contentTypeAssociatedFactories
-                    .get(cleanedContentType)
-                    .getSerializationWriter(cleanedContentType);
+            contentTypeWrapper.cleanedContentType = cleanedContentType;
+            return contentTypeAssociatedFactories.get(contentTypeWrapper.cleanedContentType);
         }
         throw new RuntimeException(
-                "Content type " + contentType + " does not have a factory to be serialized");
+                "Content type "
+                        + contentTypeWrapper.contentType
+                        + " does not have a factory to be serialized");
+    }
+
+    /**
+     * Splits content type by ; and returns first segment or original contentType
+     * @param contentType
+     * @return vendor specific content type
+     */
+    @Nonnull private String getVendorSpecificContentType(@Nonnull final String contentType) {
+        String[] split = contentType.split(";");
+        if (split.length >= 1) {
+            return split[0];
+        }
+        return contentType;
+    }
+
+    /**
+     * Does a regex match on the content type replacing special characters
+     * @param contentType
+     * @return cleaned content type
+     */
+    @Nonnull private String getCleanedVendorSpecificContentType(@Nonnull final String contentType) {
+        return contentTypeVendorCleanupPattern.matcher(contentType).replaceAll("");
+    }
+
+    /**
+     * Wrapper class to carry the cleaned version of content-type after parsing in multiple stages
+     */
+    private static final class ContentTypeWrapper {
+        private String contentType;
+        private String cleanedContentType;
+
+        ContentTypeWrapper(@Nonnull final String contentType) {
+            this.contentType = contentType;
+            this.cleanedContentType = "";
+        }
     }
 }
