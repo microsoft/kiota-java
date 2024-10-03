@@ -1,4 +1,4 @@
-template, result
+template; result
 {+baseurl}/users; http://localhost:8080/users
 {+baseurl}/users/{id}/list; http://localhost:8080/users/1/list
 {+baseurl}/users/{id}/list{?async*}; http://localhost:8080/users/1/list?async=true
