@@ -30,16 +30,16 @@ public class TestBackedModelEntity implements Parsable, AdditionalDataHolder, Ba
         return this.backingStore.get("id");
     }
 
-    public void setId(String _id) {
-        this.backingStore.set("id", _id);
+    public void setId(String id) {
+        this.backingStore.set("id", id);
     }
 
     public String getOfficeLocation() {
         return this.backingStore.get("officeLocation");
     }
 
-    public void setOfficeLocation(String _officeLocation) {
-        this.backingStore.set("officeLocation", _officeLocation);
+    public void setOfficeLocation(String officeLocation) {
+        this.backingStore.set("officeLocation", officeLocation);
     }
 
     public LocalDate getBirthDay() {
@@ -88,37 +88,37 @@ public class TestBackedModelEntity implements Parsable, AdditionalDataHolder, Ba
             {
                 put(
                         "id",
-                        (n) -> {
+                        n -> {
                             setId(n.getStringValue());
                         });
                 put(
                         "officeLocation",
-                        (n) -> {
+                        n -> {
                             setOfficeLocation(n.getStringValue());
                         });
                 put(
                         "birthDay",
-                        (n) -> {
+                        n -> {
                             setBirthDay(n.getLocalDateValue());
                         });
                 put(
                         "workDuration",
-                        (n) -> {
+                        n -> {
                             setWorkDuration(n.getPeriodAndDurationValue());
                         });
                 put(
                         "startWorkTime",
-                        (n) -> {
+                        n -> {
                             setStartWorkTime(n.getLocalTimeValue());
                         });
                 put(
                         "endWorkTime",
-                        (n) -> {
+                        n -> {
                             setEndWorkTime(n.getLocalTimeValue());
                         });
                 put(
                         "createdDateTime",
-                        (n) -> {
+                        n -> {
                             setCreatedDateTime(n.getOffsetDateTimeValue());
                         });
             }
