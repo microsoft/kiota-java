@@ -119,8 +119,7 @@ class SerializationHelpersTest {
 
         final String collectionResult =
                 KiotaJsonSerialization.serializeAsString(
-                        false,
-                        new ArrayList<>(Arrays.asList(entity)));
+                        false, new ArrayList<>(Arrays.asList(entity)));
 
         assertEquals("[{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}]", collectionResult);
     }
@@ -146,8 +145,7 @@ class SerializationHelpersTest {
 
         final String collectionResult =
                 KiotaJsonSerialization.serializeAsString(
-                        true,
-                        new ArrayList<>(Arrays.asList(entity)));
+                        true, new ArrayList<>(Arrays.asList(entity)));
         assertEquals("[{}]", collectionResult);
     }
 
@@ -164,12 +162,16 @@ class SerializationHelpersTest {
         entity.setId("123");
         entity.setOfficeLocation("Nairobi");
 
-        final String result = KiotaSerialization.serializeAsString("application/json;odata.metadata=minimal", entity);
+        final String result =
+                KiotaSerialization.serializeAsString(
+                        "application/json;odata.metadata=minimal", entity);
         assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", result);
 
-        // Because onAfterObjectSerialization, returnOnlyChangedValues is set to false & initialization is completed
+        // Because onAfterObjectSerialization, returnOnlyChangedValues is set to false &
+        // initialization is completed
         entity.getBackingStore().setIsInitializationCompleted(false);
-        final String otherResult = KiotaSerialization.serializeAsString("application/vnd.github.raw+json", entity);
+        final String otherResult =
+                KiotaSerialization.serializeAsString("application/vnd.github.raw+json", entity);
         assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", otherResult);
     }
 }
