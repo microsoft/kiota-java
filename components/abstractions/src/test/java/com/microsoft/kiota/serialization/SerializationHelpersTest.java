@@ -109,6 +109,7 @@ class SerializationHelpersTest {
         entity.setId("123");
         entity.setOfficeLocation("Nairobi");
 
+        // Sets the backing store to be initialized. No properties are dirty
         entity.getBackingStore().setIsInitializationCompleted(true);
 
         final String result = KiotaJsonSerialization.serializeAsString(false, entity);
@@ -136,7 +137,6 @@ class SerializationHelpersTest {
         final TestBackedModelEntity entity = new TestBackedModelEntity();
         entity.setId("123");
         entity.setOfficeLocation("Nairobi");
-
         entity.getBackingStore().setIsInitializationCompleted(true);
 
         final String result = KiotaJsonSerialization.serializeAsString(true, entity);
@@ -149,5 +149,27 @@ class SerializationHelpersTest {
                         true,
                         new ArrayList<>(Arrays.asList(entity)));
         assertEquals("[{}]", collectionResult);
+    }
+
+    @Test
+    void cleansContentType() throws IOException {
+        final BackingStoreSerializationWriterProxyFactory
+                backingStoreSerializationWriterProxyFactory =
+                        new BackingStoreSerializationWriterProxyFactory(
+                                new JsonSerializationWriterFactory());
+        SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
+                _jsonContentType, backingStoreSerializationWriterProxyFactory);
+
+        final TestBackedModelEntity entity = new TestBackedModelEntity();
+        entity.setId("123");
+        entity.setOfficeLocation("Nairobi");
+
+        final String result = KiotaSerialization.serializeAsString("application/json;odata.metadata=minimal", entity);
+        assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", result);
+
+        // Because onAfterObjectSerialization, returnOnlyChangedValues is set to false & initialization is completed
+        entity.getBackingStore().setIsInitializationCompleted(false);
+        final String otherResult = KiotaSerialization.serializeAsString("application/vnd.github.raw+json", entity);
+        assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", otherResult);
     }
 }

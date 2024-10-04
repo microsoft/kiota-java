@@ -81,7 +81,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
             return contentTypeAssociatedFactories.get(contentTypeWrapper.cleanedContentType);
         }
         final String cleanedContentType =
-                getCleanedVendorSpecificContentType(contentTypeWrapper.cleanedContentType);
+                getCleanedVendorSpecificContentType(vendorSpecificContentType);
         if (contentTypeAssociatedFactories.containsKey(cleanedContentType)) {
             contentTypeWrapper.cleanedContentType = cleanedContentType;
             return contentTypeAssociatedFactories.get(contentTypeWrapper.cleanedContentType);
