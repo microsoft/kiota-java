@@ -111,14 +111,15 @@ class SerializationHelpersTest {
 
         entity.getBackingStore().setIsInitializationCompleted(true);
 
-        final String result = KiotaJsonSerialization.serializeAsString(entity, false);
+        final String result = KiotaJsonSerialization.serializeAsString(false, entity);
 
         assertFalse(entity.getBackingStore().getReturnOnlyChangedValues());
         assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", result);
 
         final String collectionResult =
                 KiotaJsonSerialization.serializeAsString(
-                        new ArrayList<>(Arrays.asList(entity)), false);
+                        false,
+                        new ArrayList<>(Arrays.asList(entity)));
 
         assertEquals("[{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}]", collectionResult);
     }
@@ -138,14 +139,15 @@ class SerializationHelpersTest {
 
         entity.getBackingStore().setIsInitializationCompleted(true);
 
-        final String result = KiotaJsonSerialization.serializeAsString(entity, true);
+        final String result = KiotaJsonSerialization.serializeAsString(true, entity);
 
         assertFalse(entity.getBackingStore().getReturnOnlyChangedValues());
         assertEquals("{}", result);
 
         final String collectionResult =
                 KiotaJsonSerialization.serializeAsString(
-                        new ArrayList<>(Arrays.asList(entity)), true);
+                        true,
+                        new ArrayList<>(Arrays.asList(entity)));
         assertEquals("[{}]", collectionResult);
     }
 }
