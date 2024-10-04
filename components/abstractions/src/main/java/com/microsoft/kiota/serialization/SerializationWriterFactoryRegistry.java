@@ -118,8 +118,8 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
      * Wrapper class to carry the cleaned version of content-type after parsing in multiple stages
      */
     private static final class ContentTypeWrapper {
-        private String contentType;
-        private String cleanedContentType;
+        String contentType;
+        String cleanedContentType;
 
         ContentTypeWrapper(@Nonnull final String contentType) {
             this.contentType = contentType;
