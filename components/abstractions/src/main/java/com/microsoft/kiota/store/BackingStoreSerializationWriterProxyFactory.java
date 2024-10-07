@@ -62,7 +62,7 @@ public class BackingStoreSerializationWriterProxyFactory extends SerializationWr
     @Nonnull public SerializationWriter getSerializationWriter(
             @Nonnull final String contentType, final boolean serializeOnlyChangedValues) {
         if (!serializeOnlyChangedValues) {
-            return _concrete.getSerializationWriter(contentType);
+            return proxiedFactory.getSerializationWriter(contentType);
         }
         return getSerializationWriter(contentType);
     }
