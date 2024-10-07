@@ -30,7 +30,7 @@ public final class KiotaSerialization {
      */
     @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
             @Nonnull final String contentType, @Nonnull final T value) throws IOException {
-        return serializeAsStream(contentType, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES, value);
+        return serializeAsStream(contentType, value, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES);
     }
 
     /**
@@ -44,8 +44,8 @@ public final class KiotaSerialization {
      */
     @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
             @Nonnull final String contentType,
-            final boolean serializeOnlyChangedValues,
-            @Nonnull final T value)
+            @Nonnull final T value,
+            final boolean serializeOnlyChangedValues)
             throws IOException {
         Objects.requireNonNull(value);
         try (final SerializationWriter writer =
@@ -66,7 +66,7 @@ public final class KiotaSerialization {
     @Nonnull public static <T extends Parsable> String serializeAsString(
             @Nonnull final String contentType, @Nonnull final T value) throws IOException {
         Objects.requireNonNull(value);
-        return serializeAsString(contentType, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES, value);
+        return serializeAsString(contentType, value, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES);
     }
 
     /**
@@ -80,12 +80,12 @@ public final class KiotaSerialization {
      */
     @Nonnull public static <T extends Parsable> String serializeAsString(
             @Nonnull final String contentType,
-            final boolean serializeOnlyChangedValues,
-            @Nonnull final T value)
+            @Nonnull final T value,
+            final boolean serializeOnlyChangedValues)
             throws IOException {
         Objects.requireNonNull(value);
         try (final InputStream stream =
-                serializeAsStream(contentType, serializeOnlyChangedValues, value)) {
+                serializeAsStream(contentType, value, serializeOnlyChangedValues)) {
             return new String(Compatibility.readAllBytes(stream), CHARSET_NAME);
         }
     }
@@ -102,7 +102,7 @@ public final class KiotaSerialization {
             @Nonnull final String contentType, @Nonnull final Iterable<T> values)
             throws IOException {
         Objects.requireNonNull(values);
-        return serializeAsStream(contentType, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES, values);
+        return serializeAsStream(contentType, values, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES);
     }
 
     /**
@@ -116,8 +116,8 @@ public final class KiotaSerialization {
      */
     @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
             @Nonnull final String contentType,
-            final boolean serializeOnlyChangedValues,
-            @Nonnull final Iterable<T> values)
+            @Nonnull final Iterable<T> values,
+            final boolean serializeOnlyChangedValues)
             throws IOException {
         Objects.requireNonNull(values);
         try (final SerializationWriter writer =
@@ -139,7 +139,7 @@ public final class KiotaSerialization {
             @Nonnull final String contentType, @Nonnull final Iterable<T> values)
             throws IOException {
         Objects.requireNonNull(values);
-        return serializeAsString(contentType, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES, values);
+        return serializeAsString(contentType, values, DEFAULT_SERIALIZE_ONLY_CHANGED_VALUES);
     }
 
     /**
@@ -153,12 +153,12 @@ public final class KiotaSerialization {
      */
     @Nonnull public static <T extends Parsable> String serializeAsString(
             @Nonnull final String contentType,
-            final boolean serializeOnlyChangedValues,
-            @Nonnull final Iterable<T> values)
+            @Nonnull final Iterable<T> values,
+            final boolean serializeOnlyChangedValues)
             throws IOException {
         Objects.requireNonNull(values);
         try (final InputStream stream =
-                serializeAsStream(contentType, serializeOnlyChangedValues, values)) {
+                serializeAsStream(contentType, values, serializeOnlyChangedValues)) {
             return new String(Compatibility.readAllBytes(stream), CHARSET_NAME);
         }
     }

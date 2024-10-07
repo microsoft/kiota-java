@@ -112,14 +112,14 @@ class SerializationHelpersTest {
         // Sets the backing store to be initialized. No properties are dirty
         entity.getBackingStore().setIsInitializationCompleted(true);
 
-        final String result = KiotaJsonSerialization.serializeAsString(false, entity);
+        final String result = KiotaJsonSerialization.serializeAsString(entity, false);
 
         assertFalse(entity.getBackingStore().getReturnOnlyChangedValues());
         assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", result);
 
         final String collectionResult =
                 KiotaJsonSerialization.serializeAsString(
-                        false, new ArrayList<>(Arrays.asList(entity)));
+                        new ArrayList<>(Arrays.asList(entity)), false);
 
         assertEquals("[{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}]", collectionResult);
     }
@@ -138,14 +138,14 @@ class SerializationHelpersTest {
         entity.setOfficeLocation("Nairobi");
         entity.getBackingStore().setIsInitializationCompleted(true);
 
-        final String result = KiotaJsonSerialization.serializeAsString(true, entity);
+        final String result = KiotaJsonSerialization.serializeAsString(entity, true);
 
         assertFalse(entity.getBackingStore().getReturnOnlyChangedValues());
         assertEquals("{}", result);
 
         final String collectionResult =
                 KiotaJsonSerialization.serializeAsString(
-                        true, new ArrayList<>(Arrays.asList(entity)));
+                        new ArrayList<>(Arrays.asList(entity)), true);
         assertEquals("[{}]", collectionResult);
     }
 

@@ -35,9 +35,9 @@ public class KiotaJsonSerialization {
      * @throws IOException when the stream cannot be closed or read.
      */
     @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
-            final boolean serializeOnlyChangedValues, @Nonnull final T value) throws IOException {
+            @Nonnull final T value, final boolean serializeOnlyChangedValues) throws IOException {
         return KiotaSerialization.serializeAsStream(
-                CONTENT_TYPE, serializeOnlyChangedValues, value);
+                CONTENT_TYPE, value, serializeOnlyChangedValues);
     }
 
     /**
@@ -61,9 +61,9 @@ public class KiotaJsonSerialization {
      * @throws IOException when the stream cannot be closed or read.
      */
     @Nonnull public static <T extends Parsable> String serializeAsString(
-            final boolean serializeOnlyChangedValues, @Nonnull final T value) throws IOException {
+            @Nonnull final T value, final boolean serializeOnlyChangedValues) throws IOException {
         return KiotaSerialization.serializeAsString(
-                CONTENT_TYPE, serializeOnlyChangedValues, value);
+                CONTENT_TYPE, value, serializeOnlyChangedValues);
     }
 
     /**
@@ -87,10 +87,10 @@ public class KiotaJsonSerialization {
      * @throws IOException when the stream cannot be closed or read.
      */
     @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
-            final boolean serializeOnlyChangedValues, @Nonnull final Iterable<T> values)
+            @Nonnull final Iterable<T> values, final boolean serializeOnlyChangedValues)
             throws IOException {
         return KiotaSerialization.serializeAsStream(
-                CONTENT_TYPE, serializeOnlyChangedValues, values);
+                CONTENT_TYPE, values, serializeOnlyChangedValues);
     }
 
     /**
@@ -114,10 +114,10 @@ public class KiotaJsonSerialization {
      * @throws IOException when the stream cannot be closed or read.
      */
     @Nonnull public static <T extends Parsable> String serializeAsString(
-            final boolean serializeOnlyChangedValues, @Nonnull final Iterable<T> values)
+            @Nonnull final Iterable<T> values, final boolean serializeOnlyChangedValues)
             throws IOException {
         return KiotaSerialization.serializeAsString(
-                CONTENT_TYPE, serializeOnlyChangedValues, values);
+                CONTENT_TYPE, values, serializeOnlyChangedValues);
     }
 
     /**
