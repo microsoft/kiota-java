@@ -3,6 +3,7 @@ package com.microsoft.kiota.serialization;
 import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -34,15 +35,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
 
     @Override
     @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
-        Objects.requireNonNull(contentType, "parameter contentType cannot be null");
-        if (contentType.isEmpty()) {
-            throw new NullPointerException("contentType cannot be empty");
-        }
-        final ContentTypeWrapper contentTypeWrapper = new ContentTypeWrapper(contentType);
-        final SerializationWriterFactory serializationWriterFactory =
-                getSerializationWriterFactory(contentTypeWrapper);
-        return serializationWriterFactory.getSerializationWriter(
-                contentTypeWrapper.cleanedContentType);
+        return getSerializationWriter(contentType, true);
     }
 
     /**
@@ -50,46 +43,48 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
      * @param contentType
      * @param serializeOnlyChangedValues control backing store functionality
      * @return the serialization writer
+     * @throws RuntimeException when no factory is found for content type
      */
     @Nonnull public SerializationWriter getSerializationWriter(
             @Nonnull final String contentType, final boolean serializeOnlyChangedValues) {
-        if (!serializeOnlyChangedValues) {
-            final ContentTypeWrapper contentTypeWrapper = new ContentTypeWrapper(contentType);
-            final SerializationWriterFactory factory =
-                    getSerializationWriterFactory(contentTypeWrapper);
-            if (factory instanceof BackingStoreSerializationWriterProxyFactory) {
-                return ((BackingStoreSerializationWriterProxyFactory) factory)
-                        .getSerializationWriter(
-                                contentTypeWrapper.cleanedContentType, serializeOnlyChangedValues);
+        Objects.requireNonNull(contentType, "parameter contentType cannot be null");
+        if (contentType.isEmpty()) {
+            throw new NullPointerException("contentType cannot be empty");
+        }
+        String cleanedContentType = getVendorSpecificContentType(contentType);
+        SerializationWriterFactory factory = getSerializationWriterFactory(cleanedContentType);
+        if (factory == null) {
+            cleanedContentType = getCleanedVendorSpecificContentType(cleanedContentType);
+            factory =
+                    getSerializationWriterFactory(
+                            getCleanedVendorSpecificContentType(cleanedContentType));
+            if (factory == null) {
+                throw new RuntimeException(
+                        "Content type "
+                                + contentType
+                                + " does not have a factory to be serialized");
             }
         }
-        return getSerializationWriter(contentType);
+        if (!serializeOnlyChangedValues) {
+            if (factory instanceof BackingStoreSerializationWriterProxyFactory) {
+                return ((BackingStoreSerializationWriterProxyFactory) factory)
+                        .getSerializationWriter(cleanedContentType, serializeOnlyChangedValues);
+            }
+        }
+        return factory.getSerializationWriter(cleanedContentType);
     }
 
     /**
      * Gets a SerializationWriterFactory that is mapped to a cleaned content type string
-     * @param contentTypeWrapper wrapper object carrying initial content type and result of parsing it
-     * @return the serialization writer factory
-     * @throws RuntimeException when no mapped factory is found
+     * @param contentType wrapper object carrying initial content type and result of parsing it
+     * @return the serialization writer factory or null if no mapped factory is found
      */
-    @Nonnull private SerializationWriterFactory getSerializationWriterFactory(
-            @Nonnull final ContentTypeWrapper contentTypeWrapper) {
-        final String vendorSpecificContentType =
-                getVendorSpecificContentType(contentTypeWrapper.contentType);
-        if (contentTypeAssociatedFactories.containsKey(vendorSpecificContentType)) {
-            contentTypeWrapper.cleanedContentType = vendorSpecificContentType;
-            return contentTypeAssociatedFactories.get(contentTypeWrapper.cleanedContentType);
+    @Nullable private SerializationWriterFactory getSerializationWriterFactory(
+            @Nonnull final String contentType) {
+        if (contentTypeAssociatedFactories.containsKey(contentType)) {
+            return contentTypeAssociatedFactories.get(contentType);
         }
-        final String cleanedContentType =
-                getCleanedVendorSpecificContentType(vendorSpecificContentType);
-        if (contentTypeAssociatedFactories.containsKey(cleanedContentType)) {
-            contentTypeWrapper.cleanedContentType = cleanedContentType;
-            return contentTypeAssociatedFactories.get(contentTypeWrapper.cleanedContentType);
-        }
-        throw new RuntimeException(
-                "Content type "
-                        + contentTypeWrapper.contentType
-                        + " does not have a factory to be serialized");
+        return null;
     }
 
     /**
@@ -112,18 +107,5 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
      */
     @Nonnull private String getCleanedVendorSpecificContentType(@Nonnull final String contentType) {
         return contentTypeVendorCleanupPattern.matcher(contentType).replaceAll("");
-    }
-
-    /**
-     * Wrapper class to carry the cleaned version of content-type after parsing in multiple stages
-     */
-    private static final class ContentTypeWrapper {
-        String contentType;
-        String cleanedContentType;
-
-        ContentTypeWrapper(@Nonnull final String contentType) {
-            this.contentType = contentType;
-            this.cleanedContentType = "";
-        }
     }
 }
