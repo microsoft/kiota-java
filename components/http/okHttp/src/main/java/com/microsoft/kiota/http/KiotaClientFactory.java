@@ -139,7 +139,7 @@ public class KiotaClientFactory {
             }
         }
 
-        List<Interceptor> handlers = new ArrayList<>();
+        final List<Interceptor> handlers = new ArrayList<>();
         handlers.add(uriReplacementOption != null ? new UrlReplaceHandler(uriReplacementOption) : new UrlReplaceHandler());
         handlers.add(retryHandlerOption != null ? new RetryHandler(retryHandlerOption) : new RetryHandler());
         handlers.add(redirectHandlerOption != null ? new RedirectHandler(redirectHandlerOption) : new RedirectHandler());
