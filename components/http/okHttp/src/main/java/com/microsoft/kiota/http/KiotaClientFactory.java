@@ -114,7 +114,7 @@ public class KiotaClientFactory {
 
     }
 
-    @Nonnull public static Interceptor[] createDefaultInterceptors(List<RequestOption> requestOptions) {
+    @Nonnull public static Interceptor[] createDefaultInterceptors(@Nullable final List<RequestOption> requestOptions) {
 
         UrlReplaceHandlerOption uriReplacementOption = null;
         UserAgentHandlerOption userAgentHandlerOption = null;
