@@ -3,6 +3,7 @@ package com.microsoft.kiota.http;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.http.middleware.ChaosHandler;
 import com.microsoft.kiota.http.middleware.HeadersInspectionHandler;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
@@ -10,9 +11,14 @@ import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
+import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
+import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,17 +35,50 @@ public class KiotaClientFactoryTest {
     }
 
     @Test
-    void testOverideDefaultInterceptors() throws IOException {
+    void testDefaultInterceptorsWhenPassedIn() throws IOException {
         OkHttpClient client = KiotaClientFactory.create(
             new Interceptor[]{getDisabledRetryHandler(), new ChaosHandler()}).build();
         List<Interceptor> interceptors = client.interceptors();
         assertNotNull(interceptors);
-        assertEquals(7, interceptors.size());
+        assertEquals(2, interceptors.size());
         for (Interceptor interceptor : interceptors) {
             if (interceptor instanceof RetryHandler) {
                 RetryHandlerOption handlerOption = ((RetryHandler) interceptor).getRetryOptions();
                 assertEquals(0, handlerOption.delay());
                 assertEquals(0, handlerOption.maxRetries());
+            }
+
+            assertTrue(interceptor instanceof RetryHandler || interceptor instanceof ChaosHandler,
+                "Array should contain instances of RetryHandler and ChaosHandler");
+
+        }
+    }
+    @Test
+    void testDefaultInterceptorsWhenRequestOptionsPassedIn() throws IOException {
+        RetryHandlerOption retryHandlerOption = new RetryHandlerOption(
+            (delay, executionCount, request, response) -> false, 0, 0);
+        UrlReplaceHandlerOption urlReplaceHandlerOption = new UrlReplaceHandlerOption(new HashMap<>(),false);
+
+        List<RequestOption> options = new ArrayList<>();
+        options.add(urlReplaceHandlerOption);
+        options.add(retryHandlerOption);
+
+        Interceptor[] interceptors = KiotaClientFactory.createDefaultInterceptors(options);
+        OkHttpClient client = KiotaClientFactory.create(interceptors).build();
+        List<Interceptor> clientInterceptors = client.interceptors();
+        assertNotNull(interceptors);
+        assertEquals(6, clientInterceptors.size());
+        for (Interceptor interceptor : clientInterceptors) {
+            if (interceptor instanceof RetryHandler) {
+                RetryHandlerOption handlerOption = ((RetryHandler) interceptor).getRetryOptions();
+                assertEquals(0, handlerOption.delay());
+                assertEquals(0, handlerOption.maxRetries());
+            }
+
+            if (interceptor instanceof UrlReplaceHandler) {
+                UrlReplaceHandlerOption handlerOption = ((UrlReplaceHandler) interceptor).getUrlReplaceHandlerOption();
+                assertTrue( handlerOption.getReplacementPairs().isEmpty());
+                assertFalse(handlerOption.isEnabled());
             }
 
             assertTrue(interceptor instanceof UrlReplaceHandler || interceptor instanceof RedirectHandler ||
@@ -50,7 +89,6 @@ public class KiotaClientFactoryTest {
 
 
         }
-
 
     }
 

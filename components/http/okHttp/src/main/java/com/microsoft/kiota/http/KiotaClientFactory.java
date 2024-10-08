@@ -1,5 +1,6 @@
 package com.microsoft.kiota.http;
 
+import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
 import com.microsoft.kiota.http.middleware.AuthorizationHandler;
 import com.microsoft.kiota.http.middleware.HeadersInspectionHandler;
@@ -9,6 +10,12 @@ import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
 
+import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
+import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
+import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
+import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
+import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
+import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -48,8 +55,7 @@ public class KiotaClientFactory {
                                 Duration.ofSeconds(
                                         100)); // TODO configure the default client options.
 
-        final Interceptor[] interceptorsOrDefault =
-                interceptors != null ? createOveridableDefaultInterceptors( interceptors ): createDefaultInterceptors();
+        final Interceptor[] interceptorsOrDefault = createDefaultInterceptors(interceptors);
         for (final Interceptor interceptor : interceptorsOrDefault) {
             builder.addInterceptor(interceptor);
         }
@@ -100,25 +106,49 @@ public class KiotaClientFactory {
      * Creates the default interceptors for the client.
      * @return an array of interceptors.
      */
-    @Nonnull public static Interceptor[] createOveridableDefaultInterceptors( @Nonnull Interceptor[] interceptors) {
-
-        List<Interceptor> handlers = new ArrayList<>(Arrays.asList(interceptors));
-        Set<String> defaultHandlerTypes = getDefaultHandler();
-
-        for (Interceptor interceptor : interceptors) {
-            defaultHandlerTypes.remove(interceptor.getClass().toString());
+    @Nonnull public static Interceptor[] createDefaultInterceptors( @Nullable Interceptor[] interceptors) {
+        if(interceptors == null || interceptors.length == 0){
+            return createDefaultInterceptors();
         }
-        // Add any remaining default interceptors
-        for (String handlerType : defaultHandlerTypes) {
+        return interceptors;
 
-            handlers.add(createHandler(handlerType));
+    }
+
+    @Nonnull public static Interceptor[] createDefaultInterceptors(List<RequestOption> requestOptions) {
+
+        UrlReplaceHandlerOption uriReplacementOption = null;
+        UserAgentHandlerOption userAgentHandlerOption = null;
+        RetryHandlerOption retryHandlerOption = null;
+        RedirectHandlerOption redirectHandlerOption = null;
+        ParametersNameDecodingOption parametersNameDecodingOption = null;
+        HeadersInspectionOption headersInspectionHandlerOption = null;
+
+        for (RequestOption option : requestOptions) {
+            if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
+                uriReplacementOption = (UrlReplaceHandlerOption) option;
+            } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
+                retryHandlerOption = (RetryHandlerOption) option;
+            } else if (redirectHandlerOption == null && option instanceof RedirectHandlerOption) {
+                redirectHandlerOption = (RedirectHandlerOption) option;
+            } else if (parametersNameDecodingOption == null && option instanceof ParametersNameDecodingOption) {
+                parametersNameDecodingOption = (ParametersNameDecodingOption) option;
+            } else if (userAgentHandlerOption == null && option instanceof UserAgentHandlerOption) {
+                userAgentHandlerOption = (UserAgentHandlerOption) option;
+            } else if (headersInspectionHandlerOption == null && option instanceof HeadersInspectionOption) {
+                headersInspectionHandlerOption = (HeadersInspectionOption) option;
+            }
         }
+
+        List<Interceptor> handlers = new ArrayList<>();
+        handlers.add(uriReplacementOption != null ? new UrlReplaceHandler(uriReplacementOption) : new UrlReplaceHandler());
+        handlers.add(retryHandlerOption != null ? new RetryHandler(retryHandlerOption) : new RetryHandler());
+        handlers.add(redirectHandlerOption != null ? new RedirectHandler(redirectHandlerOption) : new RedirectHandler());
+        handlers.add(parametersNameDecodingOption != null ? new ParametersNameDecodingHandler(parametersNameDecodingOption) : new ParametersNameDecodingHandler());
+        handlers.add(userAgentHandlerOption != null ? new UserAgentHandler(userAgentHandlerOption) : new UserAgentHandler());
+        handlers.add(headersInspectionHandlerOption != null ? new HeadersInspectionHandler(headersInspectionHandlerOption) : new HeadersInspectionHandler());
 
         return handlers.toArray(new Interceptor[0]);
     }
-
-
-
 
     /**
      * Creates the default interceptors for the client.
@@ -128,38 +158,4 @@ public class KiotaClientFactory {
         return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
 
-
-    /**
-     * Gets the default handler types.
-     *
-     * @return A list of all the default handlers classnames
-     *
-     */
-    private static Set<String> getDefaultHandler() {
-        return new HashSet<>(Arrays.asList(
-            UrlReplaceHandler.class.toString(),
-            RedirectHandler.class.toString(),
-            RetryHandler.class.toString(),
-            ParametersNameDecodingHandler.class.toString(),
-            UserAgentHandler.class.toString(),
-            HeadersInspectionHandler.class.toString()));
-    }
-    private static Interceptor createHandler(String handlerType) {
-        switch (handlerType) {
-            case "class com.microsoft.kiota.http.middleware.RetryHandler":
-                return new RetryHandler();
-            case "class com.microsoft.kiota.http.middleware.RedirectHandler":
-                return new RedirectHandler();
-            case "class com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler":
-                return new ParametersNameDecodingHandler();
-            case "class com.microsoft.kiota.http.middleware.UserAgentHandler":
-                return new UserAgentHandler();
-            case "class com.microsoft.kiota.http.middleware.HeadersInspectionHandler":
-                return new HeadersInspectionHandler();
-            case "class com.microsoft.kiota.http.middleware.UrlReplaceHandler":
-                return new UrlReplaceHandler();
-            default:
-                return null; // Handle unknown types as necessary
-        }
-    }
 }
