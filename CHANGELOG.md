@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0](https://github.com/microsoft/kiota-java/compare/v1.5.1...v1.6.0) (2024-10-08)
+
+
+### Features
+
+* Adds overload to serialization proxy factories to configure serialization of all values in backed models ([867953c](https://github.com/microsoft/kiota-java/commit/867953cbd0523cd8d146a5f3a522cd8652ccd924))
+* Adds overloads to serialization helper methods with backing store serialization configuration options ([0006ff8](https://github.com/microsoft/kiota-java/commit/0006ff8538e2c26692c4e2f3238fadaec1436027))
+
 ## [1.5.1](https://github.com/microsoft/kiota-java/compare/v1.5.0...v1.5.1) (2024-10-03)
 
 
