@@ -123,7 +123,7 @@ public class KiotaClientFactory {
         ParametersNameDecodingOption parametersNameDecodingOption = null;
         HeadersInspectionOption headersInspectionHandlerOption = null;
 
-        for (RequestOption option : requestOptions) {
+        for (final RequestOption option : requestOptions) {
             if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
                 uriReplacementOption = (UrlReplaceHandlerOption) option;
             } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
