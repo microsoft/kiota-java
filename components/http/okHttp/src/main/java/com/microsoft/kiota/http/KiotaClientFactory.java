@@ -19,8 +19,8 @@ import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -55,7 +55,7 @@ public class KiotaClientFactory {
                                 Duration.ofSeconds(
                                         100)); // TODO configure the default client options.
 
-        final Interceptor[] interceptorsOrDefault = createDefaultInterceptors(interceptors);
+        final Interceptor[] interceptorsOrDefault = interceptors == null? createDefaultInterceptors(): interceptors;
         for (final Interceptor interceptor : interceptorsOrDefault) {
             builder.addInterceptor(interceptor);
         }
@@ -92,26 +92,7 @@ public class KiotaClientFactory {
      * @return an array of interceptors.
      */
     @Nonnull public static Interceptor[] createDefaultInterceptors() {
-        return new Interceptor[] {
-            new UrlReplaceHandler(),
-            new RedirectHandler(),
-            new RetryHandler(),
-            new ParametersNameDecodingHandler(),
-            new UserAgentHandler(),
-            new HeadersInspectionHandler()
-        };
-    }
-
-    /**
-     * Creates the default interceptors for the client.
-     * @return an array of interceptors.
-     */
-    @Nonnull public static Interceptor[] createDefaultInterceptors( @Nullable Interceptor[] interceptors) {
-        if(interceptors == null || interceptors.length == 0){
-            return createDefaultInterceptors();
-        }
-        return interceptors;
-
+        return createDefaultInterceptors(null);
     }
 
     @Nonnull public static Interceptor[] createDefaultInterceptors(@Nullable final List<RequestOption> requestOptions) {
@@ -123,21 +104,24 @@ public class KiotaClientFactory {
         ParametersNameDecodingOption parametersNameDecodingOption = null;
         HeadersInspectionOption headersInspectionHandlerOption = null;
 
-        for (final RequestOption option : requestOptions) {
-            if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
-                uriReplacementOption = (UrlReplaceHandlerOption) option;
-            } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
-                retryHandlerOption = (RetryHandlerOption) option;
-            } else if (redirectHandlerOption == null && option instanceof RedirectHandlerOption) {
-                redirectHandlerOption = (RedirectHandlerOption) option;
-            } else if (parametersNameDecodingOption == null && option instanceof ParametersNameDecodingOption) {
-                parametersNameDecodingOption = (ParametersNameDecodingOption) option;
-            } else if (userAgentHandlerOption == null && option instanceof UserAgentHandlerOption) {
-                userAgentHandlerOption = (UserAgentHandlerOption) option;
-            } else if (headersInspectionHandlerOption == null && option instanceof HeadersInspectionOption) {
-                headersInspectionHandlerOption = (HeadersInspectionOption) option;
+        if(requestOptions !=null){
+             for (final RequestOption option : requestOptions) {
+                    if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
+                        uriReplacementOption = (UrlReplaceHandlerOption) option;
+                    } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
+                        retryHandlerOption = (RetryHandlerOption) option;
+                    } else if (redirectHandlerOption == null && option instanceof RedirectHandlerOption) {
+                        redirectHandlerOption = (RedirectHandlerOption) option;
+                    } else if (parametersNameDecodingOption == null && option instanceof ParametersNameDecodingOption) {
+                        parametersNameDecodingOption = (ParametersNameDecodingOption) option;
+                    } else if (userAgentHandlerOption == null && option instanceof UserAgentHandlerOption) {
+                        userAgentHandlerOption = (UserAgentHandlerOption) option;
+                    } else if (headersInspectionHandlerOption == null && option instanceof HeadersInspectionOption) {
+                        headersInspectionHandlerOption = (HeadersInspectionOption) option;
+                    }
+                }
             }
-        }
+
 
         final List<Interceptor> handlers = new ArrayList<>();
         handlers.add(uriReplacementOption != null ? new UrlReplaceHandler(uriReplacementOption) : new UrlReplaceHandler());
