@@ -24,7 +24,6 @@ import okhttp3.OkHttpClient;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,7 +46,7 @@ public class KiotaClientFactory {
      */
     @Nonnull public static OkHttpClient.Builder create(@Nonnull final RequestOption[] requestOptions) {
         Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
-        return create(createDefaultInterceptors(Arrays.asList(requestOptions)));
+        return create(createDefaultInterceptors(requestOptions));
     }
 
     /**
@@ -99,7 +98,7 @@ public class KiotaClientFactory {
      * @return an array of interceptors.
      */
     @Nonnull public static Interceptor[] createDefaultInterceptors() {
-        return createDefaultInterceptors(Collections.emptyList());
+        return createDefaultInterceptors(new RequestOption[0]);
     }
 
     /**
@@ -108,7 +107,7 @@ public class KiotaClientFactory {
      * @return an array of interceptors.
      */
     @Nonnull public static Interceptor[] createDefaultInterceptors(
-            @Nonnull final List<RequestOption> requestOptions) {
+            @Nonnull final RequestOption[] requestOptions) {
         Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
 
         UrlReplaceHandlerOption uriReplacementOption = null;

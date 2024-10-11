@@ -61,11 +61,12 @@ public class KiotaClientFactoryTest {
         UrlReplaceHandlerOption urlReplaceHandlerOption =
                 new UrlReplaceHandlerOption(new HashMap<>(), false);
 
-        List<RequestOption> options = new ArrayList<>();
+        final ArrayList<RequestOption> options = new ArrayList<>();
         options.add(urlReplaceHandlerOption);
         options.add(retryHandlerOption);
 
-        Interceptor[] interceptors = KiotaClientFactory.createDefaultInterceptors(options);
+        Interceptor[] interceptors =
+                KiotaClientFactory.createDefaultInterceptors(options.toArray(new RequestOption[0]));
         OkHttpClient client = KiotaClientFactory.create(interceptors).build();
         List<Interceptor> clientInterceptors = client.interceptors();
         assertNotNull(interceptors);
