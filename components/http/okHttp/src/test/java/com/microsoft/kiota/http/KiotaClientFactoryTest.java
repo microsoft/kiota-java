@@ -1,7 +1,6 @@
 package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.RequestOption;
 import com.microsoft.kiota.http.middleware.ChaosHandler;
@@ -11,19 +10,18 @@ import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
-import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.junit.jupiter.api.Test;
 
 public class KiotaClientFactoryTest {
 
@@ -36,8 +34,10 @@ public class KiotaClientFactoryTest {
 
     @Test
     void testDefaultInterceptorsWhenPassedIn() throws IOException {
-        OkHttpClient client = KiotaClientFactory.create(
-            new Interceptor[]{getDisabledRetryHandler(), new ChaosHandler()}).build();
+        OkHttpClient client =
+                KiotaClientFactory.create(
+                                new Interceptor[] {getDisabledRetryHandler(), new ChaosHandler()})
+                        .build();
         List<Interceptor> interceptors = client.interceptors();
         assertNotNull(interceptors);
         assertEquals(2, interceptors.size());
@@ -48,16 +48,18 @@ public class KiotaClientFactoryTest {
                 assertEquals(0, handlerOption.maxRetries());
             }
 
-            assertTrue(interceptor instanceof RetryHandler || interceptor instanceof ChaosHandler,
-                "Array should contain instances of RetryHandler and ChaosHandler");
-
+            assertTrue(
+                    interceptor instanceof RetryHandler || interceptor instanceof ChaosHandler,
+                    "Array should contain instances of RetryHandler and ChaosHandler");
         }
     }
+
     @Test
     void testDefaultInterceptorsWhenRequestOptionsPassedIn() throws IOException {
-        RetryHandlerOption retryHandlerOption = new RetryHandlerOption(
-            (delay, executionCount, request, response) -> false, 0, 0);
-        UrlReplaceHandlerOption urlReplaceHandlerOption = new UrlReplaceHandlerOption(new HashMap<>(),false);
+        RetryHandlerOption retryHandlerOption =
+                new RetryHandlerOption((delay, executionCount, request, response) -> false, 0, 0);
+        UrlReplaceHandlerOption urlReplaceHandlerOption =
+                new UrlReplaceHandlerOption(new HashMap<>(), false);
 
         List<RequestOption> options = new ArrayList<>();
         options.add(urlReplaceHandlerOption);
@@ -76,27 +78,30 @@ public class KiotaClientFactoryTest {
             }
 
             if (interceptor instanceof UrlReplaceHandler) {
-                UrlReplaceHandlerOption handlerOption = ((UrlReplaceHandler) interceptor).getUrlReplaceHandlerOption();
-                assertTrue( handlerOption.getReplacementPairs().isEmpty());
+                UrlReplaceHandlerOption handlerOption =
+                        ((UrlReplaceHandler) interceptor).getUrlReplaceHandlerOption();
+                assertTrue(handlerOption.getReplacementPairs().isEmpty());
                 assertFalse(handlerOption.isEnabled());
             }
 
-            assertTrue(interceptor instanceof UrlReplaceHandler || interceptor instanceof RedirectHandler ||
-                    interceptor instanceof RetryHandler || interceptor instanceof ParametersNameDecodingHandler
-                    || interceptor instanceof UserAgentHandler || interceptor instanceof HeadersInspectionHandler
-                    || interceptor instanceof ChaosHandler,
-                "Array should contain instances of UrlReplaceHandler,RedirectHandler,RetryHandler,ParametersNameDecodingHandler,UserAgentHandler, HeadersInspectionHandler, and ChaosHandler");
-
-
+            assertTrue(
+                    interceptor instanceof UrlReplaceHandler
+                            || interceptor instanceof RedirectHandler
+                            || interceptor instanceof RetryHandler
+                            || interceptor instanceof ParametersNameDecodingHandler
+                            || interceptor instanceof UserAgentHandler
+                            || interceptor instanceof HeadersInspectionHandler
+                            || interceptor instanceof ChaosHandler,
+                    "Array should contain instances of"
+                        + " UrlReplaceHandler,RedirectHandler,RetryHandler,ParametersNameDecodingHandler,UserAgentHandler,"
+                        + " HeadersInspectionHandler, and ChaosHandler");
         }
-
     }
 
     private static RetryHandler getDisabledRetryHandler() {
-        RetryHandlerOption retryHandlerOption = new RetryHandlerOption(
-            (delay, executionCount, request, response) -> false, 0, 0);
+        RetryHandlerOption retryHandlerOption =
+                new RetryHandlerOption((delay, executionCount, request, response) -> false, 0, 0);
         RetryHandler retryHandler = new RetryHandler(retryHandlerOption);
         return retryHandler;
     }
-
 }

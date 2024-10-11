@@ -9,18 +9,16 @@ import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
-
 import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
 import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
 import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -55,7 +53,8 @@ public class KiotaClientFactory {
                                 Duration.ofSeconds(
                                         100)); // TODO configure the default client options.
 
-        final Interceptor[] interceptorsOrDefault = interceptors == null? createDefaultInterceptors(): interceptors;
+        final Interceptor[] interceptorsOrDefault =
+                interceptors == null ? createDefaultInterceptors() : interceptors;
         for (final Interceptor interceptor : interceptorsOrDefault) {
             builder.addInterceptor(interceptor);
         }
@@ -95,7 +94,8 @@ public class KiotaClientFactory {
         return createDefaultInterceptors(null);
     }
 
-    @Nonnull public static Interceptor[] createDefaultInterceptors(@Nullable final List<RequestOption> requestOptions) {
+    @Nonnull public static Interceptor[] createDefaultInterceptors(
+            @Nullable final List<RequestOption> requestOptions) {
 
         UrlReplaceHandlerOption uriReplacementOption = null;
         UserAgentHandlerOption userAgentHandlerOption = null;
@@ -104,32 +104,53 @@ public class KiotaClientFactory {
         ParametersNameDecodingOption parametersNameDecodingOption = null;
         HeadersInspectionOption headersInspectionHandlerOption = null;
 
-        if(requestOptions !=null){
-             for (final RequestOption option : requestOptions) {
-                    if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
-                        uriReplacementOption = (UrlReplaceHandlerOption) option;
-                    } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
-                        retryHandlerOption = (RetryHandlerOption) option;
-                    } else if (redirectHandlerOption == null && option instanceof RedirectHandlerOption) {
-                        redirectHandlerOption = (RedirectHandlerOption) option;
-                    } else if (parametersNameDecodingOption == null && option instanceof ParametersNameDecodingOption) {
-                        parametersNameDecodingOption = (ParametersNameDecodingOption) option;
-                    } else if (userAgentHandlerOption == null && option instanceof UserAgentHandlerOption) {
-                        userAgentHandlerOption = (UserAgentHandlerOption) option;
-                    } else if (headersInspectionHandlerOption == null && option instanceof HeadersInspectionOption) {
-                        headersInspectionHandlerOption = (HeadersInspectionOption) option;
-                    }
+        if (requestOptions != null) {
+            for (final RequestOption option : requestOptions) {
+                if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
+                    uriReplacementOption = (UrlReplaceHandlerOption) option;
+                } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
+                    retryHandlerOption = (RetryHandlerOption) option;
+                } else if (redirectHandlerOption == null
+                        && option instanceof RedirectHandlerOption) {
+                    redirectHandlerOption = (RedirectHandlerOption) option;
+                } else if (parametersNameDecodingOption == null
+                        && option instanceof ParametersNameDecodingOption) {
+                    parametersNameDecodingOption = (ParametersNameDecodingOption) option;
+                } else if (userAgentHandlerOption == null
+                        && option instanceof UserAgentHandlerOption) {
+                    userAgentHandlerOption = (UserAgentHandlerOption) option;
+                } else if (headersInspectionHandlerOption == null
+                        && option instanceof HeadersInspectionOption) {
+                    headersInspectionHandlerOption = (HeadersInspectionOption) option;
                 }
             }
-
+        }
 
         final List<Interceptor> handlers = new ArrayList<>();
-        handlers.add(uriReplacementOption != null ? new UrlReplaceHandler(uriReplacementOption) : new UrlReplaceHandler());
-        handlers.add(retryHandlerOption != null ? new RetryHandler(retryHandlerOption) : new RetryHandler());
-        handlers.add(redirectHandlerOption != null ? new RedirectHandler(redirectHandlerOption) : new RedirectHandler());
-        handlers.add(parametersNameDecodingOption != null ? new ParametersNameDecodingHandler(parametersNameDecodingOption) : new ParametersNameDecodingHandler());
-        handlers.add(userAgentHandlerOption != null ? new UserAgentHandler(userAgentHandlerOption) : new UserAgentHandler());
-        handlers.add(headersInspectionHandlerOption != null ? new HeadersInspectionHandler(headersInspectionHandlerOption) : new HeadersInspectionHandler());
+        handlers.add(
+                uriReplacementOption != null
+                        ? new UrlReplaceHandler(uriReplacementOption)
+                        : new UrlReplaceHandler());
+        handlers.add(
+                retryHandlerOption != null
+                        ? new RetryHandler(retryHandlerOption)
+                        : new RetryHandler());
+        handlers.add(
+                redirectHandlerOption != null
+                        ? new RedirectHandler(redirectHandlerOption)
+                        : new RedirectHandler());
+        handlers.add(
+                parametersNameDecodingOption != null
+                        ? new ParametersNameDecodingHandler(parametersNameDecodingOption)
+                        : new ParametersNameDecodingHandler());
+        handlers.add(
+                userAgentHandlerOption != null
+                        ? new UserAgentHandler(userAgentHandlerOption)
+                        : new UserAgentHandler());
+        handlers.add(
+                headersInspectionHandlerOption != null
+                        ? new HeadersInspectionHandler(headersInspectionHandlerOption)
+                        : new HeadersInspectionHandler());
 
         return handlers.toArray(new Interceptor[0]);
     }
@@ -141,5 +162,4 @@ public class KiotaClientFactory {
     @Nonnull public static List<Interceptor> createDefaultInterceptorsAsList() {
         return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
-
 }
