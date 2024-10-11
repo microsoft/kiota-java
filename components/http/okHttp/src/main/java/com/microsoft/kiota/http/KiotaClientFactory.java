@@ -136,30 +136,33 @@ public class KiotaClientFactory {
         }
 
         final List<Interceptor> handlers = new ArrayList<>();
-        handlers.add(
-                uriReplacementOption != null
-                        ? new UrlReplaceHandler(uriReplacementOption)
-                        : new UrlReplaceHandler());
-        handlers.add(
-                retryHandlerOption != null
-                        ? new RetryHandler(retryHandlerOption)
-                        : new RetryHandler());
-        handlers.add(
-                redirectHandlerOption != null
-                        ? new RedirectHandler(redirectHandlerOption)
-                        : new RedirectHandler());
-        handlers.add(
-                parametersNameDecodingOption != null
-                        ? new ParametersNameDecodingHandler(parametersNameDecodingOption)
-                        : new ParametersNameDecodingHandler());
+        // orders matter as they are executed in a chain
+        // interceptors that only modify the request should be added first
+        // interceptors that read the response should be added last
         handlers.add(
                 userAgentHandlerOption != null
                         ? new UserAgentHandler(userAgentHandlerOption)
                         : new UserAgentHandler());
         handlers.add(
+                parametersNameDecodingOption != null
+                        ? new ParametersNameDecodingHandler(parametersNameDecodingOption)
+                        : new ParametersNameDecodingHandler());
+        handlers.add(
+                uriReplacementOption != null
+                        ? new UrlReplaceHandler(uriReplacementOption)
+                        : new UrlReplaceHandler());
+        handlers.add(
                 headersInspectionHandlerOption != null
                         ? new HeadersInspectionHandler(headersInspectionHandlerOption)
                         : new HeadersInspectionHandler());
+        handlers.add(
+                redirectHandlerOption != null
+                        ? new RedirectHandler(redirectHandlerOption)
+                        : new RedirectHandler());
+        handlers.add(
+                retryHandlerOption != null
+                        ? new RetryHandler(retryHandlerOption)
+                        : new RetryHandler());
 
         return handlers.toArray(new Interceptor[0]);
     }
