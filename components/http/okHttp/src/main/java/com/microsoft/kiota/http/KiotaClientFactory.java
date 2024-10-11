@@ -72,8 +72,7 @@ public class KiotaClientFactory {
         if (interceptors == null) {
             return create();
         }
-        return create(
-                (new ArrayList<>(interceptors)).toArray(new Interceptor[0]));
+        return create((new ArrayList<>(interceptors)).toArray(new Interceptor[0]));
     }
 
     /**
@@ -112,14 +111,12 @@ public class KiotaClientFactory {
                 uriReplacementOption = (UrlReplaceHandlerOption) option;
             } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
                 retryHandlerOption = (RetryHandlerOption) option;
-            } else if (redirectHandlerOption == null
-                    && option instanceof RedirectHandlerOption) {
+            } else if (redirectHandlerOption == null && option instanceof RedirectHandlerOption) {
                 redirectHandlerOption = (RedirectHandlerOption) option;
             } else if (parametersNameDecodingOption == null
                     && option instanceof ParametersNameDecodingOption) {
                 parametersNameDecodingOption = (ParametersNameDecodingOption) option;
-            } else if (userAgentHandlerOption == null
-                    && option instanceof UserAgentHandlerOption) {
+            } else if (userAgentHandlerOption == null && option instanceof UserAgentHandlerOption) {
                 userAgentHandlerOption = (UserAgentHandlerOption) option;
             } else if (headersInspectionHandlerOption == null
                     && option instanceof HeadersInspectionOption) {
