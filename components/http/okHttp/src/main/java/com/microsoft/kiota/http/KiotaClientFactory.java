@@ -41,6 +41,16 @@ public class KiotaClientFactory {
     }
 
     /**
+     * Creates an OkHttpClient Builder with the default configuration and middleware options.
+     * @param requestOptions The request options to use for the interceptors.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(@Nonnull final RequestOption[] requestOptions) {
+        Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
+        return create(createDefaultInterceptors(Arrays.asList(requestOptions)));
+    }
+
+    /**
      * Creates an OkHttpClient Builder with the default configuration and middleware.
      * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
      * @return an OkHttpClient Builder instance.
