@@ -10,10 +10,10 @@ import java.util.function.Consumer;
 /** Proxy factory that allows the composition of before and after callbacks on existing factories. */
 public abstract class SerializationWriterProxyFactory implements SerializationWriterFactory {
     @Nonnull public String getValidContentType() {
-        return _concrete.getValidContentType();
+        return proxiedFactory.getValidContentType();
     }
 
-    private final SerializationWriterFactory _concrete;
+    protected final SerializationWriterFactory proxiedFactory;
     private final Consumer<Parsable> _onBefore;
     private final Consumer<Parsable> _onAfter;
     private final BiConsumer<Parsable, SerializationWriter> _onStart;
@@ -30,14 +30,14 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
             @Nullable final Consumer<Parsable> onBeforeSerialization,
             @Nullable final Consumer<Parsable> onAfterSerialization,
             @Nullable final BiConsumer<Parsable, SerializationWriter> onStartObjectSerialization) {
-        _concrete = Objects.requireNonNull(concrete);
+        proxiedFactory = Objects.requireNonNull(concrete);
         _onBefore = onBeforeSerialization;
         _onAfter = onAfterSerialization;
         _onStart = onStartObjectSerialization;
     }
 
     @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {
-        final SerializationWriter writer = _concrete.getSerializationWriter(contentType);
+        final SerializationWriter writer = proxiedFactory.getSerializationWriter(contentType);
         final Consumer<Parsable> originalBefore = writer.getOnBeforeObjectSerialization();
         final Consumer<Parsable> originalAfter = writer.getOnAfterObjectSerialization();
         final BiConsumer<Parsable, SerializationWriter> originalStart =

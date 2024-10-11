@@ -1,5 +1,6 @@
 package com.microsoft.kiota.store;
 
+import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
 import com.microsoft.kiota.serialization.SerializationWriterProxyFactory;
 
@@ -47,5 +48,22 @@ public class BackingStoreSerializationWriterProxyFactory extends SerializationWr
                         }
                     }
                 });
+    }
+
+    /**
+     * Returns a SerializationWriter that overrides the default serialization of only changed values if serializeOnlyChangedValues="true"
+     * Gets the previously proxied serialization writer without any backing store configuration to prevent overwriting the registry affecting
+     * future serialization requests
+     *
+     * @param contentType HTTP content type header value
+     * @param serializeOnlyChangedValues alter backing store default behavior
+     * @return the SerializationWriter
+     */
+    @Nonnull public SerializationWriter getSerializationWriter(
+            @Nonnull final String contentType, final boolean serializeOnlyChangedValues) {
+        if (!serializeOnlyChangedValues) {
+            return proxiedFactory.getSerializationWriter(contentType);
+        }
+        return getSerializationWriter(contentType);
     }
 }
