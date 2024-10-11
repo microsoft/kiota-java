@@ -25,7 +25,9 @@ import okhttp3.OkHttpClient;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /** This class is used to build the HttpClient instance used by the core service. */
 public class KiotaClientFactory {
@@ -91,11 +93,12 @@ public class KiotaClientFactory {
      * @return an array of interceptors.
      */
     @Nonnull public static Interceptor[] createDefaultInterceptors() {
-        return createDefaultInterceptors(null);
+        return createDefaultInterceptors(Collections.emptyList());
     }
 
     @Nonnull public static Interceptor[] createDefaultInterceptors(
-            @Nullable final List<RequestOption> requestOptions) {
+            @Nonnull final List<RequestOption> requestOptions) {
+        Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
 
         UrlReplaceHandlerOption uriReplacementOption = null;
         UserAgentHandlerOption userAgentHandlerOption = null;
@@ -104,25 +107,23 @@ public class KiotaClientFactory {
         ParametersNameDecodingOption parametersNameDecodingOption = null;
         HeadersInspectionOption headersInspectionHandlerOption = null;
 
-        if (requestOptions != null) {
-            for (final RequestOption option : requestOptions) {
-                if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
-                    uriReplacementOption = (UrlReplaceHandlerOption) option;
-                } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
-                    retryHandlerOption = (RetryHandlerOption) option;
-                } else if (redirectHandlerOption == null
-                        && option instanceof RedirectHandlerOption) {
-                    redirectHandlerOption = (RedirectHandlerOption) option;
-                } else if (parametersNameDecodingOption == null
-                        && option instanceof ParametersNameDecodingOption) {
-                    parametersNameDecodingOption = (ParametersNameDecodingOption) option;
-                } else if (userAgentHandlerOption == null
-                        && option instanceof UserAgentHandlerOption) {
-                    userAgentHandlerOption = (UserAgentHandlerOption) option;
-                } else if (headersInspectionHandlerOption == null
-                        && option instanceof HeadersInspectionOption) {
-                    headersInspectionHandlerOption = (HeadersInspectionOption) option;
-                }
+        for (final RequestOption option : requestOptions) {
+            if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
+                uriReplacementOption = (UrlReplaceHandlerOption) option;
+            } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
+                retryHandlerOption = (RetryHandlerOption) option;
+            } else if (redirectHandlerOption == null
+                    && option instanceof RedirectHandlerOption) {
+                redirectHandlerOption = (RedirectHandlerOption) option;
+            } else if (parametersNameDecodingOption == null
+                    && option instanceof ParametersNameDecodingOption) {
+                parametersNameDecodingOption = (ParametersNameDecodingOption) option;
+            } else if (userAgentHandlerOption == null
+                    && option instanceof UserAgentHandlerOption) {
+                userAgentHandlerOption = (UserAgentHandlerOption) option;
+            } else if (headersInspectionHandlerOption == null
+                    && option instanceof HeadersInspectionOption) {
+                headersInspectionHandlerOption = (HeadersInspectionOption) option;
             }
         }
 
