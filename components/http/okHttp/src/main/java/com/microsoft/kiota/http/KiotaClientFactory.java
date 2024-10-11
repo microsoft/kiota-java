@@ -73,7 +73,7 @@ public class KiotaClientFactory {
             return create();
         }
         return create(
-                (new ArrayList<>(interceptors)).toArray(new Interceptor[interceptors.size()]));
+                (new ArrayList<>(interceptors)).toArray(new Interceptor[0]));
     }
 
     /**
