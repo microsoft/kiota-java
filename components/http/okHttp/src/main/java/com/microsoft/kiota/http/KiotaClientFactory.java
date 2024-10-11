@@ -17,7 +17,6 @@ import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -46,7 +45,8 @@ public class KiotaClientFactory {
      * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
      * @return an OkHttpClient Builder instance.
      */
-    @Nonnull public static OkHttpClient.Builder create(@Nullable final Interceptor[] interceptors) {
+    @Nonnull public static OkHttpClient.Builder create(@Nonnull final Interceptor[] interceptors) {
+        Objects.requireNonNull(interceptors, "parameter interceptors cannot be null");
         final OkHttpClient.Builder builder =
                 new OkHttpClient.Builder()
                         .connectTimeout(Duration.ofSeconds(100))
@@ -55,9 +55,7 @@ public class KiotaClientFactory {
                                 Duration.ofSeconds(
                                         100)); // TODO configure the default client options.
 
-        final Interceptor[] interceptorsOrDefault =
-                interceptors == null ? createDefaultInterceptors() : interceptors;
-        for (final Interceptor interceptor : interceptorsOrDefault) {
+        for (final Interceptor interceptor : interceptors) {
             builder.addInterceptor(interceptor);
         }
         return builder;
@@ -68,10 +66,8 @@ public class KiotaClientFactory {
      * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
      * @return an OkHttpClient Builder instance.
      */
-    @Nonnull public static OkHttpClient.Builder create(@Nullable final List<Interceptor> interceptors) {
-        if (interceptors == null) {
-            return create();
-        }
+    @Nonnull public static OkHttpClient.Builder create(@Nonnull final List<Interceptor> interceptors) {
+        Objects.requireNonNull(interceptors, "parameter interceptors cannot be null");
         return create((new ArrayList<>(interceptors)).toArray(new Interceptor[0]));
     }
 
@@ -82,7 +78,8 @@ public class KiotaClientFactory {
      */
     @Nonnull public static OkHttpClient.Builder create(
             @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
-        ArrayList<Interceptor> interceptors = new ArrayList<>(createDefaultInterceptorsAsList());
+        ArrayList<Interceptor> interceptors =
+                new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
         interceptors.add(new AuthorizationHandler(authenticationProvider));
         return create(interceptors);
     }
