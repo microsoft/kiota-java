@@ -95,6 +95,11 @@ public class KiotaClientFactory {
         return createDefaultInterceptors(Collections.emptyList());
     }
 
+    /**
+     * Creates the default interceptors for the client.
+     * @param requestOptions The request options to use for the interceptors.
+     * @return an array of interceptors.
+     */
     @Nonnull public static Interceptor[] createDefaultInterceptors(
             @Nonnull final List<RequestOption> requestOptions) {
         Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
@@ -156,7 +161,9 @@ public class KiotaClientFactory {
     /**
      * Creates the default interceptors for the client.
      * @return an array of interceptors.
+     * @deprecated Use {@link #createDefaultInterceptors()} instead.
      */
+    @Deprecated
     @Nonnull public static List<Interceptor> createDefaultInterceptorsAsList() {
         return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
