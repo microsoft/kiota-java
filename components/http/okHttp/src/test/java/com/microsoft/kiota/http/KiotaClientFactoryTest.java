@@ -1,8 +1,12 @@
 package com.microsoft.kiota.http;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import com.microsoft.kiota.RequestOption;
+import com.microsoft.kiota.authentication.AccessTokenProvider;
+import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
+import com.microsoft.kiota.http.middleware.AuthorizationHandler;
 import com.microsoft.kiota.http.middleware.ChaosHandler;
 import com.microsoft.kiota.http.middleware.HeadersInspectionHandler;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
@@ -93,6 +97,56 @@ public class KiotaClientFactoryTest {
                             || interceptor instanceof UserAgentHandler
                             || interceptor instanceof HeadersInspectionHandler
                             || interceptor instanceof ChaosHandler,
+                    "Array should contain instances of"
+                        + " UrlReplaceHandler,RedirectHandler,RetryHandler,ParametersNameDecodingHandler,UserAgentHandler,"
+                        + " HeadersInspectionHandler, and ChaosHandler");
+        }
+    }
+
+    @Test
+    void testCreateWithAuthProviderAndRequestOptions() throws IOException {
+        RetryHandlerOption retryHandlerOption =
+                new RetryHandlerOption((delay, executionCount, request, response) -> false, 0, 0);
+        UrlReplaceHandlerOption urlReplaceHandlerOption =
+                new UrlReplaceHandlerOption(new HashMap<>(), false);
+
+        final ArrayList<RequestOption> options = new ArrayList<>();
+        options.add(urlReplaceHandlerOption);
+        options.add(retryHandlerOption);
+
+        OkHttpClient client =
+                KiotaClientFactory.create(
+                                new BaseBearerTokenAuthenticationProvider(
+                                        mock(AccessTokenProvider.class)),
+                                options.toArray(new RequestOption[0]))
+                        .build();
+        List<Interceptor> clientInterceptors = client.interceptors();
+        assertNotNull(clientInterceptors);
+        // including the Authorization Handler
+        assertEquals(7, clientInterceptors.size());
+        for (Interceptor interceptor : clientInterceptors) {
+            if (interceptor instanceof RetryHandler) {
+                RetryHandlerOption handlerOption = ((RetryHandler) interceptor).getRetryOptions();
+                assertEquals(0, handlerOption.delay());
+                assertEquals(0, handlerOption.maxRetries());
+            }
+
+            if (interceptor instanceof UrlReplaceHandler) {
+                UrlReplaceHandlerOption handlerOption =
+                        ((UrlReplaceHandler) interceptor).getUrlReplaceHandlerOption();
+                assertTrue(handlerOption.getReplacementPairs().isEmpty());
+                assertFalse(handlerOption.isEnabled());
+            }
+
+            assertTrue(
+                    interceptor instanceof UrlReplaceHandler
+                            || interceptor instanceof RedirectHandler
+                            || interceptor instanceof RetryHandler
+                            || interceptor instanceof ParametersNameDecodingHandler
+                            || interceptor instanceof UserAgentHandler
+                            || interceptor instanceof HeadersInspectionHandler
+                            || interceptor instanceof ChaosHandler
+                            || interceptor instanceof AuthorizationHandler,
                     "Array should contain instances of"
                         + " UrlReplaceHandler,RedirectHandler,RetryHandler,ParametersNameDecodingHandler,UserAgentHandler,"
                         + " HeadersInspectionHandler, and ChaosHandler");
