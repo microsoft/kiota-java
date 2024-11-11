@@ -87,8 +87,20 @@ public class KiotaClientFactory {
      */
     @Nonnull public static OkHttpClient.Builder create(
             @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
+        return create(authenticationProvider, new RequestOption[0]);
+    }
+
+    /**
+     * Creates an OkHttpClient Builder with the Authorization handler and optional custom default middleware configurations
+     * @param authenticationProvider authentication provider to use for the AuthorizationHandler.
+     * @param requestOptions The request options to use for the interceptors.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(
+            @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider,
+            @Nonnull final RequestOption[] requestOptions) {
         ArrayList<Interceptor> interceptors =
-                new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
+                new ArrayList<>(Arrays.asList(createDefaultInterceptors(requestOptions)));
         interceptors.add(new AuthorizationHandler(authenticationProvider));
         return create(interceptors);
     }
