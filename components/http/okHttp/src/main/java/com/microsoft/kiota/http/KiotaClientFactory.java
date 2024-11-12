@@ -185,7 +185,7 @@ public class KiotaClientFactory {
      * @deprecated Use {@link #createDefaultInterceptors()} instead.
      */
     @Deprecated
-    @Nonnull private static List<Interceptor> createDefaultInterceptorsAsList() {
+    @Nonnull public static List<Interceptor> createDefaultInterceptorsAsList() {
         return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
 }
