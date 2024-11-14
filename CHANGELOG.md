@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0](https://github.com/microsoft/kiota-java/compare/v1.7.0...v1.8.0) (2024-11-14)
+
+
+### Features
+
+* Support overriding default interceptor options when creating OkHttp clients with authentication enabled ([7876bab](https://github.com/microsoft/kiota-java/commit/7876bab5e1a5652b6e35d3f98ec2dae669690de0))
+
 ## [1.7.0](https://github.com/microsoft/kiota-java/compare/v1.6.0...v1.7.0) (2024-10-11)
 
 
