@@ -12,7 +12,7 @@ dependencies {
     implementation 'io.opentelemetry:opentelemetry-api:1.44.1'
     implementation 'io.opentelemetry:opentelemetry-context:1.44.1'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-    api 'com.azure:azure-core:1.54.0'
+    api 'com.azure:azure-core:1.54.1'
 
     api project(':components:abstractions')
 }
