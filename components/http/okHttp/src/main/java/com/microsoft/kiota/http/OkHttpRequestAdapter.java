@@ -904,12 +904,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     // stored in variable before writing to the sink due to
                                     // available()'s definition
                                     long contentLength = contentLength();
+                                    if (contentLength() > 0) {
+                                        requestInfo.content.mark((int) contentLength);
+                                    }
                                     sink.writeAll(Okio.source(requestInfo.content));
                                     if (!isOneShot()) {
                                         try {
-                                            if (contentLength > 0) {
-                                                requestInfo.content.mark((int) contentLength);
-                                            }
                                             requestInfo.content.reset();
                                         } catch (Exception ex) {
                                             spanForAttributes.recordException(ex);
