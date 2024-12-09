@@ -10,6 +10,6 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'io.github.std-uritemplate:std-uritemplate:2.0.0'
-    implementation 'io.opentelemetry:opentelemetry-api:1.44.1'
+    implementation 'io.opentelemetry:opentelemetry-api:1.45.0'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
