@@ -15,6 +15,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import static com.microsoft.kiota.http.TelemetrySemanticConventions.*;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -82,7 +84,8 @@ public class RetryHandler implements Interceptor {
             @Nonnull final Response response,
             int executionCount,
             @Nonnull final Request request,
-            @Nonnull final RetryHandlerOption retryOption) {
+            @Nonnull final RetryHandlerOption retryOption,
+            @Nonnull final Span span) {
 
         // Should retry option
         // Use should retry common for all requests
@@ -107,6 +110,7 @@ public class RetryHandler implements Interceptor {
 
         if (shouldRetry) {
             long retryInterval = getRetryAfter(response, retryOption.delay(), executionCount);
+            span.setAttribute(HTTP_REQUEST_RESEND_DELAY, Math.round(retryInterval / 1000f));
             try {
                 Thread.sleep(retryInterval);
             } catch (InterruptedException e) {
@@ -234,7 +238,7 @@ public class RetryHandler implements Interceptor {
             }
 
             int executionCount = 1;
-            while (retryRequest(response, executionCount, request, retryOption)) {
+            while (retryRequest(response, executionCount, request, retryOption, span)) {
                 final Request.Builder builder =
                         request.newBuilder()
                                 .addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
@@ -254,8 +258,8 @@ public class RetryHandler implements Interceptor {
                                 request,
                                 "RetryHandler_Intercept - attempt " + executionCount,
                                 span);
-                retrySpan.setAttribute("http.retry_count", executionCount);
-                retrySpan.setAttribute("http.status_code", response.code());
+                retrySpan.setAttribute(HTTP_REQUEST_RESEND_COUNT, executionCount);
+                retrySpan.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
                 retrySpan.end();
                 response = chain.proceed(request);
                 if (response == null)

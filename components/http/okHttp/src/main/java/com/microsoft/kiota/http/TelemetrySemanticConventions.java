@@ -26,6 +26,12 @@ public final class TelemetrySemanticConventions {
             longKey("http.request.resend_count"); // stable
 
     /**
+     * HTTP Request resend delay
+     */
+    public static final AttributeKey<Long> HTTP_REQUEST_RESEND_DELAY =
+            longKey("http.request.resend_delay"); // stable
+
+    /**
      * HTTP Request method
      */
     public static final AttributeKey<String> HTTP_REQUEST_METHOD =
