@@ -40,13 +40,18 @@ public final class TelemetrySemanticConventions {
     /**
      * Network connection protocol version
      */
-    public static final AttributeKey<String> NETWORK_PROTOCOL_VERSION =
-            stringKey("network.protocol.version"); // stable
+    public static final AttributeKey<String> NETWORK_PROTOCOL_NAME =
+            stringKey("network.protocol.name"); // stable
 
     /**
      * Full HTTP request URL
      */
     public static final AttributeKey<String> URL_FULL = stringKey("url.full"); // stable
+
+    /**
+     * Full HTTP request URL template
+     */
+    public static final AttributeKey<String> URL_TEMPLATE = stringKey("url.uri_template"); // custom
 
     /**
      * HTTP request URL scheme
@@ -78,12 +83,12 @@ public final class TelemetrySemanticConventions {
     /**
      * HTTP response content type
      */
-    public static final AttributeKey<String> CUSTOM_HTTP_RESPONSE_CONTENT_TYPE =
-            stringKey("http.response_content_type"); // custom
+    public static final AttributeKey<String> HTTP_RESPONSE_HEADER_CONTENT_TYPE =
+            stringKey("http.response.header.content-type"); // stable
 
     /**
      * HTTP request content type
      */
-    public static final AttributeKey<String> CUSTOM_HTTP_REQUEST_CONTENT_TYPE =
-            stringKey("http.request_content_type"); // custom
+    public static final AttributeKey<String> HTTP_REQUEST_HEADER_CONTENT_TYPE =
+            stringKey("http.request.header.content-type"); // stable
 }

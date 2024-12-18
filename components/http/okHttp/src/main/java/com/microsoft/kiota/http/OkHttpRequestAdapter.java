@@ -255,7 +255,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName())
                         .spanBuilder(methodName + " - " + cleanedUriTemplate)
                         .startSpan();
-        span.setAttribute("http.uri_template", decodedUriTemplate);
+        span.setAttribute(URL_TEMPLATE, decodedUriTemplate);
         return span;
     }
 
@@ -725,11 +725,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             final String contentTypeHeaderValue = getHeaderValue(response, CONTENT_TYPE_HEADER_KEY);
             if (contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
                 spanForAttributes.setAttribute(
-                        CUSTOM_HTTP_RESPONSE_CONTENT_TYPE, contentTypeHeaderValue);
+                        HTTP_RESPONSE_HEADER_CONTENT_TYPE, contentTypeHeaderValue);
             }
             spanForAttributes.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
             spanForAttributes.setAttribute(
-                    NETWORK_PROTOCOL_VERSION,
+                    NETWORK_PROTOCOL_NAME,
                     response.protocol().toString().toUpperCase(Locale.ROOT));
             return this.retryCAEResponseIfRequired(
                     response, requestInfo, span, spanForAttributes, claims);
@@ -869,7 +869,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                         final String contentType =
                                                 contentTypes.toArray(new String[] {})[0];
                                         spanForAttributes.setAttribute(
-                                                CUSTOM_HTTP_REQUEST_CONTENT_TYPE, contentType);
+                                                HTTP_REQUEST_HEADER_CONTENT_TYPE, contentType);
                                         return MediaType.parse(contentType);
                                     }
                                 }
