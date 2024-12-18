@@ -729,8 +729,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             }
             spanForAttributes.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
             spanForAttributes.setAttribute(
-                    NETWORK_PROTOCOL_NAME,
-                    response.protocol().toString().toUpperCase(Locale.ROOT));
+                    NETWORK_PROTOCOL_NAME, response.protocol().toString().toUpperCase(Locale.ROOT));
             return this.retryCAEResponseIfRequired(
                     response, requestInfo, span, spanForAttributes, claims);
         } catch (IOException | URISyntaxException ex) {

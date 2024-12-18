@@ -1,5 +1,7 @@
 package com.microsoft.kiota.http.middleware;
 
+import static com.microsoft.kiota.http.TelemetrySemanticConventions.*;
+
 import com.microsoft.kiota.http.middleware.options.IShouldRetry;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
 
@@ -14,8 +16,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-
-import static com.microsoft.kiota.http.TelemetrySemanticConventions.*;
 
 import java.io.IOException;
 import java.time.Instant;
