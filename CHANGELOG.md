@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1](https://github.com/microsoft/kiota-java/compare/v1.8.0...v1.8.1) (2024-12-19)
+
+
+### Bug Fixes
+
+* aligns http attributes names with latest open telemetry specification ([d38411a](https://github.com/microsoft/kiota-java/commit/d38411a5d4351b2b0ed5f59180d278ee16813064))
+* aligns retry handler attributes with latest open telemetry specification ([2e15fa5](https://github.com/microsoft/kiota-java/commit/2e15fa54b50dfd6eedc552a20d477e1d551527e7))
+
 ## [1.8.0](https://github.com/microsoft/kiota-java/compare/v1.7.0...v1.8.0) (2024-11-14)
 
 
