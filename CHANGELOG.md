@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2](https://github.com/microsoft/kiota-java/compare/v1.8.1...v1.8.2) (2024-12-23)
+
+
+### Bug Fixes
+
+* Handle failure to reset request body streams after writing request body ([ae47a97](https://github.com/microsoft/kiota-java/commit/ae47a97d0f4b20017cfa7c10077f900362c5eb6a))
+
 ## [1.8.1](https://github.com/microsoft/kiota-java/compare/v1.8.0...v1.8.1) (2024-12-19)
 
 
