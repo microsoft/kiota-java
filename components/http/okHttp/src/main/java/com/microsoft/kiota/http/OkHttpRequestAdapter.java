@@ -70,17 +70,24 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider.
+     *
+     * @param authenticationProvider the authentication provider to use for
+     *                               authenticating requests.
      */
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider) {
         this(authenticationProvider, null, null, null, null);
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, and the parse node factory.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, and the parse node factory.
+     *
+     * @param authenticationProvider the authentication provider to use for
+     *                               authenticating requests.
+     * @param parseNodeFactory       the parse node factory to use for parsing
+     *                               responses.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -90,10 +97,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, and the serialization writer factory.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
-     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, parse node factory, and the serialization writer factory.
+     *
+     * @param authenticationProvider     the authentication provider to use for
+     *                                   authenticating requests.
+     * @param parseNodeFactory           the parse node factory to use for parsing
+     *                                   responses.
+     * @param serializationWriterFactory the serialization writer factory to use for
+     *                                   serializing requests.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -104,11 +116,18 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, serialization writer factory, and the http client.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
-     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
-     * @param client the http client to use for sending requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, parse node factory, serialization writer factory, and the http
+     * client.
+     *
+     * @param authenticationProvider     the authentication provider to use for
+     *                                   authenticating requests.
+     * @param parseNodeFactory           the parse node factory to use for parsing
+     *                                   responses.
+     * @param serializationWriterFactory the serialization writer factory to use for
+     *                                   serializing requests.
+     * @param client                     the http client to use for sending
+     *                                   requests.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -120,12 +139,20 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, serialization writer factory, http client and observability options.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
-     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
-     * @param client the http client to use for sending requests.
-     * @param observabilityOptions the observability options to use for sending requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, parse node factory, serialization writer factory, http client and
+     * observability options.
+     *
+     * @param authenticationProvider     the authentication provider to use for
+     *                                   authenticating requests.
+     * @param parseNodeFactory           the parse node factory to use for parsing
+     *                                   responses.
+     * @param serializationWriterFactory the serialization writer factory to use for
+     *                                   serializing requests.
+     * @param client                     the http client to use for sending
+     *                                   requests.
+     * @param observabilityOptions       the observability options to use for
+     *                                   sending requests.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -590,7 +617,10 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return statusCode == 204;
     }
 
-    /** key used for the attribute when the error response has models mappings provided */
+    /**
+     * key used for the attribute when the error response has models mappings
+     * provided
+     */
     @Nonnull public static final String errorMappingFoundAttributeName =
             "com.microsoft.kiota.error_mapping_found";
 
@@ -614,6 +644,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             final int statusCode = response.code();
             final ResponseHeaders responseHeaders =
                     HeadersCompatibility.getResponseHeaders(response.headers());
+            if (statusCode >= 300 && statusCode < 400) return response;
             if (errorMappings == null
                     || !errorMappings.containsKey(statusCodeAsString)
                             && !(statusCode >= 400
@@ -751,7 +782,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return null;
     }
 
-    /** Key used for events when an authentication challenge is returned by the API */
+    /**
+     * Key used for events when an authentication challenge is returned by the API
+     */
     @Nonnull public static final String authenticateChallengedEventKey =
             "com.microsoft.kiota.authenticate_challenge_received";
 
@@ -831,7 +864,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param spanForAttributes the span for the attributes.
      * @return the created request instance.
      * @throws URISyntaxException if the URI is invalid.
-     * @throws IOException if the URL is invalid.
+     * @throws IOException        if the URL is invalid.
      */
     protected @Nonnull Request getRequestFromRequestInformation(
             @Nonnull final RequestInformation requestInfo,

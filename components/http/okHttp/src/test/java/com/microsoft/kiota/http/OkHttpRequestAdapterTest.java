@@ -535,6 +535,80 @@ public class OkHttpRequestAdapterTest {
         }
     }
 
+    @Test
+    void testHandle3XXResponseWithoutLocationHeader() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        final var client =
+                getMockClient(
+                        new Response.Builder()
+                                .code(301)
+                                .message("Moved Permanently")
+                                .protocol(Protocol.HTTP_1_1)
+                                .request(new Request.Builder().url("http://localhost").build())
+                                .body(
+                                        ResponseBody.create(
+                                                "test".getBytes("UTF-8"),
+                                                MediaType.parse("application/json")))
+                                .build());
+        final var requestInformation =
+                new RequestInformation() {
+                    {
+                        setUri(new URI("https://localhost"));
+                        httpMethod = HttpMethod.GET;
+                    }
+                };
+        final var mockEntity = creatMockEntity();
+        final var mockParseNode = creatMockParseNode(mockEntity);
+        final var mockFactory = creatMockParseNodeFactory(mockParseNode, "application/json");
+
+        final var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
+        var nativeResponseHandler = new NativeResponseHandler();
+        requestAdapter.send(requestInformation, null, node -> mockEntity);
+        var nativeResponse = (Response) nativeResponseHandler.getValue();
+        assertNull(nativeResponse);
+    }
+
+    @Test
+    void handle3XXResponseWithLocationHeader() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        final var client =
+                getMockClient(
+                        new Response.Builder()
+                                .code(301)
+                                .message("Moved Permanently")
+                                .protocol(Protocol.HTTP_1_1)
+                                .request(new Request.Builder().url("http://localhost").build())
+                                .header("Location", "https://newlocation")
+                                .body(
+                                        ResponseBody.create(
+                                                "test".getBytes("UTF-8"),
+                                                MediaType.parse("application/json")))
+                                .build());
+        final var requestInformation =
+                new RequestInformation() {
+                    {
+                        setUri(new URI("https://localhost"));
+                        httpMethod = HttpMethod.GET;
+                    }
+                };
+        final var mockEntity = creatMockEntity();
+        final var mockParseNode = creatMockParseNode(mockEntity);
+        final var mockFactory = creatMockParseNodeFactory(mockParseNode, "application/json");
+
+        final var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
+        var nativeResponseHandler = new NativeResponseHandler();
+        requestAdapter.send(requestInformation, null, node -> mockEntity);
+        // Should throw an exception
+        var nativeResponse = (Response) nativeResponseHandler.getValue();
+        assertNull(nativeResponse);
+    }
+
     public static OkHttpClient getMockClient(final Response response) throws IOException {
         final OkHttpClient mockClient = mock(OkHttpClient.class);
         final Call remoteCall = mock(Call.class);
