@@ -26,7 +26,7 @@ jacocoTestReport {
 }
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.12"
 }
 
 spotbugsMain {
@@ -92,9 +92,9 @@ publishing {
     publications {
         maven(MavenPublication) {
             customizePom(pom)
-            groupId project.property('mavenGroupId')
-            artifactId project.property('mavenArtifactId')
-            version "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
+            groupId = project.property('mavenGroupId')
+            artifactId = project.property('mavenArtifactId')
+            version = "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
             from components.java
             pom.withXml {
                 def pomFile = file("${project.buildDir}/generated-pom.xml")
