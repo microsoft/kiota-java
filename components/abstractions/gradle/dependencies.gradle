@@ -1,12 +1,9 @@
 dependencies {
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.0'
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation 'org.mockito:mockito-core:5.15.2'
     testImplementation project(':components:serialization:json')
-
-    // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'io.github.std-uritemplate:std-uritemplate:2.0.0'
