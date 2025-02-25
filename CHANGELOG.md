@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4](https://github.com/microsoft/kiota-java/compare/v1.8.3...v1.8.4) (2025-02-25)
+
+
+### Bug Fixes
+
+* resolve build errors for azure authentication package on android ([43a3a84](https://github.com/microsoft/kiota-java/commit/43a3a84670116492b7191f07081fb9c5fa405038))
+* resolve build errors for azure authentication package on android ([5fda34b](https://github.com/microsoft/kiota-java/commit/5fda34b2edceb9e100cfe72b8488e6a0c0b6e1ae))
+
 ## [1.8.3](https://github.com/microsoft/kiota-java/compare/v1.8.2...v1.8.3) (2025-02-20)
 
 
