@@ -52,7 +52,6 @@ android {
         disable "UnusedResources"              // Unused will be removed on release
         disable "IconExpectedSize"             // Using the material icons provided from Google
         disable "GoogleAppIndexingApiWarning"  // We might want to index our app later
-        disable "InvalidPackage"               // Butterknife, Okio and Realm
         disable "ResourceType"                 // Annotation binding
         disable "GradleDependency"
         disable "NewerVersionAvailable"
