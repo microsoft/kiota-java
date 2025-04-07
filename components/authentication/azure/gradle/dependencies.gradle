@@ -5,8 +5,8 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.17.0'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'io.opentelemetry:opentelemetry-api:1.48.0'
-    implementation 'io.opentelemetry:opentelemetry-context:1.48.0'
+    implementation 'io.opentelemetry:opentelemetry-api:1.49.0'
+    implementation 'io.opentelemetry:opentelemetry-context:1.49.0'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
     api 'javax.xml.stream:stax-api:1.0-2'
     api 'com.azure:azure-core:1.55.3'
