@@ -2,7 +2,7 @@ dependencies {
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation 'org.mockito:mockito-core:5.17.0'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
