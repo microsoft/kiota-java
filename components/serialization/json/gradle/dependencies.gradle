@@ -1,6 +1,6 @@
 dependencies {
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.0'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
