@@ -153,6 +153,12 @@ public class KiotaClientFactoryTest {
         }
     }
 
+    @Test
+    void upstreamRedirectHandlingDisabledByDefault() {
+        OkHttpClient client = KiotaClientFactory.create().build();
+        assertFalse(client.followRedirects());
+    }
+
     private static RetryHandler getDisabledRetryHandler() {
         RetryHandlerOption retryHandlerOption =
                 new RetryHandlerOption((delay, executionCount, request, response) -> false, 0, 0);
