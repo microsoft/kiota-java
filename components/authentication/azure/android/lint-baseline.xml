@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.10.1" type="baseline" client="gradle" dependencies="false" name="AGP (8.10.1)" variant="all" version="8.10.1">
+
+    <issue
+        id="InvalidPackage"
+        message="Invalid package reference in com.fasterxml.jackson.core:jackson-core; not included in Android: `java.lang.foreign`. Referenced from `com.fasterxml.jackson.core.internal.shaded.fdp.v2_18_3.FastDoubleSwar`.">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.18.3/78f80c259268200e588aa204dd97ecf09b76916e/jackson-core-2.18.3.jar"/>
+    </issue>
+    <!-- https://github.com/Azure/azure-sdk-for-java/issues/45634 -->
+    <!-- https://github.com/FasterXML/jackson-core/issues/1446 -->
+
+</issues>
