@@ -173,8 +173,9 @@ public class RedirectHandler implements Interceptor {
                                     request,
                                     "RedirectHandler_Intercept - redirect " + requestsCount,
                                     span);
-                    if(redirectSpan != null) {
-                        redirectSpan.setAttribute("com.microsoft.kiota.handler.redirect.count", requestsCount);
+                    if (redirectSpan != null) {
+                        redirectSpan.setAttribute(
+                                "com.microsoft.kiota.handler.redirect.count", requestsCount);
                         redirectSpan.setAttribute("http.status_code", response.code());
                         redirectSpan.end();
                     }
