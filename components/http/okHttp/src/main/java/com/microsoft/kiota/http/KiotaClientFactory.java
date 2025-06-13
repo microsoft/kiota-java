@@ -58,6 +58,9 @@ public class KiotaClientFactory {
         Objects.requireNonNull(interceptors, "parameter interceptors cannot be null");
         final OkHttpClient.Builder builder =
                 new OkHttpClient.Builder()
+                        .followRedirects(
+                                false) // Redirects handled by .middleware.RedirectHandler rather
+                        // than okhttp
                         .connectTimeout(Duration.ofSeconds(100))
                         .readTimeout(Duration.ofSeconds(100))
                         .callTimeout(
