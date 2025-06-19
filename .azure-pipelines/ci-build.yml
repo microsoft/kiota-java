@@ -59,8 +59,7 @@ extends:
                 inputs:
                   secureFile: 'secring.gpg'
               
-              - displayName: Copy secring
-                pwsh: |
+              - pwsh: |
                   Copy-Item secring.gpg components/abstractions/ -Verbose
                   Copy-Item secring.gpg components/authentication/azure/ -Verbose
                   Copy-Item secring.gpg components/serialization/form/ -Verbose
@@ -69,6 +68,7 @@ extends:
                   Copy-Item secring.gpg components/serialization/multipart/ -Verbose
                   Copy-Item secring.gpg components/http/okHttp/ -Verbose
                   Copy-Item secring.gpg components/bundle/ -Verbose
+                displayName: Copy secring
 
               - shell: ./gradlew --no-daemon publishToMavenLocal
                 displayName: Publish to local Maven
@@ -78,8 +78,7 @@ extends:
                 displayName: Publish to local Maven
                 if: contains(variables['build.sourceBranch'], 'refs/tags/v')
 
-              - displayName: Get current SNAPSHOT version
-                pwsh: |
+              - pwsh: |
                   $contents = Get-Content gradle.properties -Raw
                   $major = $contents | Select-String -Pattern 'mavenMajorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
                   $minor = $contents | Select-String -Pattern 'mavenMinorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
@@ -87,12 +86,12 @@ extends:
                   $version = "$major.$minor.$patch$Env:SNAPSHOT_SUFFIX"
                   echo "Current version is $version"
                   echo "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=true]$version"
+                displayName: Get current SNAPSHOT version
                 env:
                 ${{ if contains(variables['build.sourceBranch'], 'refs/tags/v') }}:
                   SNAPSHOT_SUFFIX: '-SNAPSHOT'
 
-              - displayName: Inspect contents of local Maven cache
-                pwsh: |
+              - pwsh: |
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
@@ -101,9 +100,9 @@ extends:
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
+                displayName: Inspect contents of local Maven cache
 
-              - displayName: Zip contents of local Maven cache
-                pwsh: |
+              - pwsh: |
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
@@ -112,6 +111,7 @@ extends:
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
+                displayName: Zip contents of local Maven cache
                 env:
                   OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)
               
