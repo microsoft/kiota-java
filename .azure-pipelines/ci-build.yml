@@ -91,6 +91,7 @@ extends:
                   echo "Current version is $version"
                   echo "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=true]$version"
                 displayName: Get current version
+                name: GetVersion
                 env:
                   BRANCH_NAME: $(Build.SourceBranchName)
 
@@ -104,6 +105,8 @@ extends:
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
                   .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
                 displayName: Inspect contents of local Maven cache
+                env:
+                  PACKAGE_VERSION: $[ dependencies.GetVersion.outputs['GetVersion.PACKAGE_VERSION'] ]
 
               - pwsh: |
                   .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
@@ -117,6 +120,7 @@ extends:
                 displayName: Zip contents of local Maven cache
                 env:
                   OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)
+                  PACKAGE_VERSION: $[ dependencies.GetVersion.outputs['GetVersion.PACKAGE_VERSION'] ]
               
               - task: 1ES.PublishPipelineArtifact@1
                 displayName: "Publish Artifact: jars"
@@ -124,4 +128,24 @@ extends:
                   artifactName: jars
                   targetPath: "$(Build.ArtifactStagingDirectory)/*.zip"
 
-
+      # - stage: deploy
+      #   dependsOn: build
+      #   jobs:
+      #     - deployment: deploy_github
+      #       pool:
+      #         name: Azure-Pipelines-1ESPT-ExDShared
+      #         os: linux
+      #         image: ubuntu-latest
+      #       templateContext:
+      #         type: releaseJob
+      #         isProduction: true
+      #         inputs:
+      #           - input: pipelineArtifact
+      #             artifactName: jars
+      #             targetPath: "$(Pipeline.Workspace)"
+      #       environment: kiota-github-releases
+      #       strategy:
+      #         runOnce:
+      #           deploy:
+      #             steps:
+            
