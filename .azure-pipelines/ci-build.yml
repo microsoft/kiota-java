@@ -185,7 +185,7 @@ extends:
                         addChangeLog: false
                         action: edit
             
-          - deployment: deploy_npm
+          - deployment: deploy_maven
             # condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
             pool:
               name: Azure-Pipelines-1ESPT-ExDShared
@@ -199,21 +199,24 @@ extends:
                   artifactName: jars
                   targetPath: "$(Pipeline.Workspace)"
             dependsOn: []
-            steps:
-              - task: EsrpRelease@7
-                inputs:
-                  connectedservicename: "Federated DevX ESRP Managed Identity Connection"
-                  keyvaultname: "akv-prod-eastus"
-                  authcertname: "ReferenceLibraryPrivateCert"
-                  signcertname: "ReferencePackagePublisherCertificate"
-                  clientid: "65035b7f-7357-4f29-bf25-c5ee5c3949f8"
-                  intent: "PackageDistribution"
-                  contenttype: "Maven"
-                  contentsource: "Folder"
-                  folderlocation: "$(Pipeline.Workspace)"
-                  waitforreleasecompletion: true
-                  owners: $(MAVEN_OWNERS_LIST)
-                  approvers: $(MAVEN_APPROVERS_LIST)
-                  serviceendpointurl: "https://api.esrp.microsoft.com"
-                  mainpublisher: "ESRPRELPACMAN"
-                  domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - task: EsrpRelease@7
+                      inputs:
+                        connectedservicename: "Federated DevX ESRP Managed Identity Connection"
+                        keyvaultname: "akv-prod-eastus"
+                        authcertname: "ReferenceLibraryPrivateCert"
+                        signcertname: "ReferencePackagePublisherCertificate"
+                        clientid: "65035b7f-7357-4f29-bf25-c5ee5c3949f8"
+                        intent: "PackageDistribution"
+                        contenttype: "Maven"
+                        contentsource: "Folder"
+                        folderlocation: "$(Pipeline.Workspace)"
+                        waitforreleasecompletion: true
+                        owners: $(MAVEN_OWNERS_LIST)
+                        approvers: $(MAVEN_APPROVERS_LIST)
+                        serviceendpointurl: "https://api.esrp.microsoft.com"
+                        mainpublisher: "ESRPRELPACMAN"
+                        domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
