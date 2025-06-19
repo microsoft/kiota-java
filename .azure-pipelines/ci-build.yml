@@ -225,6 +225,7 @@ extends:
                     - task: EsrpRelease@9
                       inputs:
                         connectedservicename: "Federated DevX ESRP Managed Identity Connection"
+                        usemanagedidentity: false
                         keyvaultname: "akv-prod-eastus"
                         authcertname: "ReferenceLibraryPrivateCert"
                         signcertname: "ReferencePackagePublisherCertificate"
@@ -234,8 +235,8 @@ extends:
                         contentsource: "Folder"
                         folderlocation: "$(Pipeline.Workspace)\\publishing"
                         waitforreleasecompletion: true
-                        owners: vibiret@microsoft.com,mmainer@microsoft.com
-                        approvers: vibiret@microsoft.com,mmainer@microsoft.com
+                        owners: vibiret@microsoft.com
+                        approvers: mmainer@microsoft.com
                         serviceendpointurl: "https://api.esrp.microsoft.com"
                         mainpublisher: "ESRPRELPACMAN"
                         domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
