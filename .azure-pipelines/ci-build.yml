@@ -78,6 +78,11 @@ extends:
 
               - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
                 displayName: Publish to local Maven ADO for ESRP
+                # condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
+
+              # - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true
+              #   displayName: Publish to local Maven ADO for ESRP
+              #   condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
 
               - pwsh: |
                   $contents = Get-Content gradle.properties -Raw
