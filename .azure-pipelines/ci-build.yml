@@ -222,7 +222,7 @@ extends:
                         }
                         Compress-Archive -Path "$(Pipeline.Workspace)\archiving\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
                       displayName: Rezip artifacts in a single zip file
-                    - task: EsrpRelease@7
+                    - task: EsrpRelease@9
                       inputs:
                         connectedservicename: "Federated DevX ESRP Managed Identity Connection"
                         keyvaultname: "akv-prod-eastus"
