@@ -215,12 +215,12 @@ extends:
                   steps:
                     - pwsh: |
                         $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
+                        $targetPath = "$(Pipeline.Workspace)\archiving"
                         foreach ($zip in $zips) {
-                            $targetPath = $zip.FullName.Replace(".zip", "")
                             Expand-Archive -Path (Split-Path $zip.FullName) -DestinationPath $targetPath
                             Remove-Item -Path $zip.FullName -Force
                         }
-                        Compress-Archive -Path "$(Pipeline.Workspace)\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
+                        Compress-Archive -Path "$(Pipeline.Workspace)\archiving\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
                       displayName: Rezip artifacts in a single zip file
                     - task: EsrpRelease@7
                       inputs:
