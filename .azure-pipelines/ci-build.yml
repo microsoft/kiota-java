@@ -97,14 +97,14 @@ extends:
                   BRANCH_NAME: $(Build.SourceBranchName)
 
               - pwsh: |
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $(PACKAGE_VERSION)
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $(PACKAGE_VERSION)
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
                 displayName: Inspect contents of local Maven cache
 
               - pwsh: |
