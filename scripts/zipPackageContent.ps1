@@ -20,7 +20,10 @@ if(-not (Test-Path -Path $packageFullPath)) {
 }
 
 $outputFilePath = Join-Path -Path $OutputDirectory -ChildPath "$ArtifactId-$Version.zip"
+# removing any existing file
 Remove-Item -Path $outputFilePath -ErrorAction SilentlyContinue
+# removing any xml files that are not expected in ESRP release
+Remove-Item -Path "$packageFullPath\*.xml" -ErrorAction SilentlyContinue -Verbose
 Compress-Archive -Path "$packageFullPath\*" -DestinationPath $outputFilePath
 
 exit 0

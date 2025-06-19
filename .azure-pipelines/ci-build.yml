@@ -205,6 +205,15 @@ extends:
               runOnce:
                 deploy:
                   steps:
+                    - pwsh: |
+                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
+                        foreach ($zip in $zips) {
+                            $targetPath = $zip.FullName.Replace(".zip", "")
+                            Expand-Archive -Path (Split-Path $zip.FullName) -DestinationPath $targetPath
+                            Remove-Item -Path $zip.FullName -Force
+                        }
+                        Compress-Archive -Path "$(Pipeline.Workspace)\*" -DestinationPath "$(Pipeline.Workspace)\packages.zip"
+                      displayName: Rezip artifacts in a single zip file
                     - task: EsrpRelease@7
                       inputs:
                         connectedservicename: "Federated DevX ESRP Managed Identity Connection"
