@@ -70,11 +70,11 @@ extends:
                   Copy-Item secring.gpg components/bundle/ -Verbose
                 displayName: Copy secring
 
-              - shell: ./gradlew --no-daemon publishToMavenLocal
+              - script: ./gradlew --no-daemon publishToMavenLocal
                 displayName: Publish to local Maven
                 if: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
 
-              - shell: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralSnapshotArtifactSuffix=""
+              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralSnapshotArtifactSuffix=""
                 displayName: Publish to local Maven
                 if: contains(variables['build.sourceBranch'], 'refs/tags/v')
 
