@@ -359,3 +359,4 @@ build/
 local.properties
 
 *.gpg
+*.zip
