@@ -199,6 +199,7 @@ extends:
                   artifactName: jars
                   targetPath: "$(Pipeline.Workspace)"
             dependsOn: []
+            environment: maven_central
             strategy:
               runOnce:
                 deploy:
