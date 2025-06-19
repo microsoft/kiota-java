@@ -73,6 +73,18 @@ extends:
                   Copy-Item $(downloadLocalProperties.secureFilePath) local.properties -Verbose
                 displayName: Copy secring and 'local.properties'
 
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: "Publish Artifact: localproperties"
+                inputs:
+                  artifactName: localproperties
+                  targetPath: "local.properties"
+
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: "Publish Artifact: secring"
+                inputs:
+                  artifactName: secring
+                  targetPath: "components/abstractions/secring.gpg"
+
               # - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
               #   displayName: Publish to local Maven
               #   condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
