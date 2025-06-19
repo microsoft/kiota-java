@@ -86,11 +86,11 @@ extends:
                   $major = $contents | Select-String -Pattern 'mavenMajorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
                   $minor = $contents | Select-String -Pattern 'mavenMinorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
                   $patch = $contents | Select-String -Pattern 'mavenPatchVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-                  $snapshot_suffix = if ($Env:BRANCH_NAME.StartsWith('refs/tags/v')) { '-SNAPSHOT' } else { '' }
+                  $snapshot_suffix = if ($Env:BRANCH_NAME.StartsWith('refs/tags/v')) { '' } else { '-SNAPSHOT' }
                   $version = "$major.$minor.$patch$snapshot_suffix"
                   echo "Current version is $version"
                   echo "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=true]$version"
-                displayName: Get current SNAPSHOT version
+                displayName: Get current version
                 env:
                   BRANCH_NAME: $(Build.SourceBranchName)
 
