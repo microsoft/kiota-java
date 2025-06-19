@@ -52,23 +52,26 @@ extends:
                   jdkSourceOption: 'PreInstalled'
 
               - task: DownloadSecureFile@1
+                name: downloadLocalProperties
                 inputs:
                   secureFile: 'local.properties'
 
               - task: DownloadSecureFile@1
+                name: downloadSecringGpg
                 inputs:
                   secureFile: 'secring.gpg'
               
               - pwsh: |
-                  Copy-Item secring.gpg components/abstractions/ -Verbose
-                  Copy-Item secring.gpg components/authentication/azure/ -Verbose
-                  Copy-Item secring.gpg components/serialization/form/ -Verbose
-                  Copy-Item secring.gpg components/serialization/text/ -Verbose
-                  Copy-Item secring.gpg components/serialization/json/ -Verbose
-                  Copy-Item secring.gpg components/serialization/multipart/ -Verbose
-                  Copy-Item secring.gpg components/http/okHttp/ -Verbose
-                  Copy-Item secring.gpg components/bundle/ -Verbose
-                displayName: Copy secring
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/abstractions/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/authentication/azure/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/form/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/text/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/json/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/multipart/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/http/okHttp/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/bundle/secring.gpg -Verbose
+                  Copy-Item $(downloadLocalProperties.secureFilePath) local.properties -Verbose
+                displayName: Copy secring and 'local.properties'
 
               - script: ./gradlew --no-daemon publishToMavenLocal
                 displayName: Publish to local Maven
