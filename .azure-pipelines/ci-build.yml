@@ -128,6 +128,23 @@ extends:
                   artifactName: jars
                   targetPath: "$(Build.ArtifactStagingDirectory)"
 
+              - pwsh: |
+                  $zips = Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Filter "*.zip"
+                  $targetPath = "$(Build.ArtifactStagingDirectory)\archiving"
+                  foreach ($zip in $zips) {
+                      Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
+                      Remove-Item -Path $zip.FullName -Force
+                  }
+                  New-Item "$(Build.ArtifactStagingDirectory)\publishing" -ItemType Directory -Force -ErrorAction SilentlyContinue
+                  Compress-Archive -Path "$(Build.ArtifactStagingDirectory)\archiving\*" -DestinationPath "$(Build.ArtifactStagingDirectory)\publishing\packages.zip"
+                displayName: Rezip artifacts in a single zip file
+
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: "Publish Artifact: mergedZips"
+                inputs:
+                  artifactName: mergedZips
+                  targetPath: "$(Build.ArtifactStagingDirectory)/publishing"
+
       - stage: deploy
         # condition: and(or(contains(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['build.sourceBranch'], '${{ parameters.previewBranch }}')), succeeded())
         dependsOn: build
@@ -208,40 +225,30 @@ extends:
                 - input: pipelineArtifact
                   artifactName: jars
                   targetPath: "$(Pipeline.Workspace)"
-              outputs:
-                - output: maven_central
-                  value: "$(Pipeline.Workspace)/publishing/packages.zip"
+                - input: pipelineArtifact
+                  artifactName: mergedZips
+                  targetPath: "$(Pipeline.Workspace)/publishing"
             dependsOn: []
             environment: maven_central
             strategy:
               runOnce:
                 deploy:
                   steps:
-                    - pwsh: |
-                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
-                        $targetPath = "$(Pipeline.Workspace)\archiving"
-                        foreach ($zip in $zips) {
-                            Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
-                            Remove-Item -Path $zip.FullName -Force
-                        }
-                        New-Item "$(Pipeline.Workspace)\publishing" -ItemType Directory -Force -ErrorAction SilentlyContinue
-                        Compress-Archive -Path "$(Pipeline.Workspace)\archiving\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
-                      displayName: Rezip artifacts in a single zip file
-                    # - task: EsrpRelease@9
-                    #   inputs:
-                    #     connectedservicename: "Federated DevX ESRP Managed Identity Connection"
-                    #     usemanagedidentity: false
-                    #     keyvaultname: "akv-prod-eastus"
-                    #     authcertname: "ReferenceLibraryPrivateCert"
-                    #     signcertname: "ReferencePackagePublisherCertificate"
-                    #     clientid: "65035b7f-7357-4f29-bf25-c5ee5c3949f8"
-                    #     intent: "PackageDistribution"
-                    #     contenttype: "Maven"
-                    #     contentsource: "Folder"
-                    #     folderlocation: "$(Pipeline.Workspace)/publishing"
-                    #     waitforreleasecompletion: true
-                    #     owners: vibiret@microsoft.com
-                    #     approvers: mmainer@microsoft.com
-                    #     serviceendpointurl: "https://api.esrp.microsoft.com"
-                    #     mainpublisher: "ESRPRELPACMAN"
-                    #     domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
+                    - task: EsrpRelease@9
+                      inputs:
+                        connectedservicename: "Federated DevX ESRP Managed Identity Connection"
+                        usemanagedidentity: false
+                        keyvaultname: "akv-prod-eastus"
+                        authcertname: "ReferenceLibraryPrivateCert"
+                        signcertname: "ReferencePackagePublisherCertificate"
+                        clientid: "65035b7f-7357-4f29-bf25-c5ee5c3949f8"
+                        intent: "PackageDistribution"
+                        contenttype: "Maven"
+                        contentsource: "Folder"
+                        folderlocation: "$(Pipeline.Workspace)/publishing"
+                        waitforreleasecompletion: true
+                        owners: vibiret@microsoft.com
+                        approvers: mmainer@microsoft.com
+                        serviceendpointurl: "https://api.esrp.microsoft.com"
+                        mainpublisher: "ESRPRELPACMAN"
+                        domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
