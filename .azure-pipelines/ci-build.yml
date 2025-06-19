@@ -125,7 +125,7 @@ extends:
                 displayName: "Publish Artifact: jars"
                 inputs:
                   artifactName: jars
-                  targetPath: "$(Build.ArtifactStagingDirectory)/*.zip"
+                  targetPath: "$(Build.ArtifactStagingDirectory)"
 
       - stage: deploy
         # condition: and(or(contains(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['build.sourceBranch'], '${{ parameters.previewBranch }}')), succeeded())
