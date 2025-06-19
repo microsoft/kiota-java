@@ -132,7 +132,7 @@ extends:
         dependsOn: build
         jobs:
           - deployment: deploy_github
-            # condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
+            condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
             pool:
               name: Azure-Pipelines-1ESPT-ExDShared
               os: linux
