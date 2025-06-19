@@ -125,43 +125,60 @@ extends:
                   artifactName: jars
                   targetPath: "$(Build.ArtifactStagingDirectory)/*.zip"
 
-      # - stage: deploy
-      #   # condition: and(or(contains(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['build.sourceBranch'], '${{ parameters.previewBranch }}')), succeeded())
-      #   dependsOn: build
-      #   jobs:
-      #     - deployment: deploy_github
-      #       pool:
-      #         name: Azure-Pipelines-1ESPT-ExDShared
-      #         os: linux
-      #         image: ubuntu-latest
-      #       templateContext:
-      #         type: releaseJob
-      #         isProduction: true
-      #         inputs:
-      #           - input: pipelineArtifact
-      #             artifactName: jars
-      #             targetPath: "$(Pipeline.Workspace)"
-      #       environment: kiota-github-releases
-      #       strategy:
-      #         runOnce:
-      #           deploy:
-      #             steps:
-      #               - pwsh: |
-      #                   $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
-      #                   foreach ($zip in $zips) {
-      #                       $targetPath = $zip.FullName.Replace(".zip", "")
-      #                       Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
-      #                       Remove-Item -Path $zip.FullName -Force
-      #                   }
-      #                 displayName: Unzip artifacts
-      #               #TODO artifactVersion
-      #               - task: GitHubRelease@1
-      #                 inputs:
-      #                   gitHubConnection: "microsoftkiota"
-      #                   tagSource: userSpecifiedTag
-      #                   tag: "v$(artifactVersion)"
-      #                   title: "v$(artifactVersion)"
-      #                   assets: |
-      #                     $(Pipeline.Workspace)/**/*
-      #                   addChangeLog: false
+      - stage: deploy
+        # condition: and(or(contains(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['build.sourceBranch'], '${{ parameters.previewBranch }}')), succeeded())
+        dependsOn: build
+        jobs:
+          - deployment: deploy_github
+            # condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
+            pool:
+              name: Azure-Pipelines-1ESPT-ExDShared
+              os: linux
+              image: ubuntu-latest
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  artifactName: jars
+                  targetPath: "$(Pipeline.Workspace)"
+            environment: kiota-github-releases
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - pwsh: |
+                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
+                        $zip = $zips | Select-Object -First 1
+                        $zipName = $zip.Name
+                        if ($zipName -match "\d+.\d+.\d+")
+                        {
+                          $version = $matches[0]
+                          echo "Current version is $version"
+                          echo "##vso[task.setvariable variable=artifactVersion;]$version"
+                        }
+                        else
+                        {
+                          Write-Error "No valid version found in zip file name."
+                          exit 1
+                        }
+
+                    - pwsh: |
+                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
+                        foreach ($zip in $zips) {
+                            $targetPath = $zip.FullName.Replace(".zip", "")
+                            Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
+                            Remove-Item -Path $zip.FullName -Force
+                        }
+                      displayName: Unzip artifacts
+                        
+                    - task: GitHubRelease@1
+                      inputs:
+                        gitHubConnection: "microsoftkiota"
+                        tagSource: userSpecifiedTag
+                        tag: "v$(artifactVersion)"
+                        title: "v$(artifactVersion)"
+                        assets: |
+                          $(Pipeline.Workspace)/**/*
+                        addChangeLog: false
             
