@@ -220,7 +220,7 @@ extends:
                             Expand-Archive -Path (Split-Path $zip.FullName) -DestinationPath $targetPath
                             Remove-Item -Path $zip.FullName -Force
                         }
-                        Compress-Archive -Path "$(Pipeline.Workspace)\*" -DestinationPath "$(Pipeline.Workspace)\packages.zip"
+                        Compress-Archive -Path "$(Pipeline.Workspace)\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
                       displayName: Rezip artifacts in a single zip file
                     - task: EsrpRelease@7
                       inputs:
@@ -232,7 +232,7 @@ extends:
                         intent: "PackageDistribution"
                         contenttype: "Maven"
                         contentsource: "Folder"
-                        folderlocation: "$(Pipeline.Workspace)"
+                        folderlocation: "$(Pipeline.Workspace)\\publishing"
                         waitforreleasecompletion: true
                         owners: vibiret@microsoft.com,mmainer@microsoft.com
                         approvers: vibiret@microsoft.com,mmainer@microsoft.com
