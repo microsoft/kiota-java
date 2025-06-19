@@ -220,6 +220,7 @@ extends:
                             Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
                             Remove-Item -Path $zip.FullName -Force
                         }
+                        New-Item "$(Pipeline.Workspace)\publishing" -ItemType Directory -Force -ErrorAction SilentlyContinue
                         Compress-Archive -Path "$(Pipeline.Workspace)\archiving\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
                       displayName: Rezip artifacts in a single zip file
                     - task: EsrpRelease@9
