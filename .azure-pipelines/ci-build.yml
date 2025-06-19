@@ -186,6 +186,7 @@ extends:
                         action: edit
             
           - deployment: deploy_maven
+            # snapshots are not supported by ESRP release for now, but they are planning to add support. When it happens, simply remove the condition
             # condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
             pool:
               name: Azure-Pipelines-1ESPT-ExDShared
@@ -216,8 +217,8 @@ extends:
                         contentsource: "Folder"
                         folderlocation: "$(Pipeline.Workspace)"
                         waitforreleasecompletion: true
-                        owners: $(MAVEN_OWNERS_LIST)
-                        approvers: $(MAVEN_APPROVERS_LIST)
+                        owners: vibiret@microsoft.com,mmainer@microsoft.com
+                        approvers: vibiret@microsoft.com,mmainer@microsoft.com
                         serviceendpointurl: "https://api.esrp.microsoft.com"
                         mainpublisher: "ESRPRELPACMAN"
                         domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
