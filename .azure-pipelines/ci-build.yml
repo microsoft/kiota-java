@@ -73,13 +73,13 @@ extends:
                   Copy-Item $(downloadLocalProperties.secureFilePath) local.properties -Verbose
                 displayName: Copy secring and 'local.properties'
 
-              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
-                displayName: Publish to local Maven
-                condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+              # - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
+              #   displayName: Publish to local Maven
+              #   condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
 
               - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
                 displayName: Publish to local Maven
-                condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
+                # condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
 
               - pwsh: |
                   $contents = Get-Content gradle.properties -Raw
