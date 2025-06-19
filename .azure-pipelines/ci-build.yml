@@ -217,7 +217,7 @@ extends:
                         $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
                         $targetPath = "$(Pipeline.Workspace)\archiving"
                         foreach ($zip in $zips) {
-                            Expand-Archive -Path (Split-Path $zip.FullName) -DestinationPath $targetPath
+                            Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
                             Remove-Item -Path $zip.FullName -Force
                         }
                         Compress-Archive -Path "$(Pipeline.Workspace)\archiving\*" -DestinationPath "$(Pipeline.Workspace)\publishing\packages.zip"
