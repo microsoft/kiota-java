@@ -207,13 +207,35 @@ extends:
                         title: "v$(artifactVersion)"
                         assets: |
                           $(Pipeline.Workspace)/**/*.jar
+                          $(Pipeline.Workspace)/**/*.jar.md5
+                          $(Pipeline.Workspace)/**/*.jar.sha1
                           $(Pipeline.Workspace)/**/*.jar.sha256
+                          $(Pipeline.Workspace)/**/*.jar.sha512
                           $(Pipeline.Workspace)/**/*.jar.asc
+                          $(Pipeline.Workspace)/**/*.jar.asc.md5
+                          $(Pipeline.Workspace)/**/*.jar.asc.sha1
                           $(Pipeline.Workspace)/**/*.jar.asc.sha256
+                          $(Pipeline.Workspace)/**/*.jar.asc.sha512
                           $(Pipeline.Workspace)/**/*.pom
+                          $(Pipeline.Workspace)/**/*.pom.md5
+                          $(Pipeline.Workspace)/**/*.pom.sha1
                           $(Pipeline.Workspace)/**/*.pom.sha256
+                          $(Pipeline.Workspace)/**/*.pom.sha512
                           $(Pipeline.Workspace)/**/*.pom.asc
+                          $(Pipeline.Workspace)/**/*.pom.asc.md5
+                          $(Pipeline.Workspace)/**/*.pom.asc.sha1
                           $(Pipeline.Workspace)/**/*.pom.asc.sha256
+                          $(Pipeline.Workspace)/**/*.pom.asc.sha512
+                          $(Pipeline.Workspace)/**/*.module
+                          $(Pipeline.Workspace)/**/*.module.md5
+                          $(Pipeline.Workspace)/**/*.module.sha1
+                          $(Pipeline.Workspace)/**/*.module.sha256
+                          $(Pipeline.Workspace)/**/*.module.sha512
+                          $(Pipeline.Workspace)/**/*.module.asc
+                          $(Pipeline.Workspace)/**/*.module.asc.md5
+                          $(Pipeline.Workspace)/**/*.module.asc.sha1
+                          $(Pipeline.Workspace)/**/*.module.asc.sha256
+                          $(Pipeline.Workspace)/**/*.module.asc.sha512
 
                         addChangeLog: false
                         action: edit
