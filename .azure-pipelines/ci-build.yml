@@ -1,0 +1,124 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+name: $(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  tags:
+    include:
+      - "v*"
+  branches:
+    include:
+      - main
+
+parameters:
+  - name: previewBranch
+    type: string
+    default: "refs/heads/main"
+
+resources:
+  repositories:
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: Azure-Pipelines-1ESPT-ExDShared
+        os: windows
+        image: windows-latest
+
+    stages:
+      - stage: build
+        jobs:
+          - job: build
+            pool:
+              name: Azure-Pipelines-1ESPT-ExDShared
+              os: linux
+              image: ubuntu-latest
+            #TODO maybe missing template context with sdl baselines?
+            steps:
+              - checkout: self
+                persistCredentials: true
+
+              - task: JavaToolInstaller@1
+                inputs:
+                  versionSpec: '21'
+                  jdkArchitectureOption: 'x64'
+                  jdkSourceOption: 'PreInstalled'
+
+              - task: DownloadSecureFile@1
+                inputs:
+                  secureFile: 'local.properties'
+
+              - task: DownloadSecureFile@1
+                inputs:
+                  secureFile: 'secring.gpg'
+              
+              - displayName: Copy secring
+                pwsh: |
+                  Copy-Item secring.gpg components/abstractions/ -Verbose
+                  Copy-Item secring.gpg components/authentication/azure/ -Verbose
+                  Copy-Item secring.gpg components/serialization/form/ -Verbose
+                  Copy-Item secring.gpg components/serialization/text/ -Verbose
+                  Copy-Item secring.gpg components/serialization/json/ -Verbose
+                  Copy-Item secring.gpg components/serialization/multipart/ -Verbose
+                  Copy-Item secring.gpg components/http/okHttp/ -Verbose
+                  Copy-Item secring.gpg components/bundle/ -Verbose
+
+              - shell: ./gradlew --no-daemon publishToMavenLocal
+                displayName: Publish to local Maven
+                if: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+
+              - shell: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralSnapshotArtifactSuffix=""
+                displayName: Publish to local Maven
+                if: contains(variables['build.sourceBranch'], 'refs/tags/v')
+
+              - displayName: Get current SNAPSHOT version
+                pwsh: |
+                  $contents = Get-Content gradle.properties -Raw
+                  $major = $contents | Select-String -Pattern 'mavenMajorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+                  $minor = $contents | Select-String -Pattern 'mavenMinorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+                  $patch = $contents | Select-String -Pattern 'mavenPatchVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+                  $version = "$major.$minor.$patch$Env:SNAPSHOT_SUFFIX"
+                  echo "Current version is $version"
+                  echo "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=true]$version"
+                env:
+                ${{ if contains(variables['build.sourceBranch'], 'refs/tags/v') }}:
+                  SNAPSHOT_SUFFIX: '-SNAPSHOT'
+
+              - displayName: Inspect contents of local Maven cache
+                pwsh: |
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
+
+              - displayName: Zip contents of local Maven cache
+                pwsh: |
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
+                env:
+                  OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)
+              
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: "Publish Artifact: jars"
+                inputs:
+                  artifactName: jars
+                  targetPath: "$(Build.ArtifactStagingDirectory)/*.zip"
+
+
