@@ -73,13 +73,11 @@ extends:
                   Copy-Item $(downloadLocalProperties.secureFilePath) local.properties -Verbose
                 displayName: Copy secring and 'local.properties'
 
-              # - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
-              #   displayName: Publish to local Maven
-              #   condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
+                displayName: Publish to local Maven for verification
 
-              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
-                displayName: Publish to local Maven
-                # condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
+              - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
+                displayName: Publish to local Maven ADO for ESRP
 
               - pwsh: |
                   $contents = Get-Content gradle.properties -Raw
@@ -108,14 +106,14 @@ extends:
                 displayName: Inspect contents of local Maven cache
 
               - pwsh: |
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -PackageSegment abstractions -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -PackageSegment "authentication/azure" -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -PackageSegment "http/okHttp" -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -PackageSegment "serialization/form" -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -PackageSegment "serialization/json" -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -PackageSegment "serialization/text" -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -PackageSegment "serialization/multipart" -Version $(PACKAGE_VERSION)
+                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -PackageSegment bundle -Version $(PACKAGE_VERSION)
                   echo "list of zips:"
                   Get-ChildItem -Path $Env:OUTPUT_DIRECTORY -Filter "*.zip" | ForEach-Object { Write-Host $_.FullName }
                 displayName: Zip contents of local Maven cache
