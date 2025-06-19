@@ -183,6 +183,7 @@ extends:
                         assets: |
                           $(Pipeline.Workspace)/**/*
                         addChangeLog: false
+                        action: edit
             
           - deployment: deploy_npm
             # condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
