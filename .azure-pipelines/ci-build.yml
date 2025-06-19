@@ -132,7 +132,7 @@ extends:
         dependsOn: build
         jobs:
           - deployment: deploy_github
-            condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
+            # condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
             pool:
               name: Azure-Pipelines-1ESPT-ExDShared
               os: linux
@@ -181,7 +181,15 @@ extends:
                         tag: "v$(artifactVersion)"
                         title: "v$(artifactVersion)"
                         assets: |
-                          $(Pipeline.Workspace)/**/*
+                          $(Pipeline.Workspace)/**/*.jar
+                          $(Pipeline.Workspace)/**/*.jar.sha256
+                          $(Pipeline.Workspace)/**/*.jar.asc
+                          $(Pipeline.Workspace)/**/*.jar.asc.sha256
+                          $(Pipeline.Workspace)/**/*.pom
+                          $(Pipeline.Workspace)/**/*.pom.sha256
+                          $(Pipeline.Workspace)/**/*.pom.asc
+                          $(Pipeline.Workspace)/**/*.pom.asc.sha256
+
                         addChangeLog: false
                         action: edit
             
