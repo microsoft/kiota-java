@@ -19,7 +19,7 @@ if(-not (Test-Path -Path $packageFullPath)) {
   exit 1
 }
 
-$outputFilePath = Join-Path -Path $OutputDirectory -ChildPath "$ArtifactId-$Version.zip")
+$outputFilePath = Join-Path -Path $OutputDirectory -ChildPath "$ArtifactId-$Version.zip"
 Remove-Item -Path $outputFilePath -ErrorAction SilentlyContinue
 Compress-Archive -Path "$packageFullPath\*" -DestinationPath $outputFilePath
 
