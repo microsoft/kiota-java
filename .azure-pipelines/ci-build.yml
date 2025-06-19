@@ -234,7 +234,7 @@ extends:
                         intent: "PackageDistribution"
                         contenttype: "Maven"
                         contentsource: "Folder"
-                        folderlocation: "$(Pipeline.Workspace)\\publishing"
+                        folderlocation: "$(Pipeline.Workspace)/publishing"
                         waitforreleasecompletion: true
                         owners: vibiret@microsoft.com
                         approvers: mmainer@microsoft.com
