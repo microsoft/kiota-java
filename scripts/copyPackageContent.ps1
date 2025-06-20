@@ -22,6 +22,6 @@ if(-not (Test-Path -Path $packageFullPath)) {
   exit 1
 }
 
-Copy-Item -Path "$packageFullPath\*" -DestinationPath $OutputDirectory
+Copy-Item -Path "$packageFullPath\*" -Destination $OutputDirectory
 
 exit 0
