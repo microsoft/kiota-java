@@ -15,17 +15,13 @@ $groupIdPath = $GroupId -replace "\.", [System.IO.Path]::DirectorySeparatorChar
 $packageFullPath = Join-Path -Path $PSScriptRoot -ChildPath $ComponentsSegment -AdditionalChildPath $PackageSegment, $buildOutDir, $groupIdPath, $ArtifactId, $Version
 
 Write-Output "---------------------------------------------------"
-Write-Output "Zipping package contents at $packageFullPath"
+Write-Output "Copying package contents at $packageFullPath"
 
 if(-not (Test-Path -Path $packageFullPath)) {
   Write-Output "Package not found in local cache."
   exit 1
 }
 
-$outputFilePath = Join-Path -Path $OutputDirectory -ChildPath "$ArtifactId-$Version.zip"
-# removing any existing file
-Remove-Item -Path $outputFilePath -ErrorAction SilentlyContinue
-# removing any xml files that are not expected in ESRP release
-Compress-Archive -Path "$packageFullPath\*" -DestinationPath $outputFilePath
+Copy-Item -Path "$packageFullPath\*" -DestinationPath $OutputDirectory
 
 exit 0

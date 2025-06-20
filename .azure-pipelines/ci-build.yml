@@ -114,14 +114,14 @@ extends:
                 displayName: Inspect contents of local Maven cache
 
               - pwsh: |
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -PackageSegment abstractions -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -PackageSegment "authentication/azure" -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -PackageSegment "http/okHttp" -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -PackageSegment "serialization/form" -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -PackageSegment "serialization/json" -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -PackageSegment "serialization/text" -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -PackageSegment "serialization/multipart" -Version $(PACKAGE_VERSION)
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -PackageSegment bundle -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -PackageSegment abstractions -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -PackageSegment "authentication/azure" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -PackageSegment "http/okHttp" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -PackageSegment "serialization/form" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -PackageSegment "serialization/json" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -PackageSegment "serialization/text" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -PackageSegment "serialization/multipart" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -PackageSegment bundle -Version $(PACKAGE_VERSION)
                   echo "list of zips:"
                   Get-ChildItem -Path $Env:OUTPUT_DIRECTORY -Filter "*.zip" | ForEach-Object { Write-Host $_.FullName }
                 displayName: Zip contents of local Maven cache
@@ -133,23 +133,6 @@ extends:
                 inputs:
                   artifactName: jars
                   targetPath: "$(Build.ArtifactStagingDirectory)"
-
-              - pwsh: |
-                  $zips = Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Filter "*.zip"
-                  $targetPath = "$(Build.ArtifactStagingDirectory)\archiving"
-                  foreach ($zip in $zips) {
-                      Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
-                      Remove-Item -Path $zip.FullName -Force
-                  }
-                  New-Item "$(Build.ArtifactStagingDirectory)\publishing" -ItemType Directory -Force -ErrorAction SilentlyContinue
-                  Compress-Archive -Path "$(Build.ArtifactStagingDirectory)\archiving\*" -DestinationPath "$(Build.ArtifactStagingDirectory)\publishing\packages.zip"
-                displayName: Rezip artifacts in a single zip file
-
-              - task: 1ES.PublishPipelineArtifact@1
-                displayName: "Publish Artifact: mergedZips"
-                inputs:
-                  artifactName: mergedZips
-                  targetPath: "$(Build.ArtifactStagingDirectory)/publishing"
 
       - stage: deploy
         # condition: and(or(contains(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['build.sourceBranch'], '${{ parameters.previewBranch }}')), succeeded())
@@ -174,7 +157,7 @@ extends:
                 deploy:
                   steps:
                     - pwsh: |
-                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
+                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.jar"
                         $zip = $zips | Select-Object -First 1
                         $zipName = $zip.Name
                         if ($zipName -match "\d+.\d+.\d+")
@@ -188,15 +171,6 @@ extends:
                           Write-Error "No valid version found in zip file name."
                           exit 1
                         }
-
-                    - pwsh: |
-                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.zip"
-                        foreach ($zip in $zips) {
-                            $targetPath = $zip.FullName.Replace(".zip", "")
-                            Expand-Archive -Path $zip.FullName -DestinationPath $targetPath
-                            Remove-Item -Path $zip.FullName -Force
-                        }
-                      displayName: Unzip artifacts
                         
                     - task: GitHubRelease@1
                       inputs:
@@ -253,9 +227,6 @@ extends:
                 - input: pipelineArtifact
                   artifactName: jars
                   targetPath: "$(Pipeline.Workspace)"
-                - input: pipelineArtifact
-                  artifactName: mergedZips
-                  targetPath: "$(Pipeline.Workspace)/publishing"
             dependsOn: []
             environment: maven_central
             strategy:
@@ -273,7 +244,7 @@ extends:
                         intent: "PackageDistribution"
                         contenttype: "Maven"
                         contentsource: "Folder"
-                        folderlocation: "$(Pipeline.Workspace)/publishing"
+                        folderlocation: "$(Pipeline.Workspace)"
                         waitforreleasecompletion: true
                         owners: vibiret@microsoft.com
                         approvers: mmainer@microsoft.com
