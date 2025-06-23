@@ -43,7 +43,6 @@ extends:
             #TODO maybe missing template context with sdl baselines?
             steps:
               - checkout: self
-                persistCredentials: true
 
               - task: JavaToolInstaller@1
                 inputs:
@@ -52,66 +51,80 @@ extends:
                   jdkSourceOption: 'PreInstalled'
 
               - task: DownloadSecureFile@1
+                name: downloadLocalProperties
                 inputs:
                   secureFile: 'local.properties'
 
               - task: DownloadSecureFile@1
+                name: downloadSecringGpg
                 inputs:
                   secureFile: 'secring.gpg'
               
-              - displayName: Copy secring
-                pwsh: |
-                  Copy-Item secring.gpg components/abstractions/ -Verbose
-                  Copy-Item secring.gpg components/authentication/azure/ -Verbose
-                  Copy-Item secring.gpg components/serialization/form/ -Verbose
-                  Copy-Item secring.gpg components/serialization/text/ -Verbose
-                  Copy-Item secring.gpg components/serialization/json/ -Verbose
-                  Copy-Item secring.gpg components/serialization/multipart/ -Verbose
-                  Copy-Item secring.gpg components/http/okHttp/ -Verbose
-                  Copy-Item secring.gpg components/bundle/ -Verbose
+              - pwsh: |
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/abstractions/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/authentication/azure/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/form/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/text/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/json/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/serialization/multipart/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/http/okHttp/secring.gpg -Verbose
+                  Copy-Item $(downloadSecringGpg.secureFilePath) components/bundle/secring.gpg -Verbose
+                  Copy-Item $(downloadLocalProperties.secureFilePath) local.properties -Verbose
+                displayName: Copy secring and 'local.properties'
 
-              - shell: ./gradlew --no-daemon publishToMavenLocal
-                displayName: Publish to local Maven
-                if: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
+                displayName: Publish to local Maven for verification
+                condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
 
-              - shell: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralSnapshotArtifactSuffix=""
-                displayName: Publish to local Maven
-                if: contains(variables['build.sourceBranch'], 'refs/tags/v')
+              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
+                displayName: Publish to local Maven for verification
+                condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
 
-              - displayName: Get current SNAPSHOT version
-                pwsh: |
+              - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
+                displayName: Publish to local Maven ADO for ESRP
+                condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
+
+              - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true
+                displayName: Publish to local Maven ADO for ESRP
+                condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+
+              - pwsh: |
                   $contents = Get-Content gradle.properties -Raw
-                  $major = $contents | Select-String -Pattern 'mavenMajorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-                  $minor = $contents | Select-String -Pattern 'mavenMinorVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-                  $patch = $contents | Select-String -Pattern 'mavenPatchVersion = ([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
-                  $version = "$major.$minor.$patch$Env:SNAPSHOT_SUFFIX"
+                  $major = $contents | Select-String -Pattern 'mavenMajorVersion\s*=\s*([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+                  $minor = $contents | Select-String -Pattern 'mavenMinorVersion\s*=\s*([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+                  $patch = $contents | Select-String -Pattern 'mavenPatchVersion\s*=\s*([0-9]+)' | ForEach-Object { $_.Matches.Groups[1].Value }
+                  $snapshot_suffix = if ($Env:BRANCH_NAME.StartsWith('refs/tags/v')) { '' } else { '-SNAPSHOT' }
+                  $version = "$major.$minor.$patch$snapshot_suffix"
                   echo "Current version is $version"
-                  echo "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=true]$version"
+                  echo "##vso[task.setvariable variable=PACKAGE_VERSION;]$version"
+                displayName: Get current version
+                name: GetVersion
                 env:
-                ${{ if contains(variables['build.sourceBranch'], 'refs/tags/v') }}:
-                  SNAPSHOT_SUFFIX: '-SNAPSHOT'
+                  BRANCH_NAME: $(Build.SourceBranch)
 
-              - displayName: Inspect contents of local Maven cache
-                pwsh: |
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
-                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
+              - pwsh: |
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-abstractions -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-authentication-azure -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-http-okHttp -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-form -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-json -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-text -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-serialization-multipart -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                  .\scripts\ValidatePackageContents.ps1 -ArtifactId microsoft-kiota-bundle -Version $(PACKAGE_VERSION) -ValidateMavenMetadata $false
+                displayName: Inspect contents of local Maven cache
 
-              - displayName: Zip contents of local Maven cache
-                pwsh: |
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -Version $env:PACKAGE_VERSION
-                  .\scripts\zipPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -Version $env:PACKAGE_VERSION
+              - pwsh: |
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-abstractions -PackageSegment abstractions -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-authentication-azure -PackageSegment "authentication/azure" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-http-okHttp -PackageSegment "http/okHttp" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-form -PackageSegment "serialization/form" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-json -PackageSegment "serialization/json" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-text -PackageSegment "serialization/text" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-serialization-multipart -PackageSegment "serialization/multipart" -Version $(PACKAGE_VERSION)
+                  .\scripts\copyPackageContent.ps1 -OutputDirectory $Env:OUTPUT_DIRECTORY -ArtifactId microsoft-kiota-bundle -PackageSegment bundle -Version $(PACKAGE_VERSION)
+                  echo "list of zips:"
+                  Get-ChildItem -Path $Env:OUTPUT_DIRECTORY -Filter "*.zip" | ForEach-Object { Write-Host $_.FullName }
+                displayName: Zip contents of local Maven cache
                 env:
                   OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)
               
@@ -119,6 +132,122 @@ extends:
                 displayName: "Publish Artifact: jars"
                 inputs:
                   artifactName: jars
-                  targetPath: "$(Build.ArtifactStagingDirectory)/*.zip"
+                  targetPath: "$(Build.ArtifactStagingDirectory)"
 
+      - stage: deploy
+        condition: and(or(contains(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['build.sourceBranch'], '${{ parameters.previewBranch }}')), succeeded())
+        dependsOn: build
+        jobs:
+          - deployment: deploy_github
+            condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
+            pool:
+              name: Azure-Pipelines-1ESPT-ExDShared
+              os: linux
+              image: ubuntu-latest
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  artifactName: jars
+                  targetPath: "$(Pipeline.Workspace)"
+            environment: kiota-github-releases
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - pwsh: |
+                        $zips = Get-ChildItem -Path "$(Pipeline.Workspace)" -Filter "*.jar"
+                        $zip = $zips | Select-Object -First 1
+                        $zipName = $zip.Name
+                        if ($zipName -match "\d+.\d+.\d+")
+                        {
+                          $version = $matches[0]
+                          echo "Current version is $version"
+                          echo "##vso[task.setvariable variable=artifactVersion;]$version"
+                        }
+                        else
+                        {
+                          Write-Error "No valid version found in zip file name."
+                          exit 1
+                        }
+                        
+                    - task: GitHubRelease@1
+                      inputs:
+                        gitHubConnection: "microsoftkiota"
+                        tagSource: userSpecifiedTag
+                        tag: "v$(artifactVersion)"
+                        title: "v$(artifactVersion)"
+                        assets: |
+                          $(Pipeline.Workspace)/**/*.jar
+                          $(Pipeline.Workspace)/**/*.jar.md5
+                          $(Pipeline.Workspace)/**/*.jar.sha1
+                          $(Pipeline.Workspace)/**/*.jar.sha256
+                          $(Pipeline.Workspace)/**/*.jar.sha512
+                          $(Pipeline.Workspace)/**/*.jar.asc
+                          $(Pipeline.Workspace)/**/*.jar.asc.md5
+                          $(Pipeline.Workspace)/**/*.jar.asc.sha1
+                          $(Pipeline.Workspace)/**/*.jar.asc.sha256
+                          $(Pipeline.Workspace)/**/*.jar.asc.sha512
+                          $(Pipeline.Workspace)/**/*.pom
+                          $(Pipeline.Workspace)/**/*.pom.md5
+                          $(Pipeline.Workspace)/**/*.pom.sha1
+                          $(Pipeline.Workspace)/**/*.pom.sha256
+                          $(Pipeline.Workspace)/**/*.pom.sha512
+                          $(Pipeline.Workspace)/**/*.pom.asc
+                          $(Pipeline.Workspace)/**/*.pom.asc.md5
+                          $(Pipeline.Workspace)/**/*.pom.asc.sha1
+                          $(Pipeline.Workspace)/**/*.pom.asc.sha256
+                          $(Pipeline.Workspace)/**/*.pom.asc.sha512
+                          $(Pipeline.Workspace)/**/*.module
+                          $(Pipeline.Workspace)/**/*.module.md5
+                          $(Pipeline.Workspace)/**/*.module.sha1
+                          $(Pipeline.Workspace)/**/*.module.sha256
+                          $(Pipeline.Workspace)/**/*.module.sha512
+                          $(Pipeline.Workspace)/**/*.module.asc
+                          $(Pipeline.Workspace)/**/*.module.asc.md5
+                          $(Pipeline.Workspace)/**/*.module.asc.sha1
+                          $(Pipeline.Workspace)/**/*.module.asc.sha256
+                          $(Pipeline.Workspace)/**/*.module.asc.sha512
 
+                        addChangeLog: false
+                        action: edit
+            
+          - deployment: deploy_maven
+            # snapshots are not supported by ESRP release for now, but they are planning to add support. When it happens, simply remove the condition
+            condition: and(contains(variables['build.sourceBranch'], 'refs/tags/v'), succeeded())
+            pool:
+              name: Azure-Pipelines-1ESPT-ExDShared
+              os: linux
+              image: ubuntu-latest
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  artifactName: jars
+                  targetPath: "$(Pipeline.Workspace)"
+            dependsOn: []
+            environment: maven_central
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - task: EsrpRelease@9
+                      inputs:
+                        connectedservicename: "Federated DevX ESRP Managed Identity Connection"
+                        usemanagedidentity: false
+                        keyvaultname: "akv-prod-eastus"
+                        authcertname: "ReferenceLibraryPrivateCert"
+                        signcertname: "ReferencePackagePublisherCertificate"
+                        clientid: "65035b7f-7357-4f29-bf25-c5ee5c3949f8"
+                        intent: "PackageDistribution"
+                        contenttype: "Maven"
+                        contentsource: "Folder"
+                        folderlocation: "$(Pipeline.Workspace)"
+                        waitforreleasecompletion: true
+                        owners: vibiret@microsoft.com
+                        approvers: mmainer@microsoft.com
+                        serviceendpointurl: "https://api.esrp.microsoft.com"
+                        mainpublisher: "ESRPRELPACMAN"
+                        domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"

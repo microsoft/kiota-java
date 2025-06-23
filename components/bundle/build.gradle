@@ -102,6 +102,12 @@ publishing {
             }
         }
     }
+    repositories {
+        maven {
+            name = "ADO"
+            url = layout.buildDirectory.dir("publishing-repository")
+        }
+    }
 }
 
 signing {
