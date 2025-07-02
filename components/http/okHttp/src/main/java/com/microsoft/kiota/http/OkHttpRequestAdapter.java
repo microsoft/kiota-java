@@ -344,7 +344,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     private void closeResponse(boolean closeResponse, Response response) {
-        if (closeResponse && response.code() != 204 && (response.code() < 300 || response.code() > 399)) {
+        if (closeResponse
+                && response.code() != 204
+                && (response.code() < 300 || response.code() > 399)) {
             response.close();
         }
     }
