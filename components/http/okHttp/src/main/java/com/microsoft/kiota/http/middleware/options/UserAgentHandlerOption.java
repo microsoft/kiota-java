@@ -13,7 +13,7 @@ public class UserAgentHandlerOption implements RequestOption {
 
     private boolean enabled = true;
     @Nonnull private String productName = "kiota-java";
-    @Nonnull private String productVersion = "1.8.6"; // x-release-please-version
+    @Nonnull private String productVersion = "1.8.7"; // x-release-please-version
 
     /**
      * Gets the product name to be used in the user agent header

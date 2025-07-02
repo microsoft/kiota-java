@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.7](https://github.com/microsoft/kiota-java/compare/v1.8.6...v1.8.7) (2025-07-02)
+
+
+### Bug Fixes
+
+* bumps azure core to avoid jar confusion on jwks-rsa-java ([6384963](https://github.com/microsoft/kiota-java/commit/63849637068adcfa5c3f1937760194639f8638d8))
+* bumps azure core to avoid jar confusion on jwks-rsa-java ([cc98340](https://github.com/microsoft/kiota-java/commit/cc98340c8b449e6369c4a16042a8867ba27eedb6))
+
 ## [1.8.6](https://github.com/microsoft/kiota-java/compare/v1.8.5...v1.8.6) (2025-06-23)
 
 
