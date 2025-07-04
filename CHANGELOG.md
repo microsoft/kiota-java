@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.8](https://github.com/microsoft/kiota-java/compare/v1.8.7...v1.8.8) (2025-07-04)
+
+
+### Bug Fixes
+
+* Ensure 304 response code does not throw exceptions ([5a03f1a](https://github.com/microsoft/kiota-java/commit/5a03f1a736f190e534e77a577c30dadbcf9c6c4b))
+
 ## [1.8.7](https://github.com/microsoft/kiota-java/compare/v1.8.6...v1.8.7) (2025-07-02)
 
 
