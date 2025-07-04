@@ -344,7 +344,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     private void closeResponse(boolean closeResponse, Response response) {
-        if (closeResponse && response.code() != 204) {
+        if (closeResponse
+                && response.code() != 204
+                && (response.code() < 300 || response.code() > 399)) {
             response.close();
         }
     }
@@ -614,7 +616,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     private boolean shouldReturnNull(final Response response) {
         final int statusCode = response.code();
-        return statusCode == 204;
+        return statusCode == 204 || (statusCode > 299 && statusCode < 400);
     }
 
     /**

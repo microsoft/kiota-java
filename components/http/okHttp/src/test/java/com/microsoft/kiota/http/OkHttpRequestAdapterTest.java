@@ -120,7 +120,7 @@ public class OkHttpRequestAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {200, 201, 202, 203, 204})
+    @ValueSource(ints = {200, 201, 202, 203, 204, 304})
     void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
@@ -149,7 +149,7 @@ public class OkHttpRequestAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {200, 201, 202, 203, 204, 205})
+    @ValueSource(ints = {200, 201, 202, 203, 204, 205, 304})
     void sendReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
