@@ -1,15 +1,15 @@
 dependencies {
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.3'
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation(libs.org.junit.jupiter.junit.jupiter)
+    testRuntimeOnly(libs.org.junit.platform.junit.platform.launcher)
+    testImplementation(libs.org.mockito.mockito.core)
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'io.opentelemetry:opentelemetry-api:1.51.0'
-    implementation 'io.opentelemetry:opentelemetry-context:1.51.0'
-    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-    api 'javax.xml.stream:stax-api:1.0-2'
-    api 'com.azure:azure-core:1.55.5'
+    implementation(libs.io.opentelemetry.opentelemetry.api)
+    implementation(libs.io.opentelemetry.opentelemetry.context)
+    implementation(libs.jakarta.annotation.jakarta.annotation.api)
+    api(libs.javax.xml.stream.stax.api)
+    api(libs.com.azure.azure.core)
 
     api project(':components:abstractions')
 }
