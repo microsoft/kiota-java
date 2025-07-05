@@ -1,18 +1,22 @@
+[versions]
+okhttp = "4.12.0"
+opentelemetry = "1.51.0"
+
 [libraries]
 com-android-tools-build-gradle = { group = "com.android.tools.build", name = "gradle", version = "8.11.0" }
 com-azure-azure-core = { group = "com.azure", name = "azure-core", version = "1.55.5" }
 com-github-ben-manes-gradle-versions-plugin = { group = "com.github.ben-manes", name = "gradle-versions-plugin", version = "0.52.0" }
 com-google-code-gson-gson = { group = "com.google.code.gson", name = "gson", version = "2.13.1" }
 com-gradle-gradle-enterprise-gradle-plugin = { group = "com.gradle", name = "gradle-enterprise-gradle-plugin", version = "3.19.2" }
-com-squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version = "4.12.0" }
-com-squareup-okhttp3-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.12.0" }
-com-squareup-okhttp3-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
+com-squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+com-squareup-okhttp3-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+com-squareup-okhttp3-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 io-github-std-uritemplate-std-uritemplate = { group = "io.github.std-uritemplate", name = "std-uritemplate", version = "2.0.0" }
-io-opentelemetry-opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api", version = "1.51.0" }
-io-opentelemetry-opentelemetry-context = { group = "io.opentelemetry", name = "opentelemetry-context", version = "1.51.0" }
+io-opentelemetry-opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api", version.ref = "opentelemetry" }
+io-opentelemetry-opentelemetry-context = { group = "io.opentelemetry", name = "opentelemetry-context", version.ref = "opentelemetry" }
 jakarta-annotation-jakarta-annotation-api = { group = "jakarta.annotation", name = "jakarta.annotation-api", version = "2.1.1" }
 javax-xml-stream-stax-api = { group = "javax.xml.stream", name = "stax-api", version = "1.0-2" }
-org-junit-jupiter-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version = "5.13.2" }
+org-junit-jupiter-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version = "5.13.3" }
 org-junit-platform-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.13.0-M3" }
 org-mockito-mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.18.0" }
 
