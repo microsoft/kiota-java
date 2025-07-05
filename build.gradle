@@ -1,8 +1,8 @@
 plugins {
     id "java-library"
-    id "org.sonarqube" version "6.2.0.5505"
-    id 'com.github.spotbugs' version '6.2.1'
-    id "com.diffplug.spotless" version "7.0.4"
+    alias(libs.plugins.org.sonarqube)
+    alias(libs.plugins.com.github.spotbugs)
+    alias(libs.plugins.com.diffplug.spotless)
 }
 
 sonar {
