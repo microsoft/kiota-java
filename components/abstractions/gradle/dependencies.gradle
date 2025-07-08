@@ -1,12 +1,12 @@
 dependencies {
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.3'
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation(libs.org.junit.jupiter.junit.jupiter)
+    testRuntimeOnly(libs.org.junit.platform.junit.platform.launcher)
+    testImplementation(libs.org.mockito.mockito.core)
     testImplementation project(':components:serialization:json')
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'io.github.std-uritemplate:std-uritemplate:2.0.0'
-    implementation 'io.opentelemetry:opentelemetry-api:1.51.0'
-    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+    implementation(libs.io.github.std.uritemplate.std.uritemplate)
+    implementation(libs.io.opentelemetry.opentelemetry.api)
+    implementation(libs.jakarta.annotation.jakarta.annotation.api)
 }
