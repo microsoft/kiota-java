@@ -17,7 +17,7 @@ io-opentelemetry-opentelemetry-context = { group = "io.opentelemetry", name = "o
 jakarta-annotation-jakarta-annotation-api = { group = "jakarta.annotation", name = "jakarta.annotation-api", version = "2.1.1" }
 javax-xml-stream-stax-api = { group = "javax.xml.stream", name = "stax-api", version = "1.0-2" }
 org-junit-jupiter-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version = "5.13.3" }
-org-junit-platform-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.13.0-M3" }
+org-junit-platform-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "6.0.0-M1" }
 org-mockito-mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.18.0" }
 
 [plugins]
