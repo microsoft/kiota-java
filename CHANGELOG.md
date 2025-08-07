@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.9](https://github.com/microsoft/kiota-java/compare/v1.8.8...v1.8.9) (2025-08-07)
+
+
+### Bug Fixes
+
+* Patch RetryHandler.tryParseTimeHeader to support comma separated values returned by the server ([77a52a0](https://github.com/microsoft/kiota-java/commit/77a52a0629bfe722f582e0666d060b01ac064f1b))
+
 ## [1.8.8](https://github.com/microsoft/kiota-java/compare/v1.8.7...v1.8.8) (2025-07-04)
 
 
