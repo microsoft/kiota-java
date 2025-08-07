@@ -48,14 +48,14 @@ class RetryHandlerTest {
                 Arguments.of(" 15 ", 15.0 * DELAY_MILLISECONDS), // Whitespace around value
                 Arguments.of("10, 20", 10.0 * DELAY_MILLISECONDS), // Whitespace after comma
                 Arguments.of(" 0 , 30 ", 30.0 * DELAY_MILLISECONDS) // Multiple whitespaces
-        );
+                );
     }
 
     @ParameterizedTest
     @MethodSource("retryAfterHeaderValues")
     void testTryParseTimeHeader(String headerValue, double expectedDelay) {
         double result = retryHandler.tryParseTimeHeader(headerValue);
-        assertEquals(expectedDelay, result, DELTA,
-                    "Failed for header value: '" + headerValue + "'");
+        assertEquals(
+                expectedDelay, result, DELTA, "Failed for header value: '" + headerValue + "'");
     }
 }
