@@ -141,16 +141,26 @@ public class RetryHandler implements Interceptor {
         return (long) Math.min(retryDelay, RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
     }
 
+    /**
+     * Return first positive value from the Retry-After header.
+     * @param retryAfterHeader The value of the Retry-After header. Sometimes it can contain multiple values separated by commas.
+     *                         For example: "31,120".
+     * @return Retry interval in milliseconds
+     */
     double tryParseTimeHeader(String retryAfterHeader) {
-        double retryDelay = -1;
-        try {
-            retryDelay = Integer.parseInt(retryAfterHeader) * DELAY_MILLISECONDS;
-        } catch (NumberFormatException e) {
-            return retryDelay;
+        String[] values = retryAfterHeader.split(",");
+        for (String value : values) {
+            try {
+                double parsedValue = Double.parseDouble(value.trim());
+                if (parsedValue > 0) {
+                    return parsedValue * DELAY_MILLISECONDS;
+                }
+            } catch (NumberFormatException e) {
+                // Continue to the next value
+            }
         }
-        return retryDelay;
+        return -1;
     }
-
     double tryParseDateHeader(String retryAfterHeader) {
         double retryDelay = -1;
         try {
