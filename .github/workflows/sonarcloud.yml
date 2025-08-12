@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ ( github.event_name == 'push' ) || ( github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login == 'microsoft' ) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK
