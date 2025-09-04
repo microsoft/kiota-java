@@ -146,6 +146,8 @@ public class JsonParseNode implements ParseNode {
             return (T) itemNode.getIntegerValue();
         } else if (targetClass == Float.class) {
             return (T) itemNode.getFloatValue();
+        } else if (targetClass == Double.class) {
+            return (T) itemNode.getDoubleValue();
         } else if (targetClass == Long.class) {
             return (T) itemNode.getLongValue();
         } else if (targetClass == UUID.class) {
