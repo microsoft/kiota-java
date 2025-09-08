@@ -172,4 +172,19 @@ class JsonParseNodeTests {
             }
         }
     }
+
+    @Test
+    void getCollectionOfPrimitiveDoubleValues() throws UnsupportedEncodingException {
+        final var initialString = "{\"values\":[1.1,2.2,3.3]}";
+        final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
+        final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
+        final var valuesNode = parseNode.getChildNode("values");
+        assertNotNull(valuesNode);
+        final var doubles = valuesNode.getCollectionOfPrimitiveValues(Double.class);
+        assertNotNull(doubles);
+        assertEquals(3, doubles.size());
+        assertEquals(1.1, doubles.get(0), 0.000001);
+        assertEquals(2.2, doubles.get(1), 0.000001);
+        assertEquals(3.3, doubles.get(2), 0.000001);
+    }
 }
