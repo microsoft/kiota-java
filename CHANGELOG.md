@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.10](https://github.com/microsoft/kiota-java/compare/v1.8.9...v1.8.10) (2025-09-08)
+
+
+### Bug Fixes
+
+* deserialization of `List<Double>` in JSON parse node ([737591e](https://github.com/microsoft/kiota-java/commit/737591e5118be4dcc68544e73f755f26fc9a4cb2))
+
 ## [1.8.9](https://github.com/microsoft/kiota-java/compare/v1.8.8...v1.8.9) (2025-08-07)
 
 
