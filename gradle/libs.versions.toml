@@ -4,7 +4,7 @@ opentelemetry = "1.54.1"
 
 [libraries]
 com-android-tools-build-gradle = { group = "com.android.tools.build", name = "gradle", version = "8.11.0" }
-com-azure-azure-core = { group = "com.azure", name = "azure-core", version = "1.56.1" }
+com-azure-azure-core = { group = "com.azure", name = "azure-core", version = "1.57.0" }
 com-github-ben-manes-gradle-versions-plugin = { group = "com.github.ben-manes", name = "gradle-versions-plugin", version = "0.52.0" }
 com-google-code-gson-gson = { group = "com.google.code.gson", name = "gson", version = "2.13.2" }
 com-gradle-gradle-enterprise-gradle-plugin = { group = "com.gradle", name = "gradle-enterprise-gradle-plugin", version = "3.19.2" }
