@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.11](https://github.com/microsoft/kiota-java/compare/v1.8.10...v1.8.11) (2025-11-14)
+
+
+### Bug Fixes
+
+* handle negative retry interval in RetryHandler ([f79bc62](https://github.com/microsoft/kiota-java/commit/f79bc626b2c51efa06fc7eef5f0b9ff2ee1e5048))
+* prevent negative timeout in RetryHandler causing IllegalArgumentException ([dd0be6c](https://github.com/microsoft/kiota-java/commit/dd0be6c80398bd1a80f17da18e04c57cc6c79281))
+
 ## [1.8.10](https://github.com/microsoft/kiota-java/compare/v1.8.9...v1.8.10) (2025-09-08)
 
 
