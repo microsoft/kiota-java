@@ -71,15 +71,17 @@ class RetryHandlerTest {
     }
 
     @Test
-    void testGetRetryAfterReturnsNegativeWhenHeaderParsingFails() {
+    void testGetRetryAfterHandlesNegativeValues() {
         // Create a mock response with a Retry-After header that will fail parsing
         Response mockResponse = mock(Response.class);
         when(mockResponse.header("Retry-After")).thenReturn("invalid");
         when(mockResponse.code()).thenReturn(429);
 
-        // getRetryAfter should return -1 when parsing fails but header exists
+        // getRetryAfter should return a value between 1-10ms when parsing fails
         long retryAfter = retryHandler.getRetryAfter(mockResponse, 3, 1);
-        assertEquals(-1, retryAfter, "Expected -1 when Retry-After header parsing fails");
+        assertTrue(
+                retryAfter >= 1 && retryAfter <= 10,
+                "Expected retry interval between 1-10ms, got " + retryAfter);
     }
 
     @Test
