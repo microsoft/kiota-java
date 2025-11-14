@@ -85,7 +85,7 @@ class RetryHandlerTest {
     }
 
     @Test
-    void testRetryRequestHandlesNegativeRetryInterval() throws Exception {
+    void testRetryRequestHandlesNegativeRetryInterval() {
         // Create mocks
         Response mockResponse = mock(Response.class);
         Request mockRequest = mock(Request.class);
@@ -114,7 +114,7 @@ class RetryHandlerTest {
     }
 
     @Test
-    void testRetryRequestWithNegativeRetryIntervalAppliesRandomDelay() throws Exception {
+    void testRetryRequestWithNegativeRetryIntervalAppliesRandomDelay() {
         // Create mocks
         Response mockResponse = mock(Response.class);
         Request mockRequest = mock(Request.class);
