@@ -59,7 +59,7 @@ public class RetryHandler implements Interceptor {
     /**
      * One second as milliseconds
      */
-    private static final long DELAY_MILLISECONDS = 1000;
+    private static final int DELAY_MILLISECONDS = 1000;
 
     /**
      * Initialize retry handler with retry option
@@ -138,7 +138,16 @@ public class RetryHandler implements Interceptor {
         } else if (retryDelay == -1) {
             retryDelay = exponentialBackOffDelay(delay, executionCount);
         }
-        return (long) Math.min(retryDelay, RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
+        long result =
+                (long)
+                        Math.min(
+                                retryDelay,
+                                (double) RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
+        // Ensure minimum delay if retry interval is negative
+        if (result < 0) {
+            result = 1 + (long) (Math.random() * 9); // Random delay between 1-10ms
+        }
+        return result;
     }
 
     /**
