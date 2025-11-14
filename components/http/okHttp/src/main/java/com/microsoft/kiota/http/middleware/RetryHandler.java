@@ -110,6 +110,10 @@ public class RetryHandler implements Interceptor {
 
         if (shouldRetry) {
             long retryInterval = getRetryAfter(response, retryOption.delay(), executionCount);
+            // Ensure minimum delay if retry interval is negative
+            if (retryInterval < 0) {
+                retryInterval = 1 + (long) (Math.random() * 9); // Random delay between 1-10ms
+            }
             span.setAttribute(HTTP_REQUEST_RESEND_DELAY, Math.round(retryInterval / 1000f));
             try {
                 Thread.sleep(retryInterval);
