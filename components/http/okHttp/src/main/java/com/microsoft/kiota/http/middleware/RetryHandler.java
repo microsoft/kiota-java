@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * The middleware responsible for retrying requests when they fail because of transient issues
@@ -60,6 +61,11 @@ public class RetryHandler implements Interceptor {
      * One second as milliseconds
      */
     private static final long DELAY_MILLISECONDS = 1000;
+
+    /**
+     * Random instance for generating random delays
+     */
+    private static final Random RANDOM = new Random();
 
     /**
      * Initialize retry handler with retry option
@@ -142,7 +148,7 @@ public class RetryHandler implements Interceptor {
                 (long) Math.min(retryDelay, RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
         // Ensure minimum delay if retry interval is negative
         if (result < 0) {
-            result = 1 + (long) (Math.random() * 9); // Random delay between 1-10ms
+            result = 1 + RANDOM.nextLong(10); // Random delay between 1-10ms
         }
         return result;
     }
