@@ -139,7 +139,10 @@ public class RetryHandler implements Interceptor {
             retryDelay = exponentialBackOffDelay(delay, executionCount);
         }
         long result =
-                (long) Math.min(retryDelay, (double)RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
+                (long)
+                        Math.min(
+                                retryDelay,
+                                (double) RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
         // Ensure minimum delay if retry interval is negative
         if (result < 0) {
             result = 1 + (long) (Math.random() * 9); // Random delay between 1-10ms
