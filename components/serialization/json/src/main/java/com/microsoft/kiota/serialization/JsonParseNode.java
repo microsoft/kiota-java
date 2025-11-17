@@ -73,11 +73,11 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public String getStringValue() {
-        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, String.class) : null;
+        return gson.fromJson(currentNode, String.class);
     }
 
     @Nullable public Boolean getBooleanValue() {
-        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Boolean.class) : null;
+        return gson.fromJson(currentNode, Boolean.class);
     }
 
     @Nullable public Byte getByteValue() {
