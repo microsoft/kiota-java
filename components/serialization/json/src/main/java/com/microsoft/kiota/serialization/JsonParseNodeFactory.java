@@ -13,8 +13,21 @@ import java.util.Objects;
 
 /** Creates new Json parse nodes from the payload. */
 public class JsonParseNodeFactory implements ParseNodeFactory {
+    private final Gson gson;
+
     /** Creates a new factory */
-    public JsonParseNodeFactory() {}
+    public JsonParseNodeFactory() {
+        this(DefaultGsonBuilder.getDefaultInstance());
+    }
+
+    /**
+     * Creates a new factory
+     * @param gson the {@link Gson} instance to use for parsing value types.
+     */
+    public JsonParseNodeFactory(@Nonnull Gson gson) {
+        Objects.requireNonNull(gson, "parameter gson cannot be null");
+        this.gson = gson;
+    }
 
     /** {@inheritDoc} */
     @Nonnull public String getValidContentType() {
@@ -23,21 +36,11 @@ public class JsonParseNodeFactory implements ParseNodeFactory {
 
     private static final String validContentType = "application/json";
 
-    private Gson gson = DefaultGsonBuilder.getDefaultInstance();
-
     /**
      * @return the {@link Gson} instance to use for parsing value types.
      */
     @Nonnull public Gson getGson() {
         return gson;
-    }
-
-    /**
-     * Specify a custom {@link Gson} instance for parsing value types.
-     * @param gson the {@link Gson} instance to use.
-     */
-    public void setGson(@Nonnull Gson gson) {
-        this.gson = gson;
     }
 
     /** {@inheritDoc} */

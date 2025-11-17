@@ -38,12 +38,9 @@ public class JsonSerializationWriter implements SerializationWriter {
 
     /**
      * Creates a new instance of a json serialization writer
-     * @deprecated use {@link #JsonSerializationWriter(Gson)} instead.
      */
-    @Deprecated
     public JsonSerializationWriter() {
-        this.writer = new JsonWriter(new OutputStreamWriter(this.stream, StandardCharsets.UTF_8));
-        this.gson = DefaultGsonBuilder.getDefaultInstance();
+        this(DefaultGsonBuilder.getDefaultInstance());
     }
 
     /**

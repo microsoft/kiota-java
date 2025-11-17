@@ -28,18 +28,15 @@ import java.util.function.Function;
 
 /** ParseNode implementation for JSON */
 public class JsonParseNode implements ParseNode {
-    private final JsonElement currentNode;
+    protected final JsonElement currentNode;
     protected final Gson gson;
 
     /**
      * Creates a new instance of the JsonParseNode class.
      * @param node the node to wrap.
-     * @deprecated use {@link #JsonParseNode(JsonElement, Gson)} instead.
      */
-    @Deprecated
     public JsonParseNode(@Nonnull final JsonElement node) {
-        currentNode = Objects.requireNonNull(node, "parameter node cannot be null");
-        this.gson = DefaultGsonBuilder.getDefaultInstance();
+        this(node, DefaultGsonBuilder.getDefaultInstance());
     }
 
     /**
@@ -76,39 +73,39 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public String getStringValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsString() : null;
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, String.class) : null;
     }
 
     @Nullable public Boolean getBooleanValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsBoolean() : null;
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Boolean.class) : null;
     }
 
     @Nullable public Byte getByteValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsByte() : null;
+        return gson.fromJson(currentNode, Byte.class);
     }
 
     @Nullable public Short getShortValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsShort() : null;
+        return gson.fromJson(currentNode, Short.class);
     }
 
     @Nullable public BigDecimal getBigDecimalValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsBigDecimal() : null;
+        return gson.fromJson(currentNode, BigDecimal.class);
     }
 
     @Nullable public Integer getIntegerValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsInt() : null;
+        return gson.fromJson(currentNode, Integer.class);
     }
 
     @Nullable public Float getFloatValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsFloat() : null;
+        return gson.fromJson(currentNode, Float.class);
     }
 
     @Nullable public Double getDoubleValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsDouble() : null;
+        return gson.fromJson(currentNode, Double.class);
     }
 
     @Nullable public Long getLongValue() {
-        return currentNode.isJsonPrimitive() ? currentNode.getAsLong() : null;
+        return gson.fromJson(currentNode, Long.class);
     }
 
     @Nullable public UUID getUUIDValue() {
@@ -133,37 +130,7 @@ public class JsonParseNode implements ParseNode {
 
     @Nullable private <T> T getPrimitiveValue(
             @Nonnull final Class<T> targetClass, @Nonnull final JsonParseNode itemNode) {
-        if (targetClass == Boolean.class) {
-            return (T) itemNode.getBooleanValue();
-        } else if (targetClass == Short.class) {
-            return (T) itemNode.getShortValue();
-        } else if (targetClass == Byte.class) {
-            return (T) itemNode.getByteValue();
-        } else if (targetClass == BigDecimal.class) {
-            return (T) itemNode.getBigDecimalValue();
-        } else if (targetClass == String.class) {
-            return (T) itemNode.getStringValue();
-        } else if (targetClass == Integer.class) {
-            return (T) itemNode.getIntegerValue();
-        } else if (targetClass == Float.class) {
-            return (T) itemNode.getFloatValue();
-        } else if (targetClass == Double.class) {
-            return (T) itemNode.getDoubleValue();
-        } else if (targetClass == Long.class) {
-            return (T) itemNode.getLongValue();
-        } else if (targetClass == UUID.class) {
-            return (T) itemNode.getUUIDValue();
-        } else if (targetClass == OffsetDateTime.class) {
-            return (T) itemNode.getOffsetDateTimeValue();
-        } else if (targetClass == LocalDate.class) {
-            return (T) itemNode.getLocalDateValue();
-        } else if (targetClass == LocalTime.class) {
-            return (T) itemNode.getLocalTimeValue();
-        } else if (targetClass == PeriodAndDuration.class) {
-            return (T) itemNode.getPeriodAndDurationValue();
-        } else {
-            throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
-        }
+        return gson.fromJson(itemNode.currentNode, targetClass);
     }
 
     private <T> List<T> iterateOnArray(JsonElement jsonElement, Function<JsonParseNode, T> fn) {
