@@ -10,6 +10,7 @@ import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,7 +54,8 @@ class JsonSerializationWriterTests {
                 .getAdditionalData()
                 .put("aliases", aliases); // place a collection in the additional data
 
-        try (final var jsonSerializer = new JsonSerializationWriter()) {
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance())) {
             jsonSerializer.writeObjectValue("", testEntity);
             var contentStream = jsonSerializer.getSerializedContent();
             var serializedJsonString =
@@ -62,6 +64,22 @@ class JsonSerializationWriterTests {
             var expectedString =
                     "{\"aliases\":[\"alias1\",\"alias2\"],\"nickName\":\"Peter"
                         + " Pan\",\"hasDependents\":true,\"accountBalance\":330.7,\"reportsCount\":4,\"averageScore\":78.142}";
+            assertEquals(expectedString, serializedJsonString);
+        }
+    }
+
+    @Test
+    void useNonStandardOffsetDateTimeFormat() throws IOException {
+        var testEntity = new TestEntity();
+        testEntity.setCreatedDateTime(OffsetDateTime.parse("2024-02-12T19:47:39+00:00"));
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(JsonParseNodeTests.customGson)) {
+            jsonSerializer.writeObjectValue("", testEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+            // Assert
+            var expectedString = "{\"createdDateTime\":\"2024-02-12T19:47:39+0000\"}";
             assertEquals(expectedString, serializedJsonString);
         }
     }
@@ -81,7 +99,8 @@ class JsonSerializationWriterTests {
                 .getAdditionalData()
                 .put("manager", managerAdditionalData); // place a parsable in the addtionaldata
 
-        try (final var jsonSerializer = new JsonSerializationWriter()) {
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance())) {
             jsonSerializer.writeObjectValue("", testEntity);
             var contentStream = jsonSerializer.getSerializedContent();
             var serializedJsonString =
@@ -186,7 +205,8 @@ class JsonSerializationWriterTests {
                                     }
                                 }));
 
-        try (final var jsonSerializer = new JsonSerializationWriter()) {
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance())) {
             jsonSerializer.writeObjectValue("", untypedTestEntity);
             var contentStream = jsonSerializer.getSerializedContent();
             var serializedJsonString =

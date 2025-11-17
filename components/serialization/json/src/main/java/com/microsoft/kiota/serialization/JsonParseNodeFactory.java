@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
 import jakarta.annotation.Nonnull;
@@ -22,6 +23,23 @@ public class JsonParseNodeFactory implements ParseNodeFactory {
 
     private static final String validContentType = "application/json";
 
+    private Gson gson = DefaultGsonBuilder.getDefaultInstance();
+
+    /**
+     * @return the {@link Gson} instance to use for parsing value types.
+     */
+    @Nonnull public Gson getGson() {
+        return gson;
+    }
+
+    /**
+     * Specify a custom {@link Gson} instance for parsing value types.
+     * @param gson the {@link Gson} instance to use.
+     */
+    public void setGson(@Nonnull Gson gson) {
+        this.gson = gson;
+    }
+
     /** {@inheritDoc} */
     @Override
     @Nonnull public ParseNode getParseNode(
@@ -35,7 +53,7 @@ public class JsonParseNodeFactory implements ParseNodeFactory {
         }
         try (final InputStreamReader reader =
                 new InputStreamReader(rawResponse, StandardCharsets.UTF_8)) {
-            return new JsonParseNode(JsonParser.parseReader(reader));
+            return new JsonParseNode(JsonParser.parseReader(reader), gson);
         } catch (IOException ex) {
             throw new RuntimeException("could not close the reader", ex);
         }
