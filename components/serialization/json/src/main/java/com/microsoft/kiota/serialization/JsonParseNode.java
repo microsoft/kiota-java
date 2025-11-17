@@ -128,7 +128,7 @@ public class JsonParseNode implements ParseNode {
         return gson.fromJson(currentNode, PeriodAndDuration.class);
     }
 
-    @Nullable private <T> T getPrimitiveValue(
+    @Nullable protected <T> T getPrimitiveValue(
             @Nonnull final Class<T> targetClass, @Nonnull final JsonParseNode itemNode) {
         return gson.fromJson(itemNode.currentNode, targetClass);
     }
