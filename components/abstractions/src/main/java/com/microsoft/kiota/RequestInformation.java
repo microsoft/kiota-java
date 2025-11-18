@@ -462,10 +462,14 @@ public class RequestInformation {
             return null;
         }
         if (value.getClass().isArray()) {
-            if (((Object[]) value).length > 0 && ((Object[]) value)[0] instanceof ValuedEnum) {
+            if (((Object[]) value).length > 0) {
+                if (((Object[]) value)[0].getClass().isArray()) {
+                    throw new IllegalArgumentException("multidimensional arrays are not supported");
+                }
+
                 final ArrayList<String> result = new ArrayList<>();
                 for (final Object item : (Object[]) value) {
-                    result.add(((ValuedEnum) item).getValue());
+                    result.add(getSanitizedValues(item).toString());
                 }
                 return result;
             }
