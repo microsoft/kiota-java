@@ -462,14 +462,20 @@ public class RequestInformation {
             return null;
         }
         if (value.getClass().isArray()) {
-            if (((Object[]) value).length > 0 && ((Object[]) value)[0] instanceof ValuedEnum) {
+            final Object[] values = (Object[]) value;
+
+            if (values.length > 0) {
+                if (values[0].getClass().isArray()) {
+                    throw new IllegalArgumentException("multidimensional arrays are not supported");
+                }
+
                 final ArrayList<String> result = new ArrayList<>();
-                for (final Object item : (Object[]) value) {
-                    result.add(((ValuedEnum) item).getValue());
+                for (final Object item : values) {
+                    result.add(getSanitizedValues(item).toString());
                 }
                 return result;
             }
-            return Arrays.asList((Object[]) value);
+            return Arrays.asList(values);
         } else if (value instanceof ValuedEnum) {
             return ((ValuedEnum) value).getValue();
         } else if (value instanceof UUID) {

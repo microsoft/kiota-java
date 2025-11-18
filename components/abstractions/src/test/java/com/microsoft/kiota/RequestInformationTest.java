@@ -21,6 +21,7 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 class RequestInformationTest {
     @Test
@@ -48,6 +49,27 @@ class RequestInformationTest {
         // Assert
         var result = assertDoesNotThrow(() -> requestInfo.getUri());
         assertEquals("http://localhost/users", result.toString());
+    }
+
+    @Test
+    void ThrowsIllegalArgumentWhenMultidimensionalQueryParameterIsSet() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "{+baseurl}/users{?datasetIds}";
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.parallelDatasetIds =
+                new UUID[][] {
+                    {UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")},
+                    {UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")}
+                };
+
+        // Assert
+        var exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> requestInfo.addQueryParameters(queryParameters));
+        assertTrue(exception.getMessage().contains("multidimensional arrays are not supported"));
     }
 
     @Test
@@ -132,6 +154,30 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsQueryParametersOfPeriodAndDurationTypedArray()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?periods}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.messageAges =
+                new PeriodAndDuration[] {
+                    PeriodAndDuration.parse("PT30M"),
+                    PeriodAndDuration.parse("PT20M"),
+                    PeriodAndDuration.parse("PT1H20M")
+                };
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?periods=PT30M,PT20M,PT1H20M", uri.toString());
+    }
+
+    @Test
     void ExpandQueryParametersAfterPathParams() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -208,6 +254,24 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsQueryParametersOfBooleanTypedArray() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?expandChildren}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.expandChildren = new Boolean[] {true, false, true, true};
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?expandChildren=true,false,true,true", uri.toString());
+    }
+
+    @Test
     void SetsPathParametersOfUUIDType() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -237,6 +301,30 @@ class RequestInformationTest {
         // Assert
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertTrue(uriResult.toString().contains("?id=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"));
+    }
+
+    @Test
+    void SetsQueryParametersOfUUIDTypedArray() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasetIds}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.datasetIds =
+                new UUID[] {
+                    UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"),
+                    UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")
+                };
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals(
+                "http://localhost/?datasetIds=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e,a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e",
+                uri.toString());
     }
 
     @Test
@@ -415,12 +503,31 @@ class GetQueryParameters implements QueryParameters {
 
     @jakarta.annotation.Nullable public TestEnum[] datasets;
 
+    @jakarta.annotation.Nullable public UUID[] datasetIds;
+
+    /**
+     * Search by dataset ids in parallel (or something like that)
+     */
+    @jakarta.annotation.Nullable public UUID[][] parallelDatasetIds;
+
+    /** Per-dataset boolean indicating whether to resolve its child datasets */
+    @jakarta.annotation.Nullable public Boolean[] expandChildren;
+
+    /**
+     * Minimum message ages as duration, per dataset
+     */
+    @jakarta.annotation.Nullable public PeriodAndDuration[] messageAges;
+
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
-        final Map<String, Object> allQueryParams = new HashMap();
+        final Map<String, Object> allQueryParams = new HashMap<>();
         allQueryParams.put("%24select", select);
         allQueryParams.put("%24search", search);
         allQueryParams.put("dataset", dataset);
         allQueryParams.put("datasets", datasets);
+        allQueryParams.put("datasetIds", datasetIds);
+        allQueryParams.put("parallelDatasetIds", parallelDatasetIds);
+        allQueryParams.put("expandChildren", expandChildren);
+        allQueryParams.put("periods", messageAges);
         return allQueryParams;
     }
 }
