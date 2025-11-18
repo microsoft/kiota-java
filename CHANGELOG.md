@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.12](https://github.com/microsoft/kiota-java/compare/v1.8.11...v1.8.12) (2025-11-18)
+
+
+### Bug Fixes
+
+* allow arrays of all supported types in getSanitizedValues ([96f9f31](https://github.com/microsoft/kiota-java/commit/96f9f311b4f16766bd95776341597c9b3d5a5d74))
+* mitigate illegal substitution exceptions ([b21e82f](https://github.com/microsoft/kiota-java/commit/b21e82faf1269173f22c3fbcd3ddaed3c87671fb))
+
 ## [1.8.11](https://github.com/microsoft/kiota-java/compare/v1.8.10...v1.8.11) (2025-11-14)
 
 
