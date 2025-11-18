@@ -52,6 +52,23 @@ class RequestInformationTest {
     }
 
     @Test
+    void ThrowsIllegalArgumentWhenMultidimensionalQueryParameterIsSet() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "{+baseurl}/users{?datasetIds}";
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.parallelDatasetIds = new UUID[][] {
+                {UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")},
+                {UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")}
+        };
+
+        // Assert
+        var exception = assertThrows(IllegalArgumentException.class, () -> requestInfo.addQueryParameters(queryParameters));
+        assertTrue(exception.getMessage().contains("multidimensional arrays are not supported"));
+    }
+
+    @Test
     void SetsPathParametersOfDateTimeOffsetType() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -483,6 +500,11 @@ class GetQueryParameters implements QueryParameters {
 
     @jakarta.annotation.Nullable public UUID[] datasetIds;
 
+    /**
+     * Search by dataset ids in parallel (or something like that)
+     */
+    @jakarta.annotation.Nullable public UUID[][] parallelDatasetIds;
+
     /** Per-dataset boolean indicating whether to resolve its child datasets */
     @jakarta.annotation.Nullable public Boolean[] expandChildren;
 
@@ -491,6 +513,7 @@ class GetQueryParameters implements QueryParameters {
      */
     @jakarta.annotation.Nullable public PeriodAndDuration[] messageAges;
 
+
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
         final Map<String, Object> allQueryParams = new HashMap<>();
         allQueryParams.put("%24select", select);
@@ -498,6 +521,7 @@ class GetQueryParameters implements QueryParameters {
         allQueryParams.put("dataset", dataset);
         allQueryParams.put("datasets", datasets);
         allQueryParams.put("datasetIds", datasetIds);
+        allQueryParams.put("parallelDatasetIds", parallelDatasetIds);
         allQueryParams.put("expandChildren", expandChildren);
         allQueryParams.put("periods", messageAges);
         return allQueryParams;
