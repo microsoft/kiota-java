@@ -31,13 +31,6 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
 
     private static final String validContentType = "application/json";
 
-    /**
-     * @return the {@link Gson} instance to use for writing value types.
-     */
-    @Nonnull public Gson getGson() {
-        return gson;
-    }
-
     /** {@inheritDoc} */
     @Override
     @Nonnull public SerializationWriter getSerializationWriter(@Nonnull final String contentType) {

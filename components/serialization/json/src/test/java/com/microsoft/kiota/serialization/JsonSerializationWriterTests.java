@@ -1,8 +1,10 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.microsoft.kiota.Compatibility;
+import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.MyEnum;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
@@ -10,11 +12,17 @@ import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 class JsonSerializationWriterTests {
 
@@ -224,5 +232,59 @@ class JsonSerializationWriterTests {
                         + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
             assertEquals(expectedString, serializedJsonString);
         }
+    }
+
+    @Test
+    void parseWrittenValues() throws IOException {
+        writeAndParse(
+                ParseNode::getStringValue, SerializationWriter::writeStringValue, "just a string");
+        writeAndParse(ParseNode::getBooleanValue, SerializationWriter::writeBooleanValue, true);
+        writeAndParse(ParseNode::getByteValue, SerializationWriter::writeByteValue, (byte) 3);
+        writeAndParse(ParseNode::getShortValue, SerializationWriter::writeShortValue, (short) 42);
+        writeAndParse(
+                ParseNode::getBigDecimalValue,
+                SerializationWriter::writeBigDecimalValue,
+                new BigDecimal(123456789L));
+        writeAndParse(ParseNode::getIntegerValue, SerializationWriter::writeIntegerValue, 54321);
+        writeAndParse(
+                ParseNode::getFloatValue, SerializationWriter::writeFloatValue, (float) 67.89);
+        writeAndParse(ParseNode::getDoubleValue, SerializationWriter::writeDoubleValue, 3245.12356);
+        writeAndParse(ParseNode::getLongValue, SerializationWriter::writeLongValue, -543219876L);
+        writeAndParse(
+                ParseNode::getUUIDValue, SerializationWriter::writeUUIDValue, UUID.randomUUID());
+        writeAndParse(
+                ParseNode::getOffsetDateTimeValue,
+                SerializationWriter::writeOffsetDateTimeValue,
+                OffsetDateTime.now());
+        writeAndParse(
+                ParseNode::getLocalDateValue,
+                SerializationWriter::writeLocalDateValue,
+                LocalDate.now());
+        writeAndParse(
+                ParseNode::getLocalTimeValue,
+                SerializationWriter::writeLocalTimeValue,
+                LocalTime.now());
+        writeAndParse(
+                ParseNode::getPeriodAndDurationValue,
+                SerializationWriter::writePeriodAndDurationValue,
+                PeriodAndDuration.of(Period.ofYears(3), Duration.ofHours(6)));
+    }
+
+    private <T> void writeAndParse(
+            TestParsable.ParseMethod<T> parseMethod,
+            TestParsable.WriteMethod<T> writeMethod,
+            T value)
+            throws IOException {
+        var testParsable = new TestParsable<>(parseMethod, writeMethod, value);
+        var writer = new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance());
+        writer.writeObjectValue(null, testParsable);
+
+        var parseNodeFactory = new JsonParseNodeFactory(DefaultGsonBuilder.getDefaultInstance());
+        var parseNode =
+                parseNodeFactory.getParseNode("application/json", writer.getSerializedContent());
+        var result = parseNode.getObjectValue(TestParsable.factory(parseMethod, writeMethod));
+        assertEquals(value, result.getRealValue());
+        assertNull(result.getNullValue());
+        writer.close();
     }
 }

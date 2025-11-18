@@ -58,7 +58,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(String.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -70,7 +70,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Boolean.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -82,7 +82,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Short.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -94,7 +94,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Byte.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -106,7 +106,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(BigDecimal.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -118,7 +118,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Integer.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -130,7 +130,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Float.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -142,7 +142,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Double.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }
@@ -154,7 +154,7 @@ public class JsonSerializationWriter implements SerializationWriter {
                 if (key != null && !key.isEmpty()) {
                     writer.name(key);
                 }
-                writer.value(value);
+                gson.getAdapter(Long.class).write(writer, value);
             } catch (IOException ex) {
                 throw new RuntimeException("could not serialize value", ex);
             }

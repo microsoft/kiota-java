@@ -28,8 +28,8 @@ import java.util.function.Function;
 
 /** ParseNode implementation for JSON */
 public class JsonParseNode implements ParseNode {
-    protected final JsonElement currentNode;
-    protected final Gson gson;
+    private final JsonElement currentNode;
+    private final Gson gson;
 
     /**
      * Creates a new instance of the JsonParseNode class.
@@ -54,7 +54,7 @@ public class JsonParseNode implements ParseNode {
      * @param node the node to wrap.
      * @return the newly created {@link JsonParseNode}.
      */
-    @Nonnull protected JsonParseNode createNewNode(@Nonnull JsonElement node) {
+    @Nonnull private JsonParseNode createNewNode(@Nonnull JsonElement node) {
         return new JsonParseNode(node, gson);
     }
 
@@ -128,7 +128,7 @@ public class JsonParseNode implements ParseNode {
         return gson.fromJson(currentNode, PeriodAndDuration.class);
     }
 
-    @Nullable protected <T> T getPrimitiveValue(
+    @Nullable private <T> T getPrimitiveValue(
             @Nonnull final Class<T> targetClass, @Nonnull final JsonParseNode itemNode) {
         return gson.fromJson(itemNode.currentNode, targetClass);
     }

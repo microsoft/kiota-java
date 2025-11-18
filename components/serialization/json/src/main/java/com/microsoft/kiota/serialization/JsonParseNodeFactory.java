@@ -36,13 +36,6 @@ public class JsonParseNodeFactory implements ParseNodeFactory {
 
     private static final String validContentType = "application/json";
 
-    /**
-     * @return the {@link Gson} instance to use for parsing value types.
-     */
-    @Nonnull public Gson getGson() {
-        return gson;
-    }
-
     /** {@inheritDoc} */
     @Override
     @Nonnull public ParseNode getParseNode(
