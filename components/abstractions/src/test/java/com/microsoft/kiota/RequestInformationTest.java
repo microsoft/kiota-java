@@ -58,13 +58,17 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "{+baseurl}/users{?datasetIds}";
         final GetQueryParameters queryParameters = new GetQueryParameters();
-        queryParameters.parallelDatasetIds = new UUID[][] {
-                {UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")},
-                {UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")}
-        };
+        queryParameters.parallelDatasetIds =
+                new UUID[][] {
+                    {UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")},
+                    {UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")}
+                };
 
         // Assert
-        var exception = assertThrows(IllegalArgumentException.class, () -> requestInfo.addQueryParameters(queryParameters));
+        var exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> requestInfo.addQueryParameters(queryParameters));
         assertTrue(exception.getMessage().contains("multidimensional arrays are not supported"));
     }
 
@@ -149,20 +153,21 @@ class RequestInformationTest {
         assertTrue(uriResult.toString().contains("seatingDuration='PT30M'"));
     }
 
-
     @Test
-    void SetsQueryParametersOfPeriodAndDurationTypedArray() throws IllegalStateException, URISyntaxException {
+    void SetsQueryParametersOfPeriodAndDurationTypedArray()
+            throws IllegalStateException, URISyntaxException {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/{?periods}";
 
         final GetQueryParameters queryParameters = new GetQueryParameters();
-        queryParameters.messageAges = new PeriodAndDuration[] {
-                PeriodAndDuration.parse("PT30M"),
-                PeriodAndDuration.parse("PT20M"),
-                PeriodAndDuration.parse("PT1H20M")
-        };
+        queryParameters.messageAges =
+                new PeriodAndDuration[] {
+                    PeriodAndDuration.parse("PT30M"),
+                    PeriodAndDuration.parse("PT20M"),
+                    PeriodAndDuration.parse("PT1H20M")
+                };
 
         // Act
         requestInfo.addQueryParameters(queryParameters);
@@ -256,9 +261,7 @@ class RequestInformationTest {
         requestInfo.urlTemplate = "http://localhost/{?expandChildren}";
 
         final GetQueryParameters queryParameters = new GetQueryParameters();
-        queryParameters.expandChildren = new Boolean[] {
-                true, false, true, true
-        };
+        queryParameters.expandChildren = new Boolean[] {true, false, true, true};
 
         // Act
         requestInfo.addQueryParameters(queryParameters);
@@ -308,19 +311,21 @@ class RequestInformationTest {
         requestInfo.urlTemplate = "http://localhost/{?datasetIds}";
 
         final GetQueryParameters queryParameters = new GetQueryParameters();
-        queryParameters.datasetIds = new UUID[] {
-                UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"),
-                UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")
-        };
+        queryParameters.datasetIds =
+                new UUID[] {
+                    UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"),
+                    UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")
+                };
 
         // Act
         requestInfo.addQueryParameters(queryParameters);
 
         // Assert
         final URI uri = requestInfo.getUri();
-        assertEquals("http://localhost/?datasetIds=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e,a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e", uri.toString());
+        assertEquals(
+                "http://localhost/?datasetIds=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e,a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e",
+                uri.toString());
     }
-
 
     @Test
     void SetsParsableContent() {
@@ -512,7 +517,6 @@ class GetQueryParameters implements QueryParameters {
      * Minimum message ages as duration, per dataset
      */
     @jakarta.annotation.Nullable public PeriodAndDuration[] messageAges;
-
 
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
         final Map<String, Object> allQueryParams = new HashMap<>();
