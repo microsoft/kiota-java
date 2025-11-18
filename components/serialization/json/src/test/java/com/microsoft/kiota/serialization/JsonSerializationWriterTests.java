@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -268,6 +269,10 @@ class JsonSerializationWriterTests {
                 ParseNode::getPeriodAndDurationValue,
                 SerializationWriter::writePeriodAndDurationValue,
                 PeriodAndDuration.of(Period.ofYears(3), Duration.ofHours(6)));
+        writeAndParse(
+                ParseNode::getByteArrayValue,
+                SerializationWriter::writeByteArrayValue,
+                new byte[] {8, 10, 127, -50, 0});
     }
 
     private <T> void writeAndParse(
@@ -283,7 +288,11 @@ class JsonSerializationWriterTests {
         var parseNode =
                 parseNodeFactory.getParseNode("application/json", writer.getSerializedContent());
         var result = parseNode.getObjectValue(TestParsable.factory(parseMethod, writeMethod));
-        assertEquals(value, result.getRealValue());
+        if (value instanceof byte[] bytea) {
+            assertArrayEquals(bytea, (byte[]) result.getRealValue());
+        } else {
+            assertEquals(value, result.getRealValue());
+        }
         assertNull(result.getNullValue());
         writer.close();
     }

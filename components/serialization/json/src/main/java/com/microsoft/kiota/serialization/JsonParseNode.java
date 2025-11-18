@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -312,10 +311,6 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public byte[] getByteArrayValue() {
-        final String base64 = this.getStringValue();
-        if (base64 == null || base64.isEmpty()) {
-            return null;
-        }
-        return Base64.getDecoder().decode(base64);
+        return gson.fromJson(currentNode, byte[].class);
     }
 }

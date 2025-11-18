@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.Base64;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -540,6 +539,14 @@ public class JsonSerializationWriter implements SerializationWriter {
     }
 
     public void writeByteArrayValue(@Nullable final String key, @Nullable final byte[] value) {
-        if (value != null) this.writeStringValue(key, Base64.getEncoder().encodeToString(value));
+        if (value != null)
+            try {
+                if (key != null && !key.isEmpty()) {
+                    writer.name(key);
+                }
+                gson.getAdapter(byte[].class).write(writer, value);
+            } catch (IOException ex) {
+                throw new RuntimeException("could not serialize value", ex);
+            }
     }
 }

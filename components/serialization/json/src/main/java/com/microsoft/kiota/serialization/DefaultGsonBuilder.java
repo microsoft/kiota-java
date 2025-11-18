@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
 
 public class DefaultGsonBuilder {
 
@@ -116,6 +117,32 @@ public class DefaultGsonBuilder {
                 }
             };
 
+    private static final TypeAdapter<byte[]> BYTE_ARRAY =
+            new TypeAdapter<>() {
+                @Override
+                public byte[] read(JsonReader in) throws IOException {
+                    String stringValue = in.nextString();
+                    try {
+                        if (stringValue.isEmpty()) {
+                            return null;
+                        }
+                        return Base64.getDecoder().decode(stringValue);
+                    } catch (IllegalArgumentException ex) {
+                        throw new JsonSyntaxException(
+                                "Failed parsing '"
+                                        + stringValue
+                                        + "' as byte[]; at path "
+                                        + in.getPreviousPath(),
+                                ex);
+                    }
+                }
+
+                @Override
+                public void write(JsonWriter out, byte[] value) throws IOException {
+                    out.value(Base64.getEncoder().encodeToString(value));
+                }
+            };
+
     private static final Gson defaultInstance = getDefaultBuilder().create();
 
     public static Gson getDefaultInstance() {
@@ -127,6 +154,7 @@ public class DefaultGsonBuilder {
                 .registerTypeAdapter(OffsetDateTime.class, OFFSET_DATE_TIME.nullSafe())
                 .registerTypeAdapter(LocalDate.class, LOCAL_DATE.nullSafe())
                 .registerTypeAdapter(LocalTime.class, LOCAL_TIME.nullSafe())
-                .registerTypeAdapter(PeriodAndDuration.class, PERIOD_AND_DURATION.nullSafe());
+                .registerTypeAdapter(PeriodAndDuration.class, PERIOD_AND_DURATION.nullSafe())
+                .registerTypeAdapter(byte[].class, BYTE_ARRAY.nullSafe());
     }
 }
