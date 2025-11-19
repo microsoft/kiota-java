@@ -1,6 +1,5 @@
 package com.microsoft.kiota.serialization.mocks;
 
-import com.google.gson.JsonSyntaxException;
 import com.microsoft.kiota.serialization.ComposedTypeWrapper;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParseNode;
@@ -22,18 +21,16 @@ public class IntersectionTypeMock implements Parsable, ComposedTypeWrapper {
             @jakarta.annotation.Nonnull final ParseNode parseNode) {
         Objects.requireNonNull(parseNode);
         final var result = new IntersectionTypeMock();
-        try {
+        if (parseNode.getStringValue() != null) {
             result.setStringValue(parseNode.getStringValue());
-        } catch (JsonSyntaxException e) {
-            if (parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue)
-                    != null) {
-                result.setComposedType3(
-                        parseNode.getCollectionOfObjectValues(
-                                TestEntity::createFromDiscriminatorValue));
-            } else {
-                result.setComposedType1(new TestEntity());
-                result.setComposedType2(new SecondTestEntity());
-            }
+        } else if (parseNode.getCollectionOfObjectValues(TestEntity::createFromDiscriminatorValue)
+                != null) {
+            result.setComposedType3(
+                    parseNode.getCollectionOfObjectValues(
+                            TestEntity::createFromDiscriminatorValue));
+        } else {
+            result.setComposedType1(new TestEntity());
+            result.setComposedType2(new SecondTestEntity());
         }
         return result;
     }

@@ -72,39 +72,39 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public String getStringValue() {
-        return gson.fromJson(currentNode, String.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, String.class) : null;
     }
 
     @Nullable public Boolean getBooleanValue() {
-        return gson.fromJson(currentNode, Boolean.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Boolean.class) : null;
     }
 
     @Nullable public Byte getByteValue() {
-        return gson.fromJson(currentNode, Byte.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Byte.class) : null;
     }
 
     @Nullable public Short getShortValue() {
-        return gson.fromJson(currentNode, Short.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Short.class) : null;
     }
 
     @Nullable public BigDecimal getBigDecimalValue() {
-        return gson.fromJson(currentNode, BigDecimal.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, BigDecimal.class) : null;
     }
 
     @Nullable public Integer getIntegerValue() {
-        return gson.fromJson(currentNode, Integer.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Integer.class) : null;
     }
 
     @Nullable public Float getFloatValue() {
-        return gson.fromJson(currentNode, Float.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Float.class) : null;
     }
 
     @Nullable public Double getDoubleValue() {
-        return gson.fromJson(currentNode, Double.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Double.class) : null;
     }
 
     @Nullable public Long getLongValue() {
-        return gson.fromJson(currentNode, Long.class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, Long.class) : null;
     }
 
     @Nullable public UUID getUUIDValue() {
@@ -311,6 +311,6 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public byte[] getByteArrayValue() {
-        return gson.fromJson(currentNode, byte[].class);
+        return currentNode.isJsonPrimitive() ? gson.fromJson(currentNode, byte[].class) : null;
     }
 }
