@@ -24,7 +24,8 @@ In `build.gradle` in the `dependencies` section:
 // x-release-please-start-version
 implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:1.8.12'
 // x-release-please-end
-implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.5.0'
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.8.12'
 // x-release-please-end
 // x-release-please-start-version
 implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:1.8.12'
