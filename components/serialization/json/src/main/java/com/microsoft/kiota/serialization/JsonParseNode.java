@@ -41,7 +41,7 @@ public class JsonParseNode implements ParseNode {
     /**
      * Creates a new instance of the JsonParseNode class.
      * @param node the node to wrap.
-     * @param node the node to wrap.
+     * @param gson the Gson instance to use and deserialize the node with.
      */
     public JsonParseNode(@Nonnull final JsonElement node, @Nonnull final Gson gson) {
         currentNode = Objects.requireNonNull(node, "parameter node cannot be null");
