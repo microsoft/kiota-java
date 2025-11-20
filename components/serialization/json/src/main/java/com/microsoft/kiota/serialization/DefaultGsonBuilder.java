@@ -8,6 +8,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.microsoft.kiota.PeriodAndDuration;
 
+import jakarta.annotation.Nonnull;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -146,11 +148,11 @@ public class DefaultGsonBuilder {
 
     private static final Gson defaultInstance = getDefaultBuilder().create();
 
-    public static Gson getDefaultInstance() {
+    public static @Nonnull Gson getDefaultInstance() {
         return defaultInstance;
     }
 
-    public static GsonBuilder getDefaultBuilder() {
+    public static @Nonnull GsonBuilder getDefaultBuilder() {
         return new GsonBuilder()
                 .registerTypeAdapter(OffsetDateTime.class, OFFSET_DATE_TIME.nullSafe())
                 .registerTypeAdapter(LocalDate.class, LOCAL_DATE.nullSafe())
