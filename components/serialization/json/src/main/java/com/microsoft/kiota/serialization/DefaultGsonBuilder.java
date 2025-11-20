@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
 
@@ -44,7 +45,7 @@ public class DefaultGsonBuilder {
 
                 @Override
                 public void write(JsonWriter out, OffsetDateTime value) throws IOException {
-                    out.value(value.toString());
+                    out.value(value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
                 }
             };
 
@@ -67,7 +68,7 @@ public class DefaultGsonBuilder {
 
                 @Override
                 public void write(JsonWriter out, LocalDate value) throws IOException {
-                    out.value(value.toString());
+                    out.value(value.format(DateTimeFormatter.ISO_LOCAL_DATE));
                 }
             };
 
@@ -90,7 +91,7 @@ public class DefaultGsonBuilder {
 
                 @Override
                 public void write(JsonWriter out, LocalTime value) throws IOException {
-                    out.value(value.toString());
+                    out.value(value.format(DateTimeFormatter.ISO_LOCAL_TIME));
                 }
             };
 
