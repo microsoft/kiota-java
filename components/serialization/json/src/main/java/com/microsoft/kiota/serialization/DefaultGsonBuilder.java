@@ -20,7 +20,7 @@ import java.util.Base64;
 public class DefaultGsonBuilder {
 
     private static final TypeAdapter<OffsetDateTime> OFFSET_DATE_TIME =
-            new TypeAdapter<>() {
+            new TypeAdapter<OffsetDateTime>() {
                 @Override
                 public OffsetDateTime read(JsonReader in) throws IOException {
                     String stringValue = in.nextString();
@@ -49,7 +49,7 @@ public class DefaultGsonBuilder {
             };
 
     private static final TypeAdapter<LocalDate> LOCAL_DATE =
-            new TypeAdapter<>() {
+            new TypeAdapter<LocalDate>() {
                 @Override
                 public LocalDate read(JsonReader in) throws IOException {
                     String stringValue = in.nextString();
@@ -72,7 +72,7 @@ public class DefaultGsonBuilder {
             };
 
     private static final TypeAdapter<LocalTime> LOCAL_TIME =
-            new TypeAdapter<>() {
+            new TypeAdapter<LocalTime>() {
                 @Override
                 public LocalTime read(JsonReader in) throws IOException {
                     String stringValue = in.nextString();
@@ -95,7 +95,7 @@ public class DefaultGsonBuilder {
             };
 
     private static final TypeAdapter<PeriodAndDuration> PERIOD_AND_DURATION =
-            new TypeAdapter<>() {
+            new TypeAdapter<PeriodAndDuration>() {
                 @Override
                 public PeriodAndDuration read(JsonReader in) throws IOException {
                     String stringValue = in.nextString();
@@ -118,7 +118,7 @@ public class DefaultGsonBuilder {
             };
 
     private static final TypeAdapter<byte[]> BYTE_ARRAY =
-            new TypeAdapter<>() {
+            new TypeAdapter<byte[]>() {
                 @Override
                 public byte[] read(JsonReader in) throws IOException {
                     String stringValue = in.nextString();
