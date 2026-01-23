@@ -21,6 +21,6 @@ org-junit-platform-junit-platform-launcher = { group = "org.junit.platform", nam
 org-mockito-mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.21.0" }
 
 [plugins]
-com-diffplug-spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
+com-diffplug-spotless = { id = "com.diffplug.spotless", version = "8.2.0" }
 com-github-spotbugs = { id = "com.github.spotbugs", version = "6.4.8" }
 org-sonarqube = { id = "org.sonarqube", version = "7.2.2.6593" }
