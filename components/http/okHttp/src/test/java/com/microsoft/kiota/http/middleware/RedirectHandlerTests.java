@@ -65,7 +65,7 @@ public class RedirectHandlerTests {
                         .url("http://trusted.example.com/api")
                         .addHeader("Authorization", "Bearer token")
                         .addHeader("Cookie", "session=SECRET")
-                        .addHeader("Proxy-Authorization", "Basic cHJveHk6cGFzcw==")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
                         .build();
         Response redirect =
                 new Response.Builder()
