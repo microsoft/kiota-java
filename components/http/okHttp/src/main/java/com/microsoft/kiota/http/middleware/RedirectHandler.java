@@ -111,8 +111,11 @@ public class RedirectHandler implements Interceptor {
         boolean sameScheme = locationUrl.scheme().equalsIgnoreCase(requestUrl.scheme());
         boolean sameHost =
                 locationUrl.host().toString().equalsIgnoreCase(requestUrl.host().toString());
-        if (!sameScheme || !sameHost) {
+        boolean samePort = locationUrl.port() == requestUrl.port();
+        if (!sameScheme || !sameHost || !samePort) {
             requestBuilder.removeHeader("Authorization");
+            requestBuilder.removeHeader("Cookie");
+            requestBuilder.removeHeader("Proxy-Authorization");
         }
 
         // Response status code 303 See Other then POST changes to GET
