@@ -60,18 +60,22 @@ public class RedirectHandlerTests {
 
     @Test
     void crossHostRedirectLeaksCookies() throws Exception {
-        Request original = new Request.Builder()
-            .url("http://trusted.example.com/api")
-            .addHeader("Authorization", "Bearer token")
-            .addHeader("Cookie", "session=SECRET")
-            .addHeader("Proxy-Authorization", "Basic cHJveHk6cGFzcw==")
-            .build();
-        Response redirect = new Response.Builder()
-            .request(original).protocol(Protocol.HTTP_1_1)
-            .code(302).message("Found")
-            .header("Location", "http://evil.attacker.com/steal")
-            .body(ResponseBody.create("", MediaType.parse("text/plain")))
-            .build();
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic cHJveHk6cGFzcw==")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://evil.attacker.com/steal")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
         Request result = new RedirectHandler().getRedirect(original, redirect);
         assertNotNull(result);
         assertEquals("evil.attacker.com", result.url().host());
@@ -87,15 +91,20 @@ public class RedirectHandlerTests {
         evil.enqueue(new MockResponse().setResponseCode(200));
         var trusted = new MockWebServer();
         trusted.start();
-        trusted.enqueue(new MockResponse().setResponseCode(302)
-            .setHeader("Location", evil.url("/steal")));
-        OkHttpClient client = KiotaClientFactory.create(new Interceptor[]{new RedirectHandler()}).build();
-        client.newCall(new Request.Builder().url(trusted.url("/api")).addHeader("Cookie", "session=SECRET").build()).execute();
+        trusted.enqueue(
+                new MockResponse().setResponseCode(302).setHeader("Location", evil.url("/steal")));
+        OkHttpClient client =
+                KiotaClientFactory.create(new Interceptor[] {new RedirectHandler()}).build();
+        client.newCall(
+                        new Request.Builder()
+                                .url(trusted.url("/api"))
+                                .addHeader("Cookie", "session=SECRET")
+                                .build())
+                .execute();
         trusted.takeRequest();
         RecordedRequest captured = evil.takeRequest();
-        assertNull(captured.getHeader("Cookie")); 
+        assertNull(captured.getHeader("Cookie"));
         evil.shutdown();
         trusted.shutdown();
     }
-
 }
