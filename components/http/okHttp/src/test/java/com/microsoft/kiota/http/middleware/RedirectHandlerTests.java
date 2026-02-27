@@ -15,7 +15,6 @@ import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.Collections;
 
