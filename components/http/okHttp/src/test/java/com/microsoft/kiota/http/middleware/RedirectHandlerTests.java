@@ -301,4 +301,48 @@ public class RedirectHandlerTests {
         assertNotNull(result.header("Authorization")); // KEPT by custom scrubber
         assertNotNull(result.header("Cookie")); // KEPT by custom scrubber
     }
+
+    @Test
+    void customScrubberRemovesCustomHeaders() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("X-Custom-Secret", "my-secret-value")
+                        .addHeader("X-Api-Key", "key-12345")
+                        .addHeader("X-Safe-Header", "keep-me")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Custom scrubber that removes custom headers in addition to the defaults
+        RedirectHandlerOption.IScrubSensitiveHeaders customScrubber =
+                (requestBuilder, originalUrl, newUrl, proxyResolver) -> {
+                    // Apply default scrubbing first
+                    RedirectHandlerOption.DEFAULT_SCRUB_SENSITIVE_HEADERS.scrubHeaders(
+                            requestBuilder, originalUrl, newUrl, proxyResolver);
+                    // Also remove application-specific sensitive headers
+                    requestBuilder.removeHeader("X-Custom-Secret");
+                    requestBuilder.removeHeader("X-Api-Key");
+                };
+
+        Interceptor.Chain chain = mock(Interceptor.Chain.class);
+
+        RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped by default scrubber
+        assertNull(result.header("X-Custom-Secret")); // stripped by custom scrubber
+        assertNull(result.header("X-Api-Key")); // stripped by custom scrubber
+        assertNotNull(result.header("X-Safe-Header")); // kept (not in scrub list)
+    }
 }
