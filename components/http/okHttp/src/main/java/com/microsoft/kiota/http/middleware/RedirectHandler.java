@@ -81,7 +81,11 @@ public class RedirectHandler implements Interceptor {
         return false;
     }
 
-    Request getRedirect(final Request request, final Response userResponse)
+    Request getRedirect(
+            final Request request,
+            final Response userResponse,
+            final RedirectHandlerOption redirectOption,
+            final Chain chain)
             throws ProtocolException {
         String location = userResponse.header("Location");
         if (location == null || location.length() == 0) return null;
@@ -105,18 +109,12 @@ public class RedirectHandler implements Interceptor {
         // Most redirects don't include a request body.
         Request.Builder requestBuilder = userResponse.request().newBuilder();
 
-        // When redirecting across hosts, drop all authentication headers. This
-        // is potentially annoying to the application layer since they have no
-        // way to retain them.
-        boolean sameScheme = locationUrl.scheme().equalsIgnoreCase(requestUrl.scheme());
-        boolean sameHost =
-                locationUrl.host().toString().equalsIgnoreCase(requestUrl.host().toString());
-        boolean samePort = locationUrl.port() == requestUrl.port();
-        if (!sameScheme || !sameHost || !samePort) {
-            requestBuilder.removeHeader("Authorization");
-            requestBuilder.removeHeader("Cookie");
-            requestBuilder.removeHeader("Proxy-Authorization");
-        }
+        // Scrub sensitive headers before following the redirect
+        java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =
+                RedirectHandlerOption.getProxyResolver(
+                        chain.call().client().proxySelector());
+        redirectOption.scrubSensitiveHeaders().scrubHeaders(
+                requestBuilder, requestUrl, locationUrl, proxyResolver);
 
         // Response status code 303 See Other then POST changes to GET
         if (userResponse.code() == HTTP_SEE_OTHER) {
@@ -166,7 +164,8 @@ public class RedirectHandler implements Interceptor {
                         isRedirected(request, response, requestsCount, redirectOption)
                                 && redirectOption.shouldRedirect().shouldRedirect(response);
 
-                final Request followup = shouldRedirect ? getRedirect(request, response) : null;
+                final Request followup =
+                        shouldRedirect ? getRedirect(request, response, redirectOption, chain) : null;
                 if (followup != null) {
                     response.close();
                     request = followup;
