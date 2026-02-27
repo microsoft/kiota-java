@@ -84,10 +84,6 @@ public class RedirectHandlerTests {
 
         // Mock chain to get client without proxy
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
-        Call call = mock(Call.class);
-        OkHttpClient client = new OkHttpClient.Builder().build();
-        when(chain.call()).thenReturn(call);
-        when(call.client()).thenReturn(client);
 
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
@@ -143,17 +139,12 @@ public class RedirectHandlerTests {
 
         // Mock chain with proxy
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
-        Call call = mock(Call.class);
         ProxySelector proxySelector = mock(ProxySelector.class);
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
         when(proxySelector.select(any(URI.class))).thenReturn(Collections.singletonList(proxy));
 
-        OkHttpClient client = new OkHttpClient.Builder().proxySelector(proxySelector).build();
-        when(chain.call()).thenReturn(call);
-        when(call.client()).thenReturn(client);
-
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option, chain);
 
         assertNotNull(result);
         assertEquals("trusted.example.com", result.url().host());
@@ -183,17 +174,12 @@ public class RedirectHandlerTests {
 
         // Mock chain with active proxy
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
-        Call call = mock(Call.class);
         ProxySelector proxySelector = mock(ProxySelector.class);
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
         when(proxySelector.select(any(URI.class))).thenReturn(Collections.singletonList(proxy));
 
-        OkHttpClient client = new OkHttpClient.Builder().proxySelector(proxySelector).build();
-        when(chain.call()).thenReturn(call);
-        when(call.client()).thenReturn(client);
-
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option, chain);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
@@ -224,17 +210,12 @@ public class RedirectHandlerTests {
 
         // Mock chain with DIRECT proxy (no proxy)
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
-        Call call = mock(Call.class);
         ProxySelector proxySelector = mock(ProxySelector.class);
         when(proxySelector.select(any(URI.class)))
                 .thenReturn(Collections.singletonList(Proxy.NO_PROXY));
 
-        OkHttpClient client = new OkHttpClient.Builder().proxySelector(proxySelector).build();
-        when(chain.call()).thenReturn(call);
-        when(call.client()).thenReturn(client);
-
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option, chain);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
@@ -268,10 +249,6 @@ public class RedirectHandlerTests {
 
         // Mock chain without proxy
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
-        Call call = mock(Call.class);
-        OkHttpClient client = new OkHttpClient.Builder().build();
-        when(chain.call()).thenReturn(call);
-        when(call.client()).thenReturn(client);
 
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
@@ -310,10 +287,6 @@ public class RedirectHandlerTests {
 
         // Mock chain
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
-        Call call = mock(Call.class);
-        OkHttpClient client = new OkHttpClient.Builder().build();
-        when(chain.call()).thenReturn(call);
-        when(call.client()).thenReturn(client);
 
         RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
         Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);

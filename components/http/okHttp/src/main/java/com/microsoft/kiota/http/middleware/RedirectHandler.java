@@ -29,12 +29,13 @@ import java.util.Objects;
  */
 public class RedirectHandler implements Interceptor {
     @Nonnull private final RedirectHandlerOption mRedirectOption;
+    @Nullable private final java.net.ProxySelector mProxySelector;
 
     /**
      * Initialize using default redirect options, default IShouldRedirect and max redirect value
      */
     public RedirectHandler() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -42,11 +43,23 @@ public class RedirectHandler implements Interceptor {
      * @param redirectOption pass instance of redirect options to be used
      */
     public RedirectHandler(@Nullable final RedirectHandlerOption redirectOption) {
+        this(redirectOption, null);
+    }
+
+    /**
+     * Initialize using custom redirect options and proxy selector.
+     * @param redirectOption pass instance of redirect options to be used
+     * @param proxySelector The ProxySelector to use for determining proxy configuration, or null to use the system default
+     */
+    public RedirectHandler(
+            @Nullable final RedirectHandlerOption redirectOption,
+            @Nullable final java.net.ProxySelector proxySelector) {
         if (redirectOption == null) {
             this.mRedirectOption = new RedirectHandlerOption();
         } else {
             this.mRedirectOption = redirectOption;
         }
+        this.mProxySelector = proxySelector != null ? proxySelector : java.net.ProxySelector.getDefault();
     }
 
     boolean isRedirected(
@@ -111,8 +124,7 @@ public class RedirectHandler implements Interceptor {
 
         // Scrub sensitive headers before following the redirect
         java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =
-                RedirectHandlerOption.getProxyResolver(
-                        chain.call().client().proxySelector());
+                RedirectHandlerOption.getProxyResolver(mProxySelector);
         redirectOption.scrubSensitiveHeaders().scrubHeaders(
                 requestBuilder, requestUrl, locationUrl, proxyResolver);
 
