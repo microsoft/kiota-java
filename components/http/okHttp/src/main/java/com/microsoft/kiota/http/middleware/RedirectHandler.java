@@ -29,12 +29,13 @@ import java.util.Objects;
  */
 public class RedirectHandler implements Interceptor {
     @Nonnull private final RedirectHandlerOption mRedirectOption;
+    @Nullable private final java.net.ProxySelector mProxySelector;
 
     /**
      * Initialize using default redirect options, default IShouldRedirect and max redirect value
      */
     public RedirectHandler() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -42,11 +43,24 @@ public class RedirectHandler implements Interceptor {
      * @param redirectOption pass instance of redirect options to be used
      */
     public RedirectHandler(@Nullable final RedirectHandlerOption redirectOption) {
+        this(redirectOption, null);
+    }
+
+    /**
+     * Initialize using custom redirect options and proxy selector.
+     * @param redirectOption pass instance of redirect options to be used
+     * @param proxySelector The ProxySelector to use for determining proxy configuration, or null to use the system default
+     */
+    public RedirectHandler(
+            @Nullable final RedirectHandlerOption redirectOption,
+            @Nullable final java.net.ProxySelector proxySelector) {
         if (redirectOption == null) {
             this.mRedirectOption = new RedirectHandlerOption();
         } else {
             this.mRedirectOption = redirectOption;
         }
+        this.mProxySelector =
+                proxySelector != null ? proxySelector : java.net.ProxySelector.getDefault();
     }
 
     boolean isRedirected(
@@ -81,7 +95,11 @@ public class RedirectHandler implements Interceptor {
         return false;
     }
 
-    Request getRedirect(final Request request, final Response userResponse)
+    Request getRedirect(
+            final Request request,
+            final Response userResponse,
+            final RedirectHandlerOption redirectOption,
+            final Chain chain)
             throws ProtocolException {
         String location = userResponse.header("Location");
         if (location == null || location.length() == 0) return null;
@@ -95,9 +113,9 @@ public class RedirectHandler implements Interceptor {
             location = request.url() + location;
         }
 
-        HttpUrl requestUrl = userResponse.request().url();
+        HttpUrl requestUrl = request.url();
 
-        HttpUrl locationUrl = userResponse.request().url().resolve(location);
+        HttpUrl locationUrl = request.url().resolve(location);
 
         // Don't follow redirects to unsupported protocols.
         if (locationUrl == null) return null;
@@ -105,15 +123,12 @@ public class RedirectHandler implements Interceptor {
         // Most redirects don't include a request body.
         Request.Builder requestBuilder = userResponse.request().newBuilder();
 
-        // When redirecting across hosts, drop all authentication headers. This
-        // is potentially annoying to the application layer since they have no
-        // way to retain them.
-        boolean sameScheme = locationUrl.scheme().equalsIgnoreCase(requestUrl.scheme());
-        boolean sameHost =
-                locationUrl.host().toString().equalsIgnoreCase(requestUrl.host().toString());
-        if (!sameScheme || !sameHost) {
-            requestBuilder.removeHeader("Authorization");
-        }
+        // Scrub sensitive headers before following the redirect
+        java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =
+                RedirectHandlerOption.getProxyResolver(mProxySelector);
+        redirectOption
+                .scrubSensitiveHeaders()
+                .scrubHeaders(requestBuilder, requestUrl, locationUrl, proxyResolver);
 
         // Response status code 303 See Other then POST changes to GET
         if (userResponse.code() == HTTP_SEE_OTHER) {
@@ -163,7 +178,10 @@ public class RedirectHandler implements Interceptor {
                         isRedirected(request, response, requestsCount, redirectOption)
                                 && redirectOption.shouldRedirect().shouldRedirect(response);
 
-                final Request followup = shouldRedirect ? getRedirect(request, response) : null;
+                final Request followup =
+                        shouldRedirect
+                                ? getRedirect(request, response, redirectOption, chain)
+                                : null;
                 if (followup != null) {
                     response.close();
                     request = followup;
