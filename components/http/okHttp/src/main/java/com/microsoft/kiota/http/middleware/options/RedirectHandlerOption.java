@@ -8,7 +8,6 @@ import jakarta.annotation.Nullable;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
@@ -81,7 +80,8 @@ public class RedirectHandlerOption implements RequestOption {
                 }
 
                 // Remove Proxy-Authorization if no proxy is configured or the URL is bypassed
-                boolean isProxyInactive = proxyResolver == null || proxyResolver.apply(newUrl) == null;
+                boolean isProxyInactive =
+                        proxyResolver == null || proxyResolver.apply(newUrl) == null;
                 if (isProxyInactive) {
                     requestBuilder.removeHeader("Proxy-Authorization");
                 }

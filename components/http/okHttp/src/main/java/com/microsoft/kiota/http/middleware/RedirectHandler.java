@@ -59,7 +59,8 @@ public class RedirectHandler implements Interceptor {
         } else {
             this.mRedirectOption = redirectOption;
         }
-        this.mProxySelector = proxySelector != null ? proxySelector : java.net.ProxySelector.getDefault();
+        this.mProxySelector =
+                proxySelector != null ? proxySelector : java.net.ProxySelector.getDefault();
     }
 
     boolean isRedirected(
@@ -125,8 +126,9 @@ public class RedirectHandler implements Interceptor {
         // Scrub sensitive headers before following the redirect
         java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =
                 RedirectHandlerOption.getProxyResolver(mProxySelector);
-        redirectOption.scrubSensitiveHeaders().scrubHeaders(
-                requestBuilder, requestUrl, locationUrl, proxyResolver);
+        redirectOption
+                .scrubSensitiveHeaders()
+                .scrubHeaders(requestBuilder, requestUrl, locationUrl, proxyResolver);
 
         // Response status code 303 See Other then POST changes to GET
         if (userResponse.code() == HTTP_SEE_OTHER) {
@@ -177,7 +179,9 @@ public class RedirectHandler implements Interceptor {
                                 && redirectOption.shouldRedirect().shouldRedirect(response);
 
                 final Request followup =
-                        shouldRedirect ? getRedirect(request, response, redirectOption, chain) : null;
+                        shouldRedirect
+                                ? getRedirect(request, response, redirectOption, chain)
+                                : null;
                 if (followup != null) {
                     response.close();
                     request = followup;

@@ -144,7 +144,9 @@ public class RedirectHandlerTests {
         when(proxySelector.select(any(URI.class))).thenReturn(Collections.singletonList(proxy));
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option, chain);
+        Request result =
+                new RedirectHandler(option, proxySelector)
+                        .getRedirect(original, redirect, option, chain);
 
         assertNotNull(result);
         assertEquals("trusted.example.com", result.url().host());
@@ -179,7 +181,9 @@ public class RedirectHandlerTests {
         when(proxySelector.select(any(URI.class))).thenReturn(Collections.singletonList(proxy));
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option, chain);
+        Request result =
+                new RedirectHandler(option, proxySelector)
+                        .getRedirect(original, redirect, option, chain);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
@@ -215,7 +219,9 @@ public class RedirectHandlerTests {
                 .thenReturn(Collections.singletonList(Proxy.NO_PROXY));
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option, chain);
+        Request result =
+                new RedirectHandler(option, proxySelector)
+                        .getRedirect(original, redirect, option, chain);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
