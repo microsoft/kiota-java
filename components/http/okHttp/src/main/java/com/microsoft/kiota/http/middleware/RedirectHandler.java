@@ -113,9 +113,9 @@ public class RedirectHandler implements Interceptor {
             location = request.url() + location;
         }
 
-        HttpUrl requestUrl = userResponse.request().url();
+        HttpUrl requestUrl = request.url();
 
-        HttpUrl locationUrl = userResponse.request().url().resolve(location);
+        HttpUrl locationUrl = request.url().resolve(location);
 
         // Don't follow redirects to unsupported protocols.
         if (locationUrl == null) return null;
