@@ -386,10 +386,10 @@ public class RedirectHandlerTests {
 
         // Custom scrubber that removes custom headers in addition to the defaults
         RedirectHandlerOption.IScrubSensitiveHeaders customScrubber =
-                (requestBuilder, originalUrl, newUrl, proxyResolver) -> {
+                (requestBuilder, originalUrl, proxyResolver) -> {
                     // Apply default scrubbing first
                     RedirectHandlerOption.DEFAULT_SCRUB_SENSITIVE_HEADERS.scrubHeaders(
-                            requestBuilder, originalUrl, newUrl, proxyResolver);
+                            requestBuilder, originalUrl, proxyResolver);
                     // Also remove application-specific sensitive headers
                     requestBuilder.removeHeader("X-Custom-Secret");
                     requestBuilder.removeHeader("X-Api-Key");
