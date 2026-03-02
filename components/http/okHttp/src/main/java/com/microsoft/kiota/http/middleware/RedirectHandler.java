@@ -98,8 +98,7 @@ public class RedirectHandler implements Interceptor {
     Request getRedirect(
             final Request request,
             final Response userResponse,
-            final RedirectHandlerOption redirectOption,
-            final Chain chain)
+            final RedirectHandlerOption redirectOption)
             throws ProtocolException {
         String location = userResponse.header("Location");
         if (location == null || location.length() == 0) return null;
