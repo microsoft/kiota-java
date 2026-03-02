@@ -49,32 +49,34 @@ public class RedirectHandlerOption implements RequestOption {
          * Scrubs sensitive headers from the request before following a redirect.
          * @param requestBuilder The request builder to modify
          * @param originalUrl The original request URL
-         * @param newUrl The new redirect URL
          * @param proxyResolver A function that returns the proxy for a given destination, or null if no proxy applies
          */
         void scrubHeaders(
                 @Nonnull Request.Builder requestBuilder,
                 @Nonnull HttpUrl originalUrl,
-                @Nonnull HttpUrl newUrl,
                 @Nullable Function<HttpUrl, Proxy> proxyResolver);
     }
 
     /**
      * The default implementation for scrubbing sensitive headers during redirects.
-     * This method removes Authorization and Cookie headers when the host or scheme changes,
+     * This method removes Authorization and Cookie headers when the host, scheme, or port changes,
      * and removes Proxy-Authorization headers when no proxy is configured or the proxy is bypassed for the new URL.
      */
     @Nonnull public static final IScrubSensitiveHeaders DEFAULT_SCRUB_SENSITIVE_HEADERS =
-            (requestBuilder, originalUrl, newUrl, proxyResolver) -> {
+            (requestBuilder, originalUrl, proxyResolver) -> {
                 Objects.requireNonNull(requestBuilder, "parameter requestBuilder cannot be null");
                 Objects.requireNonNull(originalUrl, "parameter originalUrl cannot be null");
-                Objects.requireNonNull(newUrl, "parameter newUrl cannot be null");
 
-                // Remove Authorization and Cookie headers if the request's scheme or host changes
-                boolean isDifferentHostOrScheme =
+                // Get the new URL from the request builder
+                HttpUrl newUrl = requestBuilder.build().url();
+                Objects.requireNonNull(newUrl, "The request URL cannot be null");
+
+                // Remove Authorization and Cookie headers if the request's scheme, host, or port changes
+                boolean isDifferentOrigin =
                         !newUrl.host().equalsIgnoreCase(originalUrl.host())
-                                || !newUrl.scheme().equalsIgnoreCase(originalUrl.scheme());
-                if (isDifferentHostOrScheme) {
+                                || !newUrl.scheme().equalsIgnoreCase(originalUrl.scheme())
+                                || newUrl.port() != originalUrl.port();
+                if (isDifferentOrigin) {
                     requestBuilder.removeHeader("Authorization");
                     requestBuilder.removeHeader("Cookie");
                 }

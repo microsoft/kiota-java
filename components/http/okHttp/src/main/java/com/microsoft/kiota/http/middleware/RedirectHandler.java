@@ -121,21 +121,21 @@ public class RedirectHandler implements Interceptor {
         if (locationUrl == null) return null;
 
         // Most redirects don't include a request body.
-        Request.Builder requestBuilder = userResponse.request().newBuilder();
+        Request.Builder requestBuilder = userResponse.request().newBuilder().url(locationUrl);
 
         // Scrub sensitive headers before following the redirect
         java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =
                 RedirectHandlerOption.getProxyResolver(mProxySelector);
         redirectOption
                 .scrubSensitiveHeaders()
-                .scrubHeaders(requestBuilder, requestUrl, locationUrl, proxyResolver);
+                .scrubHeaders(requestBuilder, requestUrl, proxyResolver);
 
         // Response status code 303 See Other then POST changes to GET
         if (userResponse.code() == HTTP_SEE_OTHER) {
             requestBuilder.method("GET", null);
         }
 
-        return requestBuilder.url(locationUrl).build();
+        return requestBuilder.build();
     }
 
     // Intercept request and response made to network

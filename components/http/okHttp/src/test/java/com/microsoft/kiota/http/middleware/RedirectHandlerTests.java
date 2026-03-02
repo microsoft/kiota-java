@@ -267,6 +267,68 @@ public class RedirectHandlerTests {
     }
 
     @Test
+    void redirectWithDifferentPortRemovesAuthAndCookie() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://example.org:8080/foo")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(301)
+                        .message("Moved Permanently")
+                        .header("Location", "http://example.org:9090/bar")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Mock chain without proxy
+        Interceptor.Chain chain = mock(Interceptor.Chain.class);
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+
+        assertNotNull(result);
+        assertEquals("example.org", result.url().host());
+        assertEquals(9090, result.url().port());
+        assertNull(result.header("Authorization")); // stripped (port changed)
+        assertNull(result.header("Cookie")); // stripped (port changed)
+    }
+
+    @Test
+    void redirectWithSamePortKeepsAuthAndCookie() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://example.org:8080/foo")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://example.org:8080/bar")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Mock chain without proxy
+        Interceptor.Chain chain = mock(Interceptor.Chain.class);
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+
+        assertNotNull(result);
+        assertEquals("example.org", result.url().host());
+        assertEquals(8080, result.url().port());
+        assertNotNull(result.header("Authorization")); // kept (same port)
+        assertNotNull(result.header("Cookie")); // kept (same port)
+    }
+
+    @Test
     void customScrubberIsUsed() throws Exception {
         Request original =
                 new Request.Builder()
@@ -286,7 +348,7 @@ public class RedirectHandlerTests {
 
         // Custom scrubber that never removes headers
         RedirectHandlerOption.IScrubSensitiveHeaders customScrubber =
-                (requestBuilder, originalUrl, newUrl, proxyResolver) -> {
+                (requestBuilder, originalUrl, proxyResolver) -> {
                     // Don't remove any headers
                 };
 
