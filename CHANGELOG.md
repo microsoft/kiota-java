@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1](https://github.com/microsoft/kiota-java/compare/v1.9.0...v1.9.1) (2026-03-02)
+
+
+### Bug Fixes
+
+* check for port changes on redirect ([5746c34](https://github.com/microsoft/kiota-java/commit/5746c345691d550ee2373c1f217aad37f1bb6c38))
+* **security:** vulnerability where all headers are passed on redirect ([38e45c9](https://github.com/microsoft/kiota-java/commit/38e45c916dc2f7d883d80af25812d927bee3c9e4))
+
 ## [1.9.0](https://github.com/microsoft/kiota-java/compare/v1.8.12...v1.9.0) (2025-11-20)
 
 
