@@ -81,7 +81,6 @@ public class RedirectHandlerTests {
                         .body(ResponseBody.create("", MediaType.parse("text/plain")))
                         .build();
 
-
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result = new RedirectHandler().getRedirect(original, redirect, option);
         assertNotNull(result);
@@ -244,7 +243,6 @@ public class RedirectHandlerTests {
                         .body(ResponseBody.create("", MediaType.parse("text/plain")))
                         .build();
 
-
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
@@ -274,7 +272,6 @@ public class RedirectHandlerTests {
                         .body(ResponseBody.create("", MediaType.parse("text/plain")))
                         .build();
 
-
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
@@ -302,7 +299,6 @@ public class RedirectHandlerTests {
                         .header("Location", "http://example.org:8080/bar")
                         .body(ResponseBody.create("", MediaType.parse("text/plain")))
                         .build();
-
 
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result = new RedirectHandler().getRedirect(original, redirect, option);
@@ -377,7 +373,6 @@ public class RedirectHandlerTests {
                     requestBuilder.removeHeader("X-Custom-Secret");
                     requestBuilder.removeHeader("X-Api-Key");
                 };
-
 
         RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
         Request result = new RedirectHandler().getRedirect(original, redirect, option);
