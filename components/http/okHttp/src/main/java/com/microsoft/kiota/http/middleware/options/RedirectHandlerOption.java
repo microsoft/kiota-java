@@ -71,7 +71,8 @@ public class RedirectHandlerOption implements RequestOption {
                 HttpUrl newUrl = requestBuilder.build().url();
                 Objects.requireNonNull(newUrl, "The request URL cannot be null");
 
-                // Remove Authorization and Cookie headers if the request's scheme, host, or port changes
+                // Remove Authorization and Cookie headers if the request's scheme, host, or port
+                // changes
                 boolean isDifferentOrigin =
                         !newUrl.host().equalsIgnoreCase(originalUrl.host())
                                 || !newUrl.scheme().equalsIgnoreCase(originalUrl.scheme())
