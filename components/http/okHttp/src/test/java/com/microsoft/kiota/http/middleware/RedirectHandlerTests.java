@@ -85,7 +85,7 @@ public class RedirectHandlerTests {
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
         assertNotNull(result);
         assertEquals("evil.attacker.com", result.url().host());
         assertNull(result.header("Authorization")); // stripped (good)
@@ -145,7 +145,7 @@ public class RedirectHandlerTests {
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result =
                 new RedirectHandler(option, proxySelector)
-                        .getRedirect(original, redirect, option, chain);
+                        .getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("trusted.example.com", result.url().host());
@@ -182,7 +182,7 @@ public class RedirectHandlerTests {
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result =
                 new RedirectHandler(option, proxySelector)
-                        .getRedirect(original, redirect, option, chain);
+                        .getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
@@ -220,7 +220,7 @@ public class RedirectHandlerTests {
         RedirectHandlerOption option = new RedirectHandlerOption();
         Request result =
                 new RedirectHandler(option, proxySelector)
-                        .getRedirect(original, redirect, option, chain);
+                        .getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
@@ -256,7 +256,7 @@ public class RedirectHandlerTests {
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("trusted.example.com", result.url().host());
@@ -288,7 +288,7 @@ public class RedirectHandlerTests {
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("example.org", result.url().host());
@@ -319,7 +319,7 @@ public class RedirectHandlerTests {
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
 
         RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("example.org", result.url().host());
@@ -356,7 +356,7 @@ public class RedirectHandlerTests {
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
 
         RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());
@@ -398,7 +398,7 @@ public class RedirectHandlerTests {
         Interceptor.Chain chain = mock(Interceptor.Chain.class);
 
         RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
-        Request result = new RedirectHandler().getRedirect(original, redirect, option, chain);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
 
         assertNotNull(result);
         assertEquals("other.example.com", result.url().host());

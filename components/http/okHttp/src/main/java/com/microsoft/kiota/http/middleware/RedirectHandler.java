@@ -179,7 +179,7 @@ public class RedirectHandler implements Interceptor {
 
                 final Request followup =
                         shouldRedirect
-                                ? getRedirect(request, response, redirectOption, chain)
+                                ? getRedirect(request, response, redirectOption)
                                 : null;
                 if (followup != null) {
                     response.close();
