@@ -178,9 +178,7 @@ public class RedirectHandler implements Interceptor {
                                 && redirectOption.shouldRedirect().shouldRedirect(response);
 
                 final Request followup =
-                        shouldRedirect
-                                ? getRedirect(request, response, redirectOption)
-                                : null;
+                        shouldRedirect ? getRedirect(request, response, redirectOption) : null;
                 if (followup != null) {
                     response.close();
                     request = followup;
