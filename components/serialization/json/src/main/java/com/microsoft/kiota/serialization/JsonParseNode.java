@@ -127,15 +127,10 @@ public class JsonParseNode implements ParseNode {
         return gson.fromJson(currentNode, PeriodAndDuration.class);
     }
 
-    @Nullable private <T> T getPrimitiveValue(
-            @Nonnull final Class<T> targetClass, @Nonnull final JsonParseNode itemNode) {
-        return gson.fromJson(itemNode.currentNode, targetClass);
-    }
-
     private <T> List<T> iterateOnArray(JsonElement jsonElement, Function<JsonParseNode, T> fn) {
         JsonArray array = jsonElement.getAsJsonArray();
         final Iterator<JsonElement> sourceIterator = array.iterator();
-        final List<T> result = new ArrayList<>();
+        final List<T> result = new ArrayList<>(array.size());
         while (sourceIterator.hasNext()) {
             final JsonElement item = sourceIterator.next();
             final JsonParseNode itemNode = createNewNode(item);
@@ -151,8 +146,12 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            return iterateOnArray(
-                    currentNode, itemNode -> getPrimitiveValue(targetClass, itemNode));
+            final JsonArray array = currentNode.getAsJsonArray();
+            final List<T> result = new ArrayList<>(array.size());
+            for (final JsonElement item : array) {
+                result.add(gson.fromJson(item, targetClass));
+            }
+            return result;
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 
@@ -172,7 +171,20 @@ public class JsonParseNode implements ParseNode {
         if (currentNode.isJsonNull()) {
             return null;
         } else if (currentNode.isJsonArray()) {
-            return iterateOnArray(currentNode, itemNode -> itemNode.getEnumValue(enumParser));
+            final JsonArray array = currentNode.getAsJsonArray();
+            final List<T> result = new ArrayList<>(array.size());
+            for (final JsonElement item : array) {
+                if (!item.isJsonNull()) {
+                    final String rawValue = gson.fromJson(item, String.class);
+                    if (rawValue != null && !rawValue.isEmpty()) {
+                        final T value = enumParser.forValue(rawValue);
+                        if (value != null) {
+                            result.add(value);
+                        }
+                    }
+                }
+            }
+            return result;
         } else throw new RuntimeException("invalid state expected to have an array node");
     }
 
@@ -202,17 +214,17 @@ public class JsonParseNode implements ParseNode {
             HashMap<String, UntypedNode> propertiesMap = new HashMap<>();
             for (final Map.Entry<String, JsonElement> fieldEntry :
                     element.getAsJsonObject().entrySet()) {
-                final String fieldKey = fieldEntry.getKey();
-                final JsonElement fieldValue = fieldEntry.getValue();
-                final JsonParseNode childNode = createNewNode(fieldValue);
-                childNode.setOnBeforeAssignFieldValues(this.getOnBeforeAssignFieldValues());
-                childNode.setOnAfterAssignFieldValues(this.getOnAfterAssignFieldValues());
-                propertiesMap.put(fieldKey, childNode.getUntypedValue());
+                propertiesMap.put(fieldEntry.getKey(), getUntypedValue(fieldEntry.getValue()));
             }
             return new UntypedObject(propertiesMap);
 
         } else if (element.isJsonArray()) {
-            return new UntypedArray(iterateOnArray(element, JsonParseNode::getUntypedValue));
+            final JsonArray array = element.getAsJsonArray();
+            final List<UntypedNode> result = new ArrayList<>(array.size());
+            for (final JsonElement item : array) {
+                result.add(getUntypedValue(item));
+            }
+            return new UntypedArray(result);
         }
 
         throw new RuntimeException(
