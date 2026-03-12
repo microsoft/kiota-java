@@ -18,7 +18,7 @@ jakarta-annotation-jakarta-annotation-api = { group = "jakarta.annotation", name
 javax-xml-stream-stax-api = { group = "javax.xml.stream", name = "stax-api", version = "1.0-2" }
 org-junit-jupiter-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version = "6.0.3" }
 org-junit-platform-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "6.0.3" }
-org-mockito-mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.22.0" }
+org-mockito-mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.23.0" }
 
 [plugins]
 com-diffplug-spotless = { id = "com.diffplug.spotless", version = "8.3.0" }
