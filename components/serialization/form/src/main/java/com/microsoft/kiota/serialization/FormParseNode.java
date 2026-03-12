@@ -296,8 +296,7 @@ public class FormParseNode implements ParseNode {
         return LocalTime.parse(value);
     }
 
-    @Nullable private static PeriodAndDuration parsePeriodAndDurationValue(
-            @Nullable final String value) {
+    @Nullable private static PeriodAndDuration parsePeriodAndDurationValue(@Nullable final String value) {
         if (value == null) return null;
         return PeriodAndDuration.parse(value);
     }
