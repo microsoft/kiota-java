@@ -88,115 +88,55 @@ public class FormParseNode implements ParseNode {
     }
 
     @Nullable public Boolean getBooleanValue() {
-        switch (getStringValue()
-                .toLowerCase(
-                        Locale.ROOT)) { // boolean parse returns false for any value that is not
-                // true
-            case "true":
-            case "1":
-                return true;
-            case "false":
-            case "0":
-                return false;
-            default:
-                return null;
-        }
+        return parseBooleanValue(getStringValue());
     }
 
     @Nullable public Byte getByteValue() {
-        try {
-            return Byte.parseByte(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseByteValue(getStringValue());
     }
 
     @Nullable public Short getShortValue() {
-        try {
-            return Short.parseShort(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseShortValue(getStringValue());
     }
 
     @Nullable public BigDecimal getBigDecimalValue() {
-        try {
-            return new BigDecimal(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseBigDecimalValue(getStringValue());
     }
 
     @Nullable public Integer getIntegerValue() {
-        try {
-            return Integer.parseInt(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseIntegerValue(getStringValue());
     }
 
     @Nullable public Float getFloatValue() {
-        try {
-            return Float.parseFloat(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseFloatValue(getStringValue());
     }
 
     @Nullable public Double getDoubleValue() {
-        try {
-            return Double.parseDouble(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseDoubleValue(getStringValue());
     }
 
     @Nullable public Long getLongValue() {
-        try {
-            return Long.parseLong(getStringValue());
-        } catch (final NumberFormatException ex) {
-            return null;
-        }
+        return parseLongValue(getStringValue());
     }
 
     @Nullable public UUID getUUIDValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return UUID.fromString(stringValue);
+        return parseUUIDValue(getStringValue());
     }
 
     @Nullable public OffsetDateTime getOffsetDateTimeValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        try {
-            return OffsetDateTime.parse(stringValue);
-        } catch (DateTimeParseException ex) {
-            // Append UTC offset if it's missing
-            try {
-                LocalDateTime localDateTime = LocalDateTime.parse(stringValue);
-                return localDateTime.atOffset(ZoneOffset.UTC);
-            } catch (DateTimeParseException ex2) {
-                throw ex;
-            }
-        }
+        return parseOffsetDateTimeValue(getStringValue());
     }
 
     @Nullable public LocalDate getLocalDateValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return LocalDate.parse(stringValue);
+        return parseLocalDateValue(getStringValue());
     }
 
     @Nullable public LocalTime getLocalTimeValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return LocalTime.parse(stringValue);
+        return parseLocalTimeValue(getStringValue());
     }
 
     @Nullable public PeriodAndDuration getPeriodAndDurationValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return PeriodAndDuration.parse(stringValue);
+        return parsePeriodAndDurationValue(getStringValue());
     }
 
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
@@ -231,6 +171,8 @@ public class FormParseNode implements ParseNode {
             return (T) parseIntegerValue(value);
         } else if (targetClass == Float.class) {
             return (T) parseFloatValue(value);
+        } else if (targetClass == Double.class) {
+            return (T) parseDoubleValue(value);
         } else if (targetClass == Long.class) {
             return (T) parseLongValue(value);
         } else if (targetClass == UUID.class) {
@@ -302,6 +244,15 @@ public class FormParseNode implements ParseNode {
         if (value == null) return null;
         try {
             return Float.parseFloat(value);
+        } catch (final NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    @Nullable private static Double parseDoubleValue(@Nullable final String value) {
+        if (value == null) return null;
+        try {
+            return Double.parseDouble(value);
         } catch (final NumberFormatException ex) {
             return null;
         }

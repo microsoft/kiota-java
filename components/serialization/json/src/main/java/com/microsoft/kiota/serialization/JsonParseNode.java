@@ -175,12 +175,9 @@ public class JsonParseNode implements ParseNode {
             final List<T> result = new ArrayList<>(array.size());
             for (final JsonElement item : array) {
                 if (!item.isJsonNull()) {
-                    final String rawValue = gson.fromJson(item, String.class);
-                    if (rawValue != null && !rawValue.isEmpty()) {
-                        final T value = enumParser.forValue(rawValue);
-                        if (value != null) {
-                            result.add(value);
-                        }
+                    final T value = parseEnumValue(gson.fromJson(item, String.class), enumParser);
+                    if (value != null) {
+                        result.add(value);
                     }
                 }
             }
@@ -232,7 +229,11 @@ public class JsonParseNode implements ParseNode {
     }
 
     @Nullable public <T extends Enum<T>> T getEnumValue(@Nonnull final ValuedEnumParser<T> enumParser) {
-        final String rawValue = this.getStringValue();
+        return parseEnumValue(this.getStringValue(), enumParser);
+    }
+
+    @Nullable private static <T extends Enum<T>> T parseEnumValue(
+            @Nullable final String rawValue, @Nonnull final ValuedEnumParser<T> enumParser) {
         if (rawValue == null || rawValue.isEmpty()) {
             return null;
         }
