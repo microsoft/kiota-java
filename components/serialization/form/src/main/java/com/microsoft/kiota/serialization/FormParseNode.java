@@ -155,7 +155,7 @@ public class FormParseNode implements ParseNode {
     }
 
     @SuppressWarnings("unchecked")
-    @Nonnull private static <T> T convertPrimitiveValue(
+    @Nullable private static <T> T convertPrimitiveValue(
             @Nullable final String value, @Nonnull final Class<T> targetClass) {
         if (targetClass == Boolean.class) {
             return (T) parseBooleanValue(value);
