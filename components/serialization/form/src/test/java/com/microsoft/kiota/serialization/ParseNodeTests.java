@@ -49,7 +49,7 @@ public class ParseNodeTests {
                     "id=48d31887-5fad-4d73-a9f5-3c356e68a038";
 
     @Test
-    public void getsEntityValueFromForm() {
+    void getsEntityValueFromForm() {
         final FormParseNode parseNode = new FormParseNode(testUserForm);
         final TestEntity entity =
                 parseNode.getObjectValue(TestEntity::createFromDiscriminatorValue);
@@ -69,7 +69,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfObjectValuesFromForm() {
+    void getCollectionOfObjectValuesFromForm() {
         final FormParseNode parseNode = new FormParseNode(testUserForm);
         assertThrows(
                 RuntimeException.class,
@@ -79,14 +79,14 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void returnsDefaultIfChildNodeDoesNotExist() {
+    void returnsDefaultIfChildNodeDoesNotExist() {
         final FormParseNode parseNode = new FormParseNode(testUserForm);
         final ParseNode childNode = parseNode.getChildNode("doesNotExist");
         assertNull(childNode);
     }
 
     @Test
-    public void getCollectionOfBooleanPrimitiveValuesFromForm() {
+    void getCollectionOfBooleanPrimitiveValuesFromForm() {
         final String TestFormData = "bools=true&" + "bools=false";
         final ParseNode numberNode = new FormParseNode(TestFormData).getChildNode("bools");
         final List<Boolean> numberCollection =
@@ -97,7 +97,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfGuidPrimitiveValuesFromForm() {
+    void getCollectionOfGuidPrimitiveValuesFromForm() {
         final String TestFormData =
                 "ids=48d31887-5fad-4d73-a9f5-3c356e68a038&"
                         + "ids=48d31887-5fad-4d73-a9f5-3c356e68a038";
@@ -140,7 +140,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfStringPrimitiveValuesFromForm() {
+    void getCollectionOfStringPrimitiveValuesFromForm() {
         final String testFormData = "names=Alice&names=Bob";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("names");
         final List<String> result = node.getCollectionOfPrimitiveValues(String.class);
@@ -151,7 +151,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfIntegerPrimitiveValuesFromForm() {
+    void getCollectionOfIntegerPrimitiveValuesFromForm() {
         final String testFormData = "nums=1&nums=2&nums=3";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("nums");
         final List<Integer> result = node.getCollectionOfPrimitiveValues(Integer.class);
@@ -163,7 +163,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfLongPrimitiveValuesFromForm() {
+    void getCollectionOfLongPrimitiveValuesFromForm() {
         final String testFormData = "vals=100&vals=200";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<Long> result = node.getCollectionOfPrimitiveValues(Long.class);
@@ -174,7 +174,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfDoublePrimitiveValuesFromForm() {
+    void getCollectionOfDoublePrimitiveValuesFromForm() {
         final String testFormData = "vals=1.5&vals=2.5";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<Double> result = node.getCollectionOfPrimitiveValues(Double.class);
@@ -185,7 +185,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfFloatPrimitiveValuesFromForm() {
+    void getCollectionOfFloatPrimitiveValuesFromForm() {
         final String testFormData = "vals=1.5&vals=2.5";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<Float> result = node.getCollectionOfPrimitiveValues(Float.class);
@@ -196,7 +196,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfShortPrimitiveValuesFromForm() {
+    void getCollectionOfShortPrimitiveValuesFromForm() {
         final String testFormData = "vals=10&vals=20";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<Short> result = node.getCollectionOfPrimitiveValues(Short.class);
@@ -207,7 +207,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfBytePrimitiveValuesFromForm() {
+    void getCollectionOfBytePrimitiveValuesFromForm() {
         final String testFormData = "vals=1&vals=2";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<Byte> result = node.getCollectionOfPrimitiveValues(Byte.class);
@@ -218,7 +218,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfBigDecimalPrimitiveValuesFromForm() {
+    void getCollectionOfBigDecimalPrimitiveValuesFromForm() {
         final String testFormData = "vals=123.45&vals=678.90";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<BigDecimal> result = node.getCollectionOfPrimitiveValues(BigDecimal.class);
@@ -229,7 +229,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfOffsetDateTimePrimitiveValuesFromForm() {
+    void getCollectionOfOffsetDateTimePrimitiveValuesFromForm() {
         final String dt1 = "2024-01-01T00:00:00Z";
         final String dt2 = "2024-06-15T12:30:00Z";
         final String testFormData =
@@ -247,7 +247,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfLocalDatePrimitiveValuesFromForm() {
+    void getCollectionOfLocalDatePrimitiveValuesFromForm() {
         final String testFormData = "vals=2024-01-01&vals=2024-06-15";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<LocalDate> result = node.getCollectionOfPrimitiveValues(LocalDate.class);
@@ -258,7 +258,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfLocalTimePrimitiveValuesFromForm() {
+    void getCollectionOfLocalTimePrimitiveValuesFromForm() {
         final String testFormData = "vals=08:00:00&vals=17:30:00";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<LocalTime> result = node.getCollectionOfPrimitiveValues(LocalTime.class);
@@ -269,7 +269,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfPeriodAndDurationPrimitiveValuesFromForm() {
+    void getCollectionOfPeriodAndDurationPrimitiveValuesFromForm() {
         final String testFormData = "vals=P1M&vals=PT2H";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         final List<PeriodAndDuration> result =
@@ -281,7 +281,7 @@ public class ParseNodeTests {
     }
 
     @Test
-    public void getCollectionOfPrimitiveValuesThrowsForUnknownType() {
+    void getCollectionOfPrimitiveValuesThrowsForUnknownType() {
         final String testFormData = "vals=foo";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
         assertThrows(
