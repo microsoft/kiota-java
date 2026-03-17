@@ -16,11 +16,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -90,10 +88,111 @@ public class FormParseNode implements ParseNode {
     }
 
     @Nullable public Boolean getBooleanValue() {
-        switch (getStringValue()
-                .toLowerCase(
-                        Locale.ROOT)) { // boolean parse returns false for any value that is not
-                // true
+        return parseBooleanValue(getStringValue());
+    }
+
+    @Nullable public Byte getByteValue() {
+        return parseByteValue(getStringValue());
+    }
+
+    @Nullable public Short getShortValue() {
+        return parseShortValue(getStringValue());
+    }
+
+    @Nullable public BigDecimal getBigDecimalValue() {
+        return parseBigDecimalValue(getStringValue());
+    }
+
+    @Nullable public Integer getIntegerValue() {
+        return parseIntegerValue(getStringValue());
+    }
+
+    @Nullable public Float getFloatValue() {
+        return parseFloatValue(getStringValue());
+    }
+
+    @Nullable public Double getDoubleValue() {
+        return parseDoubleValue(getStringValue());
+    }
+
+    @Nullable public Long getLongValue() {
+        return parseLongValue(getStringValue());
+    }
+
+    @Nullable public UUID getUUIDValue() {
+        return parseUUIDValue(getStringValue());
+    }
+
+    @Nullable public OffsetDateTime getOffsetDateTimeValue() {
+        return parseOffsetDateTimeValue(getStringValue());
+    }
+
+    @Nullable public LocalDate getLocalDateValue() {
+        return parseLocalDateValue(getStringValue());
+    }
+
+    @Nullable public LocalTime getLocalTimeValue() {
+        return parseLocalTimeValue(getStringValue());
+    }
+
+    @Nullable public PeriodAndDuration getPeriodAndDurationValue() {
+        return parsePeriodAndDurationValue(getStringValue());
+    }
+
+    @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
+        final String[] primitiveStringCollection = getStringValue().split(",");
+        final List<T> result = new ArrayList<>(primitiveStringCollection.length);
+        for (final String item : primitiveStringCollection) {
+            String decodedItem;
+            try {
+                decodedItem = URLDecoder.decode(item, encoding);
+            } catch (UnsupportedEncodingException e) {
+                decodedItem = item;
+            }
+            result.add(convertPrimitiveValue(decodedItem, targetClass));
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable private static <T> T convertPrimitiveValue(
+            @Nullable final String value, @Nonnull final Class<T> targetClass) {
+        if (targetClass == Boolean.class) {
+            return (T) parseBooleanValue(value);
+        } else if (targetClass == Short.class) {
+            return (T) parseShortValue(value);
+        } else if (targetClass == Byte.class) {
+            return (T) parseByteValue(value);
+        } else if (targetClass == BigDecimal.class) {
+            return (T) parseBigDecimalValue(value);
+        } else if (targetClass == String.class) {
+            return (T) (value != null && value.equalsIgnoreCase("null") ? null : value);
+        } else if (targetClass == Integer.class) {
+            return (T) parseIntegerValue(value);
+        } else if (targetClass == Float.class) {
+            return (T) parseFloatValue(value);
+        } else if (targetClass == Double.class) {
+            return (T) parseDoubleValue(value);
+        } else if (targetClass == Long.class) {
+            return (T) parseLongValue(value);
+        } else if (targetClass == UUID.class) {
+            return (T) parseUUIDValue(value);
+        } else if (targetClass == OffsetDateTime.class) {
+            return (T) parseOffsetDateTimeValue(value);
+        } else if (targetClass == LocalDate.class) {
+            return (T) parseLocalDateValue(value);
+        } else if (targetClass == LocalTime.class) {
+            return (T) parseLocalTimeValue(value);
+        } else if (targetClass == PeriodAndDuration.class) {
+            return (T) parsePeriodAndDurationValue(value);
+        } else {
+            throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
+        }
+    }
+
+    @Nullable private static Boolean parseBooleanValue(@Nullable final String value) {
+        if (value == null) return null;
+        switch (value.toLowerCase(Locale.ROOT)) {
             case "true":
             case "1":
                 return true;
@@ -105,77 +204,81 @@ public class FormParseNode implements ParseNode {
         }
     }
 
-    @Nullable public Byte getByteValue() {
+    @Nullable private static Byte parseByteValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return Byte.parseByte(getStringValue());
+            return Byte.parseByte(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public Short getShortValue() {
+    @Nullable private static Short parseShortValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return Short.parseShort(getStringValue());
+            return Short.parseShort(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public BigDecimal getBigDecimalValue() {
+    @Nullable private static BigDecimal parseBigDecimalValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return new BigDecimal(getStringValue());
+            return new BigDecimal(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public Integer getIntegerValue() {
+    @Nullable private static Integer parseIntegerValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return Integer.parseInt(getStringValue());
+            return Integer.parseInt(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public Float getFloatValue() {
+    @Nullable private static Float parseFloatValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return Float.parseFloat(getStringValue());
+            return Float.parseFloat(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public Double getDoubleValue() {
+    @Nullable private static Double parseDoubleValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return Double.parseDouble(getStringValue());
+            return Double.parseDouble(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public Long getLongValue() {
+    @Nullable private static Long parseLongValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return Long.parseLong(getStringValue());
+            return Long.parseLong(value);
         } catch (final NumberFormatException ex) {
             return null;
         }
     }
 
-    @Nullable public UUID getUUIDValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return UUID.fromString(stringValue);
+    @Nullable private static UUID parseUUIDValue(@Nullable final String value) {
+        if (value == null) return null;
+        return UUID.fromString(value);
     }
 
-    @Nullable public OffsetDateTime getOffsetDateTimeValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
+    @Nullable private static OffsetDateTime parseOffsetDateTimeValue(@Nullable final String value) {
+        if (value == null) return null;
         try {
-            return OffsetDateTime.parse(stringValue);
+            return OffsetDateTime.parse(value);
         } catch (DateTimeParseException ex) {
-            // Append UTC offset if it's missing
             try {
-                LocalDateTime localDateTime = LocalDateTime.parse(stringValue);
+                LocalDateTime localDateTime = LocalDateTime.parse(value);
                 return localDateTime.atOffset(ZoneOffset.UTC);
             } catch (DateTimeParseException ex2) {
                 throw ex;
@@ -183,93 +286,19 @@ public class FormParseNode implements ParseNode {
         }
     }
 
-    @Nullable public LocalDate getLocalDateValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return LocalDate.parse(stringValue);
+    @Nullable private static LocalDate parseLocalDateValue(@Nullable final String value) {
+        if (value == null) return null;
+        return LocalDate.parse(value);
     }
 
-    @Nullable public LocalTime getLocalTimeValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return LocalTime.parse(stringValue);
+    @Nullable private static LocalTime parseLocalTimeValue(@Nullable final String value) {
+        if (value == null) return null;
+        return LocalTime.parse(value);
     }
 
-    @Nullable public PeriodAndDuration getPeriodAndDurationValue() {
-        final String stringValue = getStringValue();
-        if (stringValue == null) return null;
-        return PeriodAndDuration.parse(stringValue);
-    }
-
-    @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
-        final List<String> primitiveStringCollection = Arrays.asList(getStringValue().split(","));
-        final Iterator<String> sourceIterator = primitiveStringCollection.iterator();
-        final FormParseNode _this = this;
-        final List<T> result = new ArrayList<>();
-        final Iterable<T> iterable =
-                new Iterable<T>() {
-                    @Override
-                    public Iterator<T> iterator() {
-                        return new Iterator<T>() {
-                            @Override
-                            public boolean hasNext() {
-                                return sourceIterator.hasNext();
-                            }
-
-                            @Override
-                            @SuppressWarnings("unchecked")
-                            public T next() {
-                                final String item = sourceIterator.next();
-                                final Consumer<Parsable> onBefore =
-                                        _this.getOnBeforeAssignFieldValues();
-                                final Consumer<Parsable> onAfter =
-                                        _this.getOnAfterAssignFieldValues();
-                                final FormParseNode itemNode =
-                                        new FormParseNode(item) {
-                                            {
-                                                this.setOnBeforeAssignFieldValues(onBefore);
-                                                this.setOnAfterAssignFieldValues(onAfter);
-                                            }
-                                        };
-                                if (targetClass == Boolean.class) {
-                                    return (T) itemNode.getBooleanValue();
-                                } else if (targetClass == Short.class) {
-                                    return (T) itemNode.getShortValue();
-                                } else if (targetClass == Byte.class) {
-                                    return (T) itemNode.getByteValue();
-                                } else if (targetClass == BigDecimal.class) {
-                                    return (T) itemNode.getBigDecimalValue();
-                                } else if (targetClass == String.class) {
-                                    return (T) itemNode.getStringValue();
-                                } else if (targetClass == Integer.class) {
-                                    return (T) itemNode.getIntegerValue();
-                                } else if (targetClass == Float.class) {
-                                    return (T) itemNode.getFloatValue();
-                                } else if (targetClass == Long.class) {
-                                    return (T) itemNode.getLongValue();
-                                } else if (targetClass == UUID.class) {
-                                    return (T) itemNode.getUUIDValue();
-                                } else if (targetClass == OffsetDateTime.class) {
-                                    return (T) itemNode.getOffsetDateTimeValue();
-                                } else if (targetClass == LocalDate.class) {
-                                    return (T) itemNode.getLocalDateValue();
-                                } else if (targetClass == LocalTime.class) {
-                                    return (T) itemNode.getLocalTimeValue();
-                                } else if (targetClass == PeriodAndDuration.class) {
-                                    return (T) itemNode.getPeriodAndDurationValue();
-                                } else {
-                                    throw new RuntimeException(
-                                            "unknown type to deserialize " + targetClass.getName());
-                                }
-                            }
-                        };
-                    }
-                };
-
-        for (T elem : iterable) {
-            result.add(elem);
-        }
-        return result;
+    @Nullable private static PeriodAndDuration parsePeriodAndDurationValue(@Nullable final String value) {
+        if (value == null) return null;
+        return PeriodAndDuration.parse(value);
     }
 
     @Nullable public <T extends Parsable> List<T> getCollectionOfObjectValues(
