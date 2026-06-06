@@ -473,6 +473,149 @@ class RequestInformationTest {
         assertEquals("http://localhost/1,2", uri.toString());
     }
 
+    @Test
+    void ExpandsMapQueryParameterAsIndividualKeyValuePairs()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.query = new HashMap<>();
+        queryParameters.query.put("filter", "equals(published,true)");
+        queryParameters.query.put("sort", "-createdAt");
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert — RFC 6570 {?query*} expands each map entry as its own key=value pair.
+        // Java's URLEncoder encodes ( → %28, ) → %29, , → %2C.
+        final URI uri = requestInfo.getUri();
+        final String uriStr = uri.toString();
+        assertTrue(uriStr.contains("filter=equals%28published%2Ctrue%29"));
+        assertTrue(uriStr.contains("sort=-createdAt"));
+    }
+
+    @Test
+    void SkipsNullValuesWhenExpandingMapQueryParameter()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final Map<String, String> mapWithNull = new HashMap<>();
+        mapWithNull.put("filter", "equals(published,true)");
+        mapWithNull.put("sort", null);
+
+        // Act
+        requestInfo.addQueryParameter("query", mapWithNull);
+
+        // Assert — null-valued entry is silently dropped
+        final URI uri = requestInfo.getUri();
+        final String uriStr = uri.toString();
+        assertTrue(uriStr.contains("filter=equals%28published%2Ctrue%29"));
+        assertFalse(uriStr.contains("sort"));
+    }
+
+    @Test
+    void DoesNotThrowWhenMapQueryParameterContainsNullValues()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final Map<String, String> mapWithNull = new HashMap<>();
+        mapWithNull.put("filter", "value");
+        mapWithNull.put("sort", null);
+
+        // Act + Assert — must not throw NullPointerException
+        assertDoesNotThrow(() -> requestInfo.addQueryParameter("query", mapWithNull));
+        final URI uri = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uri.toString().contains("filter=value"));
+        assertFalse(uri.toString().contains("sort"));
+    }
+
+    @Test
+    void PreservesEmptyStringValueInMapQueryParameter()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final Map<String, String> map = new HashMap<>();
+        map.put("filter", "");
+
+        // Act
+        requestInfo.addQueryParameter("query", map);
+
+        // Assert — empty string emits ?filter= (key present, no value)
+        final URI uri = requestInfo.getUri();
+        assertTrue(uri.toString().contains("filter="));
+    }
+
+    @Test
+    void OmitsMapQueryParameterEntirelyWhenAllValuesAreNull()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final Map<String, String> allNull = new HashMap<>();
+        allNull.put("filter", null);
+        allNull.put("sort", null);
+
+        // Act
+        requestInfo.addQueryParameter("query", allNull);
+
+        // Assert — sanitized map is empty → StdUriTemplate omits the parameter entirely
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/articles", uri.toString());
+    }
+
+    @Test
+    void OmitsMapQueryParameterEntirelyWhenMapIsEmpty()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.query = new HashMap<>();
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/articles", uri.toString());
+    }
+
+    @Test
+    void MixesMapQueryParameterWithScalarQueryParameters()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?%24top,query*}";
+
+        requestInfo.addQueryParameter("%24top", 5);
+        final Map<String, String> map = new HashMap<>();
+        map.put("filter", "active");
+        requestInfo.addQueryParameter("query", map);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        final String uriStr = uri.toString();
+        assertTrue(uriStr.contains("%24top=5"));
+        assertTrue(uriStr.contains("filter=active"));
+    }
+
     public final SerializationWriterFactory createMockSerializationWriterFactory(
             SerializationWriter writer) {
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
@@ -518,6 +661,12 @@ class GetQueryParameters implements QueryParameters {
      */
     @jakarta.annotation.Nullable public PeriodAndDuration[] messageAges;
 
+    /**
+     * Free-form key-value query parameters (type: object + additionalProperties).
+     * Expanded via RFC 6570 {?query*} into individual key=value pairs.
+     */
+    @jakarta.annotation.Nullable public Map<String, String> query;
+
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
         final Map<String, Object> allQueryParams = new HashMap<>();
         allQueryParams.put("%24select", select);
@@ -528,6 +677,7 @@ class GetQueryParameters implements QueryParameters {
         allQueryParams.put("parallelDatasetIds", parallelDatasetIds);
         allQueryParams.put("expandChildren", expandChildren);
         allQueryParams.put("periods", messageAges);
+        allQueryParams.put("query", query);
         return allQueryParams;
     }
 }
