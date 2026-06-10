@@ -1,17 +1,17 @@
 {
-	"name": "Java",
-	"image": "mcr.microsoft.com/devcontainers/java:17",
+	"name": "Java 21 & Gradle",
+	"image": "mcr.microsoft.com/devcontainers/java:21-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {
 			"version": "none",
 			"installMaven": "true",
 			"installGradle": "true"
 		},
-		"ghcr.io/devcontainers/features/node:1": {
+		"ghcr.io/devcontainers/features/node:2": {
 			"version": "lts"
 		},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers/features/powershell:1": {}
+		"ghcr.io/devcontainers/features/powershell:2": {}
 	},
 	// Configure tool-specific properties.
 	"customizations": {
