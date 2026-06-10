@@ -73,4 +73,8 @@ public abstract class SerializationWriterProxyFactory implements SerializationWr
                 });
         return writer;
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

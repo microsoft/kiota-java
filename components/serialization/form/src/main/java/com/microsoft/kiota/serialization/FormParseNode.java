@@ -140,7 +140,11 @@ public class FormParseNode implements ParseNode {
     }
 
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
-        final String[] primitiveStringCollection = getStringValue().split(",");
+        final String rawValue = getStringValue();
+        if (rawValue == null) {
+            return null;
+        }
+        final String[] primitiveStringCollection = rawValue.split(",");
         final List<T> result = new ArrayList<>(primitiveStringCollection.length);
         for (final String item : primitiveStringCollection) {
             String decodedItem;

@@ -85,4 +85,8 @@ public class HeadersInspectionHandler implements Interceptor {
             }
         }
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

@@ -119,6 +119,10 @@ public class JsonParseNode implements ParseNode {
         return gson.fromJson(currentNode, LocalDate.class);
     }
 
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
+
     @Nullable public LocalTime getLocalTimeValue() {
         return gson.fromJson(currentNode, LocalTime.class);
     }

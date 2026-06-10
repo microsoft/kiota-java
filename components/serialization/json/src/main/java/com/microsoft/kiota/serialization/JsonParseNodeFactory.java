@@ -54,4 +54,8 @@ public class JsonParseNodeFactory implements ParseNodeFactory {
             throw new RuntimeException("could not close the reader", ex);
         }
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

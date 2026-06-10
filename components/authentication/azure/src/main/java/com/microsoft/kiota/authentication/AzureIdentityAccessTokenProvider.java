@@ -181,4 +181,8 @@ public class AzureIdentityAccessTokenProvider implements AccessTokenProvider {
         Objects.requireNonNull(host);
         return localhostStrings.contains(host.toLowerCase(Locale.ROOT));
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

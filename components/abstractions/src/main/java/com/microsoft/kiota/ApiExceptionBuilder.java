@@ -99,4 +99,8 @@ public class ApiExceptionBuilder {
         value = null;
         return result;
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

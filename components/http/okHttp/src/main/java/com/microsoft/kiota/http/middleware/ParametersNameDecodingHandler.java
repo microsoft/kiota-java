@@ -98,6 +98,10 @@ public class ParametersNameDecodingHandler implements Interceptor {
         }
     }
 
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
+
     /**
      * INTERNAL Decodes the query parameters that are in the list of parameters to decode
      * @param original the original query string

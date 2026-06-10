@@ -44,4 +44,8 @@ public class BasicAccessAuthenticationProvider implements AuthenticationProvider
             @Nullable final Map<String, Object> additionalAuthenticationContext) {
         request.headers.add(AUTHORIZATION_HEADER_KEY, BASIC + encoded);
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

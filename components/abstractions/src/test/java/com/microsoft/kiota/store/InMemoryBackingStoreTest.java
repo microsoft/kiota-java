@@ -450,6 +450,7 @@ class InMemoryBackingStoreTest {
         manager.setId("2fe22fe5-1132-42cf-90f9-1dc17e325a74");
         manager.getBackingStore().setIsInitializationCompleted(true);
         var collectionValues = testUserCollectionResponse.getValue();
+        assertNotNull(collectionValues);
         collectionValues.get(0).setManager(manager);
 
         // Assert by retrieving only changed values
@@ -504,7 +505,9 @@ class InMemoryBackingStoreTest {
         testUser.setValue(colleagues);
 
         testUser.getBackingStore().setIsInitializationCompleted(true);
-        for (TestEntity colleague : testUser.getValue()) {
+        final var values = testUser.getValue();
+        assertNotNull(values);
+        for (TestEntity colleague : values) {
             assertTrue(colleague.getBackingStore().getIsInitializationCompleted());
         }
     }

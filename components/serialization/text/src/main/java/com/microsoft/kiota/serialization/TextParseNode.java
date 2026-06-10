@@ -78,7 +78,8 @@ public class TextParseNode implements ParseNode {
     }
 
     @Nullable public UUID getUUIDValue() {
-        return UUID.fromString(this.getStringValue());
+        final String value = this.getStringValue();
+        return value != null ? UUID.fromString(value) : null;
     }
 
     @Nullable public OffsetDateTime getOffsetDateTimeValue() {
@@ -104,7 +105,8 @@ public class TextParseNode implements ParseNode {
     }
 
     @Nullable public PeriodAndDuration getPeriodAndDurationValue() {
-        return PeriodAndDuration.parse(this.getStringValue());
+        final String value = this.getStringValue();
+        return value != null ? PeriodAndDuration.parse(value) : null;
     }
 
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {
@@ -165,4 +167,8 @@ public class TextParseNode implements ParseNode {
         }
         return Base64.getDecoder().decode(base64);
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

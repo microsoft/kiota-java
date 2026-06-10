@@ -86,4 +86,8 @@ public class UrlReplaceHandlerOption implements RequestOption {
     @Nonnull public <T extends RequestOption> Class<T> getType() {
         return (Class<T>) UrlReplaceHandlerOption.class;
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }

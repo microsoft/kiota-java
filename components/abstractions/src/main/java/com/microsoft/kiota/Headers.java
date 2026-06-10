@@ -88,4 +88,8 @@ public abstract class Headers extends CaseInsensitiveMap {
         }
         return false;
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() {}
 }
