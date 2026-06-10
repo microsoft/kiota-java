@@ -48,3 +48,8 @@ updates:
     open-telemetry:
       patterns:
         - "*opentelemetry*"
+- package-ecosystem: devcontainers
+  directory: "/.devcontainer"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
