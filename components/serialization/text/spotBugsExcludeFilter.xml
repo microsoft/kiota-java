@@ -7,4 +7,8 @@
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
 		<Class name="com.microsoft.kiota.serialization.TextSerializationWriter" />
 	</Match>
+	<Match>
+		<Bug pattern="CT_CONSTRUCTOR_THROW" />
+		<Class name="com.microsoft.kiota.serialization.TextParseNode" />
+	</Match>
 </FindBugsFilter>

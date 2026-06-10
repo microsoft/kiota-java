@@ -59,8 +59,4 @@ public abstract class ParseNodeProxyFactory implements ParseNodeFactory {
                 });
         return node;
     }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
 }

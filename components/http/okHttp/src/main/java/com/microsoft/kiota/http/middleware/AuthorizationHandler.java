@@ -137,8 +137,4 @@ public class AuthorizationHandler implements Interceptor {
         }
         return request;
     }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
 }

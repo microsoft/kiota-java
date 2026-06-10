@@ -127,10 +127,6 @@ public class RequestInformation {
         }
     }
 
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
-
     /**
      * Sets the URI of the request.
      * @param uri the URI of the request.

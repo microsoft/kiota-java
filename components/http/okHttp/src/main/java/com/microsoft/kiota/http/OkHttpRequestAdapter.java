@@ -1005,8 +1005,4 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             span.end();
         }
     }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
 }

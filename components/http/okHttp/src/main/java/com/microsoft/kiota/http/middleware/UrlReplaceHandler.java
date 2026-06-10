@@ -72,10 +72,6 @@ public class UrlReplaceHandler implements Interceptor {
         return chain.proceed(request);
     }
 
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
-
     /**
      * Gets the UrlReplaceHandlerOption for the UrlReplaceHandler.
      * @return the UrlReplaceHandlerOption for the UrlReplaceHandler.

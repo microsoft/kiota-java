@@ -42,8 +42,4 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
         }
         return new JsonSerializationWriter(gson);
     }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
 }

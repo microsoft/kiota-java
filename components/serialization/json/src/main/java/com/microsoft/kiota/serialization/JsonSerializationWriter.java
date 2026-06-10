@@ -111,10 +111,6 @@ public class JsonSerializationWriter implements SerializationWriter {
             }
     }
 
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
-
     public void writeIntegerValue(@Nullable final String key, @Nullable final Integer value) {
         if (value != null)
             try {

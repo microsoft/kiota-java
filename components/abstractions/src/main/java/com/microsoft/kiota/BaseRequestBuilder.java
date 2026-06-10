@@ -54,8 +54,4 @@ public abstract class BaseRequestBuilder {
         this(requestAdapter, urlTemplate);
         this.pathParameters.put(RequestInformation.RAW_URL_KEY, Objects.requireNonNull(rawUrl));
     }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
 }

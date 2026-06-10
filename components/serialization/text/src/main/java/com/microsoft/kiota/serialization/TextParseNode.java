@@ -167,8 +167,4 @@ public class TextParseNode implements ParseNode {
         }
         return Base64.getDecoder().decode(base64);
     }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() {}
 }

@@ -39,4 +39,15 @@
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
 		<Class name="com.microsoft.kiota.http.middleware.UserAgentHandlerTest" />
 	</Match>
+	<Match>
+		<Bug pattern="CT_CONSTRUCTOR_THROW" />
+		<Or>
+			<Class name="com.microsoft.kiota.http.OkHttpRequestAdapter" />
+			<Class name="com.microsoft.kiota.http.middleware.AuthorizationHandler" />
+			<Class name="com.microsoft.kiota.http.middleware.HeadersInspectionHandler" />
+			<Class name="com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler" />
+			<Class name="com.microsoft.kiota.http.middleware.UrlReplaceHandler" />
+			<Class name="com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption" />
+		</Or>
+	</Match>
 </FindBugsFilter>
