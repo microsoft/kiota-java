@@ -85,7 +85,7 @@ public class RetryHandler implements Interceptor {
             int executionCount,
             @Nonnull final Request request,
             @Nonnull final RetryHandlerOption retryOption,
-            @Nonnull final Span span) {
+            @Nullable final Span span) {
 
         // Should retry option
         // Use should retry common for all requests
@@ -110,7 +110,9 @@ public class RetryHandler implements Interceptor {
 
         if (shouldRetry) {
             long retryInterval = getRetryAfter(response, retryOption.delay(), executionCount);
-            span.setAttribute(HTTP_REQUEST_RESEND_DELAY, Math.round(retryInterval / 1000f));
+            if (span != null) {
+                span.setAttribute(HTTP_REQUEST_RESEND_DELAY, Math.round(retryInterval / 1000f));
+            }
             try {
                 Thread.sleep(retryInterval);
             } catch (InterruptedException e) {
@@ -258,7 +260,8 @@ public class RetryHandler implements Interceptor {
             }
 
             int executionCount = 1;
-            while (retryRequest(response, executionCount, request, retryOption, span)) {
+            while (retryRequest(
+                    response, executionCount, request, Objects.requireNonNull(retryOption), span)) {
                 final Request.Builder builder =
                         request.newBuilder()
                                 .addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
@@ -266,9 +269,6 @@ public class RetryHandler implements Interceptor {
                     builder.tag(Span.class, span);
                 }
                 request = builder.build();
-                if (request == null) {
-                    throw new IllegalArgumentException("request cannot be null");
-                }
                 executionCount++;
                 final ResponseBody body = response.body();
                 if (body != null) body.close();

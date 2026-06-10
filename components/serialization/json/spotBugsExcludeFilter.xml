@@ -32,4 +32,13 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 		<Bug pattern="NP_BOOLEAN_RETURN_NULL" />
 		<Class name="com.microsoft.kiota.serialization.JsonParseNode" />
 	</Match>
+	<Match>
+		<Bug pattern="CT_CONSTRUCTOR_THROW" />
+		<Or>
+			<Class name="com.microsoft.kiota.serialization.JsonParseNode" />
+			<Class name="com.microsoft.kiota.serialization.JsonParseNodeFactory" />
+			<Class name="com.microsoft.kiota.serialization.JsonSerializationWriter" />
+			<Class name="com.microsoft.kiota.serialization.JsonSerializationWriterFactory" />
+		</Or>
+	</Match>
 </FindBugsFilter>

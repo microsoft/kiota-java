@@ -42,6 +42,9 @@ public class BaseBearerTokenAuthenticationProvider implements AuthenticationProv
             } catch (URISyntaxException e) {
                 throw new RuntimeException("Malformed URI.", e);
             }
+            if (targetUri == null) {
+                throw new IllegalStateException("Request URI cannot be null.");
+            }
             String accessToken =
                     this.accessTokenProvider.getAuthorizationToken(
                             targetUri, additionalAuthenticationContext);

@@ -44,6 +44,7 @@ class RequestInformationTest {
         requestInfo.urlTemplate = "{+baseurl}/users{?%24count}";
 
         // Act
+        assertNotNull(requestInfo.pathParameters);
         requestInfo.pathParameters.put("baseurl", "http://localhost");
 
         // Assert

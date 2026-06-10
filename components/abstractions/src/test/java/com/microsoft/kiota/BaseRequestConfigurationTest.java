@@ -20,9 +20,10 @@ public class BaseRequestConfigurationTest {
 
         RequestOption requestOption =
                 new RequestOption() {
+                    @SuppressWarnings("unchecked")
                     @Override
                     public <T extends RequestOption> Class<T> getType() {
-                        return null;
+                        return (Class<T>) RequestOption.class;
                     }
                 };
         // options should be mutable list

@@ -879,8 +879,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         .setParent(Context.current().with(parentSpan))
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
-            spanForAttributes.setAttribute(HTTP_REQUEST_METHOD, requestInfo.httpMethod.toString());
-            final URL requestURL = requestInfo.getUri().toURL();
+            final HttpMethod requestMethod =
+                    Objects.requireNonNull(requestInfo.httpMethod, "httpMethod cannot be null");
+            spanForAttributes.setAttribute(HTTP_REQUEST_METHOD, requestMethod.toString());
+            final java.net.URI requestUri =
+                    Objects.requireNonNull(requestInfo.getUri(), "request URI cannot be null");
+            final URL requestURL = requestUri.toURL();
             if (obsOptions.getIncludeEUIIAttributes()) {
                 spanForAttributes.setAttribute(URL_FULL, requestURL.toString());
             }
@@ -888,8 +892,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             spanForAttributes.setAttribute(SERVER_ADDRESS, requestURL.getHost());
             spanForAttributes.setAttribute(URL_SCHEME, requestURL.getProtocol());
 
+            final InputStream requestContent = requestInfo.content;
             RequestBody body =
-                    requestInfo.content == null
+                    requestContent == null
                             ? null
                             : new RequestBody() {
                                 @Override
@@ -910,7 +915,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public boolean isOneShot() {
-                                    return !requestInfo.content.markSupported();
+                                    return requestContent == null
+                                            || !requestContent.markSupported();
                                 }
 
                                 @Override
@@ -924,9 +930,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     }
                                     // super.contentLength() is not relied on since it defaults to
                                     // -1L, causing wrong telemetry added to the attributes.
-                                    if (requestInfo.content instanceof ByteArrayInputStream) {
+                                    if (requestContent instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
-                                                (ByteArrayInputStream) requestInfo.content;
+                                                (ByteArrayInputStream) requestContent;
                                         // using available() on a byte-array backed input stream is
                                         // reliable because array size is defined.
                                         return contentStream.available();
@@ -936,14 +942,14 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public void writeTo(@Nonnull BufferedSink sink) throws IOException {
-                                    long contentLength = contentLength();
+                                    final long contentLength = contentLength();
                                     if (contentLength > 0) {
-                                        requestInfo.content.mark((int) contentLength);
+                                        requestContent.mark((int) contentLength);
                                     }
-                                    sink.writeAll(Okio.source(requestInfo.content));
+                                    sink.writeAll(Okio.source(requestContent));
                                     if (!isOneShot()) {
                                         try {
-                                            requestInfo.content.reset();
+                                            requestContent.reset();
                                         } catch (Exception ex) {
                                             spanForAttributes.recordException(ex);
                                             // we don't want to fail the request if reset() fails

@@ -91,7 +91,7 @@ public class RequestInformation {
     @Nullable public String urlTemplate;
 
     /** The path parameters for the current request */
-    @Nullable public Map<String, Object> pathParameters = new HashMap<>();
+    @Nonnull public Map<String, Object> pathParameters = new HashMap<>();
 
     private URI uri;
 

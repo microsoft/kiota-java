@@ -67,4 +67,17 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
         <Bug pattern="SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR" />
         <Class name="com.microsoft.kiota.store.BackingStoreFactorySingleton" />
     </Match>
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+        <Or>
+            <Class name="com.microsoft.kiota.ApiExceptionBuilder" />
+            <Class name="com.microsoft.kiota.BaseRequestBuilder" />
+            <Class name="com.microsoft.kiota.Headers" />
+            <Class name="com.microsoft.kiota.RequestInformation" />
+            <Class name="com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider" />
+            <Class name="com.microsoft.kiota.authentication.BasicAccessAuthenticationProvider" />
+            <Class name="com.microsoft.kiota.serialization.ParseNodeProxyFactory" />
+            <Class name="com.microsoft.kiota.serialization.SerializationWriterProxyFactory" />
+        </Or>
+    </Match>
 </FindBugsFilter>

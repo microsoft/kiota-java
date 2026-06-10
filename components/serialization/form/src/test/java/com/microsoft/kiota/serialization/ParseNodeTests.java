@@ -89,6 +89,7 @@ public class ParseNodeTests {
     void getCollectionOfBooleanPrimitiveValuesFromForm() {
         final String TestFormData = "bools=true&" + "bools=false";
         final ParseNode numberNode = new FormParseNode(TestFormData).getChildNode("bools");
+        assertNotNull(numberNode);
         final List<Boolean> numberCollection =
                 numberNode.getCollectionOfPrimitiveValues(Boolean.class);
         assertNotNull(numberCollection);
@@ -102,6 +103,7 @@ public class ParseNodeTests {
                 "ids=48d31887-5fad-4d73-a9f5-3c356e68a038&"
                         + "ids=48d31887-5fad-4d73-a9f5-3c356e68a038";
         final ParseNode numberNode = new FormParseNode(TestFormData).getChildNode("ids");
+        assertNotNull(numberNode);
         var numberCollection = numberNode.getCollectionOfPrimitiveValues(UUID.class);
         assertNotNull(numberCollection);
         assertEquals(2, numberCollection.size());
@@ -143,6 +145,7 @@ public class ParseNodeTests {
     void getCollectionOfStringPrimitiveValuesFromForm() {
         final String testFormData = "names=Alice&names=Bob";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("names");
+        assertNotNull(node);
         final List<String> result = node.getCollectionOfPrimitiveValues(String.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -154,6 +157,7 @@ public class ParseNodeTests {
     void getCollectionOfIntegerPrimitiveValuesFromForm() {
         final String testFormData = "nums=1&nums=2&nums=3";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("nums");
+        assertNotNull(node);
         final List<Integer> result = node.getCollectionOfPrimitiveValues(Integer.class);
         assertNotNull(result);
         assertEquals(3, result.size());
@@ -166,6 +170,7 @@ public class ParseNodeTests {
     void getCollectionOfLongPrimitiveValuesFromForm() {
         final String testFormData = "vals=100&vals=200";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<Long> result = node.getCollectionOfPrimitiveValues(Long.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -177,6 +182,7 @@ public class ParseNodeTests {
     void getCollectionOfDoublePrimitiveValuesFromForm() {
         final String testFormData = "vals=1.5&vals=2.5";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<Double> result = node.getCollectionOfPrimitiveValues(Double.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -188,6 +194,7 @@ public class ParseNodeTests {
     void getCollectionOfFloatPrimitiveValuesFromForm() {
         final String testFormData = "vals=1.5&vals=2.5";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<Float> result = node.getCollectionOfPrimitiveValues(Float.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -199,6 +206,7 @@ public class ParseNodeTests {
     void getCollectionOfShortPrimitiveValuesFromForm() {
         final String testFormData = "vals=10&vals=20";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<Short> result = node.getCollectionOfPrimitiveValues(Short.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -210,6 +218,7 @@ public class ParseNodeTests {
     void getCollectionOfBytePrimitiveValuesFromForm() {
         final String testFormData = "vals=1&vals=2";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<Byte> result = node.getCollectionOfPrimitiveValues(Byte.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -221,6 +230,7 @@ public class ParseNodeTests {
     void getCollectionOfBigDecimalPrimitiveValuesFromForm() {
         final String testFormData = "vals=123.45&vals=678.90";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<BigDecimal> result = node.getCollectionOfPrimitiveValues(BigDecimal.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -238,6 +248,7 @@ public class ParseNodeTests {
                         + "&vals="
                         + URLEncoder.encode(dt2, StandardCharsets.UTF_8);
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<OffsetDateTime> result =
                 node.getCollectionOfPrimitiveValues(OffsetDateTime.class);
         assertNotNull(result);
@@ -250,6 +261,7 @@ public class ParseNodeTests {
     void getCollectionOfLocalDatePrimitiveValuesFromForm() {
         final String testFormData = "vals=2024-01-01&vals=2024-06-15";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<LocalDate> result = node.getCollectionOfPrimitiveValues(LocalDate.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -261,6 +273,7 @@ public class ParseNodeTests {
     void getCollectionOfLocalTimePrimitiveValuesFromForm() {
         final String testFormData = "vals=08:00:00&vals=17:30:00";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<LocalTime> result = node.getCollectionOfPrimitiveValues(LocalTime.class);
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -272,6 +285,7 @@ public class ParseNodeTests {
     void getCollectionOfPeriodAndDurationPrimitiveValuesFromForm() {
         final String testFormData = "vals=P1M&vals=PT2H";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         final List<PeriodAndDuration> result =
                 node.getCollectionOfPrimitiveValues(PeriodAndDuration.class);
         assertNotNull(result);
@@ -284,6 +298,7 @@ public class ParseNodeTests {
     void getCollectionOfPrimitiveValuesThrowsForUnknownType() {
         final String testFormData = "vals=foo";
         final ParseNode node = new FormParseNode(testFormData).getChildNode("vals");
+        assertNotNull(node);
         assertThrows(
                 RuntimeException.class, () -> node.getCollectionOfPrimitiveValues(Object.class));
     }
