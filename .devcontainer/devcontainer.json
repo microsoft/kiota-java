@@ -13,6 +13,9 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/powershell:2": {}
 	},
+	"containerEnv": {
+		"WAYLAND_DISPLAY": "disabled"
+	},
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
