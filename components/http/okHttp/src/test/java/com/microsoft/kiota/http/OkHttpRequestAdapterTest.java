@@ -51,6 +51,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class OkHttpRequestAdapterTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
     @ParameterizedTest
     @EnumSource(
             value = HttpMethod.class,
@@ -618,7 +622,7 @@ public class OkHttpRequestAdapterTest {
                         (Answer<Void>)
                                 invocation -> {
                                     Callback callback = invocation.getArgument(0);
-                                    callback.onResponse(null, response);
+                                    callback.onResponse(nullValue(), response);
                                     return null;
                                 })
                 .when(remoteCall)

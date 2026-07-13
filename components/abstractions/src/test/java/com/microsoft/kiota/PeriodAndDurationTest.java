@@ -10,30 +10,39 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 
 class PeriodAndDurationTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
     @Test
     void Defensive() {
         // Assert
         var exception =
-                assertThrows(NullPointerException.class, () -> PeriodAndDuration.of(null, null));
+                assertThrows(
+                        NullPointerException.class,
+                        () -> PeriodAndDuration.of(nullValue(), nullValue()));
         assertTrue(exception.getMessage().contains("period cannot be null"));
 
         var exception2 =
                 assertThrows(
                         NullPointerException.class,
-                        () -> PeriodAndDuration.of(null, Duration.ZERO));
+                        () -> PeriodAndDuration.of(nullValue(), Duration.ZERO));
         assertTrue(exception2.getMessage().contains("period cannot be null"));
 
         var exception3 =
                 assertThrows(
-                        NullPointerException.class, () -> PeriodAndDuration.of(Period.ZERO, null));
+                        NullPointerException.class,
+                        () -> PeriodAndDuration.of(Period.ZERO, nullValue()));
         assertTrue(exception3.getMessage().contains("duration cannot be null"));
 
         var exception4 =
-                assertThrows(NullPointerException.class, () -> PeriodAndDuration.ofDuration(null));
+                assertThrows(
+                        NullPointerException.class, () -> PeriodAndDuration.ofDuration(nullValue()));
         assertTrue(exception4.getMessage().contains("duration cannot be null"));
 
         var exception5 =
-                assertThrows(NullPointerException.class, () -> PeriodAndDuration.ofPeriod(null));
+                assertThrows(
+                        NullPointerException.class, () -> PeriodAndDuration.ofPeriod(nullValue()));
         assertTrue(exception5.getMessage().contains("period cannot be null"));
 
         final PeriodAndDuration periodAndDuration =

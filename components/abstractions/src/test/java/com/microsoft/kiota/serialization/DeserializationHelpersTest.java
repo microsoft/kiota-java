@@ -18,6 +18,18 @@ import java.util.ArrayList;
 class DeserializationHelpersTest {
     private static final String _jsonContentType = "application/json";
     private static final String _charset = "utf-8";
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+    private static String nullString() {
+        return nullValue();
+    }
+    private static InputStream nullInputStream() {
+        return nullValue();
+    }
+    private static ParsableFactory<TestEntity> nullFactory() {
+        return nullValue();
+    }
 
     @Test
     void defensive() {
@@ -25,15 +37,15 @@ class DeserializationHelpersTest {
                 NullPointerException.class,
                 () ->
                         KiotaSerialization.deserialize(
-                                null,
-                                (InputStream) null,
+                                nullString(),
+                                nullInputStream(),
                                 TestEntity::createFromDiscriminatorValue));
         assertThrows(
                 NullPointerException.class,
                 () ->
                         KiotaSerialization.deserialize(
                                 _jsonContentType,
-                                (InputStream) null,
+                                nullInputStream(),
                                 TestEntity::createFromDiscriminatorValue));
         assertThrows(
                 NullPointerException.class,
@@ -41,7 +53,7 @@ class DeserializationHelpersTest {
                         KiotaSerialization.deserialize(
                                 _jsonContentType,
                                 new ByteArrayInputStream("{}".getBytes(_charset)),
-                                (ParsableFactory<TestEntity>) null));
+                                nullFactory()));
     }
 
     @Test
@@ -50,15 +62,15 @@ class DeserializationHelpersTest {
                 NullPointerException.class,
                 () ->
                         KiotaSerialization.deserializeCollection(
-                                null,
-                                (InputStream) null,
+                                nullString(),
+                                nullInputStream(),
                                 TestEntity::createFromDiscriminatorValue));
         assertThrows(
                 NullPointerException.class,
                 () ->
                         KiotaSerialization.deserializeCollection(
                                 _jsonContentType,
-                                (InputStream) null,
+                                nullInputStream(),
                                 TestEntity::createFromDiscriminatorValue));
         assertThrows(
                 NullPointerException.class,
@@ -66,7 +78,7 @@ class DeserializationHelpersTest {
                         KiotaSerialization.deserializeCollection(
                                 _jsonContentType,
                                 new ByteArrayInputStream("{}".getBytes(_charset)),
-                                (ParsableFactory<TestEntity>) null));
+                                nullFactory()));
     }
 
     @Test
