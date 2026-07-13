@@ -24,15 +24,19 @@ import java.util.Arrays;
 class SerializationHelpersTest {
     private static final String _jsonContentType = "application/json";
     private static final String _charset = "utf-8";
+
     private static <T> T nullValue() {
         return java.util.Collections.<String, T>emptyMap().get("missing");
     }
+
     private static String nullString() {
         return nullValue();
     }
+
     private static Parsable nullParsable() {
         return nullValue();
     }
+
     private static Iterable<Parsable> nullParsableCollection() {
         return nullValue();
     }
@@ -51,9 +55,7 @@ class SerializationHelpersTest {
     void defensiveCollection() {
         assertThrows(
                 NullPointerException.class,
-                () ->
-                        KiotaSerialization.serializeAsStream(
-                                nullString(), nullParsableCollection()));
+                () -> KiotaSerialization.serializeAsStream(nullString(), nullParsableCollection()));
         assertThrows(
                 NullPointerException.class,
                 () ->

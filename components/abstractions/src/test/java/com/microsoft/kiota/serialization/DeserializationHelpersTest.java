@@ -18,15 +18,19 @@ import java.util.ArrayList;
 class DeserializationHelpersTest {
     private static final String _jsonContentType = "application/json";
     private static final String _charset = "utf-8";
+
     private static <T> T nullValue() {
         return java.util.Collections.<String, T>emptyMap().get("missing");
     }
+
     private static String nullString() {
         return nullValue();
     }
+
     private static InputStream nullInputStream() {
         return nullValue();
     }
+
     private static ParsableFactory<TestEntity> nullFactory() {
         return nullValue();
     }

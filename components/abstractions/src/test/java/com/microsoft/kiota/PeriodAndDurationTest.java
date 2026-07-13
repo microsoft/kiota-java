@@ -37,7 +37,8 @@ class PeriodAndDurationTest {
 
         var exception4 =
                 assertThrows(
-                        NullPointerException.class, () -> PeriodAndDuration.ofDuration(nullValue()));
+                        NullPointerException.class,
+                        () -> PeriodAndDuration.ofDuration(nullValue()));
         assertTrue(exception4.getMessage().contains("duration cannot be null"));
 
         var exception5 =
