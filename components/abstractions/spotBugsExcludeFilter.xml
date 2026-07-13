@@ -47,6 +47,23 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 		<Class name="com.microsoft.kiota.serialization.SerializationHelpersTest" />
 	</Match>
     <Match>
+        <Bug pattern="NP_NONNULL_PARAM_VIOLATION" />
+        <Or>
+            <Class name="com.microsoft.kiota.MultiPartBodyTest" />
+            <Class name="com.microsoft.kiota.PeriodAndDurationTest" />
+            <Class name="com.microsoft.kiota.authentication.ApiKeyAuthenticationProviderTest" />
+            <Class name="com.microsoft.kiota.serialization.DeserializationHelpersTest" />
+            <Class name="com.microsoft.kiota.serialization.SerializationHelpersTest" />
+        </Or>
+    </Match>
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+        <Or>
+            <Class name="com.microsoft.kiota.serialization.mocks.TestEntity$1" />
+            <Class name="com.microsoft.kiota.serialization.mocks.TestBackedModelEntity$1" />
+        </Or>
+    </Match>
+    <Match>
         <Bug pattern="EI_EXPOSE_REP" />
         <Or>
             <Class name="com.microsoft.kiota.serialization.mocks.TestEntity" />

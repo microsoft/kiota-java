@@ -36,6 +36,10 @@
 		<Class name="~com\.microsoft\.kiota\.http\.OkHttpRequestAdapterTest.*" />
 	</Match>
 	<Match>
+		<Bug pattern="NP_NONNULL_PARAM_VIOLATION" />
+		<Class name="com.microsoft.kiota.http.OkHttpRequestAdapterTest" />
+	</Match>
+	<Match>
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
 		<Class name="com.microsoft.kiota.http.middleware.UserAgentHandlerTest" />
 	</Match>
