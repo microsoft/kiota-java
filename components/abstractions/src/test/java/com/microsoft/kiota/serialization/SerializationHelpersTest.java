@@ -25,26 +25,42 @@ class SerializationHelpersTest {
     private static final String _jsonContentType = "application/json";
     private static final String _charset = "utf-8";
 
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
+    private static String nullString() {
+        return nullValue();
+    }
+
+    private static Parsable nullParsable() {
+        return nullValue();
+    }
+
+    private static Iterable<Parsable> nullParsableCollection() {
+        return nullValue();
+    }
+
     @Test
     void defensive() {
         assertThrows(
                 NullPointerException.class,
-                () -> KiotaSerialization.serializeAsStream(null, (Parsable) null));
+                () -> KiotaSerialization.serializeAsStream(nullString(), nullParsable()));
         assertThrows(
                 NullPointerException.class,
-                () -> KiotaSerialization.serializeAsStream(_jsonContentType, (Parsable) null));
+                () -> KiotaSerialization.serializeAsStream(_jsonContentType, nullParsable()));
     }
 
     @Test
     void defensiveCollection() {
         assertThrows(
                 NullPointerException.class,
-                () -> KiotaSerialization.serializeAsStream(null, (Iterable<Parsable>) null));
+                () -> KiotaSerialization.serializeAsStream(nullString(), nullParsableCollection()));
         assertThrows(
                 NullPointerException.class,
                 () ->
                         KiotaSerialization.serializeAsStream(
-                                _jsonContentType, (Iterable<Parsable>) null));
+                                _jsonContentType, nullParsableCollection()));
     }
 
     @Test

@@ -10,10 +10,15 @@ import com.microsoft.kiota.serialization.SerializationWriterFactoryRegistry;
 import org.junit.jupiter.api.Test;
 
 class BundleTests {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
     @Test
     void throwsErrorNullAuthenticationProvider() throws Exception {
         var exception =
-                assertThrows(NullPointerException.class, () -> new DefaultRequestAdapter(null));
+                assertThrows(
+                        NullPointerException.class, () -> new DefaultRequestAdapter(nullValue()));
         assertEquals("parameter authenticationProvider cannot be null", exception.getMessage());
     }
 

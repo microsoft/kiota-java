@@ -116,7 +116,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "workDuration",
                         (n) -> {
-                            setWorkDuration(n.getPeriodAndDurationValue());
+                            final var value = n.getPeriodAndDurationValue();
+                            if (value != null) {
+                                setWorkDuration(value);
+                            }
                         });
                 put(
                         "startWorkTime",
@@ -136,7 +139,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "deviceNames",
                         (n) -> {
-                            setDeviceNames(n.getCollectionOfPrimitiveValues(String.class));
+                            final var value = n.getCollectionOfPrimitiveValues(String.class);
+                            if (value != null) {
+                                setDeviceNames(value);
+                            }
                         });
             }
         };

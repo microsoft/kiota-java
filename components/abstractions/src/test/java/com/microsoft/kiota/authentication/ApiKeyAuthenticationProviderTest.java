@@ -10,6 +10,10 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 
 public class ApiKeyAuthenticationProviderTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
     @Test
     void DefensivePrograming() {
         assertThrows(
@@ -23,7 +27,9 @@ public class ApiKeyAuthenticationProviderTest {
 
         var value =
                 new ApiKeyAuthenticationProvider("key", "param", ApiKeyLocation.QUERY_PARAMETER);
-        assertThrows(NullPointerException.class, () -> value.authenticateRequest(null, null));
+        assertThrows(
+                NullPointerException.class,
+                () -> value.authenticateRequest(nullValue(), nullValue()));
     }
 
     @Test

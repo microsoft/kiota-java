@@ -6,6 +6,7 @@ dependencies {
     testImplementation(libs.org.mockito.mockito.core)
     testImplementation(libs.com.squareup.okhttp3.logging.interceptor)
     testImplementation(libs.com.squareup.okhttp3.mockwebserver)
+    testImplementation(libs.io.github.std.uritemplate.std.uritemplate)
 
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.

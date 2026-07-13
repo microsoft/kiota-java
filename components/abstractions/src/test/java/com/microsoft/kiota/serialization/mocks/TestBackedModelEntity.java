@@ -104,7 +104,10 @@ public class TestBackedModelEntity implements Parsable, AdditionalDataHolder, Ba
                 put(
                         "workDuration",
                         n -> {
-                            setWorkDuration(n.getPeriodAndDurationValue());
+                            final var value = n.getPeriodAndDurationValue();
+                            if (value != null) {
+                                setWorkDuration(value);
+                            }
                         });
                 put(
                         "startWorkTime",
