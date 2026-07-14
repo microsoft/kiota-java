@@ -124,7 +124,7 @@ public class OkHttpRequestAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {200, 201, 202, 203, 204, 304})
+    @ValueSource(ints = {204, 304})
     void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
@@ -136,7 +136,6 @@ public class OkHttpRequestAdapterTest {
                                 .message("OK")
                                 .protocol(Protocol.HTTP_1_1)
                                 .request(new Request.Builder().url("http://localhost").build())
-                                .body(null)
                                 .build());
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
@@ -153,6 +152,37 @@ public class OkHttpRequestAdapterTest {
     }
 
     @ParameterizedTest
+    @ValueSource(ints = {200, 201, 202, 203})
+    void sendStreamReturnsEmptyStreamOnEmptyBody(int statusCode) throws Exception {
+        // OkHttp 5 responses always carry a non-null (possibly empty) body, so a success
+        // response with an empty body yields an empty, non-null stream rather than null.
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        final var client =
+                getMockClient(
+                        new Response.Builder()
+                                .code(statusCode)
+                                .message("OK")
+                                .protocol(Protocol.HTTP_1_1)
+                                .request(new Request.Builder().url("http://localhost").build())
+                                .build());
+        final var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
+        final var requestInformation =
+                new RequestInformation() {
+                    {
+                        setUri(new URI("https://localhost"));
+                        httpMethod = HttpMethod.GET;
+                    }
+                };
+        final var response =
+                requestAdapter.sendPrimitive(requestInformation, null, InputStream.class);
+        assertNotNull(response);
+        assertEquals(0, response.readAllBytes().length);
+    }
+
+    @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204, 205, 304})
     void sendReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
@@ -165,7 +195,6 @@ public class OkHttpRequestAdapterTest {
                                 .message("OK")
                                 .protocol(Protocol.HTTP_1_1)
                                 .request(new Request.Builder().url("http://localhost").build())
-                                .body(null)
                                 .build());
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
