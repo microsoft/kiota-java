@@ -72,21 +72,34 @@ extends:
                   Copy-Item $(downloadLocalProperties.secureFilePath) local.properties -Verbose
                 displayName: Copy secring and 'local.properties'
 
-              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
+              - task: MavenAuthenticate@0
+                displayName: Authenticate to Azure Artifacts feed (PAT-less)
+                inputs:
+                  artifactsFeeds: 'GraphDeveloperExperiences_Public'
+
+              - script: ./gradlew --no-daemon --init-script .azure-pipelines/network-isolation-feed.init.gradle publishToMavenLocal -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
                 displayName: Publish to local Maven for verification
                 condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
+                env:
+                  SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
-              - script: ./gradlew --no-daemon publishToMavenLocal -PmavenCentralPublishingEnabled=true
+              - script: ./gradlew --no-daemon --init-script .azure-pipelines/network-isolation-feed.init.gradle publishToMavenLocal -PmavenCentralPublishingEnabled=true
                 displayName: Publish to local Maven for verification
                 condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+                env:
+                  SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
-              - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
+              - script: ./gradlew --no-daemon --init-script .azure-pipelines/network-isolation-feed.init.gradle publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true -PmavenCentralSnapshotArtifactSuffix=""
                 displayName: Publish to local Maven ADO for ESRP
                 condition: contains(variables['build.sourceBranch'], 'refs/tags/v')
+                env:
+                  SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
-              - script: ./gradlew --no-daemon publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true
+              - script: ./gradlew --no-daemon --init-script .azure-pipelines/network-isolation-feed.init.gradle publishMavenPublicationToADORepository -PmavenCentralPublishingEnabled=true
                 displayName: Publish to local Maven ADO for ESRP
                 condition: not(contains(variables['build.sourceBranch'], 'refs/tags/v'))
+                env:
+                  SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
               - pwsh: |
                   $contents = Get-Content gradle.properties -Raw
