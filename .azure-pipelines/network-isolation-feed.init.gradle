@@ -1,0 +1,37 @@
+// Network-isolated CI (CFS): route ALL Gradle dependency and plugin resolution through the
+// authenticated Azure Artifacts feed instead of public repositories (Maven Central / Gradle Plugin
+// Portal). This feed is an upstream-mirroring feed, so it must have Maven Central configured as an
+// upstream source (and the Gradle Plugin Portal upstream, for plugin resolution).
+//
+// Authentication uses the pipeline OAuth token exposed as SYSTEM_ACCESSTOKEN; the Project Collection
+// Build Service identity must have at least Reader access to the feed. This init script is applied via
+// `--init-script` from .azure-pipelines/ci-build.yml and is paired with the MavenAuthenticate@0 task.
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.credentials.HttpHeaderCredentials
+import org.gradle.authentication.http.HttpHeaderAuthentication
+
+final String FEED_URL = 'https://microsoftgraph.pkgs.visualstudio.com/0985d294-5762-4bc2-a565-161ef349ca3e/_packaging/GraphDeveloperExperiences_Public/maven/v1'
+final String ACCESS_TOKEN = System.getenv('SYSTEM_ACCESSTOKEN')
+
+Closure applyFeed = { RepositoryHandler repositories ->
+    repositories.clear()
+    repositories.maven { repo ->
+        repo.url = FEED_URL
+        repo.credentials(HttpHeaderCredentials) { creds ->
+            creds.name = 'Authorization'
+            creds.value = "Bearer ${ACCESS_TOKEN}"
+        }
+        repo.authentication { container -> container.create('header', HttpHeaderAuthentication) }
+    }
+}
+
+// Redirect plugin resolution (settings pluginManagement) to the feed.
+settingsEvaluated { settings ->
+    applyFeed(settings.pluginManagement.repositories)
+}
+
+// Redirect buildscript classpath + project dependency resolution for every project to the feed.
+allprojects { project ->
+    applyFeed(project.buildscript.repositories)
+    applyFeed(project.repositories)
+}
