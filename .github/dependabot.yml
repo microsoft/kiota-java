@@ -2,54 +2,62 @@ version: 2
 updates:
 - package-ecosystem: gradle
   directories:
-    - "/"
-    - "/components/abstractions"
-    - "/components/serialization/form"
-    - "/components/serialization/json"
-    - "/components/serialization/text"
-    - "/components/serialization/multipart"
-    - "/components/authentication/azure"
-    - "/components/http/okHttp"
-    - "/components/bundle"
+  - /
+  - /components/abstractions
+  - /components/serialization/form
+  - /components/serialization/json
+  - /components/serialization/text
+  - /components/serialization/multipart
+  - /components/authentication/azure
+  - /components/http/okHttp
+  - /components/bundle
   schedule:
     interval: daily
-    time: "09:00" # 9am UTC
+    time: 09:00
   open-pull-requests-limit: 10
   groups:
     junit-dependencies:
       patterns:
-        - "*junit*"
+      - '*junit*'
     open-telemetry:
       patterns:
-        - "*opentelemetry*"
+      - '*opentelemetry*'
+  cooldown:
+    default-days: 7
 - package-ecosystem: gradle
   directories:
-    - "/components/abstractions/android"
-    - "/components/serialization/form/android"
-    - "/components/serialization/json/android"
-    - "/components/serialization/text/android"
-    - "/components/serialization/multipart/android"
-    - "/components/authentication/azure/android"
-    - "/components/http/okHttp/android"
-    - "/components/bundle/android"
+  - /components/abstractions/android
+  - /components/serialization/form/android
+  - /components/serialization/json/android
+  - /components/serialization/text/android
+  - /components/serialization/multipart/android
+  - /components/authentication/azure/android
+  - /components/http/okHttp/android
+  - /components/bundle/android
   schedule:
     interval: daily
-    time: "10:00" # 10am UTC. Checked after the core modules to prevent duplicate PRs updating dependencies.gradle files
+    time: 10:00
   open-pull-requests-limit: 10
+  cooldown:
+    default-days: 7
 - package-ecosystem: github-actions
-  directory: "/"
+  directory: /
   schedule:
     interval: daily
   open-pull-requests-limit: 10
   groups:
     junit-dependencies:
       patterns:
-        - "*junit*"
+      - '*junit*'
     open-telemetry:
       patterns:
-        - "*opentelemetry*"
+      - '*opentelemetry*'
+  cooldown:
+    default-days: 7
 - package-ecosystem: devcontainers
-  directory: "/"
+  directory: /
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  cooldown:
+    default-days: 7
