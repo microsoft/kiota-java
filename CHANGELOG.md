@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4](https://github.com/microsoft/kiota-java/compare/v1.9.3...v1.9.4) (2026-07-22)
+
+
+### Bug Fixes
+
+* replace SpotBugs suppressions with code-level test fixes ([9b8f89c](https://github.com/microsoft/kiota-java/commit/9b8f89c7680c771f59373ea58f3c3c55743156ef))
+
 ## [1.9.3](https://github.com/microsoft/kiota-java/compare/v1.9.2...v1.9.3) (2026-06-10)
 
 
