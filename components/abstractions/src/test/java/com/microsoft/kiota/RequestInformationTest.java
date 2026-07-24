@@ -505,7 +505,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/articles{?query*}";
 
-        final Map<String, String> mapWithNull = new HashMap<>();
+        final Map<String, Object> mapWithNull = new HashMap<>();
         mapWithNull.put("filter", "equals(published,true)");
         mapWithNull.put("sort", null);
 
@@ -527,7 +527,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/articles{?query*}";
 
-        final Map<String, String> mapWithNull = new HashMap<>();
+        final Map<String, Object> mapWithNull = new HashMap<>();
         mapWithNull.put("filter", "value");
         mapWithNull.put("sort", null);
 
@@ -546,7 +546,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/articles{?query*}";
 
-        final Map<String, String> map = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
         map.put("filter", "");
 
         // Act
@@ -565,7 +565,7 @@ class RequestInformationTest {
         requestInfo.httpMethod = HttpMethod.GET;
         requestInfo.urlTemplate = "http://localhost/articles{?query*}";
 
-        final Map<String, String> allNull = new HashMap<>();
+        final Map<String, Object> allNull = new HashMap<>();
         allNull.put("filter", null);
         allNull.put("sort", null);
 
@@ -605,7 +605,7 @@ class RequestInformationTest {
         requestInfo.urlTemplate = "http://localhost/articles{?%24top,query*}";
 
         requestInfo.addQueryParameter("%24top", 5);
-        final Map<String, String> map = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
         map.put("filter", "active");
         requestInfo.addQueryParameter("query", map);
 
@@ -614,6 +614,34 @@ class RequestInformationTest {
         final String uriStr = uri.toString();
         assertTrue(uriStr.contains("%24top=5"));
         assertTrue(uriStr.contains("filter=active"));
+    }
+
+    @Test
+    void ExpandsMapQueryParameterWithVariedValueTypes()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/articles{?query*}";
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("top", 10);
+        map.put("active", true);
+        map.put("enumVal", TestEnum.First);
+        map.put("nullVal", null);
+        map.put(null, "ignoredNullKey");
+
+        // Act
+        requestInfo.addQueryParameter("query", map);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        final String uriStr = uri.toString();
+        assertTrue(uriStr.contains("top=10"));
+        assertTrue(uriStr.contains("active=true"));
+        assertTrue(uriStr.contains("enumVal=1"));
+        assertFalse(uriStr.contains("nullVal"));
+        assertFalse(uriStr.contains("ignoredNullKey"));
     }
 
     public final SerializationWriterFactory createMockSerializationWriterFactory(
@@ -665,7 +693,7 @@ class GetQueryParameters implements QueryParameters {
      * Free-form key-value query parameters (type: object + additionalProperties).
      * Expanded via RFC 6570 {?query*} into individual key=value pairs.
      */
-    @jakarta.annotation.Nullable public Map<String, String> query;
+    @jakarta.annotation.Nullable public Map<String, Object> query;
 
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
         final Map<String, Object> allQueryParams = new HashMap<>();

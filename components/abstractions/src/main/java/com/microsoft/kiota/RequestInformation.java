@@ -482,12 +482,10 @@ public class RequestInformation {
             // the variable expansion results in no output". Use "" to send ?key= (empty value).
             @SuppressWarnings("unchecked")
             final Map<Object, Object> rawMap = (Map<Object, Object>) value;
-            final HashMap<String, String> sanitized = new HashMap<>(rawMap.size());
+            final HashMap<String, Object> sanitized = new HashMap<>(rawMap.size());
             for (final Map.Entry<Object, Object> entry : rawMap.entrySet()) {
-                if (entry.getValue() != null) {
-                    sanitized.put(
-                            entry.getKey().toString(),
-                            getSanitizedValues(entry.getValue()).toString());
+                if (entry.getKey() != null && entry.getValue() != null) {
+                    sanitized.put(entry.getKey().toString(), getSanitizedValues(entry.getValue()));
                 }
             }
             return sanitized;
