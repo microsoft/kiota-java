@@ -476,6 +476,19 @@ public class RequestInformation {
                 return result;
             }
             return Arrays.asList(values);
+        } else if (value instanceof Map) {
+            // Pre-process map/dictionary values for StdUriTemplate expansion.
+            // Null values are skipped: RFC 6570 §2.3 states "if the value is undefined,
+            // the variable expansion results in no output". Use "" to send ?key= (empty value).
+            @SuppressWarnings("unchecked")
+            final Map<Object, Object> rawMap = (Map<Object, Object>) value;
+            final HashMap<String, Object> sanitized = new HashMap<>(rawMap.size());
+            for (final Map.Entry<Object, Object> entry : rawMap.entrySet()) {
+                if (entry.getKey() != null && entry.getValue() != null) {
+                    sanitized.put(entry.getKey().toString(), getSanitizedValues(entry.getValue()));
+                }
+            }
+            return sanitized;
         } else if (value instanceof ValuedEnum) {
             return ((ValuedEnum) value).getValue();
         } else if (value instanceof UUID) {
