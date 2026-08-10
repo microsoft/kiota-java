@@ -23,4 +23,4 @@ org-mockito-mockito-core = { group = "org.mockito", name = "mockito-core", versi
 [plugins]
 com-diffplug-spotless = { id = "com.diffplug.spotless", version = "8.9.0" }
 com-github-spotbugs = { id = "com.github.spotbugs", version = "6.5.10" }
-org-sonarqube = { id = "org.sonarqube", version = "7.3.1.8318" }
+org-sonarqube = { id = "org.sonarqube", version = "7.4.0.8496" }
