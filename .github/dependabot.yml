@@ -46,6 +46,9 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
   groups:
+    codeql:
+      patterns:
+      - 'github/codeql-action*'
     junit-dependencies:
       patterns:
       - '*junit*'
