@@ -13,7 +13,6 @@ updates:
   - /components/bundle
   schedule:
     interval: daily
-    time: 09:00
   open-pull-requests-limit: 10
   groups:
     junit-dependencies:
@@ -36,7 +35,6 @@ updates:
   - /components/bundle/android
   schedule:
     interval: daily
-    time: 10:00
   open-pull-requests-limit: 10
   cooldown:
     default-days: 7
