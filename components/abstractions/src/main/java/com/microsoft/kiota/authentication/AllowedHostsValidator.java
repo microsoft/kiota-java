@@ -58,7 +58,18 @@ public class AllowedHostsValidator {
      * @return true if the host is allowed, false otherwise.
      */
     public boolean isUrlHostValid(@Nonnull final URI uri) {
-        return validHosts.isEmpty()
-                || validHosts.contains(uri.getHost().trim().toLowerCase(Locale.ROOT));
+        if (validHosts.isEmpty()) {
+            return true;
+        }
+        final String host = uri.getHost().trim().toLowerCase(Locale.ROOT);
+        if (validHosts.contains(host)) {
+            return true;
+        }
+        for (final String validHost : validHosts) {
+            if (validHost.startsWith(".") && host.endsWith(validHost)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
