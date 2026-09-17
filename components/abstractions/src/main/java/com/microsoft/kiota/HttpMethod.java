@@ -21,5 +21,7 @@ public enum HttpMethod {
     /** The HTTP TRACE method */
     TRACE,
     /** The HTTP HEAD method */
-    HEAD
+    HEAD,
+    /** The HTTP QUERY method */
+    QUERY
 }
