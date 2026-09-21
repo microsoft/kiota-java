@@ -80,4 +80,10 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
             <Class name="com.microsoft.kiota.serialization.SerializationWriterProxyFactory" />
         </Or>
     </Match>
+    <!-- These calls deliberately violate nullability to verify argument validation. -->
+    <Match>
+        <Bug pattern="NP_NONNULL_PARAM_VIOLATION" />
+        <Class name="com.microsoft.kiota.serialization.FactoryRegistryExceptionTest" />
+        <Method name="~lambda\$invalidArgumentsKeepTheirValidationExceptions\$.*" />
+    </Match>
 </FindBugsFilter>

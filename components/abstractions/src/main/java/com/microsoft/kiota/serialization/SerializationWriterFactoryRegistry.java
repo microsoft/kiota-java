@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.ClientException;
 import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 
 import jakarta.annotation.Nonnull;
@@ -43,7 +44,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
      * @param contentType
      * @param serializeOnlyChangedValues control backing store functionality
      * @return the serialization writer
-     * @throws RuntimeException when no factory is found for content type
+     * @throws ClientException when no factory is found for content type
      */
     @Nonnull public SerializationWriter getSerializationWriter(
             @Nonnull final String contentType, final boolean serializeOnlyChangedValues) {
@@ -59,7 +60,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
                     getSerializationWriterFactory(
                             getCleanedVendorSpecificContentType(cleanedContentType));
             if (factory == null) {
-                throw new RuntimeException(
+                throw new ClientException(
                         "Content type "
                                 + contentType
                                 + " does not have a factory to be serialized");
