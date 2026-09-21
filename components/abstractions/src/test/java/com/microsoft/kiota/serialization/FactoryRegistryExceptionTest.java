@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.microsoft.kiota.ClientException;
+import com.microsoft.kiota.Compatibility;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -72,7 +73,8 @@ class FactoryRegistryExceptionTest {
             assertEquals(
                     "42",
                     new String(
-                            writer.getSerializedContent().readAllBytes(), StandardCharsets.UTF_8));
+                            Compatibility.readAllBytes(writer.getSerializedContent()),
+                            StandardCharsets.UTF_8));
         }
     }
 }
