@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
 import com.microsoft.kiota.PeriodAndDuration;
 
@@ -474,12 +475,22 @@ public class JsonSerializationWriter implements SerializationWriter {
         }
     }
 
+    private void writeJsonElement(@Nullable final String key, @Nonnull final JsonElement value) {
+        try {
+            if (key != null && !key.isEmpty()) writer.name(key);
+            gson.getAdapter(JsonElement.class).write(writer, value);
+        } catch (IOException ex) {
+            throw new RuntimeException("could not serialize value", ex);
+        }
+    }
+
     private void writeAnyValue(@Nullable final String key, @Nullable final Object value) {
         if (value == null) {
             this.writeNullValue(key);
         } else {
             final Class<?> valueClass = value.getClass();
-            if (valueClass.equals(String.class)) this.writeStringValue(key, (String) value);
+            if (value instanceof JsonElement) this.writeJsonElement(key, (JsonElement) value);
+            else if (valueClass.equals(String.class)) this.writeStringValue(key, (String) value);
             else if (valueClass.equals(Boolean.class)) this.writeBooleanValue(key, (Boolean) value);
             else if (valueClass.equals(Byte.class)) this.writeByteValue(key, (Byte) value);
             else if (valueClass.equals(Short.class)) this.writeShortValue(key, (Short) value);

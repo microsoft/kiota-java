@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.google.gson.JsonParser;
 import com.microsoft.kiota.Compatibility;
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.MyEnum;
@@ -11,6 +12,8 @@ import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -26,6 +29,31 @@ import java.util.List;
 import java.util.UUID;
 
 class JsonSerializationWriterTests {
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "{\"@odata.type\":\"#CustomSecurityAttributeValue\",\"ids\":[\"123\",\"321\"],\"nested\":{\"nil\":null}}",
+                "[1,false,null,{\"name\":\"test\"}]",
+                "\"quoted \\\" text\"",
+                "false",
+                "123456789012345678901234567890",
+                "null",
+                "{}",
+                "[]"
+            })
+    void serializesJsonElementsInAdditionalData(String json) throws IOException {
+        var entity = new TestEntity();
+        entity.getAdditionalData().put("extra", JsonParser.parseString(json));
+        try (var serializer = new JsonSerializationWriter()) {
+            serializer.writeObjectValue(null, entity);
+            var actual =
+                    new String(
+                            Compatibility.readAllBytes(serializer.getSerializedContent()), "UTF-8");
+            assertEquals(
+                    JsonParser.parseString("{\"extra\":" + json + "}"),
+                    JsonParser.parseString(actual));
+        }
+    }
 
     @Test
     void writesSampleObjectValueWithPrimitivesInAdditionalData() throws IOException {
