@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   check-changelog:
+    if: github.event.pull_request.user.login != 'release-please-token-provider[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check for changelog changes
