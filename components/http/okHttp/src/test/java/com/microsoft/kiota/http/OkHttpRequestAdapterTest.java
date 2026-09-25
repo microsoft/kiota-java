@@ -58,7 +58,7 @@ public class OkHttpRequestAdapterTest {
     @ParameterizedTest
     @EnumSource(
             value = HttpMethod.class,
-            names = {"PUT", "POST", "PATCH"})
+            names = {"PUT", "POST", "PATCH", "QUERY"})
     void postRequestsShouldHaveEmptyBody(HttpMethod method)
             throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException:
         // method POST must have a request body.
