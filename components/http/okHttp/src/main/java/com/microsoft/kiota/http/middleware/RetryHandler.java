@@ -205,13 +205,14 @@ public class RetryHandler implements Interceptor {
     boolean isBuffered(final Request request) {
         final String methodName = request.method();
 
-        final boolean isHTTPMethodPutPatchOrPost =
+        final boolean isHTTPMethodWithBody =
                 methodName.equalsIgnoreCase("POST")
                         || methodName.equalsIgnoreCase("PUT")
-                        || methodName.equalsIgnoreCase("PATCH");
+                        || methodName.equalsIgnoreCase("PATCH")
+                        || methodName.equalsIgnoreCase("QUERY");
 
         final RequestBody requestBody = request.body();
-        if (isHTTPMethodPutPatchOrPost && requestBody != null) {
+        if (isHTTPMethodWithBody && requestBody != null) {
             try {
                 return requestBody.contentLength() != -1L;
             } catch (IOException ex) {
