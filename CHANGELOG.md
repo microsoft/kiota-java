@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1](https://github.com/microsoft/kiota-java/compare/v1.10.0...v1.10.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* expose unsupported content types as client exceptions ([8712aa7](https://github.com/microsoft/kiota-java/commit/8712aa7973e4dc6bae75bc69be835a4a7864f4e9))
+* expose unsupported content types as client exceptions ([c828613](https://github.com/microsoft/kiota-java/commit/c8286139c7fcc3db68fe390f0b08af5c980dc4cf))
+* serialize Gson elements in additional data ([a61c76c](https://github.com/microsoft/kiota-java/commit/a61c76ca3a88c322aef0d653e61093a14428e6bd))
+* serialize Gson elements in additional data ([7a7b176](https://github.com/microsoft/kiota-java/commit/7a7b176039d8c9163a79fbe721c27d43ac0e2a95))
+
 ## [1.10.0](https://github.com/microsoft/kiota-java/compare/v1.9.3...v1.10.0) (2026-08-31)
 
 
