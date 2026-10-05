@@ -129,9 +129,21 @@ public class RedirectHandler implements Interceptor {
                 .scrubSensitiveHeaders()
                 .scrubHeaders(requestBuilder, requestUrl, proxyResolver);
 
-        // Response status code 303 See Other then POST changes to GET
-        if (userResponse.code() == HTTP_SEE_OTHER) {
+        final String method = request.method();
+        final int responseCode = userResponse.code();
+        final boolean redirectsToGet =
+                ((responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP)
+                                && "POST".equals(method))
+                        || (responseCode == HTTP_SEE_OTHER
+                                && !"GET".equals(method)
+                                && !"HEAD".equals(method));
+        if (redirectsToGet) {
             requestBuilder.method("GET", null);
+            requestBuilder.removeHeader("Content-Length");
+            requestBuilder.removeHeader("Transfer-Encoding");
+            requestBuilder.removeHeader("Content-Type");
+            requestBuilder.removeHeader("Content-Encoding");
+            requestBuilder.removeHeader("Content-Language");
         }
 
         return requestBuilder.build();
