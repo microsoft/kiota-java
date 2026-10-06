@@ -3,6 +3,7 @@ package com.microsoft.kiota.http.middleware;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.*;
 
 import com.microsoft.kiota.http.KiotaClientFactory;
@@ -14,12 +15,84 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.*;
 import java.util.Collections;
 
 @SuppressWarnings("resource")
 public class RedirectHandlerTests {
+    private static final MediaType REQUEST_MEDIA_TYPE =
+            MediaType.parse("application/json; charset=utf-8");
+    private static final String REQUEST_BODY = "{\"value\":\"test\"}";
+
+    @ParameterizedTest
+    @ValueSource(ints = {301, 302})
+    void postRedirectsToGetWithoutBodyOrBodyHeaders(int statusCode) throws Exception {
+        Request original = createRequest("POST");
+        Response redirect =
+                createRedirectResponse(original, statusCode, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("GET", result.method());
+        assertNull(result.body());
+        assertBodyHeadersRemoved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @Test
+    void seeOtherRedirectsNonGetOrHeadToGetWithoutBodyOrBodyHeaders() throws Exception {
+        Request original = createRequest("PUT");
+        Response redirect =
+                createRedirectResponse(original, 303, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("GET", result.method());
+        assertNull(result.body());
+        assertBodyHeadersRemoved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "HEAD"})
+    void seeOtherPreservesGetAndHead(String method) throws Exception {
+        Request original = createBodylessRequest(method);
+        Response redirect =
+                createRedirectResponse(original, 303, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals(method, result.method());
+        assertNull(result.body());
+        assertBodyHeadersPreserved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {307, 308})
+    void redirectsPreserveMethodBodyAndBodyHeaders(int statusCode) throws Exception {
+        Request original = createRequest("POST");
+        Response redirect =
+                createRedirectResponse(original, statusCode, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("POST", result.method());
+        assertSame(original.body(), result.body());
+        assertBodyHeadersPreserved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
 
     @Test
     void redirectsAreFollowedByDefault() throws Exception {
@@ -383,5 +456,67 @@ public class RedirectHandlerTests {
         assertNull(result.header("X-Custom-Secret")); // stripped by custom scrubber
         assertNull(result.header("X-Api-Key")); // stripped by custom scrubber
         assertNotNull(result.header("X-Safe-Header")); // kept (not in scrub list)
+    }
+
+    private static Request createRequest(String method) {
+        RequestBody body = RequestBody.create(REQUEST_BODY, REQUEST_MEDIA_TYPE);
+        return new Request.Builder()
+                .url("http://trusted.example.com/api")
+                .method(method, body)
+                .headers(createRequestHeaders())
+                .build();
+    }
+
+    private static Request createBodylessRequest(String method) {
+        return new Request.Builder()
+                .url("http://trusted.example.com/api")
+                .method(method, null)
+                .headers(createRequestHeaders())
+                .build();
+    }
+
+    private static Headers createRequestHeaders() {
+        return new Headers.Builder()
+                .set("Content-Length", String.valueOf(REQUEST_BODY.length()))
+                .set("Transfer-Encoding", "chunked")
+                .set("Content-Type", REQUEST_MEDIA_TYPE.toString())
+                .set("Content-Encoding", "gzip")
+                .set("Content-Language", "en-US")
+                .set("Authorization", "Bearer secret")
+                .set("Cookie", "session=SECRET")
+                .build();
+    }
+
+    private static Response createRedirectResponse(
+            Request request, int statusCode, String location) {
+        return new Response.Builder()
+                .request(request)
+                .protocol(Protocol.HTTP_1_1)
+                .code(statusCode)
+                .message("Redirect")
+                .header("Location", location)
+                .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                .build();
+    }
+
+    private static void assertBodyHeadersRemoved(Request request) {
+        assertNull(request.header("Content-Length"));
+        assertNull(request.header("Transfer-Encoding"));
+        assertNull(request.header("Content-Type"));
+        assertNull(request.header("Content-Encoding"));
+        assertNull(request.header("Content-Language"));
+    }
+
+    private static void assertBodyHeadersPreserved(Request request) {
+        assertEquals(String.valueOf(REQUEST_BODY.length()), request.header("Content-Length"));
+        assertEquals("chunked", request.header("Transfer-Encoding"));
+        assertEquals(REQUEST_MEDIA_TYPE.toString(), request.header("Content-Type"));
+        assertEquals("gzip", request.header("Content-Encoding"));
+        assertEquals("en-US", request.header("Content-Language"));
+    }
+
+    private static void assertCrossOriginHeadersRemoved(Request request) {
+        assertNull(request.header("Authorization"));
+        assertNull(request.header("Cookie"));
     }
 }
