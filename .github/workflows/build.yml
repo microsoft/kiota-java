@@ -22,14 +22,14 @@ jobs:
       run: ./gradlew --no-daemon build -Pjava8=true
     - name: Upload Unit Test Results
       if: ${{ always() }}
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: Unit Tests
         path: |
             components/**/build/reports/tests/test/**
             components/**/build-test-results/**
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: ${{ inputs.componentName }}-drop
         path: ./**/build/*
