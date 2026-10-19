@@ -1,8 +1,5 @@
 package com.microsoft.kiota.http.middleware;
 
-import static okhttp3.internal.http.StatusLine.HTTP_PERM_REDIRECT;
-import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
-
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
@@ -28,6 +25,9 @@ import java.util.Objects;
  * Middleware that determines whether a redirect information should be followed or not, and follows it if necessary.
  */
 public class RedirectHandler implements Interceptor {
+    private static final int HTTP_TEMP_REDIRECT = 307;
+    private static final int HTTP_PERM_REDIRECT = 308;
+
     @Nonnull private final RedirectHandlerOption mRedirectOption;
     @Nullable private final java.net.ProxySelector mProxySelector;
 
