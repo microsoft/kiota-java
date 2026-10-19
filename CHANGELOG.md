@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2](https://github.com/microsoft/kiota-java/compare/v1.10.1...v1.10.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* stop using okhttp3.internal StatusLine constants ([6df4401](https://github.com/microsoft/kiota-java/commit/6df4401845fc9f42f72c8c39496fb42e63679d21))
+* stop using okhttp3.internal StatusLine constants ([#2127](https://github.com/microsoft/kiota-java/issues/2127)) ([71a310d](https://github.com/microsoft/kiota-java/commit/71a310dc21d01405f7d49d155a9af43d91c03536))
+
 ## [1.10.1](https://github.com/microsoft/kiota-java/compare/v1.10.0...v1.10.1) (2026-10-06)
 
 
