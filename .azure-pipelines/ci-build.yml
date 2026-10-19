@@ -260,7 +260,7 @@ extends:
                         folderlocation: "$(Pipeline.Workspace)"
                         waitforreleasecompletion: true
                         owners: vibiret@microsoft.com
-                        approvers: mmainer@microsoft.com
+                        approvers: gavinbarron@microsoft.com
                         serviceendpointurl: "https://api.esrp.microsoft.com"
                         mainpublisher: "ESRPRELPACMAN"
                         domaintenantid: "cdc5aeea-15c5-4db6-b079-fcadd2505dc2"
