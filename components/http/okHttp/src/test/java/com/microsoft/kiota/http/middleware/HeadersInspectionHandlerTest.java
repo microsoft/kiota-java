@@ -25,11 +25,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class HeadersInspectionHandlerTest {
     private final Chain mockChain;
@@ -231,5 +233,76 @@ class HeadersInspectionHandlerTest {
 
         assertNotNull(option.getRequestHeaders());
         assertNotNull(option.getResponseHeaders());
+    }
+
+    @Test
+    void overlappingCallsDoNotMixResponseHeaders()
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+        final HeadersInspectionOption option = new HeadersInspectionOption(true, true);
+        final HeadersInspectionHandler handler = new HeadersInspectionHandler(option);
+
+        final CountDownLatch call1ProceedReached = new CountDownLatch(1);
+        final CountDownLatch call2ProceedReached = new CountDownLatch(1);
+        final CountDownLatch call1ProceedAllowed = new CountDownLatch(1);
+        final CountDownLatch call2ProceedAllowed = new CountDownLatch(1);
+
+        final Chain chain1 = mock(Chain.class);
+        final Request req1 =
+                new Request.Builder().url("http://localhost").addHeader("req", "1").build();
+        final Response resp1 = mock(Response.class);
+        when(resp1.headers()).thenReturn(new Headers.Builder().add("resp-1", "val-1").build());
+        when(chain1.request()).thenReturn(req1);
+        when(chain1.proceed(any(Request.class)))
+                .thenAnswer(
+                        invocation -> {
+                            call1ProceedReached.countDown();
+                            call1ProceedAllowed.await();
+                            return resp1;
+                        });
+
+        final Chain chain2 = mock(Chain.class);
+        final Request req2 =
+                new Request.Builder().url("http://localhost").addHeader("req", "2").build();
+        final Response resp2 = mock(Response.class);
+        when(resp2.headers()).thenReturn(new Headers.Builder().add("resp-2", "val-2").build());
+        when(chain2.request()).thenReturn(req2);
+        when(chain2.proceed(any(Request.class)))
+                .thenAnswer(
+                        invocation -> {
+                            call2ProceedReached.countDown();
+                            call2ProceedAllowed.await();
+                            return resp2;
+                        });
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            final Future<Response> future1 = executor.submit(() -> handler.intercept(chain1));
+            assertTrue(call1ProceedReached.await(5, TimeUnit.SECONDS));
+
+            final Future<Response> future2 = executor.submit(() -> handler.intercept(chain2));
+            assertTrue(call2ProceedReached.await(5, TimeUnit.SECONDS));
+
+            // Both calls reached proceed and executed the pre-proceed clear.
+            // Allow call 1 to finish and populate response headers.
+            call1ProceedAllowed.countDown();
+            future1.get(5, TimeUnit.SECONDS);
+
+            synchronized (option) {
+                assertTrue(option.getResponseHeaders().containsKey("resp-1"));
+            }
+
+            // Allow call 2 to finish. Its response headers must replace call 1's rather than mix.
+            call2ProceedAllowed.countDown();
+            future2.get(5, TimeUnit.SECONDS);
+
+            synchronized (option) {
+                assertEquals(1, option.getResponseHeaders().size());
+                assertFalse(option.getResponseHeaders().containsKey("resp-1"));
+                assertTrue(option.getResponseHeaders().containsKey("resp-2"));
+                assertEquals("val-2", option.getResponseHeaders().get("resp-2").toArray()[0]);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

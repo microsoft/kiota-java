@@ -81,6 +81,7 @@ public class HeadersInspectionHandler implements Interceptor {
             final Response response = chain.proceed(request);
             if (inspectionOption.getInspectResponseHeaders()) {
                 synchronized (inspectionOption) {
+                    inspectionOption.getResponseHeaders().clear();
                     for (final Pair<? extends String, ? extends String> header :
                             response.headers()) {
                         inspectionOption
