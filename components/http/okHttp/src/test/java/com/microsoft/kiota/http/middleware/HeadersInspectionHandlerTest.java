@@ -1,7 +1,10 @@
 package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,6 +22,16 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class HeadersInspectionHandlerTest {
     private final Chain mockChain;
@@ -77,5 +90,219 @@ class HeadersInspectionHandlerTest {
         assertEquals(0, option.getRequestHeaders().size());
         assertEquals(1, option.getResponseHeaders().size());
         assertEquals("test", option.getResponseHeaders().get("test").toArray()[0]);
+    }
+
+    @Test
+    void preservesMultiValuedHeaders() throws IOException {
+        final HeadersInspectionOption option = new HeadersInspectionOption(true, true);
+        final HeadersInspectionHandler handler = new HeadersInspectionHandler(option);
+        final Request request =
+                new Request.Builder()
+                        .url("http://localhost")
+                        .addHeader("multi", "val1")
+                        .addHeader("multi", "val2")
+                        .build();
+        when(mockChain.request()).thenReturn(request);
+        when(mockResponse.headers())
+                .thenReturn(
+                        new Headers.Builder()
+                                .add("resp-multi", "resp1")
+                                .add("resp-multi", "resp2")
+                                .build());
+
+        handler.intercept(mockChain);
+
+        assertEquals(1, option.getRequestHeaders().size());
+        assertEquals(2, option.getRequestHeaders().get("multi").size());
+        assertTrue(option.getRequestHeaders().get("multi").contains("val1"));
+        assertTrue(option.getRequestHeaders().get("multi").contains("val2"));
+
+        assertEquals(1, option.getResponseHeaders().size());
+        assertEquals(2, option.getResponseHeaders().get("resp-multi").size());
+        assertTrue(option.getResponseHeaders().get("resp-multi").contains("resp1"));
+        assertTrue(option.getResponseHeaders().get("resp-multi").contains("resp2"));
+    }
+
+    @Test
+    void clearsHeadersBetweenConsecutiveRequests() throws IOException {
+        final HeadersInspectionOption option = new HeadersInspectionOption(true, true);
+        final HeadersInspectionHandler handler = new HeadersInspectionHandler(option);
+
+        final Request request1 =
+                new Request.Builder().url("http://localhost").addHeader("first", "val1").build();
+        when(mockChain.request()).thenReturn(request1);
+        when(mockResponse.headers())
+                .thenReturn(new Headers.Builder().add("resp-first", "r1").build());
+        handler.intercept(mockChain);
+
+        assertTrue(option.getRequestHeaders().containsKey("first"));
+        assertTrue(option.getResponseHeaders().containsKey("resp-first"));
+
+        final Request request2 =
+                new Request.Builder().url("http://localhost").addHeader("second", "val2").build();
+        when(mockChain.request()).thenReturn(request2);
+        when(mockResponse.headers())
+                .thenReturn(new Headers.Builder().add("resp-second", "r2").build());
+        handler.intercept(mockChain);
+
+        assertFalse(option.getRequestHeaders().containsKey("first"));
+        assertTrue(option.getRequestHeaders().containsKey("second"));
+        assertFalse(option.getResponseHeaders().containsKey("resp-first"));
+        assertTrue(option.getResponseHeaders().containsKey("resp-second"));
+    }
+
+    @Test
+    void clearsResponseHeadersWhenRequestFails() throws IOException {
+        final HeadersInspectionOption option = new HeadersInspectionOption(true, true);
+        final HeadersInspectionHandler handler = new HeadersInspectionHandler(option);
+
+        final Request successRequest =
+                new Request.Builder().url("http://localhost").addHeader("first", "val1").build();
+        when(mockChain.request()).thenReturn(successRequest);
+        when(mockResponse.headers())
+                .thenReturn(new Headers.Builder().add("resp-header", "resp-val").build());
+        handler.intercept(mockChain);
+
+        assertEquals(1, option.getResponseHeaders().size());
+        assertTrue(option.getResponseHeaders().containsKey("resp-header"));
+
+        final Chain failingChain = mock(Chain.class);
+        final Request failingRequest =
+                new Request.Builder().url("http://localhost").addHeader("second", "val2").build();
+        when(failingChain.request()).thenReturn(failingRequest);
+        when(failingChain.proceed(any(Request.class))).thenThrow(new IOException("Network error"));
+
+        assertThrows(IOException.class, () -> handler.intercept(failingChain));
+
+        assertEquals(0, option.getResponseHeaders().size());
+        assertEquals(1, option.getRequestHeaders().size());
+        assertTrue(option.getRequestHeaders().containsKey("second"));
+    }
+
+    @Test
+    void handlesConcurrentCallsWithoutRaces() throws InterruptedException, ExecutionException {
+        final HeadersInspectionOption option = new HeadersInspectionOption(true, true);
+        final HeadersInspectionHandler handler = new HeadersInspectionHandler(option);
+        final int threadCount = 8;
+        final int iterationsPerThread = 20;
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        boolean terminated = false;
+        try {
+            final List<Callable<Void>> tasks = new ArrayList<>();
+
+            for (int i = 0; i < threadCount; i++) {
+                final int threadId = i;
+                tasks.add(
+                        () -> {
+                            for (int j = 0; j < iterationsPerThread; j++) {
+                                final Request req =
+                                        new Request.Builder()
+                                                .url("http://localhost")
+                                                .addHeader("header-" + threadId, "val-" + j)
+                                                .addHeader("shared", "s-" + threadId)
+                                                .build();
+                                final Chain chain = mock(Chain.class);
+                                final Response resp = mock(Response.class);
+                                when(resp.headers())
+                                        .thenReturn(
+                                                new Headers.Builder()
+                                                        .add("resp-" + threadId, "rval-" + j)
+                                                        .add("resp-shared", "rs-" + threadId)
+                                                        .build());
+                                when(chain.request()).thenReturn(req);
+                                when(chain.proceed(any(Request.class))).thenReturn(resp);
+
+                                handler.intercept(chain);
+                            }
+                            return null;
+                        });
+            }
+
+            final List<Future<Void>> futures = executor.invokeAll(tasks);
+            for (final Future<Void> future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdown();
+            terminated = executor.awaitTermination(5, TimeUnit.SECONDS);
+            if (!terminated) {
+                executor.shutdownNow();
+            }
+        }
+        assertTrue(terminated);
+
+        assertNotNull(option.getRequestHeaders());
+        assertNotNull(option.getResponseHeaders());
+    }
+
+    @Test
+    void overlappingCallsDoNotMixResponseHeaders()
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+        final HeadersInspectionOption option = new HeadersInspectionOption(true, true);
+        final HeadersInspectionHandler handler = new HeadersInspectionHandler(option);
+
+        final CountDownLatch call1ProceedReached = new CountDownLatch(1);
+        final CountDownLatch call2ProceedReached = new CountDownLatch(1);
+        final CountDownLatch call1ProceedAllowed = new CountDownLatch(1);
+        final CountDownLatch call2ProceedAllowed = new CountDownLatch(1);
+
+        final Chain chain1 = mock(Chain.class);
+        final Request req1 =
+                new Request.Builder().url("http://localhost").addHeader("req", "1").build();
+        final Response resp1 = mock(Response.class);
+        when(resp1.headers()).thenReturn(new Headers.Builder().add("resp-1", "val-1").build());
+        when(chain1.request()).thenReturn(req1);
+        when(chain1.proceed(any(Request.class)))
+                .thenAnswer(
+                        invocation -> {
+                            call1ProceedReached.countDown();
+                            call1ProceedAllowed.await();
+                            return resp1;
+                        });
+
+        final Chain chain2 = mock(Chain.class);
+        final Request req2 =
+                new Request.Builder().url("http://localhost").addHeader("req", "2").build();
+        final Response resp2 = mock(Response.class);
+        when(resp2.headers()).thenReturn(new Headers.Builder().add("resp-2", "val-2").build());
+        when(chain2.request()).thenReturn(req2);
+        when(chain2.proceed(any(Request.class)))
+                .thenAnswer(
+                        invocation -> {
+                            call2ProceedReached.countDown();
+                            call2ProceedAllowed.await();
+                            return resp2;
+                        });
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            final Future<Response> future1 = executor.submit(() -> handler.intercept(chain1));
+            assertTrue(call1ProceedReached.await(5, TimeUnit.SECONDS));
+
+            final Future<Response> future2 = executor.submit(() -> handler.intercept(chain2));
+            assertTrue(call2ProceedReached.await(5, TimeUnit.SECONDS));
+
+            // Both calls reached proceed and executed the pre-proceed clear.
+            // Allow call 1 to finish and populate response headers.
+            call1ProceedAllowed.countDown();
+            future1.get(5, TimeUnit.SECONDS);
+
+            synchronized (option) {
+                assertTrue(option.getResponseHeaders().containsKey("resp-1"));
+            }
+
+            // Allow call 2 to finish. Its response headers must replace call 1's rather than mix.
+            call2ProceedAllowed.countDown();
+            future2.get(5, TimeUnit.SECONDS);
+
+            synchronized (option) {
+                assertEquals(1, option.getResponseHeaders().size());
+                assertFalse(option.getResponseHeaders().containsKey("resp-1"));
+                assertTrue(option.getResponseHeaders().containsKey("resp-2"));
+                assertEquals("val-2", option.getResponseHeaders().get("resp-2").toArray()[0]);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }
