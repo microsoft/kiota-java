@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.3](https://github.com/microsoft/kiota-java/compare/v1.10.2...v1.10.3) (2026-10-21)
+
+
+### Bug Fixes
+
+* **http:** clear response headers before populating to prevent overlapping response mixing ([e4bdf52](https://github.com/microsoft/kiota-java/commit/e4bdf52a51b6f5d6d6c391e0c736421e844cb56d))
+* **http:** remove redundant response headers clear after proceed ([6633617](https://github.com/microsoft/kiota-java/commit/66336170214a9d0308919f9cd8199f7701a3dbc5))
+* **http:** support multi-valued headers and request isolation in HeadersInspectionHandler ([496f5cf](https://github.com/microsoft/kiota-java/commit/496f5cfc294f169df5d72b94e595eb564f813669))
+* **http:** support multi-valued headers, synchronize shared capture, and prevent stale response headers ([9dbe0f7](https://github.com/microsoft/kiota-java/commit/9dbe0f71ae3a0faae516fe75f3e5e41a53313202))
+
 ## [1.10.2](https://github.com/microsoft/kiota-java/compare/v1.10.1...v1.10.2) (2026-10-19)
 
 
