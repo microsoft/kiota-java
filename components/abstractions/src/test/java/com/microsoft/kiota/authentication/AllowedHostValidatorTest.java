@@ -93,4 +93,33 @@ class AllowedHostValidatorTest {
                 validator.isUrlHostValid(
                         new URI("https://abc.123.graphql.fabric.microsoft.com/path")));
     }
+
+    @Test
+    void returnsFalseForNullUri() {
+        final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
+        assertFalse(validator.isUrlHostValid(null));
+    }
+
+    @Test
+    void returnsFalseForUriWithoutSchemeOrHost() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
+        assertFalse(validator.isUrlHostValid(new URI("mailto:test@example.com")));
+        assertFalse(validator.isUrlHostValid(new URI("/path/only")));
+    }
+
+    @Test
+    void returnsFalseForUriWithUserInfo() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
+        assertFalse(validator.isUrlHostValid(new URI("https://user:password@example.com/path")));
+        assertFalse(validator.isUrlHostValid(new URI("https://user@example.com/path")));
+    }
+
+    @Test
+    void validatesUriEvenWhenAllowedHostsEmpty() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator();
+        assertFalse(validator.isUrlHostValid(null));
+        assertFalse(validator.isUrlHostValid(new URI("mailto:test@example.com")));
+        assertFalse(validator.isUrlHostValid(new URI("https://user:pass@example.com/path")));
+        assertTrue(validator.isUrlHostValid(new URI("https://anything.com/path")));
+    }
 }
