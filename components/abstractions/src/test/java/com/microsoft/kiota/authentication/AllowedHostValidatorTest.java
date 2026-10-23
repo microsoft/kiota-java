@@ -12,6 +12,9 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 
 class AllowedHostValidatorTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
 
     @Test
     void throwsExceptionForHttpOrHttpsHosts() {
@@ -92,5 +95,34 @@ class AllowedHostValidatorTest {
         assertTrue(
                 validator.isUrlHostValid(
                         new URI("https://abc.123.graphql.fabric.microsoft.com/path")));
+    }
+
+    @Test
+    void throwsNullPointerExceptionForNullUri() {
+        final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
+        assertThrows(NullPointerException.class, () -> validator.isUrlHostValid(nullValue()));
+    }
+
+    @Test
+    void returnsFalseForUriWithoutSchemeOrHost() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
+        assertFalse(validator.isUrlHostValid(new URI("mailto:test@example.com")));
+        assertFalse(validator.isUrlHostValid(new URI("/path/only")));
+    }
+
+    @Test
+    void returnsFalseForUriWithUserInfo() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
+        assertFalse(validator.isUrlHostValid(new URI("https://user:password@example.com/path")));
+        assertFalse(validator.isUrlHostValid(new URI("https://user@example.com/path")));
+    }
+
+    @Test
+    void validatesUriEvenWhenAllowedHostsEmpty() throws URISyntaxException {
+        final AllowedHostsValidator validator = new AllowedHostsValidator();
+        assertThrows(NullPointerException.class, () -> validator.isUrlHostValid(nullValue()));
+        assertFalse(validator.isUrlHostValid(new URI("mailto:test@example.com")));
+        assertFalse(validator.isUrlHostValid(new URI("https://user:pass@example.com/path")));
+        assertTrue(validator.isUrlHostValid(new URI("https://anything.com/path")));
     }
 }
