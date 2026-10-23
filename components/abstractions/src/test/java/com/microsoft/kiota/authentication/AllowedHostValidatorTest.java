@@ -12,6 +12,9 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 
 class AllowedHostValidatorTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
 
     @Test
     void throwsExceptionForHttpOrHttpsHosts() {
@@ -95,9 +98,9 @@ class AllowedHostValidatorTest {
     }
 
     @Test
-    void returnsFalseForNullUri() {
+    void throwsNullPointerExceptionForNullUri() {
         final AllowedHostsValidator validator = new AllowedHostsValidator("example.com");
-        assertFalse(validator.isUrlHostValid(null));
+        assertThrows(NullPointerException.class, () -> validator.isUrlHostValid(nullValue()));
     }
 
     @Test
@@ -117,7 +120,7 @@ class AllowedHostValidatorTest {
     @Test
     void validatesUriEvenWhenAllowedHostsEmpty() throws URISyntaxException {
         final AllowedHostsValidator validator = new AllowedHostsValidator();
-        assertFalse(validator.isUrlHostValid(null));
+        assertThrows(NullPointerException.class, () -> validator.isUrlHostValid(nullValue()));
         assertFalse(validator.isUrlHostValid(new URI("mailto:test@example.com")));
         assertFalse(validator.isUrlHostValid(new URI("https://user:pass@example.com/path")));
         assertTrue(validator.isUrlHostValid(new URI("https://anything.com/path")));

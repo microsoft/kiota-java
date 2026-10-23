@@ -1,12 +1,12 @@
 package com.microsoft.kiota.authentication;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /** Maintains a list of valid hosts and allows authentication providers to check whether a host is valid before authenticating a request */
@@ -58,10 +58,8 @@ public class AllowedHostsValidator {
      * @param uri the uri to check the host for.
      * @return true if the host is allowed, false otherwise.
      */
-    public boolean isUrlHostValid(@Nullable final URI uri) {
-        if (uri == null) {
-            return false;
-        }
+    public boolean isUrlHostValid(@Nonnull final URI uri) {
+        Objects.requireNonNull(uri, "parameter uri cannot be null");
         final String scheme = uri.getScheme();
         if (scheme == null || scheme.trim().isEmpty()) {
             return false;
