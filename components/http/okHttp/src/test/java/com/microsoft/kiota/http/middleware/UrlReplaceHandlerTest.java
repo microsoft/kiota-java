@@ -2,6 +2,7 @@ package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
 import com.microsoft.kiota.http.KiotaClientFactory;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
@@ -95,5 +96,27 @@ class UrlReplaceHandlerTest {
         assertEquals(
                 "https://graph.microsoft.com/v1.0/me/calendar/events/AAMkADM4Njk4YzMzLTc3YTktNGQwZi05ZjRjLTJlNTUzYWMxZjAxNABGAAAAAABzQLabgoJzT6ewNe8DeydoBwBoFwNVrXtLQ5PleemFoZ87AAAAAAENAABoFwNVrXtLQ5PleemFoZ87AAA33T-eAAA%3D",
                 response.request().url().toString());
+    }
+
+    @Test
+    void testUrlReplaceHandler_propagatesSpan() throws IOException {
+        final com.microsoft.kiota.http.ObservabilityOptions obsOptions =
+                new com.microsoft.kiota.http.ObservabilityOptions();
+        final Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+        final Response mockResponse = mock(Response.class);
+        defaultReplacementPairs.put("/users/TokenToReplace", "/me");
+        final UrlReplaceHandler handler =
+                new UrlReplaceHandler(new UrlReplaceHandlerOption(defaultReplacementPairs));
+        final Request request =
+                new Request.Builder()
+                        .url(DEFAULT_URL_WITH_TOKEN)
+                        .tag(com.microsoft.kiota.http.ObservabilityOptions.class, obsOptions)
+                        .build();
+        when(mockChain.request()).thenReturn(request);
+        when(mockChain.proceed(any(Request.class))).thenReturn(mockResponse);
+
+        final Response response = handler.intercept(mockChain);
+        assertNotNull(response);
+        verify(mockChain).proceed(argThat(r -> r.tag(io.opentelemetry.api.trace.Span.class) != null));
     }
 }

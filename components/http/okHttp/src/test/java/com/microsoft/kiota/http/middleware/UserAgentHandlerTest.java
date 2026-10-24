@@ -84,4 +84,22 @@ class UserAgentHandlerTest {
         assertNotNull(result);
         assertNull(result.header("User-Agent"));
     }
+
+    @Test
+    void enclosesProceedAndPropagatesSpan() throws IOException {
+        final com.microsoft.kiota.http.ObservabilityOptions obsOptions =
+                new com.microsoft.kiota.http.ObservabilityOptions();
+        final UserAgentHandler handler = new UserAgentHandler();
+        final Request request =
+                new Request.Builder()
+                        .url("http://localhost")
+                        .tag(com.microsoft.kiota.http.ObservabilityOptions.class, obsOptions)
+                        .build();
+        when(mockChain.request()).thenReturn(request);
+
+        final Response response = handler.intercept(mockChain);
+        final Request result = response.request();
+        assertNotNull(result);
+        assertNotNull(result.tag(io.opentelemetry.api.trace.Span.class));
+    }
 }
