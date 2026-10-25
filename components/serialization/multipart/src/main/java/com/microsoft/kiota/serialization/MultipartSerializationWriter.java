@@ -17,11 +17,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Serialization writer implementation for Multipart encoded payloads */
 public class MultipartSerializationWriter implements SerializationWriter {
@@ -39,6 +42,9 @@ public class MultipartSerializationWriter implements SerializationWriter {
 
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         try {
+            if (key != null && !key.isEmpty() && value == null) {
+                return;
+            }
             if (key != null && !key.isEmpty()) writer.write(key);
             if (value != null && !value.isEmpty()) {
                 if (key != null && !key.isEmpty()) writer.write(": ");
@@ -125,21 +131,46 @@ public class MultipartSerializationWriter implements SerializationWriter {
             @Nullable final T value,
             @Nonnull final Parsable... additionalValuesToMerge) {
         Objects.requireNonNull(additionalValuesToMerge);
-        if (value != null) {
-            if (onBeforeObjectSerialization != null) {
-                onBeforeObjectSerialization.accept(value);
-            }
-            if (value instanceof MultipartBody) {
-                if (onStartObjectSerialization != null) {
-                    onStartObjectSerialization.accept(value, this);
+        final List<Parsable> nonNullAdditionalValuesToMerge =
+                Stream.of(additionalValuesToMerge)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+        if (value != null || !nonNullAdditionalValuesToMerge.isEmpty()) {
+            if (value != null) {
+                if (onBeforeObjectSerialization != null) {
+                    onBeforeObjectSerialization.accept(value);
                 }
-                value.serialize(this);
-            } else {
-                throw new RuntimeException(
-                        "expected MultipartBody instance but got " + value.getClass().getName());
+                if (value instanceof MultipartBody) {
+                    if (onStartObjectSerialization != null) {
+                        onStartObjectSerialization.accept(value, this);
+                    }
+                    value.serialize(this);
+                } else {
+                    throw new RuntimeException(
+                            "expected MultipartBody instance but got "
+                                    + value.getClass().getName());
+                }
+                if (onAfterObjectSerialization != null) {
+                    onAfterObjectSerialization.accept(value);
+                }
             }
-            if (onAfterObjectSerialization != null) {
-                onAfterObjectSerialization.accept(value);
+            for (final Parsable additionalValueToMerge : nonNullAdditionalValuesToMerge) {
+                if (onBeforeObjectSerialization != null) {
+                    onBeforeObjectSerialization.accept(additionalValueToMerge);
+                }
+                if (additionalValueToMerge instanceof MultipartBody) {
+                    if (onStartObjectSerialization != null) {
+                        onStartObjectSerialization.accept(additionalValueToMerge, this);
+                    }
+                    additionalValueToMerge.serialize(this);
+                } else {
+                    throw new RuntimeException(
+                            "expected MultipartBody instance but got "
+                                    + additionalValueToMerge.getClass().getName());
+                }
+                if (onAfterObjectSerialization != null) {
+                    onAfterObjectSerialization.accept(additionalValueToMerge);
+                }
             }
         }
     }

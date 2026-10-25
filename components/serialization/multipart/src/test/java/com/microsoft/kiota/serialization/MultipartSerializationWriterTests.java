@@ -1,7 +1,9 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -108,6 +110,93 @@ class MultipartSerializationWriterTests {
                             strResult);
                 }
             }
+        }
+    }
+
+    @Test
+    void writesStringValueWithKeyValue() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("Content-Type", "text/plain");
+            try (final var result = serializationWriter.getSerializedContent()) {
+                try (final var reader =
+                        new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
+                    final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
+                    assertEquals("Content-Type: text/plain", strResult);
+                }
+            }
+        }
+    }
+
+    @Test
+    void writeStringValueWithNilValueOmitsHeader() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("Content-Type", null);
+            try (final var result = serializationWriter.getSerializedContent()) {
+                assertEquals(0, result.available());
+            }
+        }
+    }
+
+    @Test
+    void writeStringValueWithEmptyKeyAndNilValueWritesDelimiter() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("", null);
+            try (final var result = serializationWriter.getSerializedContent()) {
+                final byte[] bytes = result.readAllBytes();
+                assertEquals("\r\n", new String(bytes, "UTF-8"));
+            }
+        }
+    }
+
+    @Test
+    void writeStringValueWithEmptyKeyAndValueWritesRawLine() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("", "raw line");
+            try (final var result = serializationWriter.getSerializedContent()) {
+                final byte[] bytes = result.readAllBytes();
+                assertEquals("raw line\r\n", new String(bytes, "UTF-8"));
+            }
+        }
+    }
+
+    @Test
+    void writesAStructuredObjectWithAdditionalValuesToMerge() throws IOException {
+        final RequestAdapter requestAdapter = mock(RequestAdapter.class);
+        when(requestAdapter.getSerializationWriterFactory())
+                .thenReturn(new JsonSerializationWriterFactory());
+
+        final MultipartBody part1 = new MultipartBody();
+        part1.requestAdapter = requestAdapter;
+        part1.addOrReplacePart("part1", "application/octet-stream", byteForTest);
+
+        final MultipartBody part2 = new MultipartBody();
+        part2.requestAdapter = requestAdapter;
+        part2.addOrReplacePart("part2", "application/octet-stream", new byte[] {0x04, 0x05});
+
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, part1, part2);
+
+            try (final var result = serializationWriter.getSerializedContent()) {
+                try (final var reader =
+                        new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
+                    final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
+                    assertNotNull(strResult);
+                    assertTrue(strResult.contains("name=\"part1\""));
+                    assertTrue(strResult.contains("name=\"part2\""));
+                }
+            }
+        }
+    }
+
+    @Test
+    void throwsOnInvalidAdditionalValuesToMerge() throws IOException {
+        final MultipartBody part1 = new MultipartBody();
+        final TestEntity nonMultipart = new TestEntity();
+
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            assertThrows(
+                    RuntimeException.class,
+                    () -> serializationWriter.writeObjectValue(null, part1, nonMultipart));
         }
     }
 }
