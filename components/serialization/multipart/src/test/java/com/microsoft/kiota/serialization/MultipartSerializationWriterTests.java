@@ -1,12 +1,12 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.kiota.Compatibility;
 import com.microsoft.kiota.MultipartBody;
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.RequestAdapter;
@@ -142,7 +142,7 @@ class MultipartSerializationWriterTests {
         try (final var serializationWriter = new MultipartSerializationWriter()) {
             serializationWriter.writeStringValue("", null);
             try (final var result = serializationWriter.getSerializedContent()) {
-                final byte[] bytes = result.readAllBytes();
+                final byte[] bytes = Compatibility.readAllBytes(result);
                 assertEquals("\r\n", new String(bytes, "UTF-8"));
             }
         }
@@ -153,7 +153,7 @@ class MultipartSerializationWriterTests {
         try (final var serializationWriter = new MultipartSerializationWriter()) {
             serializationWriter.writeStringValue("", "raw line");
             try (final var result = serializationWriter.getSerializedContent()) {
-                final byte[] bytes = result.readAllBytes();
+                final byte[] bytes = Compatibility.readAllBytes(result);
                 assertEquals("raw line\r\n", new String(bytes, "UTF-8"));
             }
         }
@@ -180,9 +180,24 @@ class MultipartSerializationWriterTests {
                 try (final var reader =
                         new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
                     final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
-                    assertNotNull(strResult);
-                    assertTrue(strResult.contains("name=\"part1\""));
-                    assertTrue(strResult.contains("name=\"part2\""));
+                    final String expected =
+                            "--"
+                                    + part1.getBoundary()
+                                    + "\r\n"
+                                    + "Content-Type: application/octet-stream\r\n"
+                                    + "Content-Disposition: form-data; name=\"part1\"\r\n\r\n"
+                                    + new String(byteForTest, "UTF-8")
+                                    + "\r\n--"
+                                    + part1.getBoundary()
+                                    + "\r\n"
+                                    + "Content-Type: application/octet-stream\r\n"
+                                    + "Content-Disposition: form-data; name=\"part2\"\r\n\r\n"
+                                    + new String(new byte[] {0x04, 0x05}, "UTF-8")
+                                    + "\r\n--"
+                                    + part1.getBoundary()
+                                    + "--";
+                    assertEquals(expected, strResult);
+                    assertFalse(strResult.contains(part2.getBoundary()));
                 }
             }
         }
@@ -190,13 +205,16 @@ class MultipartSerializationWriterTests {
 
     @Test
     void throwsOnInvalidAdditionalValuesToMerge() throws IOException {
-        final MultipartBody part1 = new MultipartBody();
         final TestEntity nonMultipart = new TestEntity();
 
         try (final var serializationWriter = new MultipartSerializationWriter()) {
-            assertThrows(
-                    RuntimeException.class,
-                    () -> serializationWriter.writeObjectValue(null, part1, nonMultipart));
+            final var exception =
+                    assertThrows(
+                            RuntimeException.class,
+                            () -> serializationWriter.writeObjectValue(null, null, nonMultipart));
+            assertEquals(
+                    "expected MultipartBody instance but got " + nonMultipart.getClass().getName(),
+                    exception.getMessage());
         }
     }
 }

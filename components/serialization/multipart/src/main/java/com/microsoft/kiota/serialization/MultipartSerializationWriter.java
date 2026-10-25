@@ -11,11 +11,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -23,32 +24,39 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-/** Serialization writer implementation for Multipart encoded payloads */
 public class MultipartSerializationWriter implements SerializationWriter {
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    private final OutputStreamWriter writer;
+    private final OutputStreamWriter writer =
+            new OutputStreamWriter(stream, StandardCharsets.UTF_8);
 
-    /** Instantiates a new MultipartSerializationWriter. */
-    public MultipartSerializationWriter() {
-        try {
-            this.writer = new OutputStreamWriter(this.stream, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("could not create writer", e);
-        }
-    }
+    private String currentTargetBoundary;
+    private String currentReplacementBoundary;
+    private boolean isLastBody;
 
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
         try {
             if (key != null && !key.isEmpty() && value == null) {
                 return;
             }
+            String valueToWrite = value;
+            if (currentTargetBoundary != null
+                    && currentReplacementBoundary != null
+                    && value != null) {
+                if (value.equals("--" + currentTargetBoundary)) {
+                    valueToWrite = "--" + currentReplacementBoundary;
+                } else if (value.equals("--" + currentTargetBoundary + "--")) {
+                    if (isLastBody) {
+                        valueToWrite = "--" + currentReplacementBoundary + "--";
+                    } else {
+                        return;
+                    }
+                }
+            }
             if (key != null && !key.isEmpty()) writer.write(key);
-            if (value != null && !value.isEmpty()) {
+            if (valueToWrite != null && !valueToWrite.isEmpty()) {
                 if (key != null && !key.isEmpty()) writer.write(": ");
-                writer.write(value);
+                writer.write(valueToWrite);
             }
             writer.write("\r\n");
             writer.flush();
@@ -131,46 +139,54 @@ public class MultipartSerializationWriter implements SerializationWriter {
             @Nullable final T value,
             @Nonnull final Parsable... additionalValuesToMerge) {
         Objects.requireNonNull(additionalValuesToMerge);
-        final List<Parsable> nonNullAdditionalValuesToMerge =
-                Stream.of(additionalValuesToMerge)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-        if (value != null || !nonNullAdditionalValuesToMerge.isEmpty()) {
-            if (value != null) {
-                if (onBeforeObjectSerialization != null) {
-                    onBeforeObjectSerialization.accept(value);
-                }
-                if (value instanceof MultipartBody) {
-                    if (onStartObjectSerialization != null) {
-                        onStartObjectSerialization.accept(value, this);
-                    }
-                    value.serialize(this);
-                } else {
-                    throw new RuntimeException(
-                            "expected MultipartBody instance but got "
-                                    + value.getClass().getName());
-                }
-                if (onAfterObjectSerialization != null) {
-                    onAfterObjectSerialization.accept(value);
-                }
+        final List<MultipartBody> bodies = new ArrayList<>();
+        if (value != null) {
+            if (value instanceof MultipartBody) {
+                bodies.add((MultipartBody) value);
+            } else {
+                throw new RuntimeException(
+                        "expected MultipartBody instance but got " + value.getClass().getName());
             }
-            for (final Parsable additionalValueToMerge : nonNullAdditionalValuesToMerge) {
-                if (onBeforeObjectSerialization != null) {
-                    onBeforeObjectSerialization.accept(additionalValueToMerge);
-                }
+        }
+        for (final Parsable additionalValueToMerge : additionalValuesToMerge) {
+            if (additionalValueToMerge != null) {
                 if (additionalValueToMerge instanceof MultipartBody) {
-                    if (onStartObjectSerialization != null) {
-                        onStartObjectSerialization.accept(additionalValueToMerge, this);
-                    }
-                    additionalValueToMerge.serialize(this);
+                    bodies.add((MultipartBody) additionalValueToMerge);
                 } else {
                     throw new RuntimeException(
                             "expected MultipartBody instance but got "
                                     + additionalValueToMerge.getClass().getName());
                 }
-                if (onAfterObjectSerialization != null) {
-                    onAfterObjectSerialization.accept(additionalValueToMerge);
-                }
+            }
+        }
+
+        if (bodies.isEmpty()) {
+            return;
+        }
+
+        final String sharedBoundary = bodies.get(0).getBoundary();
+        for (int i = 0; i < bodies.size(); i++) {
+            final MultipartBody body = bodies.get(i);
+            if (onBeforeObjectSerialization != null) {
+                onBeforeObjectSerialization.accept(body);
+            }
+            if (onStartObjectSerialization != null) {
+                onStartObjectSerialization.accept(body, this);
+            }
+
+            currentTargetBoundary = body.getBoundary();
+            currentReplacementBoundary = sharedBoundary;
+            isLastBody = (i == bodies.size() - 1);
+            try {
+                body.serialize(this);
+            } finally {
+                currentTargetBoundary = null;
+                currentReplacementBoundary = null;
+                isLastBody = false;
+            }
+
+            if (onAfterObjectSerialization != null) {
+                onAfterObjectSerialization.accept(body);
             }
         }
     }
