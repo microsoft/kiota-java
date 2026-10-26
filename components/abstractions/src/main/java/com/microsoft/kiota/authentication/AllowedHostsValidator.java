@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /** Maintains a list of valid hosts and allows authentication providers to check whether a host is valid before authenticating a request */
@@ -58,15 +59,28 @@ public class AllowedHostsValidator {
      * @return true if the host is allowed, false otherwise.
      */
     public boolean isUrlHostValid(@Nonnull final URI uri) {
+        Objects.requireNonNull(uri, "parameter uri cannot be null");
+        final String scheme = uri.getScheme();
+        if (scheme == null || scheme.trim().isEmpty()) {
+            return false;
+        }
+        final String userInfo = uri.getUserInfo();
+        if (userInfo != null && !userInfo.isEmpty()) {
+            return false;
+        }
+        final String host = uri.getHost();
+        if (host == null || host.trim().isEmpty()) {
+            return false;
+        }
         if (validHosts.isEmpty()) {
             return true;
         }
-        final String host = uri.getHost().trim().toLowerCase(Locale.ROOT);
-        if (validHosts.contains(host)) {
+        final String normalizedHost = host.trim().toLowerCase(Locale.ROOT);
+        if (validHosts.contains(normalizedHost)) {
             return true;
         }
         for (final String validHost : validHosts) {
-            if (validHost.startsWith(".") && host.endsWith(validHost)) {
+            if (validHost.startsWith(".") && normalizedHost.endsWith(validHost)) {
                 return true;
             }
         }
