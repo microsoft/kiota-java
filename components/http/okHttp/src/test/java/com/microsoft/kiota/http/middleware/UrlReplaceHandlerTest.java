@@ -2,9 +2,17 @@ package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 import com.microsoft.kiota.http.KiotaClientFactory;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.Tracer;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -12,6 +20,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -95,5 +104,93 @@ class UrlReplaceHandlerTest {
         assertEquals(
                 "https://graph.microsoft.com/v1.0/me/calendar/events/AAMkADM4Njk4YzMzLTc3YTktNGQwZi05ZjRjLTJlNTUzYWMxZjAxNABGAAAAAABzQLabgoJzT6ewNe8DeydoBwBoFwNVrXtLQ5PleemFoZ87AAAAAAENAABoFwNVrXtLQ5PleemFoZ87AAA33T-eAAA%3D",
                 response.request().url().toString());
+    }
+
+    @Test
+    void testUrlReplaceHandler_propagatesSpan() throws IOException {
+        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
+            final Tracer mockTracer = mock(Tracer.class);
+            final SpanBuilder mockSpanBuilder = mock(SpanBuilder.class);
+            final Span mockSpan = mock(Span.class);
+            final io.opentelemetry.context.Scope mockScope =
+                    mock(io.opentelemetry.context.Scope.class);
+
+            otelMock.when(() -> GlobalOpenTelemetry.getTracer(anyString())).thenReturn(mockTracer);
+            when(mockTracer.spanBuilder(anyString())).thenReturn(mockSpanBuilder);
+            when(mockSpanBuilder.setParent(any())).thenReturn(mockSpanBuilder);
+            when(mockSpanBuilder.startSpan()).thenReturn(mockSpan);
+            when(mockSpan.makeCurrent()).thenReturn(mockScope);
+
+            final com.microsoft.kiota.http.ObservabilityOptions obsOptions =
+                    new com.microsoft.kiota.http.ObservabilityOptions();
+            final Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+            final Response mockResponse = mock(Response.class);
+            defaultReplacementPairs.put("/users/TokenToReplace", "/me");
+            final UrlReplaceHandler handler =
+                    new UrlReplaceHandler(new UrlReplaceHandlerOption(defaultReplacementPairs));
+            final Request request =
+                    new Request.Builder()
+                            .url(DEFAULT_URL_WITH_TOKEN)
+                            .tag(com.microsoft.kiota.http.ObservabilityOptions.class, obsOptions)
+                            .build();
+            when(mockChain.request()).thenReturn(request);
+            when(mockChain.proceed(any(Request.class)))
+                    .thenAnswer(
+                            invocation -> {
+                                final Request req = invocation.getArgument(0);
+                                assertSame(mockSpan, req.tag(Span.class));
+                                verify(mockSpan, never()).end();
+                                verify(mockScope, never()).close();
+                                return mockResponse;
+                            });
+
+            final Response response = handler.intercept(mockChain);
+            assertNotNull(response);
+            verify(mockScope).close();
+            verify(mockSpan).end();
+        }
+    }
+
+    @Test
+    void testUrlReplaceHandler_cleansUpSpanOnException() throws IOException {
+        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
+            final Tracer mockTracer = mock(Tracer.class);
+            final SpanBuilder mockSpanBuilder = mock(SpanBuilder.class);
+            final Span mockSpan = mock(Span.class);
+            final io.opentelemetry.context.Scope mockScope =
+                    mock(io.opentelemetry.context.Scope.class);
+
+            otelMock.when(() -> GlobalOpenTelemetry.getTracer(anyString())).thenReturn(mockTracer);
+            when(mockTracer.spanBuilder(anyString())).thenReturn(mockSpanBuilder);
+            when(mockSpanBuilder.setParent(any())).thenReturn(mockSpanBuilder);
+            when(mockSpanBuilder.startSpan()).thenReturn(mockSpan);
+            when(mockSpan.makeCurrent()).thenReturn(mockScope);
+
+            final com.microsoft.kiota.http.ObservabilityOptions obsOptions =
+                    new com.microsoft.kiota.http.ObservabilityOptions();
+            final Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+            defaultReplacementPairs.put("/users/TokenToReplace", "/me");
+            final UrlReplaceHandler handler =
+                    new UrlReplaceHandler(new UrlReplaceHandlerOption(defaultReplacementPairs));
+            final Request request =
+                    new Request.Builder()
+                            .url(DEFAULT_URL_WITH_TOKEN)
+                            .tag(com.microsoft.kiota.http.ObservabilityOptions.class, obsOptions)
+                            .build();
+            when(mockChain.request()).thenReturn(request);
+            when(mockChain.proceed(any(Request.class)))
+                    .thenAnswer(
+                            invocation -> {
+                                final Request req = invocation.getArgument(0);
+                                assertSame(mockSpan, req.tag(Span.class));
+                                verify(mockSpan, never()).end();
+                                verify(mockScope, never()).close();
+                                throw new IOException("network failure");
+                            });
+
+            assertThrows(IOException.class, () -> handler.intercept(mockChain));
+            verify(mockScope).close();
+            verify(mockSpan).end();
+        }
     }
 }
