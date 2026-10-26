@@ -217,4 +217,49 @@ class MultipartSerializationWriterTests {
                     exception.getMessage());
         }
     }
+
+    @Test
+    void preservesStringPayloadMatchingBoundaryOrClosingDelimiterWhenMerging() throws IOException {
+        final RequestAdapter requestAdapter = mock(RequestAdapter.class);
+        when(requestAdapter.getSerializationWriterFactory())
+                .thenReturn(new JsonSerializationWriterFactory());
+
+        final MultipartBody part1 = new MultipartBody();
+        part1.requestAdapter = requestAdapter;
+        final String payload1 = "--" + part1.getBoundary() + "--";
+        part1.addOrReplacePart("part1", "text/plain", payload1);
+
+        final MultipartBody part2 = new MultipartBody();
+        part2.requestAdapter = requestAdapter;
+        final String payload2 = "--" + part2.getBoundary() + "--";
+        part2.addOrReplacePart("part2", "text/plain", payload2);
+
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, part1, part2);
+
+            try (final var result = serializationWriter.getSerializedContent()) {
+                try (final var reader =
+                        new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
+                    final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
+                    final String expected =
+                            "--"
+                                    + part1.getBoundary()
+                                    + "\r\n"
+                                    + "Content-Type: text/plain\r\n"
+                                    + "Content-Disposition: form-data; name=\"part1\"\r\n\r\n"
+                                    + payload1
+                                    + "\r\n\r\n--"
+                                    + part1.getBoundary()
+                                    + "\r\n"
+                                    + "Content-Type: text/plain\r\n"
+                                    + "Content-Disposition: form-data; name=\"part2\"\r\n\r\n"
+                                    + payload2
+                                    + "\r\n\r\n--"
+                                    + part1.getBoundary()
+                                    + "--";
+                    assertEquals(expected, strResult);
+                }
+            }
+        }
+    }
 }
