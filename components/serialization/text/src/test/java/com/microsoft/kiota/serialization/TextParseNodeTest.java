@@ -36,4 +36,28 @@ public class TextParseNodeTest {
             assertTrue(ex.getMessage().contains(dateTimeString));
         }
     }
+
+    @Test
+    void testParsesQuotedString() {
+        final var node = new TextParseNode("\"hello world\"");
+        assertEquals("hello world", node.getStringValue());
+    }
+
+    @Test
+    void testParsesEmptyQuotedString() {
+        final var node = new TextParseNode("\"\"");
+        assertEquals("", node.getStringValue());
+    }
+
+    @Test
+    void testParsesSingleQuoteString() {
+        final var node = new TextParseNode("\"");
+        assertEquals("\"", node.getStringValue());
+    }
+
+    @Test
+    void testParsesUnquotedString() {
+        final var node = new TextParseNode("hello world");
+        assertEquals("hello world", node.getStringValue());
+    }
 }
