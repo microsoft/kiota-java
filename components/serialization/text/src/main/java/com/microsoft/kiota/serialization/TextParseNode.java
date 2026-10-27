@@ -27,6 +27,7 @@ public class TextParseNode implements ParseNode {
 
     /**
      * Initializes a new instance of the {@link TextParseNode} class.
+     * Enclosing double quotes are stripped when the string length is at least 2.
      * @param rawText the raw text to parse.
      */
     public TextParseNode(@Nonnull final String rawText) {
