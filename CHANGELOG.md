@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.4](https://github.com/microsoft/kiota-java/compare/v1.10.3...v1.10.4) (2026-10-27)
+
+
+### Bug Fixes
+
+* **abstractions:** add null checks and reject userinfo in AllowedHostsValidator ([ab6fae4](https://github.com/microsoft/kiota-java/commit/ab6fae4a228d73d2229d0dbdc755924c5fb6a2ae))
+* **abstractions:** add null checks and reject userinfo in AllowedHostsValidator ([86313fd](https://github.com/microsoft/kiota-java/commit/86313fda247849f3f1abd90fa2124083dd2f403c))
+* **abstractions:** retain @Nonnull constraint on isUrlHostValid and fail-fast with Objects.requireNonNull ([2d75b3f](https://github.com/microsoft/kiota-java/commit/2d75b3f693bd1f4d634ecdcd76131c66296ac99e))
+* **http:** enclose proceed in handler span lifecycle and propagate span in UserAgent and UrlReplace handlers ([d60b103](https://github.com/microsoft/kiota-java/commit/d60b103dffcdf1fa1ecab947a3cc22a43c88e620))
+* **http:** enclose proceed in handler span lifecycle and propagate span in UserAgent and UrlReplace handlers ([c6a74f9](https://github.com/microsoft/kiota-java/commit/c6a74f9331ae1ef0f7df889a9b1da7061768e276))
+* **serialization:** fix quote stripping bounds in TextParseNode ([266ced8](https://github.com/microsoft/kiota-java/commit/266ced8602c05b21fecff31c757b815026eea8e4))
+* **serialization:** fix quote stripping bounds in TextParseNode and add tests ([6022367](https://github.com/microsoft/kiota-java/commit/60223675e1c9c470ce74ab600c62cba58ceb76a7))
+
 ## [1.10.3](https://github.com/microsoft/kiota-java/compare/v1.10.2...v1.10.3) (2026-10-21)
 
 
