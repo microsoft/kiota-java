@@ -32,8 +32,8 @@ public class TextParseNode implements ParseNode {
     public TextParseNode(@Nonnull final String rawText) {
         Objects.requireNonNull(rawText, "parameter node cannot be null");
         text =
-                rawText.startsWith("\"") && rawText.endsWith("\"")
-                        ? rawText.substring(1, rawText.length() - 2)
+                rawText.length() >= 2 && rawText.startsWith("\"") && rawText.endsWith("\"")
+                        ? rawText.substring(1, rawText.length() - 1)
                         : rawText;
     }
 
