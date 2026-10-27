@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.kiota.Compatibility;
 import com.microsoft.kiota.MultipartBody;
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.RequestAdapter;
@@ -107,6 +108,52 @@ class MultipartSerializationWriterTests {
                                     + "--",
                             strResult);
                 }
+            }
+        }
+    }
+
+    @Test
+    void writesStringValueWithKeyValue() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("Content-Type", "text/plain");
+            try (final var result = serializationWriter.getSerializedContent()) {
+                try (final var reader =
+                        new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
+                    final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
+                    assertEquals("Content-Type: text/plain", strResult);
+                }
+            }
+        }
+    }
+
+    @Test
+    void writeStringValueWithNilValueOmitsHeader() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("Content-Type", null);
+            try (final var result = serializationWriter.getSerializedContent()) {
+                assertEquals(0, result.available());
+            }
+        }
+    }
+
+    @Test
+    void writeStringValueWithEmptyKeyAndNilValueWritesDelimiter() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("", null);
+            try (final var result = serializationWriter.getSerializedContent()) {
+                final byte[] bytes = Compatibility.readAllBytes(result);
+                assertEquals("\r\n", new String(bytes, "UTF-8"));
+            }
+        }
+    }
+
+    @Test
+    void writeStringValueWithEmptyKeyAndValueWritesRawLine() throws IOException {
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeStringValue("", "raw line");
+            try (final var result = serializationWriter.getSerializedContent()) {
+                final byte[] bytes = Compatibility.readAllBytes(result);
+                assertEquals("raw line\r\n", new String(bytes, "UTF-8"));
             }
         }
     }
