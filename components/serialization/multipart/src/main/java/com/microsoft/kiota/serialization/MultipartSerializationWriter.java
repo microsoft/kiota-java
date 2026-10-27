@@ -16,9 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -29,77 +27,20 @@ import java.util.function.Consumer;
 public class MultipartSerializationWriter implements SerializationWriter {
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private final OutputStreamWriter writer =
-            new OutputStreamWriter(stream, StandardCharsets.UTF_8);
+            new OutputStreamWriter(this.stream, StandardCharsets.UTF_8);
 
-    private enum FramingState {
-        EXPECTING_FIRST_BOUNDARY,
-        IN_HEADERS,
-        EXPECTING_PAYLOAD,
-        EXPECTING_DELIMITER_AFTER_PAYLOAD,
-        EXPECTING_BOUNDARY_OR_CLOSING,
-        FINISHED
-    }
-
-    private String currentTargetBoundary;
-    private String currentReplacementBoundary;
-    private boolean isLastBody;
-    private FramingState framingState;
+    /** Instantiates a new MultipartSerializationWriter. */
+    public MultipartSerializationWriter() {}
 
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
+        if (key != null && !key.isEmpty() && value == null) {
+            return;
+        }
         try {
-            if (key != null && !key.isEmpty() && value == null) {
-                return;
-            }
-            String valueToWrite = value;
-            if (currentTargetBoundary != null
-                    && currentReplacementBoundary != null
-                    && framingState != null) {
-                switch (framingState) {
-                    case EXPECTING_FIRST_BOUNDARY:
-                        if ((key == null || key.isEmpty())
-                                && value != null
-                                && value.equals("--" + currentTargetBoundary)) {
-                            valueToWrite = "--" + currentReplacementBoundary;
-                            framingState = FramingState.IN_HEADERS;
-                        }
-                        break;
-                    case IN_HEADERS:
-                        if ((key == null || key.isEmpty()) && (value == null || value.isEmpty())) {
-                            framingState = FramingState.EXPECTING_PAYLOAD;
-                        }
-                        break;
-                    case EXPECTING_PAYLOAD:
-                        framingState = FramingState.EXPECTING_DELIMITER_AFTER_PAYLOAD;
-                        break;
-                    case EXPECTING_DELIMITER_AFTER_PAYLOAD:
-                        if ((key == null || key.isEmpty()) && (value == null || value.isEmpty())) {
-                            framingState = FramingState.EXPECTING_BOUNDARY_OR_CLOSING;
-                        }
-                        break;
-                    case EXPECTING_BOUNDARY_OR_CLOSING:
-                        if ((key == null || key.isEmpty()) && value != null) {
-                            if (value.equals("--" + currentTargetBoundary)) {
-                                valueToWrite = "--" + currentReplacementBoundary;
-                                framingState = FramingState.IN_HEADERS;
-                            } else if (value.equals("--" + currentTargetBoundary + "--")) {
-                                if (isLastBody) {
-                                    valueToWrite = "--" + currentReplacementBoundary + "--";
-                                    framingState = FramingState.FINISHED;
-                                } else {
-                                    framingState = FramingState.FINISHED;
-                                    return;
-                                }
-                            }
-                        }
-                        break;
-                    case FINISHED:
-                        break;
-                }
-            }
             if (key != null && !key.isEmpty()) writer.write(key);
-            if (valueToWrite != null && !valueToWrite.isEmpty()) {
+            if (value != null && !value.isEmpty()) {
                 if (key != null && !key.isEmpty()) writer.write(": ");
-                writer.write(valueToWrite);
+                writer.write(value);
             }
             writer.write("\r\n");
             writer.flush();
@@ -182,56 +123,21 @@ public class MultipartSerializationWriter implements SerializationWriter {
             @Nullable final T value,
             @Nonnull final Parsable... additionalValuesToMerge) {
         Objects.requireNonNull(additionalValuesToMerge);
-        final List<MultipartBody> bodies = new ArrayList<>();
         if (value != null) {
+            if (onBeforeObjectSerialization != null) {
+                onBeforeObjectSerialization.accept(value);
+            }
             if (value instanceof MultipartBody) {
-                bodies.add((MultipartBody) value);
+                if (onStartObjectSerialization != null) {
+                    onStartObjectSerialization.accept(value, this);
+                }
+                value.serialize(this);
             } else {
                 throw new RuntimeException(
                         "expected MultipartBody instance but got " + value.getClass().getName());
             }
-        }
-        for (final Parsable additionalValueToMerge : additionalValuesToMerge) {
-            if (additionalValueToMerge != null) {
-                if (additionalValueToMerge instanceof MultipartBody) {
-                    bodies.add((MultipartBody) additionalValueToMerge);
-                } else {
-                    throw new RuntimeException(
-                            "expected MultipartBody instance but got "
-                                    + additionalValueToMerge.getClass().getName());
-                }
-            }
-        }
-
-        if (bodies.isEmpty()) {
-            return;
-        }
-
-        final String sharedBoundary = bodies.get(0).getBoundary();
-        for (int i = 0; i < bodies.size(); i++) {
-            final MultipartBody body = bodies.get(i);
-            if (onBeforeObjectSerialization != null) {
-                onBeforeObjectSerialization.accept(body);
-            }
-            if (onStartObjectSerialization != null) {
-                onStartObjectSerialization.accept(body, this);
-            }
-
-            currentTargetBoundary = body.getBoundary();
-            currentReplacementBoundary = sharedBoundary;
-            isLastBody = (i == bodies.size() - 1);
-            framingState = FramingState.EXPECTING_FIRST_BOUNDARY;
-            try {
-                body.serialize(this);
-            } finally {
-                currentTargetBoundary = null;
-                currentReplacementBoundary = null;
-                isLastBody = false;
-                framingState = null;
-            }
-
             if (onAfterObjectSerialization != null) {
-                onAfterObjectSerialization.accept(body);
+                onAfterObjectSerialization.accept(value);
             }
         }
     }
@@ -296,9 +202,6 @@ public class MultipartSerializationWriter implements SerializationWriter {
 
     public void writeByteArrayValue(
             @Nullable final String key, @Nullable @Nonnull final byte[] value) {
-        if (framingState == FramingState.EXPECTING_PAYLOAD) {
-            framingState = FramingState.EXPECTING_DELIMITER_AFTER_PAYLOAD;
-        }
         if (value != null)
             try {
                 this.stream.write(value);

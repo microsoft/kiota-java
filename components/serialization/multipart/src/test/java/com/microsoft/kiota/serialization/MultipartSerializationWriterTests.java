@@ -1,7 +1,6 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -155,110 +154,6 @@ class MultipartSerializationWriterTests {
             try (final var result = serializationWriter.getSerializedContent()) {
                 final byte[] bytes = Compatibility.readAllBytes(result);
                 assertEquals("raw line\r\n", new String(bytes, "UTF-8"));
-            }
-        }
-    }
-
-    @Test
-    void writesAStructuredObjectWithAdditionalValuesToMerge() throws IOException {
-        final RequestAdapter requestAdapter = mock(RequestAdapter.class);
-        when(requestAdapter.getSerializationWriterFactory())
-                .thenReturn(new JsonSerializationWriterFactory());
-
-        final MultipartBody part1 = new MultipartBody();
-        part1.requestAdapter = requestAdapter;
-        part1.addOrReplacePart("part1", "application/octet-stream", byteForTest);
-
-        final MultipartBody part2 = new MultipartBody();
-        part2.requestAdapter = requestAdapter;
-        part2.addOrReplacePart("part2", "application/octet-stream", new byte[] {0x04, 0x05});
-
-        try (final var serializationWriter = new MultipartSerializationWriter()) {
-            serializationWriter.writeObjectValue(null, part1, part2);
-
-            try (final var result = serializationWriter.getSerializedContent()) {
-                try (final var reader =
-                        new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
-                    final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
-                    final String expected =
-                            "--"
-                                    + part1.getBoundary()
-                                    + "\r\n"
-                                    + "Content-Type: application/octet-stream\r\n"
-                                    + "Content-Disposition: form-data; name=\"part1\"\r\n\r\n"
-                                    + new String(byteForTest, "UTF-8")
-                                    + "\r\n--"
-                                    + part1.getBoundary()
-                                    + "\r\n"
-                                    + "Content-Type: application/octet-stream\r\n"
-                                    + "Content-Disposition: form-data; name=\"part2\"\r\n\r\n"
-                                    + new String(new byte[] {0x04, 0x05}, "UTF-8")
-                                    + "\r\n--"
-                                    + part1.getBoundary()
-                                    + "--";
-                    assertEquals(expected, strResult);
-                    assertFalse(strResult.contains(part2.getBoundary()));
-                }
-            }
-        }
-    }
-
-    @Test
-    void throwsOnInvalidAdditionalValuesToMerge() throws IOException {
-        final TestEntity nonMultipart = new TestEntity();
-
-        try (final var serializationWriter = new MultipartSerializationWriter()) {
-            final var exception =
-                    assertThrows(
-                            RuntimeException.class,
-                            () -> serializationWriter.writeObjectValue(null, null, nonMultipart));
-            assertEquals(
-                    "expected MultipartBody instance but got " + nonMultipart.getClass().getName(),
-                    exception.getMessage());
-        }
-    }
-
-    @Test
-    void preservesStringPayloadMatchingBoundaryOrClosingDelimiterWhenMerging() throws IOException {
-        final RequestAdapter requestAdapter = mock(RequestAdapter.class);
-        when(requestAdapter.getSerializationWriterFactory())
-                .thenReturn(new JsonSerializationWriterFactory());
-
-        final MultipartBody part1 = new MultipartBody();
-        part1.requestAdapter = requestAdapter;
-        final String payload1 = "--" + part1.getBoundary() + "--";
-        part1.addOrReplacePart("part1", "text/plain", payload1);
-
-        final MultipartBody part2 = new MultipartBody();
-        part2.requestAdapter = requestAdapter;
-        final String payload2 = "--" + part2.getBoundary() + "--";
-        part2.addOrReplacePart("part2", "text/plain", payload2);
-
-        try (final var serializationWriter = new MultipartSerializationWriter()) {
-            serializationWriter.writeObjectValue(null, part1, part2);
-
-            try (final var result = serializationWriter.getSerializedContent()) {
-                try (final var reader =
-                        new BufferedReader(new InputStreamReader(result, "UTF-8"))) {
-                    final String strResult = reader.lines().collect(Collectors.joining("\r\n"));
-                    final String expected =
-                            "--"
-                                    + part1.getBoundary()
-                                    + "\r\n"
-                                    + "Content-Type: text/plain\r\n"
-                                    + "Content-Disposition: form-data; name=\"part1\"\r\n\r\n"
-                                    + payload1
-                                    + "\r\n\r\n--"
-                                    + part1.getBoundary()
-                                    + "\r\n"
-                                    + "Content-Type: text/plain\r\n"
-                                    + "Content-Disposition: form-data; name=\"part2\"\r\n\r\n"
-                                    + payload2
-                                    + "\r\n\r\n--"
-                                    + part1.getBoundary()
-                                    + "--";
-                    assertEquals(expected, strResult);
-                }
             }
         }
     }
