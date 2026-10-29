@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.5](https://github.com/microsoft/kiota-java/compare/v1.10.4...v1.10.5) (2026-10-29)
+
+
+### Bug Fixes
+
+* **abstractions:** support collection sanitization and null safety in RequestInformation ([c180e33](https://github.com/microsoft/kiota-java/commit/c180e331abbc9ad1ee6f80317583ed2310cd6665))
+* **abstractions:** support collection sanitization and null safety in RequestInformation ([acfe31e](https://github.com/microsoft/kiota-java/commit/acfe31e3e926ee8f5a03da2264531c07a88b99ba))
+* **multipart:** omit null header string values and revert additionalValuesToMerge ([fd7c48e](https://github.com/microsoft/kiota-java/commit/fd7c48e2b9d13a3ea35f57a37e3797b91e3ea5ce))
+* **multipart:** omit null header string values in writeStringValue ([9be49ef](https://github.com/microsoft/kiota-java/commit/9be49ef8b2681dde73f0780f6737518baba5bc07))
+
 ## [1.10.4](https://github.com/microsoft/kiota-java/compare/v1.10.3...v1.10.4) (2026-10-27)
 
 
