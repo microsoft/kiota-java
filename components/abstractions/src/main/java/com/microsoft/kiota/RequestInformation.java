@@ -14,6 +14,7 @@ import jakarta.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -462,20 +463,31 @@ public class RequestInformation {
             return null;
         }
         if (value.getClass().isArray()) {
-            final Object[] values = (Object[]) value;
-
-            if (values.length > 0) {
-                if (values[0].getClass().isArray()) {
+            final int length = Array.getLength(value);
+            final ArrayList<String> result = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                final Object item = Array.get(value, i);
+                if (item != null && (item.getClass().isArray() || item instanceof Iterable<?>)) {
                     throw new IllegalArgumentException("multidimensional arrays are not supported");
                 }
-
-                final ArrayList<String> result = new ArrayList<>();
-                for (final Object item : values) {
-                    result.add(getSanitizedValues(item).toString());
+                final Object sanitizedItem = getSanitizedValues(item);
+                if (sanitizedItem != null) {
+                    result.add(sanitizedItem.toString());
                 }
-                return result;
             }
-            return Arrays.asList(values);
+            return result;
+        } else if (value instanceof Iterable<?>) {
+            final ArrayList<String> result = new ArrayList<>();
+            for (final Object item : (Iterable<?>) value) {
+                if (item != null && (item.getClass().isArray() || item instanceof Iterable<?>)) {
+                    throw new IllegalArgumentException("multidimensional arrays are not supported");
+                }
+                final Object sanitizedItem = getSanitizedValues(item);
+                if (sanitizedItem != null) {
+                    result.add(sanitizedItem.toString());
+                }
+            }
+            return result;
         } else if (value instanceof ValuedEnum) {
             return ((ValuedEnum) value).getValue();
         } else if (value instanceof UUID) {
