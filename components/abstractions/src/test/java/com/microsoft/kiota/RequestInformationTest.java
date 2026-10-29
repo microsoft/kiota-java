@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -472,6 +473,110 @@ class RequestInformationTest {
         // Assert
         final URI uri = requestInfo.getUri();
         assertEquals("http://localhost/1,2", uri.toString());
+    }
+
+    @Test
+    void ReplacesEnumCollectionQueryParameters() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        // Act
+        requestInfo.addQueryParameter("datasets", Arrays.asList(TestEnum.First, TestEnum.Second));
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+
+    @Test
+    void ReplacesEnumCollectionPathParameters() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{datasets}";
+
+        // Act
+        requestInfo.pathParameters.put("datasets", Arrays.asList(TestEnum.First, TestEnum.Second));
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/1,2", uri.toString());
+    }
+
+    @Test
+    void HandlesArrayWithNullElementsInQueryParameters()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        // Act
+        requestInfo.addQueryParameter(
+                "datasets", new TestEnum[] {null, TestEnum.First, null, TestEnum.Second});
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+
+    @Test
+    void HandlesCollectionWithNullElementsInQueryParameters()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        final ArrayList<TestEnum> list = new ArrayList<>();
+        list.add(null);
+        list.add(TestEnum.First);
+        list.add(null);
+        list.add(TestEnum.Second);
+
+        // Act
+        requestInfo.addQueryParameter("datasets", list);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+
+    @Test
+    void ThrowsIllegalArgumentWhenMultidimensionalCollectionQueryParameterIsSet() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "{+baseurl}/users{?datasetIds}";
+
+        // Assert
+        final IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                requestInfo.addQueryParameter(
+                                        "datasetIds",
+                                        Arrays.asList(
+                                                Arrays.asList(UUID.randomUUID()),
+                                                Arrays.asList(UUID.randomUUID()))));
+        assertTrue(exception.getMessage().contains("multidimensional arrays are not supported"));
+    }
+
+    @Test
+    void SetsPrimitiveIntArrayQueryParameters() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?ids}";
+
+        // Act
+        requestInfo.addQueryParameter("ids", new int[] {1, 2, 3});
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?ids=1,2,3", uri.toString());
     }
 
     public final SerializationWriterFactory createMockSerializationWriterFactory(
