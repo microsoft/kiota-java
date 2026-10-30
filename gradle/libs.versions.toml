@@ -1,5 +1,5 @@
 [versions]
-okhttp = "4.12.0"
+okhttp = "4.12.1"
 opentelemetry = "1.67.0"
 
 [libraries]
