@@ -40,12 +40,14 @@ public class FormParseNode implements ParseNode {
         Objects.requireNonNull(rawString, "parameter node cannot be null");
         rawStringValue = rawString;
         for (final String kv : rawString.split("&")) {
-            final String[] split = kv.split("=");
-            final String key = sanitizeKey(split[0]);
+            final String[] split = kv.split("=", 2);
             if (split.length == 2) {
-                if (fields.containsKey(key))
-                    fields.put(key, fields.get(key).concat("," + split[1].trim()));
-                else fields.put(key, split[1].trim());
+                final String key = sanitizeKey(split[0]);
+                if (!key.isEmpty()) {
+                    if (fields.containsKey(key))
+                        fields.put(key, fields.get(key).concat("," + split[1].trim()));
+                    else fields.put(key, split[1].trim());
+                }
             }
         }
     }
