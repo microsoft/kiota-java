@@ -1,5 +1,6 @@
 package com.microsoft.kiota.serialization;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -301,5 +302,70 @@ public class ParseNodeTests {
         assertNotNull(node);
         assertThrows(
                 RuntimeException.class, () -> node.getCollectionOfPrimitiveValues(Object.class));
+    }
+
+    @Test
+    void parsesValuesContainingEqualsSigns() {
+        final String formData = "filter=status=active&url=https://example.com?a=1&equation=x=y=z";
+        final FormParseNode parseNode = new FormParseNode(formData);
+
+        final ParseNode filterNode = parseNode.getChildNode("filter");
+        assertNotNull(filterNode);
+        assertEquals("status=active", filterNode.getStringValue());
+
+        final ParseNode urlNode = parseNode.getChildNode("url");
+        assertNotNull(urlNode);
+        assertEquals("https://example.com?a=1", urlNode.getStringValue());
+
+        final ParseNode equationNode = parseNode.getChildNode("equation");
+        assertNotNull(equationNode);
+        assertEquals("x=y=z", equationNode.getStringValue());
+    }
+
+    @Test
+    void parsesBase64ValuesWithPadding() {
+        final String formData = "singlePadding=SGVsbG8=&doublePadding=AQ==";
+        final FormParseNode parseNode = new FormParseNode(formData);
+
+        final ParseNode singlePaddingNode = parseNode.getChildNode("singlePadding");
+        assertNotNull(singlePaddingNode);
+        assertEquals("SGVsbG8=", singlePaddingNode.getStringValue());
+        assertArrayEquals(
+                "Hello".getBytes(StandardCharsets.UTF_8), singlePaddingNode.getByteArrayValue());
+
+        final ParseNode doublePaddingNode = parseNode.getChildNode("doublePadding");
+        assertNotNull(doublePaddingNode);
+        assertEquals("AQ==", doublePaddingNode.getStringValue());
+        assertArrayEquals(new byte[] {1}, doublePaddingNode.getByteArrayValue());
+    }
+
+    @Test
+    void handlesEmptyAndInvalidPairs() {
+        final String formData = "valid=value&&=missingKey&flag&empty=";
+        final FormParseNode parseNode = new FormParseNode(formData);
+
+        final ParseNode validNode = parseNode.getChildNode("valid");
+        assertNotNull(validNode);
+        assertEquals("value", validNode.getStringValue());
+
+        final ParseNode emptyNode = parseNode.getChildNode("empty");
+        assertNotNull(emptyNode);
+        assertEquals("", emptyNode.getStringValue());
+
+        assertNull(parseNode.getChildNode(""));
+        assertNull(parseNode.getChildNode("missingKey"));
+        assertNull(parseNode.getChildNode("flag"));
+    }
+
+    @Test
+    void parsesMultipleValuesWithEquals() {
+        final String formData = "items=a=1&items=b=2";
+        final ParseNode node = new FormParseNode(formData).getChildNode("items");
+        assertNotNull(node);
+        final List<String> result = node.getCollectionOfPrimitiveValues(String.class);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("a=1", result.get(0));
+        assertEquals("b=2", result.get(1));
     }
 }
