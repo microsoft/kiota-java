@@ -2,9 +2,11 @@ package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+import com.microsoft.kiota.serialization.mocks.TestEnum;
 
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +116,36 @@ public class FormSerializationWriterTests {
             assertThrows(
                     RuntimeException.class,
                     () -> serializationWriter.writeObjectValue(null, testEntity));
+        }
+    }
+
+    @Test
+    public void writesDoubleAndByteArrayAndEnumInCollectionsAndAdditionalData()
+            throws IOException, UnsupportedEncodingException {
+        final var testEntity = new TestEntity();
+        testEntity.setId("test-id");
+        testEntity.getAdditionalData().put("rating", 4.5d);
+        testEntity.getAdditionalData().put("rawCert", new byte[] {1, 2, 3});
+        testEntity.getAdditionalData().put("status", TestEnum.VALUE1);
+
+        try (final var serializationWriter = new FormSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, testEntity);
+            serializationWriter.writeCollectionOfPrimitiveValues(
+                    "prices", Arrays.asList(1.5d, 2.5d));
+            serializationWriter.writeCollectionOfPrimitiveValues(
+                    "keys", Arrays.asList(new byte[] {1, 2}, new byte[] {3, 4}));
+            try (final var content = serializationWriter.getSerializedContent()) {
+                try (final var contentReader =
+                        new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
+                    String result = contentReader.lines().collect(Collectors.joining("\n"));
+                    assertTrue(result.contains("id=test-id"));
+                    assertTrue(result.contains("rating=4.5"));
+                    assertTrue(result.contains("rawCert=AQID"));
+                    assertTrue(result.contains("status=val1"));
+                    assertTrue(result.contains("prices=1.5&prices=2.5"));
+                    assertTrue(result.contains("keys=AQI%3D&keys=AwQ%3D"));
+                }
+            }
         }
     }
 }

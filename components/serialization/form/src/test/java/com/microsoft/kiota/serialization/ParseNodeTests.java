@@ -368,4 +368,16 @@ public class ParseNodeTests {
         assertEquals("a=1", result.get(0));
         assertEquals("b=2", result.get(1));
     }
+
+    @Test
+    void parsesCollectionOfByteArrayValues() {
+        final String formData = "bytes=SGVsbG8%3D&bytes=d29ybGQ%3D";
+        final ParseNode node = new FormParseNode(formData).getChildNode("bytes");
+        assertNotNull(node);
+        final List<byte[]> result = node.getCollectionOfPrimitiveValues(byte[].class);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertArrayEquals("Hello".getBytes(StandardCharsets.UTF_8), result.get(0));
+        assertArrayEquals("world".getBytes(StandardCharsets.UTF_8), result.get(1));
+    }
 }
