@@ -264,7 +264,7 @@ public class RetryHandler implements Interceptor {
                     response, executionCount, request, Objects.requireNonNull(retryOption), span)) {
                 final Request.Builder builder =
                         request.newBuilder()
-                                .addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
+                                .header(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
                 if (span != null) {
                     builder.tag(Span.class, span);
                 }
