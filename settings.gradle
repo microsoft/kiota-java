@@ -1,3 +1,10 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 rootProject.name = 'kiota-java'
 System.setProperty("sonar.gradle.skipCompile", "true")
 
