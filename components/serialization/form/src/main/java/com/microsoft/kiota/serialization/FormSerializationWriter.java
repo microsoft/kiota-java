@@ -263,6 +263,10 @@ public class FormSerializationWriter implements SerializationWriter {
                 this.writeLocalTimeValue(key, (LocalTime) value);
             else if (valueClass.equals(PeriodAndDuration.class))
                 this.writePeriodAndDurationValue(key, (PeriodAndDuration) value);
+            else if (valueClass.equals(byte[].class)) this.writeByteArrayValue(key, (byte[]) value);
+            else if (value instanceof ValuedEnum)
+                this.writeStringValue(key, ((ValuedEnum) value).getValue());
+            else if (value instanceof Enum<?>) this.writeStringValue(key, ((Enum<?>) value).name());
             else if (value instanceof Iterable<?>)
                 this.writeCollectionOfPrimitiveValues(key, (Iterable<?>) value);
             else throw new RuntimeException("unknown type to serialize " + valueClass.getName());
