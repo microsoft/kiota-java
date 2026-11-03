@@ -965,7 +965,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             if (body == null
                     && (requestInfo.httpMethod.equals(HttpMethod.POST)
                             || requestInfo.httpMethod.equals(HttpMethod.PATCH)
-                            || requestInfo.httpMethod.equals(HttpMethod.PUT))) {
+                            || requestInfo.httpMethod.equals(HttpMethod.PUT)
+                            || requestInfo.httpMethod.equals(HttpMethod.QUERY))) {
                 body = RequestBody.create(new byte[0]);
             }
             final Request.Builder requestBuilder =
