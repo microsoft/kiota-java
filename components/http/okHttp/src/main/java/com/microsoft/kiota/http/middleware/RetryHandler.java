@@ -264,7 +264,7 @@ public class RetryHandler implements Interceptor {
                     response, executionCount, request, Objects.requireNonNull(retryOption), span)) {
                 final Request.Builder builder =
                         request.newBuilder()
-                                .addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
+                                .header(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
                 if (span != null) {
                     builder.tag(Span.class, span);
                 }
@@ -278,9 +278,11 @@ public class RetryHandler implements Interceptor {
                                 request,
                                 "RetryHandler_Intercept - attempt " + executionCount,
                                 span);
-                retrySpan.setAttribute(HTTP_REQUEST_RESEND_COUNT, executionCount);
-                retrySpan.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
-                retrySpan.end();
+                if (retrySpan != null) {
+                    retrySpan.setAttribute(HTTP_REQUEST_RESEND_COUNT, executionCount);
+                    retrySpan.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
+                    retrySpan.end();
+                }
                 response = chain.proceed(request);
                 if (response == null)
                     throw new RuntimeException("unable to get a response from the chain");

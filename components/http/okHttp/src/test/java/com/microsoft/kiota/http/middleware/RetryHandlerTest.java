@@ -1,6 +1,7 @@
 package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,8 +10,12 @@ import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
 
 import io.opentelemetry.api.trace.Span;
 
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,6 +143,73 @@ class RetryHandlerTest {
                     retryHandler.retryRequest(mockResponse, 1, mockRequest, mockOption, mockSpan);
             // Verify each call succeeds without throwing IllegalArgumentException
             assertTrue(result, "Expected retryRequest to return true on iteration " + i);
+        }
+    }
+
+    @Test
+    void interceptReplacesRetryAttemptHeaderOnSubsequentRetries() throws Exception {
+        try (var server = new MockWebServer()) {
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(429)
+                            .setHeader("Retry-After", "0")
+                            .setBody("retry1"));
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(429)
+                            .setHeader("Retry-After", "0")
+                            .setBody("retry2"));
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("ok"));
+
+            var retryOption =
+                    new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .addInterceptor(new RetryHandler(retryOption))
+                            .build();
+            final Request request = new Request.Builder().url(server.url("/test")).build();
+
+            try (var response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            }
+
+            assertEquals(3, server.getRequestCount());
+
+            final RecordedRequest initialRequest = server.takeRequest();
+            assertNull(initialRequest.getHeader("Retry-Attempt"));
+
+            final RecordedRequest firstRetry = server.takeRequest();
+            assertEquals("1", firstRetry.getHeader("Retry-Attempt"));
+            assertEquals(1, firstRetry.getHeaders().values("Retry-Attempt").size());
+
+            final RecordedRequest secondRetry = server.takeRequest();
+            assertEquals("2", secondRetry.getHeader("Retry-Attempt"));
+            assertEquals(1, secondRetry.getHeaders().values("Retry-Attempt").size());
+        }
+    }
+
+    @Test
+    void interceptExecutesCleanlyWhenObservabilitySpanIsNull() throws Exception {
+        try (var server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse().setResponseCode(200));
+
+            var retryOption =
+                    new RetryHandlerOption((delay, executionCount, req, resp) -> true, 2, 0);
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .addInterceptor(new RetryHandler(retryOption))
+                            .build();
+            final Request request =
+                    new Request.Builder().url(server.url("/test-null-span")).build();
+
+            try (var response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            }
+
+            server.takeRequest();
+            final RecordedRequest retry = server.takeRequest();
+            assertEquals("1", retry.getHeader("Retry-Attempt"));
         }
     }
 }
