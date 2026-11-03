@@ -149,13 +149,7 @@ public class FormParseNode implements ParseNode {
         final String[] primitiveStringCollection = rawValue.split(",");
         final List<T> result = new ArrayList<>(primitiveStringCollection.length);
         for (final String item : primitiveStringCollection) {
-            String decodedItem;
-            try {
-                decodedItem = URLDecoder.decode(item, encoding);
-            } catch (UnsupportedEncodingException e) {
-                decodedItem = item;
-            }
-            result.add(convertPrimitiveValue(decodedItem, targetClass));
+            result.add(convertPrimitiveValue(item, targetClass));
         }
         return result;
     }
@@ -417,7 +411,7 @@ public class FormParseNode implements ParseNode {
     }
 
     @Nullable private static byte[] parseByteArrayValue(@Nullable final String value) {
-        if (value == null || value.isEmpty()) {
+        if (value == null || value.isEmpty() || value.equalsIgnoreCase("null")) {
             return null;
         }
         return Base64.getDecoder().decode(value);
