@@ -368,4 +368,41 @@ public class ParseNodeTests {
         assertEquals("a=1", result.get(0));
         assertEquals("b=2", result.get(1));
     }
+
+    @Test
+    void parsesCollectionOfByteArrayValues() {
+        final String formData = "bytes=SGVsbG8%3D&bytes=d29ybGQ%3D";
+        final ParseNode node = new FormParseNode(formData).getChildNode("bytes");
+        assertNotNull(node);
+        final List<byte[]> result = node.getCollectionOfPrimitiveValues(byte[].class);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertArrayEquals("Hello".getBytes(StandardCharsets.UTF_8), result.get(0));
+        assertArrayEquals("world".getBytes(StandardCharsets.UTF_8), result.get(1));
+    }
+
+    @Test
+    void parsesCollectionOfByteArrayValuesWithBase64Plus() {
+        final String formData = "bytes=%2Bw%3D%3D&bytes=AQ%3D%3D";
+        final ParseNode node = new FormParseNode(formData).getChildNode("bytes");
+        assertNotNull(node);
+        final List<byte[]> result = node.getCollectionOfPrimitiveValues(byte[].class);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertArrayEquals(new byte[] {(byte) 0xfb}, result.get(0));
+        assertArrayEquals(new byte[] {1}, result.get(1));
+    }
+
+    @Test
+    void parsesCollectionOfByteArrayValuesWithNullElements() {
+        final String formData = "bytes=null&bytes=AQ%3D%3D&bytes=null";
+        final ParseNode node = new FormParseNode(formData).getChildNode("bytes");
+        assertNotNull(node);
+        final List<byte[]> result = node.getCollectionOfPrimitiveValues(byte[].class);
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertNull(result.get(0));
+        assertArrayEquals(new byte[] {1}, result.get(1));
+        assertNull(result.get(2));
+    }
 }

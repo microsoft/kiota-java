@@ -1,10 +1,15 @@
 package com.microsoft.kiota.serialization;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+import com.microsoft.kiota.serialization.mocks.TestEnum;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +22,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class FormSerializationWriterTests {
@@ -115,5 +121,63 @@ public class FormSerializationWriterTests {
                     RuntimeException.class,
                     () -> serializationWriter.writeObjectValue(null, testEntity));
         }
+    }
+
+    @Test
+    public void writesDoubleAndByteArrayAndEnumInCollectionsAndAdditionalData()
+            throws IOException, UnsupportedEncodingException {
+        final var testEntity = new TestEntity();
+        testEntity.setId("test-id");
+        testEntity.getAdditionalData().put("rating", 4.5d);
+        testEntity.getAdditionalData().put("rawCert", new byte[] {1, 2, 3});
+        testEntity.getAdditionalData().put("status", TestEnum.VALUE1);
+
+        try (final var serializationWriter = new FormSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, testEntity);
+            serializationWriter.writeCollectionOfPrimitiveValues(
+                    "prices", Arrays.asList(1.5d, 2.5d));
+            serializationWriter.writeCollectionOfPrimitiveValues(
+                    "keys", Arrays.asList(new byte[] {1, 2}, new byte[] {3, 4}));
+            try (final var content = serializationWriter.getSerializedContent()) {
+                try (final var contentReader =
+                        new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
+                    String result = contentReader.lines().collect(Collectors.joining("\n"));
+                    assertTrue(result.contains("id=test-id"));
+                    assertTrue(result.contains("rating=4.5"));
+                    assertTrue(result.contains("rawCert=AQID"));
+                    assertTrue(result.contains("status=val1"));
+                    assertTrue(result.contains("prices=1.5&prices=2.5"));
+                    assertTrue(result.contains("keys=AQI%3D&keys=AwQ%3D"));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void roundTripsByteArrayCollectionWithBase64PlusAndNulls()
+            throws IOException, UnsupportedEncodingException {
+        final byte[] bytesWithPlus = new byte[] {(byte) 0xfb, (byte) 0xff};
+        final byte[] regularBytes = new byte[] {1, 2, 3};
+        final List<byte[]> originalList = Arrays.asList(bytesWithPlus, null, regularBytes);
+
+        String serialized;
+        try (final var writer = new FormSerializationWriter()) {
+            writer.writeCollectionOfPrimitiveValues("bytes", originalList);
+            try (final var content = writer.getSerializedContent()) {
+                try (final var reader =
+                        new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
+                    serialized = reader.lines().collect(Collectors.joining("\n"));
+                }
+            }
+        }
+
+        final ParseNode node = new FormParseNode(serialized).getChildNode("bytes");
+        assertNotNull(node);
+        final List<byte[]> deserialized = node.getCollectionOfPrimitiveValues(byte[].class);
+        assertNotNull(deserialized);
+        assertEquals(3, deserialized.size());
+        assertArrayEquals(bytesWithPlus, deserialized.get(0));
+        assertNull(deserialized.get(1));
+        assertArrayEquals(regularBytes, deserialized.get(2));
     }
 }

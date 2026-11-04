@@ -149,13 +149,7 @@ public class FormParseNode implements ParseNode {
         final String[] primitiveStringCollection = rawValue.split(",");
         final List<T> result = new ArrayList<>(primitiveStringCollection.length);
         for (final String item : primitiveStringCollection) {
-            String decodedItem;
-            try {
-                decodedItem = URLDecoder.decode(item, encoding);
-            } catch (UnsupportedEncodingException e) {
-                decodedItem = item;
-            }
-            result.add(convertPrimitiveValue(decodedItem, targetClass));
+            result.add(convertPrimitiveValue(item, targetClass));
         }
         return result;
     }
@@ -191,6 +185,8 @@ public class FormParseNode implements ParseNode {
             return (T) parseLocalTimeValue(value);
         } else if (targetClass == PeriodAndDuration.class) {
             return (T) parsePeriodAndDurationValue(value);
+        } else if (targetClass == byte[].class) {
+            return (T) parseByteArrayValue(value);
         } else {
             throw new RuntimeException("unknown type to deserialize " + targetClass.getName());
         }
@@ -414,11 +410,14 @@ public class FormParseNode implements ParseNode {
         this.onAfterAssignFieldValues = value;
     }
 
-    @Nullable public byte[] getByteArrayValue() {
-        final String base64 = this.getStringValue();
-        if (base64 == null || base64.isEmpty()) {
+    @Nullable private static byte[] parseByteArrayValue(@Nullable final String value) {
+        if (value == null || value.isEmpty() || value.equalsIgnoreCase("null")) {
             return null;
         }
-        return Base64.getDecoder().decode(base64);
+        return Base64.getDecoder().decode(value);
+    }
+
+    @Nullable public byte[] getByteArrayValue() {
+        return parseByteArrayValue(this.getStringValue());
     }
 }
