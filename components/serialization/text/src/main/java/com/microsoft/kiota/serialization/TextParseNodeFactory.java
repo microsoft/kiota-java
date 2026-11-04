@@ -28,7 +28,7 @@ public class TextParseNodeFactory implements ParseNodeFactory {
         Objects.requireNonNull(rawResponse, "parameter rawResponse cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
-        } else if (!contentType.equals(validContentType)) {
+        } else if (!contentType.split(";", 2)[0].trim().equalsIgnoreCase(validContentType)) {
             throw new IllegalArgumentException("expected a " + validContentType + " content type");
         }
         String rawText;
