@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.5](https://github.com/microsoft/kiota-java/compare/v1.10.4...v1.10.5) (2026-11-04)
+
+
+### Bug Fixes
+
+* **abstractions:** support collection sanitization and null safety in RequestInformation ([c180e33](https://github.com/microsoft/kiota-java/commit/c180e331abbc9ad1ee6f80317583ed2310cd6665))
+* **abstractions:** support collection sanitization and null safety in RequestInformation ([acfe31e](https://github.com/microsoft/kiota-java/commit/acfe31e3e926ee8f5a03da2264531c07a88b99ba))
+* **http:** guard retrySpan against null when observability is not configured ([7959539](https://github.com/microsoft/kiota-java/commit/79595398177d8c896581ed317460e5900d446a83))
+* **http:** replace Retry-Attempt header on retry and guard retry span against null ([8d45187](https://github.com/microsoft/kiota-java/commit/8d4518711bfe745833735e1d23823786c59e7d05))
+* **http:** replace Retry-Attempt header on retry instead of accumulating duplicates ([fa78908](https://github.com/microsoft/kiota-java/commit/fa78908aff58f43908a53a35e45b1d84db3b1a07))
+* **multipart:** omit null header string values and revert additionalValuesToMerge ([fd7c48e](https://github.com/microsoft/kiota-java/commit/fd7c48e2b9d13a3ea35f57a37e3797b91e3ea5ce))
+* **multipart:** omit null header string values in writeStringValue ([9be49ef](https://github.com/microsoft/kiota-java/commit/9be49ef8b2681dde73f0780f6737518baba5bc07))
+* **multipart:** support content-type parameters and case-insensitivity in MultipartSerializationWriterFactory ([337a7e8](https://github.com/microsoft/kiota-java/commit/337a7e86577cda918ee503b472ed2be69e3f594c))
+* **multipart:** support content-type parameters and case-insensitivity in MultipartSerializationWriterFactory ([c3b8095](https://github.com/microsoft/kiota-java/commit/c3b8095ae7c096b88b3d7816edda30d2e0352575))
+* **serialization:** preserve equals signs and padding in FormParseNode values ([bb91b8b](https://github.com/microsoft/kiota-java/commit/bb91b8b0e57a2353571f3ba572dfeb92c35257c7))
+* **serialization:** preserve equals signs and padding in FormParseNode values ([61b7c91](https://github.com/microsoft/kiota-java/commit/61b7c91804c8309f3fd4b5dc3463bd48fa79a8bd))
+* **serialization:** prevent double URL decoding and recognize null marker in byte array collections ([1b3e217](https://github.com/microsoft/kiota-java/commit/1b3e217fd2c18ba64e640437ba2693b29dad7205))
+* **serialization:** support byte array and enum in FormSerializationWriter writeAnyValue ([cae35a7](https://github.com/microsoft/kiota-java/commit/cae35a76429f2870cf2f8730a0a762c020311b89))
+* **serialization:** support byte array in FormParseNode convertPrimitiveValue ([d5d947b](https://github.com/microsoft/kiota-java/commit/d5d947bd5c0cc1b54bcf819cae3645e17f904e00))
+* **serialization:** support content-type parameters and case-insensitivity in text factories ([395e40f](https://github.com/microsoft/kiota-java/commit/395e40fa98592a40cb5e48f96caeef13c588fc59))
+* **serialization:** support content-type parameters and case-insensitivity in text factories ([fc18926](https://github.com/microsoft/kiota-java/commit/fc189262ece9b49c6d4f9183a43eb0baeb0e4789))
+* **serialization:** support double in FormSerializationWriter writeAnyValue ([4bdb875](https://github.com/microsoft/kiota-java/commit/4bdb875d844870e838b218a4882c1972d374b94e))
+* **serialization:** support double, byte array, and enum in form serialization ([fd72de3](https://github.com/microsoft/kiota-java/commit/fd72de34bcd463e5f296662be534419053d8f662))
+
+
+### Reverts
+
+* remove pluginManagement repository configuration from settings.gradle ([ec3352c](https://github.com/microsoft/kiota-java/commit/ec3352c2b660041cd3cc044f080671790974ec45))
+
 ## [1.10.4](https://github.com/microsoft/kiota-java/compare/v1.10.3...v1.10.4) (2026-10-27)
 
 
