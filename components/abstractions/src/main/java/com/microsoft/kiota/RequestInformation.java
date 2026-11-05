@@ -394,6 +394,8 @@ public class RequestInformation {
                     writer.writeShortValue(null, (Short) value);
                 else if (valueClass.equals(BigDecimal.class))
                     writer.writeBigDecimalValue(null, (BigDecimal) value);
+                else if (valueClass.equals(Double.class))
+                    writer.writeDoubleValue(null, (Double) value);
                 else if (valueClass.equals(Float.class))
                     writer.writeFloatValue(null, (Float) value);
                 else if (valueClass.equals(Long.class)) writer.writeLongValue(null, (Long) value);
