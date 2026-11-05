@@ -354,6 +354,12 @@ public class RequestInformation {
         span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
     }
 
+    @SuppressWarnings("unchecked")
+    private static <E extends Enum<E>> void writeEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Object value) {
+        writer.writeEnumValue(null, (E) value);
+    }
+
     private <T> SerializationWriter getSerializationWriter(
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
@@ -412,6 +418,9 @@ public class RequestInformation {
                     writer.writePeriodAndDurationValue(null, (PeriodAndDuration) value);
                 else if (valueClass.equals(byte[].class))
                     writer.writeByteArrayValue(null, (byte[]) value);
+                else if (value instanceof Enum<?>) writeEnumValue(writer, value);
+                else if (value instanceof ValuedEnum)
+                    writer.writeStringValue(null, ((ValuedEnum) value).getValue());
                 else {
                     final RuntimeException result =
                             new RuntimeException(
