@@ -309,6 +309,38 @@ public class RequestInformation {
     }
 
     /**
+     * Sets the request body from a collection of models with the specified content type.
+     * @param values the models.
+     * @param contentType the content type.
+     * @param requestAdapter The adapter service to get the serialization writer from.
+     * @param <T> the model type.
+     */
+    public <T extends Parsable> void setContentFromParsable(
+            @Nonnull final RequestAdapter requestAdapter,
+            @Nonnull final String contentType,
+            @Nonnull final Iterable<T> values) {
+        final Span span =
+                GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
+                        .spanBuilder(SPAN_NAME)
+                        .startSpan();
+        try (final Scope scope = span.makeCurrent()) {
+            try (final SerializationWriter writer =
+                    getSerializationWriter(requestAdapter, contentType, values)) {
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
+                setRequestTypeFromCollection(values, span);
+                writer.writeCollectionOfObjectValues(null, values);
+                this.content = writer.getSerializedContent();
+            } catch (IOException ex) {
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
+                span.recordException(result);
+                throw result;
+            }
+        } finally {
+            span.end();
+        }
+    }
+
+    /**
      * Sets the request body from a model with the specified content type.
      * @param value the model.
      * @param contentType the content type.
