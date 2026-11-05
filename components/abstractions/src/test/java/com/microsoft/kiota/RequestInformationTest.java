@@ -390,6 +390,33 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsDoubleScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", 123.456d);
+
+        verify(writerMock, times(1)).writeDoubleValue(null, 123.456d);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsByteArrayScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final byte[] rawBytes = new byte[] {0x01, 0x02, 0x03};
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/octet-stream", rawBytes);
+
+        verify(writerMock, times(1)).writeByteArrayValue(null, rawBytes);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
     void SetsBoundaryOnMultipartBody() {
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.POST;
