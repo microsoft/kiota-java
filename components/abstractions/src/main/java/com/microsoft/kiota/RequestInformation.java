@@ -410,6 +410,8 @@ public class RequestInformation {
                     writer.writeLocalTimeValue(null, (LocalTime) value);
                 else if (valueClass.equals(PeriodAndDuration.class))
                     writer.writePeriodAndDurationValue(null, (PeriodAndDuration) value);
+                else if (valueClass.equals(byte[].class))
+                    writer.writeByteArrayValue(null, (byte[]) value);
                 else {
                     final RuntimeException result =
                             new RuntimeException(
