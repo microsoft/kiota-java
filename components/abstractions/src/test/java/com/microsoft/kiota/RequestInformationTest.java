@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
+import com.microsoft.kiota.serialization.ValuedEnum;
 import com.microsoft.kiota.serialization.mocks.TestEnum;
 
 import org.junit.jupiter.api.Test;
@@ -413,6 +414,33 @@ class RequestInformationTest {
         requestInfo.setContentFromScalar(requestAdapterMock, "application/octet-stream", rawBytes);
 
         verify(writerMock, times(1)).writeByteArrayValue(null, rawBytes);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", TestEnum.First);
+
+        verify(writerMock, times(1)).writeEnumValue(null, TestEnum.First);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsValuedEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final ValuedEnum valuedEnumMock = () -> "custom_value";
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", valuedEnumMock);
+
+        verify(writerMock, times(1)).writeStringValue(null, "custom_value");
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
 
