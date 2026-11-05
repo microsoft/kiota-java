@@ -295,9 +295,7 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) {
-                    setRequestType(values[0], span);
-                }
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
@@ -352,6 +350,16 @@ public class RequestInformation {
         if (result == null) return;
         if (span == null) return;
         span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
+    }
+
+    private <T> void setRequestTypeFromArray(final T[] values, final Span span) {
+        if (values == null || span == null) return;
+        for (final T value : values) {
+            if (value != null) {
+                setRequestType(value, span);
+                return;
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -458,7 +466,7 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) setRequestType(values[0], span);
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
