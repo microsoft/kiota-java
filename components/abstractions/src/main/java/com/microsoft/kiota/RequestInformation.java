@@ -362,6 +362,16 @@ public class RequestInformation {
         }
     }
 
+    private <T> void setRequestTypeFromCollection(final Iterable<T> values, final Span span) {
+        if (values == null || span == null) return;
+        for (final T value : values) {
+            if (value != null) {
+                setRequestType(value, span);
+                return;
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private static <E extends Enum<E>> void writeEnumValue(
             @Nonnull final SerializationWriter writer, @Nonnull final Object value) {
@@ -468,6 +478,38 @@ public class RequestInformation {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
                 setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
+                this.content = writer.getSerializedContent();
+            } catch (IOException ex) {
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
+                span.recordException(result);
+                throw result;
+            }
+        } finally {
+            span.end();
+        }
+    }
+
+    /**
+     * Sets the request body from a collection of scalar values with the specified content type.
+     * @param values the scalar values to serialize.
+     * @param contentType the content type.
+     * @param requestAdapter The adapter service to get the serialization writer from.
+     * @param <T> the model type.
+     */
+    public <T> void setContentFromScalarCollection(
+            @Nonnull final RequestAdapter requestAdapter,
+            @Nonnull final String contentType,
+            @Nonnull final Iterable<T> values) {
+        final Span span =
+                GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
+                        .spanBuilder(SPAN_NAME)
+                        .startSpan();
+        try (final Scope scope = span.makeCurrent()) {
+            try (final SerializationWriter writer =
+                    getSerializationWriter(requestAdapter, contentType, values)) {
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
+                setRequestTypeFromCollection(values, span);
+                writer.writeCollectionOfPrimitiveValues(null, values);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
