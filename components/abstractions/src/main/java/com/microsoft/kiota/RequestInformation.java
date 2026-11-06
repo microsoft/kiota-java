@@ -319,16 +319,17 @@ public class RequestInformation {
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
             @Nonnull final Iterable<T> values) {
+        final Iterable<T> targetValues = toCollection(values);
         final Span span =
                 GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
                         .spanBuilder(SPAN_NAME)
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try (final SerializationWriter writer =
-                    getSerializationWriter(requestAdapter, contentType, values)) {
+                    getSerializationWriter(requestAdapter, contentType, targetValues)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                setRequestTypeFromCollection(values, span);
-                writer.writeCollectionOfObjectValues(null, values);
+                setRequestTypeFromCollection(targetValues, span);
+                writer.writeCollectionOfObjectValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
@@ -402,6 +403,19 @@ public class RequestInformation {
                 return;
             }
         }
+    }
+
+    private static <T> Iterable<T> toCollection(final Iterable<T> values) {
+        if (values instanceof Collection) {
+            return values;
+        } else if (values != null) {
+            final ArrayList<T> list = new ArrayList<>();
+            for (final T item : values) {
+                list.add(item);
+            }
+            return list;
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -532,16 +546,17 @@ public class RequestInformation {
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
             @Nonnull final Iterable<T> values) {
+        final Iterable<T> targetValues = toCollection(values);
         final Span span =
                 GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
                         .spanBuilder(SPAN_NAME)
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
             try (final SerializationWriter writer =
-                    getSerializationWriter(requestAdapter, contentType, values)) {
+                    getSerializationWriter(requestAdapter, contentType, targetValues)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                setRequestTypeFromCollection(values, span);
-                writer.writeCollectionOfPrimitiveValues(null, values);
+                setRequestTypeFromCollection(targetValues, span);
+                writer.writeCollectionOfPrimitiveValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
