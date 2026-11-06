@@ -3,6 +3,8 @@ package com.microsoft.kiota;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
+import com.microsoft.kiota.serialization.ValuedEnum;
 import com.microsoft.kiota.serialization.mocks.TestEnum;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +23,10 @@ import java.net.URISyntaxException;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -376,6 +382,111 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsParsableContentCollectionWithIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final List<TestEntity> entities = Arrays.asList(new TestEntity());
+        requestInfo.setContentFromParsable(requestAdapterMock, "application/json", entities);
+
+        verify(writerMock, never()).writeObjectValue(any(), any(TestEntity.class));
+        verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), eq(entities));
+    }
+
+    @Test
+    void SetsScalarContentCollectionWithIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final List<String> scalars = Arrays.asList("foo", "bar");
+        requestInfo.setContentFromScalarCollection(requestAdapterMock, "application/json", scalars);
+
+        verify(writerMock, never()).writeStringValue(any(), anyString());
+        verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), eq(scalars));
+    }
+
+    @Test
+    void SetsParsableContentCollectionWithSingleUseIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterator<TestEntity> iterator =
+                Collections.singletonList(new TestEntity()).iterator();
+        final Iterable<TestEntity> singleUseIterable = () -> iterator;
+        requestInfo.setContentFromParsable(
+                requestAdapterMock, "application/json", singleUseIterable);
+
+        verify(writerMock, times(1))
+                .writeCollectionOfObjectValues(
+                        any(),
+                        argThat(
+                                values -> {
+                                    final List<Object> list = new ArrayList<>();
+                                    for (final Object item : values) {
+                                        list.add(item);
+                                    }
+                                    return list.size() == 1;
+                                }));
+    }
+
+    @Test
+    void SetsScalarContentCollectionWithSingleUseIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterator<String> iterator = Arrays.asList("foo", "bar").iterator();
+        final Iterable<String> singleUseIterable = () -> iterator;
+        requestInfo.setContentFromScalarCollection(
+                requestAdapterMock, "application/json", singleUseIterable);
+
+        verify(writerMock, times(1))
+                .writeCollectionOfPrimitiveValues(
+                        any(),
+                        argThat(
+                                values -> {
+                                    final List<Object> list = new ArrayList<>();
+                                    for (final Object item : values) {
+                                        list.add(item);
+                                    }
+                                    return list.size() == 2;
+                                }));
+    }
+
+    @Test
+    void SetsScalarContentCollectionWithLeadingNullElement() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final String[] scalars = new String[] {null, "foo"};
+        requestInfo.setContentFromScalarCollection(requestAdapterMock, "application/json", scalars);
+
+        verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsParsableContentCollectionWithLeadingNullElement() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final TestEntity[] entities = new TestEntity[] {null, new TestEntity()};
+        requestInfo.setContentFromParsable(requestAdapterMock, "application/json", entities);
+
+        verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), any(Iterable.class));
+    }
+
+    @Test
     void SetsScalarContent() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -386,6 +497,79 @@ class RequestInformationTest {
         requestInfo.setContentFromScalar(requestAdapterMock, "application/json", "foo");
 
         verify(writerMock, times(1)).writeStringValue(any(), anyString());
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsDoubleScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", 123.456d);
+
+        verify(writerMock, times(1)).writeDoubleValue(null, 123.456d);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsByteArrayScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final byte[] rawBytes = new byte[] {0x01, 0x02, 0x03};
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/octet-stream", rawBytes);
+
+        verify(writerMock, times(1)).writeByteArrayValue(null, rawBytes);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", TestEnum.First);
+
+        verify(writerMock, times(1)).writeEnumValue(null, TestEnum.First);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    private enum TestPlainEnum {
+        First,
+        Second
+    }
+
+    @Test
+    void SetsPlainEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "text/plain", TestPlainEnum.First);
+
+        verify(writerMock, times(1)).writeStringValue(null, "First");
+        verify(writerMock, never()).writeEnumValue(any(), any());
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsValuedEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final ValuedEnum valuedEnumMock = () -> "custom_value";
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", valuedEnumMock);
+
+        verify(writerMock, times(1)).writeStringValue(null, "custom_value");
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
 

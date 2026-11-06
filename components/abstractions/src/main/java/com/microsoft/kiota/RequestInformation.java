@@ -295,10 +295,41 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) {
-                    setRequestType(values[0], span);
-                }
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
+                this.content = writer.getSerializedContent();
+            } catch (IOException ex) {
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
+                span.recordException(result);
+                throw result;
+            }
+        } finally {
+            span.end();
+        }
+    }
+
+    /**
+     * Sets the request body from a collection of models with the specified content type.
+     * @param values the models.
+     * @param contentType the content type.
+     * @param requestAdapter The adapter service to get the serialization writer from.
+     * @param <T> the model type.
+     */
+    public <T extends Parsable> void setContentFromParsable(
+            @Nonnull final RequestAdapter requestAdapter,
+            @Nonnull final String contentType,
+            @Nonnull final Iterable<T> values) {
+        final Iterable<T> targetValues = toCollection(values);
+        final Span span =
+                GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
+                        .spanBuilder(SPAN_NAME)
+                        .startSpan();
+        try (final Scope scope = span.makeCurrent()) {
+            try (final SerializationWriter writer =
+                    getSerializationWriter(requestAdapter, contentType, targetValues)) {
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
+                setRequestTypeFromCollection(targetValues, span);
+                writer.writeCollectionOfObjectValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
@@ -354,6 +385,49 @@ public class RequestInformation {
         span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
     }
 
+    private <T> void setRequestTypeFromArray(final T[] values, final Span span) {
+        if (values == null || span == null) return;
+        for (final T value : values) {
+            if (value != null) {
+                setRequestType(value, span);
+                return;
+            }
+        }
+    }
+
+    private <T> void setRequestTypeFromCollection(final Iterable<T> values, final Span span) {
+        if (values == null || span == null) return;
+        for (final T value : values) {
+            if (value != null) {
+                setRequestType(value, span);
+                return;
+            }
+        }
+    }
+
+    private static <T> Iterable<T> toCollection(final Iterable<T> values) {
+        if (values instanceof Collection) {
+            return values;
+        } else if (values != null) {
+            final ArrayList<T> list = new ArrayList<>();
+            for (final T item : values) {
+                list.add(item);
+            }
+            return list;
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Enum<E>> void writeEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Object value) {
+        if (value instanceof ValuedEnum) {
+            writer.writeEnumValue(null, (E) value);
+        } else {
+            writer.writeStringValue(null, ((Enum<?>) value).name());
+        }
+    }
+
     private <T> SerializationWriter getSerializationWriter(
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
@@ -394,6 +468,8 @@ public class RequestInformation {
                     writer.writeShortValue(null, (Short) value);
                 else if (valueClass.equals(BigDecimal.class))
                     writer.writeBigDecimalValue(null, (BigDecimal) value);
+                else if (valueClass.equals(Double.class))
+                    writer.writeDoubleValue(null, (Double) value);
                 else if (valueClass.equals(Float.class))
                     writer.writeFloatValue(null, (Float) value);
                 else if (valueClass.equals(Long.class)) writer.writeLongValue(null, (Long) value);
@@ -408,6 +484,11 @@ public class RequestInformation {
                     writer.writeLocalTimeValue(null, (LocalTime) value);
                 else if (valueClass.equals(PeriodAndDuration.class))
                     writer.writePeriodAndDurationValue(null, (PeriodAndDuration) value);
+                else if (valueClass.equals(byte[].class))
+                    writer.writeByteArrayValue(null, (byte[]) value);
+                else if (value instanceof Enum<?>) writeEnumValue(writer, value);
+                else if (value instanceof ValuedEnum)
+                    writer.writeStringValue(null, ((ValuedEnum) value).getValue());
                 else {
                     final RuntimeException result =
                             new RuntimeException(
@@ -445,8 +526,41 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) setRequestType(values[0], span);
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
+                this.content = writer.getSerializedContent();
+            } catch (IOException ex) {
+                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
+                span.recordException(result);
+                throw result;
+            }
+        } finally {
+            span.end();
+        }
+    }
+
+    /**
+     * Sets the request body from a collection of scalar values with the specified content type.
+     * @param values the scalar values to serialize.
+     * @param contentType the content type.
+     * @param requestAdapter The adapter service to get the serialization writer from.
+     * @param <T> the model type.
+     */
+    public <T> void setContentFromScalarCollection(
+            @Nonnull final RequestAdapter requestAdapter,
+            @Nonnull final String contentType,
+            @Nonnull final Iterable<T> values) {
+        final Iterable<T> targetValues = toCollection(values);
+        final Span span =
+                GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
+                        .spanBuilder(SPAN_NAME)
+                        .startSpan();
+        try (final Scope scope = span.makeCurrent()) {
+            try (final SerializationWriter writer =
+                    getSerializationWriter(requestAdapter, contentType, targetValues)) {
+                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
+                setRequestTypeFromCollection(targetValues, span);
+                writer.writeCollectionOfPrimitiveValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
