@@ -421,7 +421,11 @@ public class RequestInformation {
     @SuppressWarnings("unchecked")
     private static <E extends Enum<E>> void writeEnumValue(
             @Nonnull final SerializationWriter writer, @Nonnull final Object value) {
-        writer.writeEnumValue(null, (E) value);
+        if (value instanceof ValuedEnum) {
+            writer.writeEnumValue(null, (E) value);
+        } else {
+            writer.writeStringValue(null, ((Enum<?>) value).name());
+        }
     }
 
     private <T> SerializationWriter getSerializationWriter(
