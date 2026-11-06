@@ -540,6 +540,25 @@ class RequestInformationTest {
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
 
+    private enum TestPlainEnum {
+        First,
+        Second
+    }
+
+    @Test
+    void SetsPlainEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "text/plain", TestPlainEnum.First);
+
+        verify(writerMock, times(1)).writeStringValue(null, "First");
+        verify(writerMock, never()).writeEnumValue(any(), any());
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
     @Test
     void SetsValuedEnumScalarContent() {
         final RequestInformation requestInfo = new RequestInformation();
