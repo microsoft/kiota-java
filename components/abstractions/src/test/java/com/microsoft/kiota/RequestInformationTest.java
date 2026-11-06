@@ -3,6 +3,7 @@ package com.microsoft.kiota;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -22,7 +23,9 @@ import java.net.URISyntaxException;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -404,6 +407,57 @@ class RequestInformationTest {
 
         verify(writerMock, never()).writeStringValue(any(), anyString());
         verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), eq(scalars));
+    }
+
+    @Test
+    void SetsParsableContentCollectionWithSingleUseIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterator<TestEntity> iterator =
+                Collections.singletonList(new TestEntity()).iterator();
+        final Iterable<TestEntity> singleUseIterable = () -> iterator;
+        requestInfo.setContentFromParsable(
+                requestAdapterMock, "application/json", singleUseIterable);
+
+        verify(writerMock, times(1))
+                .writeCollectionOfObjectValues(
+                        any(),
+                        argThat(
+                                values -> {
+                                    final List<Object> list = new ArrayList<>();
+                                    for (final Object item : values) {
+                                        list.add(item);
+                                    }
+                                    return list.size() == 1;
+                                }));
+    }
+
+    @Test
+    void SetsScalarContentCollectionWithSingleUseIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterator<String> iterator = Arrays.asList("foo", "bar").iterator();
+        final Iterable<String> singleUseIterable = () -> iterator;
+        requestInfo.setContentFromScalarCollection(
+                requestAdapterMock, "application/json", singleUseIterable);
+
+        verify(writerMock, times(1))
+                .writeCollectionOfPrimitiveValues(
+                        any(),
+                        argThat(
+                                values -> {
+                                    final List<Object> list = new ArrayList<>();
+                                    for (final Object item : values) {
+                                        list.add(item);
+                                    }
+                                    return list.size() == 2;
+                                }));
     }
 
     @Test
