@@ -434,7 +434,7 @@ public class RequestInformation {
     }
 
     @SuppressWarnings("unchecked")
-    private static <E extends Enum<E>> void writeValuedEnumValue(
+    private static <E extends Enum<E> & ValuedEnum> void writeValuedEnumValue(
             @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
         writer.writeEnumValue(null, (E) value);
     }
