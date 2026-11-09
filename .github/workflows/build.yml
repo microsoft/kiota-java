@@ -1,6 +1,8 @@
 name: Gradle Build And Test
 
 on:
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
   pull_request:
