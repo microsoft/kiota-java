@@ -319,16 +319,16 @@ public class RequestInformation {
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
             @Nonnull final Iterable<T> values) {
-        final Iterable<T> targetValues = toCollection(values);
+        Objects.requireNonNull(values, "parameter values cannot be null");
         final Span span =
                 GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
                         .spanBuilder(SPAN_NAME)
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
+            final Iterable<T> targetValues = prepareCollectionPayload(values, span);
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, targetValues)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                setRequestTypeFromCollection(targetValues, span);
                 writer.writeCollectionOfObjectValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
@@ -405,27 +405,38 @@ public class RequestInformation {
         }
     }
 
-    private static <T> Iterable<T> toCollection(final Iterable<T> values) {
+    @Nonnull private <T> Iterable<T> prepareCollectionPayload(
+            @Nonnull final Iterable<T> values, @Nullable final Span span) {
+        Objects.requireNonNull(values, "parameter values cannot be null");
         if (values instanceof Collection) {
+            setRequestTypeFromCollection(values, span);
             return values;
-        } else if (values != null) {
-            final ArrayList<T> list = new ArrayList<>();
-            for (final T item : values) {
-                list.add(item);
-            }
-            return list;
         }
-        return null;
+        final ArrayList<T> list = new ArrayList<>();
+        boolean foundNonNull = false;
+        for (final T item : values) {
+            list.add(item);
+            if (!foundNonNull && item != null && span != null) {
+                setRequestType(item, span);
+                foundNonNull = true;
+            }
+        }
+        return list;
+    }
+
+    private static void writeEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
+        if (value instanceof ValuedEnum) {
+            writeValuedEnumValue(writer, value);
+        } else {
+            writer.writeStringValue(null, value.name());
+        }
     }
 
     @SuppressWarnings("unchecked")
-    private static <E extends Enum<E>> void writeEnumValue(
-            @Nonnull final SerializationWriter writer, @Nonnull final Object value) {
-        if (value instanceof ValuedEnum) {
-            writer.writeEnumValue(null, (E) value);
-        } else {
-            writer.writeStringValue(null, ((Enum<?>) value).name());
-        }
+    private static <E extends Enum<E>> void writeValuedEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
+        writer.writeEnumValue(null, (E) value);
     }
 
     private <T> SerializationWriter getSerializationWriter(
@@ -486,7 +497,7 @@ public class RequestInformation {
                     writer.writePeriodAndDurationValue(null, (PeriodAndDuration) value);
                 else if (valueClass.equals(byte[].class))
                     writer.writeByteArrayValue(null, (byte[]) value);
-                else if (value instanceof Enum<?>) writeEnumValue(writer, value);
+                else if (value instanceof Enum<?>) writeEnumValue(writer, (Enum<?>) value);
                 else if (value instanceof ValuedEnum)
                     writer.writeStringValue(null, ((ValuedEnum) value).getValue());
                 else {
@@ -550,16 +561,16 @@ public class RequestInformation {
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
             @Nonnull final Iterable<T> values) {
-        final Iterable<T> targetValues = toCollection(values);
+        Objects.requireNonNull(values, "parameter values cannot be null");
         final Span span =
                 GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
                         .spanBuilder(SPAN_NAME)
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
+            final Iterable<T> targetValues = prepareCollectionPayload(values, span);
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, targetValues)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                setRequestTypeFromCollection(targetValues, span);
                 writer.writeCollectionOfPrimitiveValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {

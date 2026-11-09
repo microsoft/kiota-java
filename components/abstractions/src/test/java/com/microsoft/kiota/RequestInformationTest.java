@@ -461,6 +461,91 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsParsableContentCollectionWithSingleUseIterableAndLeadingNull() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterator<TestEntity> iterator =
+                Arrays.asList((TestEntity) null, new TestEntity()).iterator();
+        final Iterable<TestEntity> singleUseIterable = () -> iterator;
+        requestInfo.setContentFromParsable(
+                requestAdapterMock, "application/json", singleUseIterable);
+
+        verify(writerMock, times(1))
+                .writeCollectionOfObjectValues(
+                        any(),
+                        argThat(
+                                values -> {
+                                    final List<Object> list = new ArrayList<>();
+                                    for (final Object item : values) {
+                                        list.add(item);
+                                    }
+                                    return list.size() == 2
+                                            && list.get(0) == null
+                                            && list.get(1) != null;
+                                }));
+    }
+
+    @Test
+    void SetsScalarContentCollectionWithSingleUseIterableAndLeadingNull() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterator<String> iterator = Arrays.asList((String) null, "foo").iterator();
+        final Iterable<String> singleUseIterable = () -> iterator;
+        requestInfo.setContentFromScalarCollection(
+                requestAdapterMock, "application/json", singleUseIterable);
+
+        verify(writerMock, times(1))
+                .writeCollectionOfPrimitiveValues(
+                        any(),
+                        argThat(
+                                values -> {
+                                    final List<Object> list = new ArrayList<>();
+                                    for (final Object item : values) {
+                                        list.add(item);
+                                    }
+                                    return list.size() == 2
+                                            && list.get(0) == null
+                                            && "foo".equals(list.get(1));
+                                }));
+    }
+
+    @Test
+    void throwsNullPointerExceptionWhenSettingParsableContentCollectionWithNullIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterable<TestEntity> nullIterable = nullValue();
+        assertThrows(
+                NullPointerException.class,
+                () ->
+                        requestInfo.setContentFromParsable(
+                                requestAdapterMock, "application/json", nullIterable));
+    }
+
+    @Test
+    void throwsNullPointerExceptionWhenSettingScalarContentCollectionWithNullIterable() {
+        final RequestInformation requestInfo = new RequestInformation();
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final Iterable<String> nullIterable = nullValue();
+        assertThrows(
+                NullPointerException.class,
+                () ->
+                        requestInfo.setContentFromScalarCollection(
+                                requestAdapterMock, "application/json", nullIterable));
+    }
+
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
+    @Test
     void SetsScalarContentCollectionWithLeadingNullElement() {
         final RequestInformation requestInfo = new RequestInformation();
         requestInfo.httpMethod = HttpMethod.POST;
