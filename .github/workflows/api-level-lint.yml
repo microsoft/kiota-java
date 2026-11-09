@@ -1,6 +1,7 @@
 name: "Checks the SDK only using APIs from the targeted API level"
 
 on:
+  merge_group:
   workflow_dispatch:
   push:
     branches:
