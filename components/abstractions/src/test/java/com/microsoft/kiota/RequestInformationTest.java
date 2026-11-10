@@ -3,8 +3,6 @@ package com.microsoft.kiota;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -31,10 +29,7 @@ import java.net.URISyntaxException;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -389,85 +384,6 @@ class RequestInformationTest {
         verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
 
-    @Test
-    void SetsParsableContentCollectionWithIterable() {
-        final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod = HttpMethod.POST;
-        requestInfo.urlTemplate = "http://localhost/users";
-        final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-        final List<TestEntity> entities = Arrays.asList(new TestEntity());
-        requestInfo.setContentFromParsable(requestAdapterMock, "application/json", entities);
-
-        verify(writerMock, never()).writeObjectValue(any(), any(TestEntity.class));
-        verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), eq(entities));
-    }
-
-    @Test
-    void SetsScalarContentCollectionWithIterable() {
-        final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod = HttpMethod.POST;
-        requestInfo.urlTemplate = "http://localhost/users";
-        final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-        final List<String> scalars = Arrays.asList("foo", "bar");
-        requestInfo.setContentFromScalarCollection(requestAdapterMock, "application/json", scalars);
-
-        verify(writerMock, never()).writeStringValue(any(), anyString());
-        verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), eq(scalars));
-    }
-
-    @Test
-    void SetsParsableContentCollectionWithSingleUseIterable() {
-        final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod = HttpMethod.POST;
-        requestInfo.urlTemplate = "http://localhost/users";
-        final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-        final Iterator<TestEntity> iterator =
-                Collections.singletonList(new TestEntity()).iterator();
-        final Iterable<TestEntity> singleUseIterable = () -> iterator;
-        requestInfo.setContentFromParsable(
-                requestAdapterMock, "application/json", singleUseIterable);
-
-        verify(writerMock, times(1))
-                .writeCollectionOfObjectValues(
-                        any(),
-                        argThat(
-                                values -> {
-                                    final List<Object> list = new ArrayList<>();
-                                    for (final Object item : values) {
-                                        list.add(item);
-                                    }
-                                    return list.size() == 1;
-                                }));
-    }
-
-    @Test
-    void SetsScalarContentCollectionWithSingleUseIterable() {
-        final RequestInformation requestInfo = new RequestInformation();
-        requestInfo.httpMethod = HttpMethod.POST;
-        requestInfo.urlTemplate = "http://localhost/users";
-        final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-        final Iterator<String> iterator = Arrays.asList("foo", "bar").iterator();
-        final Iterable<String> singleUseIterable = () -> iterator;
-        requestInfo.setContentFromScalarCollection(
-                requestAdapterMock, "application/json", singleUseIterable);
-
-        verify(writerMock, times(1))
-                .writeCollectionOfPrimitiveValues(
-                        any(),
-                        argThat(
-                                values -> {
-                                    final List<Object> list = new ArrayList<>();
-                                    for (final Object item : values) {
-                                        list.add(item);
-                                    }
-                                    return list.size() == 2;
-                                }));
-    }
-
     private static void setupMockTelemetry(
             final MockedStatic<GlobalOpenTelemetry> otelMock, final Span mockSpan) {
         final Tracer mockTracer = mock(Tracer.class);
@@ -478,105 +394,6 @@ class RequestInformationTest {
         when(mockTracer.spanBuilder(anyString())).thenReturn(mockSpanBuilder);
         when(mockSpanBuilder.startSpan()).thenReturn(mockSpan);
         when(mockSpan.makeCurrent()).thenReturn(mockScope);
-    }
-
-    @Test
-    void SetsParsableContentCollectionWithSingleUseIterableAndLeadingNull() {
-        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
-            final Span mockSpan = mock(Span.class);
-            setupMockTelemetry(otelMock, mockSpan);
-
-            final RequestInformation requestInfo = new RequestInformation();
-            requestInfo.httpMethod = HttpMethod.POST;
-            requestInfo.urlTemplate = "http://localhost/users";
-            final SerializationWriter writerMock = mock(SerializationWriter.class);
-            final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-            final Iterator<TestEntity> iterator =
-                    Arrays.asList((TestEntity) null, new TestEntity()).iterator();
-            final Iterable<TestEntity> singleUseIterable = () -> iterator;
-            requestInfo.setContentFromParsable(
-                    requestAdapterMock, "application/json", singleUseIterable);
-
-            verify(mockSpan, times(1))
-                    .setAttribute("com.microsoft.kiota.request.type", TestEntity.class.getName());
-            verify(writerMock, times(1))
-                    .writeCollectionOfObjectValues(
-                            any(),
-                            argThat(
-                                    values -> {
-                                        final List<Object> list = new ArrayList<>();
-                                        for (final Object item : values) {
-                                            list.add(item);
-                                        }
-                                        return list.size() == 2
-                                                && list.get(0) == null
-                                                && list.get(1) != null;
-                                    }));
-        }
-    }
-
-    @Test
-    void SetsScalarContentCollectionWithSingleUseIterableAndLeadingNull() {
-        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
-            final Span mockSpan = mock(Span.class);
-            setupMockTelemetry(otelMock, mockSpan);
-
-            final RequestInformation requestInfo = new RequestInformation();
-            requestInfo.httpMethod = HttpMethod.POST;
-            requestInfo.urlTemplate = "http://localhost/users";
-            final SerializationWriter writerMock = mock(SerializationWriter.class);
-            final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-            final Iterator<String> iterator = Arrays.asList((String) null, "foo").iterator();
-            final Iterable<String> singleUseIterable = () -> iterator;
-            requestInfo.setContentFromScalarCollection(
-                    requestAdapterMock, "application/json", singleUseIterable);
-
-            verify(mockSpan, times(1))
-                    .setAttribute("com.microsoft.kiota.request.type", String.class.getName());
-            verify(writerMock, times(1))
-                    .writeCollectionOfPrimitiveValues(
-                            any(),
-                            argThat(
-                                    values -> {
-                                        final List<Object> list = new ArrayList<>();
-                                        for (final Object item : values) {
-                                            list.add(item);
-                                        }
-                                        return list.size() == 2
-                                                && list.get(0) == null
-                                                && "foo".equals(list.get(1));
-                                    }));
-        }
-    }
-
-    @Test
-    void throwsNullPointerExceptionWhenSettingParsableContentCollectionWithNullIterable() {
-        final RequestInformation requestInfo = new RequestInformation();
-        final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-        final Iterable<TestEntity> nullIterable = nullValue();
-        assertThrows(
-                NullPointerException.class,
-                () ->
-                        requestInfo.setContentFromParsable(
-                                requestAdapterMock, "application/json", nullIterable));
-    }
-
-    @Test
-    void throwsNullPointerExceptionWhenSettingScalarContentCollectionWithNullIterable() {
-        final RequestInformation requestInfo = new RequestInformation();
-        final SerializationWriter writerMock = mock(SerializationWriter.class);
-        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-        final Iterable<String> nullIterable = nullValue();
-        assertThrows(
-                NullPointerException.class,
-                () ->
-                        requestInfo.setContentFromScalarCollection(
-                                requestAdapterMock, "application/json", nullIterable));
-    }
-
-    private static <T> T nullValue() {
-        return java.util.Collections.<String, T>emptyMap().get("missing");
     }
 
     @Test
@@ -618,48 +435,6 @@ class RequestInformationTest {
             verify(mockSpan, times(1))
                     .setAttribute("com.microsoft.kiota.request.type", TestEntity.class.getName());
             verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), any(Iterable.class));
-        }
-    }
-
-    @Test
-    void SetsParsableContentCollectionWithLeadingNullIterable() {
-        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
-            final Span mockSpan = mock(Span.class);
-            setupMockTelemetry(otelMock, mockSpan);
-
-            final RequestInformation requestInfo = new RequestInformation();
-            requestInfo.httpMethod = HttpMethod.POST;
-            requestInfo.urlTemplate = "http://localhost/users";
-            final SerializationWriter writerMock = mock(SerializationWriter.class);
-            final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-            final List<TestEntity> entities = Arrays.asList(null, new TestEntity());
-            requestInfo.setContentFromParsable(requestAdapterMock, "application/json", entities);
-
-            verify(mockSpan, times(1))
-                    .setAttribute("com.microsoft.kiota.request.type", TestEntity.class.getName());
-            verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), any(Iterable.class));
-        }
-    }
-
-    @Test
-    void SetsScalarContentCollectionWithLeadingNullIterable() {
-        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
-            final Span mockSpan = mock(Span.class);
-            setupMockTelemetry(otelMock, mockSpan);
-
-            final RequestInformation requestInfo = new RequestInformation();
-            requestInfo.httpMethod = HttpMethod.POST;
-            requestInfo.urlTemplate = "http://localhost/users";
-            final SerializationWriter writerMock = mock(SerializationWriter.class);
-            final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
-            final List<String> scalars = Arrays.asList(null, "foo");
-            requestInfo.setContentFromScalarCollection(
-                    requestAdapterMock, "application/json", scalars);
-
-            verify(mockSpan, times(1))
-                    .setAttribute("com.microsoft.kiota.request.type", String.class.getName());
-            verify(writerMock, times(1))
-                    .writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
         }
     }
 

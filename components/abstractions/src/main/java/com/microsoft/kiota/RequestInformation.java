@@ -309,39 +309,6 @@ public class RequestInformation {
     }
 
     /**
-     * Sets the request body from a collection of models with the specified content type.
-     * @param values the models.
-     * @param contentType the content type.
-     * @param requestAdapter The adapter service to get the serialization writer from.
-     * @param <T> the model type.
-     */
-    public <T extends Parsable> void setContentFromParsable(
-            @Nonnull final RequestAdapter requestAdapter,
-            @Nonnull final String contentType,
-            @Nonnull final Iterable<T> values) {
-        Objects.requireNonNull(values, "parameter values cannot be null");
-        final Span span =
-                GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
-                        .spanBuilder(SPAN_NAME)
-                        .startSpan();
-        try (final Scope scope = span.makeCurrent()) {
-            final Iterable<T> targetValues = prepareCollectionPayload(values, span);
-            try (final SerializationWriter writer =
-                    getSerializationWriter(requestAdapter, contentType, targetValues)) {
-                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                writer.writeCollectionOfObjectValues(null, targetValues);
-                this.content = writer.getSerializedContent();
-            } catch (IOException ex) {
-                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
-                span.recordException(result);
-                throw result;
-            }
-        } finally {
-            span.end();
-        }
-    }
-
-    /**
      * Sets the request body from a model with the specified content type.
      * @param value the model.
      * @param contentType the content type.
@@ -393,35 +360,6 @@ public class RequestInformation {
                 return;
             }
         }
-    }
-
-    private <T> void setRequestTypeFromCollection(final Iterable<T> values, final Span span) {
-        if (values == null || span == null) return;
-        for (final T value : values) {
-            if (value != null) {
-                setRequestType(value, span);
-                return;
-            }
-        }
-    }
-
-    @Nonnull private <T> Iterable<T> prepareCollectionPayload(
-            @Nonnull final Iterable<T> values, @Nullable final Span span) {
-        Objects.requireNonNull(values, "parameter values cannot be null");
-        if (values instanceof Collection) {
-            setRequestTypeFromCollection(values, span);
-            return values;
-        }
-        final ArrayList<T> list = new ArrayList<>();
-        boolean foundNonNull = false;
-        for (final T item : values) {
-            list.add(item);
-            if (!foundNonNull && item != null && span != null) {
-                setRequestType(item, span);
-                foundNonNull = true;
-            }
-        }
-        return list;
     }
 
     private static void writeEnumValue(
@@ -539,39 +477,6 @@ public class RequestInformation {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
                 setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
-                this.content = writer.getSerializedContent();
-            } catch (IOException ex) {
-                final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
-                span.recordException(result);
-                throw result;
-            }
-        } finally {
-            span.end();
-        }
-    }
-
-    /**
-     * Sets the request body from a collection of scalar values with the specified content type.
-     * @param values the scalar values to serialize.
-     * @param contentType the content type.
-     * @param requestAdapter The adapter service to get the serialization writer from.
-     * @param <T> the model type.
-     */
-    public <T> void setContentFromScalarCollection(
-            @Nonnull final RequestAdapter requestAdapter,
-            @Nonnull final String contentType,
-            @Nonnull final Iterable<T> values) {
-        Objects.requireNonNull(values, "parameter values cannot be null");
-        final Span span =
-                GlobalOpenTelemetry.getTracer(OBSERVABILITY_TRACER_NAME)
-                        .spanBuilder(SPAN_NAME)
-                        .startSpan();
-        try (final Scope scope = span.makeCurrent()) {
-            final Iterable<T> targetValues = prepareCollectionPayload(values, span);
-            try (final SerializationWriter writer =
-                    getSerializationWriter(requestAdapter, contentType, targetValues)) {
-                headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                writer.writeCollectionOfPrimitiveValues(null, targetValues);
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
                 final RuntimeException result = new RuntimeException(SERIALIZE_ERROR, ex);
