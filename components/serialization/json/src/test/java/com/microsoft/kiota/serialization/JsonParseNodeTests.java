@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -27,6 +28,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.util.EnumSet;
 
 class JsonParseNodeTests {
     private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
@@ -124,6 +126,22 @@ class JsonParseNodeTests {
         final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
         final var result = parseNode.getChildNode("@odata.type");
         assertNull(result);
+    }
+
+    @Test
+    void returnsNullWhenEnumSetHasNoKnownValues() {
+        final var parseNode = new JsonParseNode(new JsonPrimitive("UNKNOWN1,UNKNOWN2"));
+
+        assertNull(parseNode.getEnumSetValue(MyEnum::forValue));
+    }
+
+    @Test
+    void retainsKnownEnumSetValuesWhenOthersAreUnknown() {
+        final var parseNode = new JsonParseNode(new JsonPrimitive("VALUE1,UNKNOWN,VALUE2"));
+
+        assertEquals(
+                EnumSet.of(MyEnum.MY_VALUE1, MyEnum.MY_VALUE2),
+                parseNode.getEnumSetValue(MyEnum::forValue));
     }
 
     @Test
