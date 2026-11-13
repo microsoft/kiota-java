@@ -254,7 +254,7 @@ public class JsonParseNode implements ParseNode {
                 result.add(value);
             }
         }
-        return EnumSet.copyOf(result);
+        return result.isEmpty() ? null : EnumSet.copyOf(result);
     }
 
     private <T extends Parsable> void assignFieldValues(

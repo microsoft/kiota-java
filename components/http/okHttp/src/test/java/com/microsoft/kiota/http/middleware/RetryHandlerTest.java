@@ -1,6 +1,7 @@
 package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -12,6 +13,7 @@ import io.opentelemetry.api.trace.Span;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -22,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 class RetryHandlerTest {
@@ -144,6 +148,18 @@ class RetryHandlerTest {
             // Verify each call succeeds without throwing IllegalArgumentException
             assertTrue(result, "Expected retryRequest to return true on iteration " + i);
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PUT", "PATCH", "QUERY"})
+    void isBufferedReturnsFalseForUnbufferedBody(String method) throws IOException {
+        Request mockRequest = mock(Request.class);
+        RequestBody mockBody = mock(RequestBody.class);
+        when(mockRequest.method()).thenReturn(method);
+        when(mockRequest.body()).thenReturn(mockBody);
+        when(mockBody.contentLength()).thenReturn(-1L);
+
+        assertFalse(retryHandler.isBuffered(mockRequest));
     }
 
     @Test

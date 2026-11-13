@@ -295,9 +295,7 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) {
-                    setRequestType(values[0], span);
-                }
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
@@ -354,6 +352,31 @@ public class RequestInformation {
         span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
     }
 
+    private <T> void setRequestTypeFromArray(final T[] values, final Span span) {
+        if (values == null || span == null) return;
+        for (final T value : values) {
+            if (value != null) {
+                setRequestType(value, span);
+                return;
+            }
+        }
+    }
+
+    private static void writeEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
+        if (value instanceof ValuedEnum) {
+            writeValuedEnumValue(writer, value);
+        } else {
+            writer.writeStringValue(null, value.name());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Enum<E> & ValuedEnum> void writeValuedEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
+        writer.writeEnumValue(null, (E) value);
+    }
+
     private <T> SerializationWriter getSerializationWriter(
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
@@ -394,6 +417,8 @@ public class RequestInformation {
                     writer.writeShortValue(null, (Short) value);
                 else if (valueClass.equals(BigDecimal.class))
                     writer.writeBigDecimalValue(null, (BigDecimal) value);
+                else if (valueClass.equals(Double.class))
+                    writer.writeDoubleValue(null, (Double) value);
                 else if (valueClass.equals(Float.class))
                     writer.writeFloatValue(null, (Float) value);
                 else if (valueClass.equals(Long.class)) writer.writeLongValue(null, (Long) value);
@@ -408,6 +433,11 @@ public class RequestInformation {
                     writer.writeLocalTimeValue(null, (LocalTime) value);
                 else if (valueClass.equals(PeriodAndDuration.class))
                     writer.writePeriodAndDurationValue(null, (PeriodAndDuration) value);
+                else if (valueClass.equals(byte[].class))
+                    writer.writeByteArrayValue(null, (byte[]) value);
+                else if (value instanceof Enum<?>) writeEnumValue(writer, (Enum<?>) value);
+                else if (value instanceof ValuedEnum)
+                    writer.writeStringValue(null, ((ValuedEnum) value).getValue());
                 else {
                     final RuntimeException result =
                             new RuntimeException(
@@ -445,7 +475,7 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) setRequestType(values[0], span);
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
