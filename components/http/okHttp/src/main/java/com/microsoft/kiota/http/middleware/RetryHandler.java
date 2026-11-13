@@ -105,6 +105,7 @@ public class RetryHandler implements Interceptor {
                         && executionCount <= retryOption.maxRetries()
                         && checkStatus(statusCode)
                         && isBuffered(request)
+                        && isRetriableForMethod(request, statusCode, retryOption)
                         && shouldRetryCallback.shouldRetry(
                                 retryOption.delay(), executionCount, request, response);
 
@@ -200,6 +201,33 @@ public class RetryHandler implements Interceptor {
         return (statusCode == MSClientErrorCodeTooManyRequests
                 || statusCode == MSClientErrorCodeServiceUnavailable
                 || statusCode == MSClientErrorCodeGatewayTimeout);
+    }
+
+    /**
+     * Checks whether the response allows resending the request, given its method.
+     * With retryUnprocessedMutationsOnly set, POST and PATCH requests are retried only after a
+     * response showing the server didn't process them, because a 504 may arrive after the server
+     * already acted on the request.
+     * @param request the request that would be resent
+     * @param statusCode the status code of the response
+     * @param retryOption the retry options in use
+     * @return whether the request can be resent
+     */
+    boolean isRetriableForMethod(
+            @Nonnull final Request request,
+            int statusCode,
+            @Nonnull final RetryHandlerOption retryOption) {
+        if (!retryOption.retryUnprocessedMutationsOnly()) {
+            return true;
+        }
+        final String methodName = request.method();
+        if (!methodName.equalsIgnoreCase("POST") && !methodName.equalsIgnoreCase("PATCH")) {
+            return true;
+        }
+        // By common service convention, a 429 or 503 means the server didn't process the request,
+        // so resending it is treated as safe.
+        return statusCode == MSClientErrorCodeTooManyRequests
+                || statusCode == MSClientErrorCodeServiceUnavailable;
     }
 
     boolean isBuffered(final Request request) {
