@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0](https://github.com/microsoft/kiota-java/compare/v1.10.5...v1.11.0) (2026-11-13)
+
+
+### Features
+
+* add support for the HTTP QUERY verb (RFC 10008) ([7d8591e](https://github.com/microsoft/kiota-java/commit/7d8591e015640f2c4579303eaef8fa831c1dd540))
+* **http:** add option to retry only unprocessed mutations ([3559f2c](https://github.com/microsoft/kiota-java/commit/3559f2c07c2e96d5f7a88905c07822468444dd3e))
+* **http:** add option to retry only unprocessed mutations ([e79b4c3](https://github.com/microsoft/kiota-java/commit/e79b4c3212282d0e265f87eab8d2bd973c02c714))
+
+
+### Bug Fixes
+
+* **abstractions:** fold telemetry detection into iterable materialization and tighten enum serialization ([434f0f3](https://github.com/microsoft/kiota-java/commit/434f0f3ddc5cb8421b4bbc726d8b4fa4505b7f31))
+* **abstractions:** materialize one-shot iterables before telemetry and serialization ([9fd197f](https://github.com/microsoft/kiota-java/commit/9fd197f9008880d4626987fbfdb5edb5ee4889b3))
+* **abstractions:** serialize ordinary enums using enum name fallback ([17f7626](https://github.com/microsoft/kiota-java/commit/17f7626f50d0795f0e6035ff8b903d341a2fe69c))
+* **abstractions:** support double, byte array, and enum in scalar content serialization ([e874c32](https://github.com/microsoft/kiota-java/commit/e874c32523c55c02391956c2c74e3fadf8d2132f))
+* **abstractions:** tighten valued enum helper bound and verify leading-null collection span telemetry ([f1e6808](https://github.com/microsoft/kiota-java/commit/f1e68081c19c6ee8aefc1c0dc6fe258387190a0e))
+* **serialization:** handle enum sets with no recognized values ([a7d4d68](https://github.com/microsoft/kiota-java/commit/a7d4d68b1a6036d5aced0a760e873539c5a9644d))
+* **serialization:** handle enum sets with no recognized values ([a75c22a](https://github.com/microsoft/kiota-java/commit/a75c22a08efea261b8b77b954b52db2c8d321585))
+* **serialization:** support content-type parameters and case-insensitivity in form factories ([460d9b9](https://github.com/microsoft/kiota-java/commit/460d9b990c03090eecc9020ad5dcfbee01ebb200))
+* **serialization:** support content-type parameters and case-insensitivity in form factories ([03ea879](https://github.com/microsoft/kiota-java/commit/03ea87921eb674115382e5f13659c8df6d0d22cd))
+* treat QUERY as request with body ([4ad9560](https://github.com/microsoft/kiota-java/commit/4ad9560b9884af1c3f487ccb86f962f4be613b1d))
+
 ## [1.10.5](https://github.com/microsoft/kiota-java/compare/v1.10.4...v1.10.5) (2026-11-04)
 
 
