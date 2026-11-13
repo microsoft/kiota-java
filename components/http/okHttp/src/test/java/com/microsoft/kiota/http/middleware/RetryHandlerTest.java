@@ -228,4 +228,119 @@ class RetryHandlerTest {
             assertEquals("1", retry.getHeader("Retry-Attempt"));
         }
     }
+
+    private static RetryHandlerOption retryUnprocessedMutationsOnlyOption() {
+        return new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0, true);
+    }
+
+    private static int sendWithStatuses(
+            final RetryHandlerOption handlerOption,
+            final RetryHandlerOption requestOption,
+            final String method,
+            final int... statusCodes)
+            throws Exception {
+        try (var server = new MockWebServer()) {
+            for (final int statusCode : statusCodes) {
+                server.enqueue(
+                        new MockResponse()
+                                .setResponseCode(statusCode)
+                                .setHeader("Retry-After", "0"));
+            }
+            server.enqueue(new MockResponse().setResponseCode(200));
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .addInterceptor(new RetryHandler(handlerOption))
+                            .build();
+            final RequestBody body =
+                    method.equalsIgnoreCase("GET") || method.equalsIgnoreCase("DELETE")
+                            ? null
+                            : RequestBody.create("{\"message\":\"hello\"}", null);
+            final Request.Builder builder =
+                    new Request.Builder().url(server.url("/send")).method(method, body);
+            if (requestOption != null) {
+                builder.tag(RetryHandlerOption.class, requestOption);
+            }
+            client.newCall(builder.build()).execute().close();
+            return server.getRequestCount();
+        }
+    }
+
+    @Test
+    void retryUnprocessedMutationsOnlyDefaultsToFalse() {
+        assertFalse(new RetryHandlerOption().retryUnprocessedMutationsOnly());
+        assertFalse(
+                new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0)
+                        .retryUnprocessedMutationsOnly());
+        assertTrue(retryUnprocessedMutationsOnlyOption().retryUnprocessedMutationsOnly());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PATCH"})
+    void retriesNonIdempotentRequestOnGatewayTimeoutByDefault(String method) throws Exception {
+        final var option = new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+        assertEquals(2, sendWithStatuses(option, null, method, 504));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PATCH"})
+    void doesNotRetryNonIdempotentRequestOnGatewayTimeoutWhenRetryUnprocessedMutationsOnly(
+            String method) throws Exception {
+        assertEquals(1, sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, method, 504));
+    }
+
+    @Test
+    void matchesNonIdempotentMethodsIgnoringCase() {
+        final Request request =
+                new Request.Builder()
+                        .url("https://example.org/send")
+                        .method("post", RequestBody.create("{}", null))
+                        .build();
+        assertFalse(
+                retryHandler.isRetriableForMethod(
+                        request, 504, retryUnprocessedMutationsOnlyOption()));
+        assertTrue(
+                retryHandler.isRetriableForMethod(
+                        request, 503, retryUnprocessedMutationsOnlyOption()));
+    }
+
+    private static Stream<Arguments> nonIdempotentMethodsAndUnprocessedStatuses() {
+        return Stream.of(
+                Arguments.of("POST", 429),
+                Arguments.of("POST", 503),
+                Arguments.of("PATCH", 429),
+                Arguments.of("PATCH", 503));
+    }
+
+    @ParameterizedTest
+    @MethodSource("nonIdempotentMethodsAndUnprocessedStatuses")
+    void retriesNonIdempotentRequestWhenNotProcessedAndRetryUnprocessedMutationsOnly(
+            String method, int statusCode) throws Exception {
+        assertEquals(
+                2,
+                sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, method, statusCode));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "PUT", "DELETE", "QUERY"})
+    void retriesIdempotentRequestOnGatewayTimeoutWhenRetryUnprocessedMutationsOnly(String method)
+            throws Exception {
+        assertEquals(2, sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, method, 504));
+    }
+
+    @Test
+    void stopsRetryingNonIdempotentRequestWhenALaterResponseLeavesOutcomeUnknown()
+            throws Exception {
+        assertEquals(
+                2, sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, "POST", 503, 504));
+    }
+
+    @Test
+    void honoursRetryUnprocessedMutationsOnlyFromRequestOption() throws Exception {
+        final var handlerOption =
+                new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+        assertEquals(
+                1,
+                sendWithStatuses(
+                        handlerOption, retryUnprocessedMutationsOnlyOption(), "POST", 504));
+    }
 }
