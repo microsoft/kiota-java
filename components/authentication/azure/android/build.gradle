@@ -70,3 +70,7 @@ android {
 }
 
 apply from: "../gradle/dependencies.gradle"
+
+dependencies {
+    api(libs.javax.xml.stream.stax.api)
+}
