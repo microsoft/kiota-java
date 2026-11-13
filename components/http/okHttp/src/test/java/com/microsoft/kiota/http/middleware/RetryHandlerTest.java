@@ -1,5 +1,6 @@
 package com.microsoft.kiota.http.middleware;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -342,5 +343,59 @@ class RetryHandlerTest {
                 1,
                 sendWithStatuses(
                         handlerOption, retryUnprocessedMutationsOnlyOption(), "POST", 504));
+    }
+
+    private static String[] sendThroughRedirect(
+            final RetryHandlerOption handlerOption,
+            final RetryHandlerOption requestOption,
+            final int redirectStatus,
+            final int expectedStatus)
+            throws Exception {
+        try (var server = new MockWebServer()) {
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(redirectStatus)
+                            .setHeader("Location", server.url("/redirected")));
+            server.enqueue(new MockResponse().setResponseCode(504).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse().setResponseCode(200));
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .followRedirects(false)
+                            .addInterceptor(new RedirectHandler())
+                            .addInterceptor(new RetryHandler(handlerOption))
+                            .build();
+            final Request.Builder builder =
+                    new Request.Builder()
+                            .url(server.url("/send"))
+                            .post(RequestBody.create("{\"message\":\"hello\"}", null));
+            if (requestOption != null) {
+                builder.tag(RetryHandlerOption.class, requestOption);
+            }
+            try (var response = client.newCall(builder.build()).execute()) {
+                assertEquals(expectedStatus, response.code());
+            }
+            final String[] methods = new String[server.getRequestCount()];
+            for (int i = 0; i < methods.length; i++) {
+                methods[i] = server.takeRequest().getMethod();
+            }
+            return methods;
+        }
+    }
+
+    @Test
+    void retriesPostRedirectedToGetWhenRetryUnprocessedMutationsOnly() throws Exception {
+        assertArrayEquals(
+                new String[] {"POST", "GET", "GET"},
+                sendThroughRedirect(retryUnprocessedMutationsOnlyOption(), null, 302, 200));
+    }
+
+    @Test
+    void doesNotRetryPostRedirectedAsPostWithRequestOption() throws Exception {
+        final var handlerOption =
+                new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+        assertArrayEquals(
+                new String[] {"POST", "POST"},
+                sendThroughRedirect(
+                        handlerOption, retryUnprocessedMutationsOnlyOption(), 307, 504));
     }
 }
