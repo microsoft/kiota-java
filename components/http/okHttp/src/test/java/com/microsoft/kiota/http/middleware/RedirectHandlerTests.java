@@ -494,6 +494,49 @@ public class RedirectHandlerTests {
         assertEquals("https://example.com/v1.0/users/details", result.url().toString());
     }
 
+    @Test
+    void relativeRedirectDropsOriginalQueryWhenRedirectLocationHasNoQuery() throws Exception {
+        Request original =
+                new Request.Builder().url("https://example.com/v1.0/users?top=10").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectPreservesRedirectQueryParameters() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users?top=10&select=id")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users?top=20");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users?top=20", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectWithRelativePathAndQueryParameters() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users/list?filter=active")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "details?id=123");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v1.0/users/details?id=123", result.url().toString());
+    }
+
     private static Request createRequest(String method) {
         RequestBody body = RequestBody.create(REQUEST_BODY, REQUEST_MEDIA_TYPE);
         return new Request.Builder()
