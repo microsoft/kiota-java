@@ -458,6 +458,42 @@ public class RedirectHandlerTests {
         assertNotNull(result.header("X-Safe-Header")); // kept (not in scrub list)
     }
 
+    @Test
+    void relativeRedirectRootPathDoesNotDuplicateParentPath() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectRootPathWithTrailingSlashOriginalUrl() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users/").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectRelativePathResolvesAgainstParentDirectory() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users/item").build();
+        Response redirect = createRedirectResponse(original, 302, "details");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v1.0/users/details", result.url().toString());
+    }
+
     private static Request createRequest(String method) {
         RequestBody body = RequestBody.create(REQUEST_BODY, REQUEST_MEDIA_TYPE);
         return new Request.Builder()
