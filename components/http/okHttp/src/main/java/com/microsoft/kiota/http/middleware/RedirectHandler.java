@@ -103,15 +103,6 @@ public class RedirectHandler implements Interceptor {
         String location = userResponse.header("Location");
         if (location == null || location.length() == 0) return null;
 
-        // For relative URL in location header, the new url to redirect is relative to original
-        // request
-        if (location.startsWith("/")) {
-            if (request.url().toString().endsWith("/")) {
-                location = location.substring(1);
-            }
-            location = request.url() + location;
-        }
-
         HttpUrl requestUrl = request.url();
 
         HttpUrl locationUrl = request.url().resolve(location);
