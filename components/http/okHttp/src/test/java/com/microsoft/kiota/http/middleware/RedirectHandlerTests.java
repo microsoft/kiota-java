@@ -587,6 +587,28 @@ public class RedirectHandlerTests {
         assertEquals("session=SECRET456", result.header("Cookie"));
     }
 
+    @Test
+    void relativeRedirectsAreFollowedEndToEnd() throws Exception {
+        var server = new MockWebServer();
+        server.enqueue(
+                new MockResponse().setResponseCode(302).setHeader("Location", "/v2/resource"));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("OK"));
+
+        var interceptors = new Interceptor[] {new RedirectHandler()};
+        final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
+        final Request request = new Request.Builder().url(server.url("/v1/resource")).build();
+
+        var response = client.newCall(request).execute();
+
+        var initialRequest = server.takeRequest();
+        var redirectedRequest = server.takeRequest();
+
+        assertEquals("/v1/resource", initialRequest.getPath());
+        assertEquals("/v2/resource", redirectedRequest.getPath());
+        assertEquals(200, response.code());
+        server.shutdown();
+    }
+
     private static Request createRequest(String method) {
         RequestBody body = RequestBody.create(REQUEST_BODY, REQUEST_MEDIA_TYPE);
         return new Request.Builder()
