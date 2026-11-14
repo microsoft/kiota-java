@@ -197,6 +197,8 @@ public class RedirectHandler implements Interceptor {
                         redirectSpan.setAttribute("http.status_code", response.code());
                         redirectSpan.end();
                     }
+                } else {
+                    shouldRedirect = false;
                 }
             } while (shouldRedirect);
         } finally {
