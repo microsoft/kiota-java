@@ -77,7 +77,7 @@ public class RedirectHandler implements Interceptor {
 
         // Location header empty then don't redirect
         final String locationHeader = response.header("location");
-        if (locationHeader == null) return false;
+        if (locationHeader == null || locationHeader.trim().isEmpty()) return false;
 
         // If any of 301,302,303,307,308 then redirect
         final int statusCode = response.code();
@@ -101,7 +101,8 @@ public class RedirectHandler implements Interceptor {
             final RedirectHandlerOption redirectOption)
             throws ProtocolException {
         String location = userResponse.header("Location");
-        if (location == null || location.length() == 0) return null;
+        if (location == null || location.trim().isEmpty()) return null;
+        location = location.trim();
 
         HttpUrl requestUrl = request.url();
 
