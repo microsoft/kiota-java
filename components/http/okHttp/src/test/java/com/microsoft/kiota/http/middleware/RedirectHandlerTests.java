@@ -568,6 +568,25 @@ public class RedirectHandlerTests {
         assertNull(result);
     }
 
+    @Test
+    void relativeRedirectPreservesSensitiveHeadersOnSameOrigin() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users")
+                        .addHeader("Authorization", "Bearer token123")
+                        .addHeader("Cookie", "session=SECRET456")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+        assertEquals("Bearer token123", result.header("Authorization"));
+        assertEquals("session=SECRET456", result.header("Cookie"));
+    }
+
     private static Request createRequest(String method) {
         RequestBody body = RequestBody.create(REQUEST_BODY, REQUEST_MEDIA_TYPE);
         return new Request.Builder()
