@@ -2,6 +2,7 @@ package com.microsoft.kiota.http.middleware;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.*;
@@ -456,6 +457,156 @@ public class RedirectHandlerTests {
         assertNull(result.header("X-Custom-Secret")); // stripped by custom scrubber
         assertNull(result.header("X-Api-Key")); // stripped by custom scrubber
         assertNotNull(result.header("X-Safe-Header")); // kept (not in scrub list)
+    }
+
+    @Test
+    void relativeRedirectRootPathDoesNotDuplicateParentPath() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectRootPathWithTrailingSlashOriginalUrl() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users/").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectRelativePathResolvesAgainstParentDirectory() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users/item").build();
+        Response redirect = createRedirectResponse(original, 302, "details");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v1.0/users/details", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectDropsOriginalQueryWhenRedirectLocationHasNoQuery() throws Exception {
+        Request original =
+                new Request.Builder().url("https://example.com/v1.0/users?top=10").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectPreservesRedirectQueryParameters() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users?top=10&select=id")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users?top=20");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users?top=20", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectWithRelativePathAndQueryParameters() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users/list?filter=active")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "details?id=123");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v1.0/users/details?id=123", result.url().toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   "})
+    void isRedirectedReturnsFalseForBlankLocationHeader(String location) throws Exception {
+        Request request = new Request.Builder().url("https://example.com/api").build();
+        Response response =
+                new Response.Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", location)
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        RedirectHandler handler = new RedirectHandler();
+        assertFalse(handler.isRedirected(request, response, 1, new RedirectHandlerOption()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "mailto:user@example.com", "javascript:void(0)"})
+    void getRedirectReturnsNullForBlankOrUnsupportedScheme(String location) throws Exception {
+        Request original = new Request.Builder().url("https://example.com/api").build();
+        Response redirect = createRedirectResponse(original, 302, location);
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNull(result);
+    }
+
+    @Test
+    void relativeRedirectPreservesSensitiveHeadersOnSameOrigin() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users")
+                        .addHeader("Authorization", "Bearer token123")
+                        .addHeader("Cookie", "session=SECRET456")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+        assertEquals("Bearer token123", result.header("Authorization"));
+        assertEquals("session=SECRET456", result.header("Cookie"));
+    }
+
+    @Test
+    void relativeRedirectsAreFollowedEndToEnd() throws Exception {
+        var server = new MockWebServer();
+        server.enqueue(
+                new MockResponse().setResponseCode(302).setHeader("Location", "/v2/resource"));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("OK"));
+
+        var interceptors = new Interceptor[] {new RedirectHandler()};
+        final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
+        final Request request = new Request.Builder().url(server.url("/v1/resource")).build();
+
+        var response = client.newCall(request).execute();
+
+        var initialRequest = server.takeRequest();
+        var redirectedRequest = server.takeRequest();
+
+        assertEquals("/v1/resource", initialRequest.getPath());
+        assertEquals("/v2/resource", redirectedRequest.getPath());
+        assertEquals(200, response.code());
+        server.shutdown();
     }
 
     private static Request createRequest(String method) {
