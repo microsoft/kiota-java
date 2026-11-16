@@ -569,6 +569,39 @@ public class RedirectHandlerTests {
     }
 
     @Test
+    void interceptWithUnsupportedRedirectSchemeReturnsOriginalResponseWithoutRetrying()
+            throws Exception {
+        Request request = new Request.Builder().url("https://example.com/api").build();
+        Response originalResponse =
+                new Response.Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "mailto:user@example.com")
+                        .body(
+                                ResponseBody.create(
+                                        "unsupported-scheme-body", MediaType.parse("text/plain")))
+                        .build();
+
+        Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+        when(mockChain.request()).thenReturn(request);
+        when(mockChain.proceed(any(Request.class)))
+                .thenReturn(originalResponse)
+                .thenThrow(new AssertionError("chain.proceed() must not be called more than once"));
+
+        RedirectHandler handler = new RedirectHandler();
+        Response response = handler.intercept(mockChain);
+
+        assertNotNull(response);
+        assertSame(originalResponse, response);
+        assertEquals(302, response.code());
+        assertEquals("mailto:user@example.com", response.header("Location"));
+        assertEquals("unsupported-scheme-body", response.body().string());
+        verify(mockChain, times(1)).proceed(any(Request.class));
+    }
+
+    @Test
     void relativeRedirectPreservesSensitiveHeadersOnSameOrigin() throws Exception {
         Request original =
                 new Request.Builder()
