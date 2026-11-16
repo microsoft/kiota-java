@@ -260,6 +260,52 @@ public class RedirectHandlerTests {
     }
 
     @Test
+    void redirectToUrlWithDifferentProxyStripsProxyAuth() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Setup proxy selector with different proxies for different hosts
+        Proxy proxyA =
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-a.example.com", 8080));
+        Proxy proxyB =
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-b.example.com", 8080));
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        when(proxySelector.select(
+                        argThat(uri -> uri != null && "other.example.com".equals(uri.getHost()))))
+                .thenReturn(Collections.singletonList(proxyB));
+        when(proxySelector.select(
+                        argThat(uri -> uri != null && "trusted.example.com".equals(uri.getHost()))))
+                .thenReturn(Collections.singletonList(proxyA));
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result =
+                new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped (different host)
+        assertNull(result.header("Cookie")); // stripped (different host)
+        assertNull(
+                result.header(
+                        "Proxy-Authorization")); // stripped because proxy changed from proxyA to
+        // proxyB
+    }
+
+    @Test
     void crossHostRedirectWithDirectProxyStripsProxyAuth() throws Exception {
         Request original =
                 new Request.Builder()
