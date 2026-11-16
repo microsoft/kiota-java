@@ -18,9 +18,12 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 
 import java.net.*;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("resource")
 public class RedirectHandlerTests {
@@ -307,21 +310,12 @@ public class RedirectHandlerTests {
 
     @Test
     void multiHopRedirectBackToOriginalProxyStripsIntermediateProxyAuth() throws Exception {
-        Request hop2Request =
+        Request initialRequest =
                 new Request.Builder()
-                        .url("http://intermediate.example.com/api")
-                        .addHeader("Authorization", "Bearer token-b")
-                        .addHeader("Cookie", "session=B")
-                        .addHeader("Proxy-Authorization", "Basic <secret-b>")
-                        .build();
-        Response hop2Redirect =
-                new Response.Builder()
-                        .request(hop2Request)
-                        .protocol(Protocol.HTTP_1_1)
-                        .code(302)
-                        .message("Found")
-                        .header("Location", "http://trusted.example.com/api2")
-                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token-a")
+                        .addHeader("Cookie", "session=A")
+                        .addHeader("Proxy-Authorization", "Basic proxy-a-secret")
                         .build();
 
         Proxy proxyA =
@@ -340,19 +334,87 @@ public class RedirectHandlerTests {
                         argThat(uri -> uri != null && "trusted.example.com".equals(uri.getHost()))))
                 .thenReturn(Collections.singletonList(proxyA));
 
-        RedirectHandlerOption option = new RedirectHandlerOption();
-        Request result =
-                new RedirectHandler(option, proxySelector)
-                        .getRedirect(hop2Request, hop2Redirect, option);
+        Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+        when(mockChain.request()).thenReturn(initialRequest);
 
-        assertNotNull(result);
-        assertEquals("trusted.example.com", result.url().host());
-        assertNull(result.header("Authorization")); // stripped (different host)
-        assertNull(result.header("Cookie")); // stripped (different host)
-        assertNull(
-                result.header(
-                        "Proxy-Authorization")); // stripped because proxy changed from proxyB to
-        // proxyA
+        AtomicInteger hopCount = new AtomicInteger(0);
+        when(mockChain.proceed(any(Request.class)))
+                .thenAnswer(
+                        invocation -> {
+                            int hop = hopCount.incrementAndGet();
+                            Request currentRequest = invocation.getArgument(0);
+                            if (hop == 1) {
+                                return new Response.Builder()
+                                        .request(currentRequest)
+                                        .protocol(Protocol.HTTP_1_1)
+                                        .code(302)
+                                        .message("Found")
+                                        .header("Location", "http://intermediate.example.com/api")
+                                        .body(
+                                                ResponseBody.create(
+                                                        "", MediaType.parse("text/plain")))
+                                        .build();
+                            } else if (hop == 2) {
+                                // Simulate downstream proxy handler or authenticator attaching
+                                // proxy B's credentials to the request that executed through proxy
+                                // B
+                                Request reqWithProxyB =
+                                        currentRequest
+                                                .newBuilder()
+                                                .header(
+                                                        "Proxy-Authorization",
+                                                        "Basic proxy-b-secret")
+                                                .build();
+                                return new Response.Builder()
+                                        .request(reqWithProxyB)
+                                        .protocol(Protocol.HTTP_1_1)
+                                        .code(302)
+                                        .message("Found")
+                                        .header("Location", "http://trusted.example.com/api2")
+                                        .body(
+                                                ResponseBody.create(
+                                                        "", MediaType.parse("text/plain")))
+                                        .build();
+                            } else {
+                                return new Response.Builder()
+                                        .request(currentRequest)
+                                        .protocol(Protocol.HTTP_1_1)
+                                        .code(200)
+                                        .message("OK")
+                                        .body(
+                                                ResponseBody.create(
+                                                        "success", MediaType.parse("text/plain")))
+                                        .build();
+                            }
+                        });
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        RedirectHandler handler = new RedirectHandler(option, proxySelector);
+        Response response = handler.intercept(mockChain);
+
+        assertNotNull(response);
+        assertEquals(200, response.code());
+
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(mockChain, times(3)).proceed(requestCaptor.capture());
+        List<Request> capturedRequests = requestCaptor.getAllValues();
+
+        // 1st request (initial): sent to trusted.example.com with proxy A's credentials
+        assertEquals("trusted.example.com", capturedRequests.get(0).url().host());
+        assertEquals("Basic proxy-a-secret", capturedRequests.get(0).header("Proxy-Authorization"));
+
+        // 2nd request (redirect hop 1): sent to intermediate.example.com; proxy A credentials
+        // stripped
+        assertEquals("intermediate.example.com", capturedRequests.get(1).url().host());
+        assertNull(capturedRequests.get(1).header("Proxy-Authorization"));
+
+        // 3rd request (redirect hop 2): sent back to trusted.example.com; proxy B credentials
+        // stripped
+        assertEquals("trusted.example.com", capturedRequests.get(2).url().host());
+        assertEquals("/api2", capturedRequests.get(2).url().encodedPath());
+        assertNull(capturedRequests.get(2).header("Proxy-Authorization"));
+        assertNull(capturedRequests.get(2).header("Authorization"));
+        assertNull(capturedRequests.get(2).header("Cookie"));
     }
 
     @Test
