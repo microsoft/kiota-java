@@ -1,21 +1,7 @@
 plugins {
     id "java-library"
-    alias(libs.plugins.org.sonarqube)
     alias(libs.plugins.com.github.spotbugs)
     alias(libs.plugins.com.diffplug.spotless)
-}
-
-sonar {
-    properties {
-        property "sonar.projectKey", "microsoft_kiota-java"
-        property "sonar.organization", "microsoft"
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/components/**/reports/jacoco/test/jacocoTestReport.xml"
-    }
-}
-
-subprojects {
-    apply plugin: 'org.sonarqube'
 }
 
 repositories {
