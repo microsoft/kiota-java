@@ -60,7 +60,8 @@ public class RedirectHandlerOption implements RequestOption {
     /**
      * The default implementation for scrubbing sensitive headers during redirects.
      * This method removes Authorization and Cookie headers when the host, scheme, or port changes,
-     * and removes Proxy-Authorization headers when no proxy is configured or the proxy is bypassed for the new URL.
+     * and removes Proxy-Authorization headers when no proxy is configured, the proxy is bypassed for the new URL,
+     * or the new URL uses a different proxy than the original URL.
      */
     @Nonnull public static final IScrubSensitiveHeaders DEFAULT_SCRUB_SENSITIVE_HEADERS =
             (requestBuilder, originalUrl, proxyResolver) -> {
@@ -82,10 +83,14 @@ public class RedirectHandlerOption implements RequestOption {
                     requestBuilder.removeHeader("Cookie");
                 }
 
-                // Remove Proxy-Authorization if no proxy is configured or the URL is bypassed
-                boolean isProxyInactive =
-                        proxyResolver == null || proxyResolver.apply(newUrl) == null;
-                if (isProxyInactive) {
+                // Remove Proxy-Authorization if no proxy is configured, the URL is bypassed, or the
+                // proxy changes
+                Proxy newProxy = proxyResolver == null ? null : proxyResolver.apply(newUrl);
+                boolean isProxyInactive = newProxy == null;
+                boolean isDifferentProxy =
+                        !isProxyInactive
+                                && !Objects.equals(newProxy, proxyResolver.apply(originalUrl));
+                if (isProxyInactive || isDifferentProxy) {
                     requestBuilder.removeHeader("Proxy-Authorization");
                 }
             };
