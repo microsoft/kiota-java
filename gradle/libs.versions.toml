@@ -1,5 +1,5 @@
 [versions]
-okhttp = "4.12.1"
+okhttp = "5.5.1
 opentelemetry = "1.68.0"
 
 [libraries]
@@ -10,7 +10,7 @@ com-google-code-gson-gson = { group = "com.google.code.gson", name = "gson", ver
 com-gradle-gradle-enterprise-gradle-plugin = { group = "com.gradle", name = "gradle-enterprise-gradle-plugin", version = "3.19.2" }
 com-squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 com-squareup-okhttp3-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
-com-squareup-okhttp3-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+com-squareup-okhttp3-okhttp-jvm = { group = "com.squareup.okhttp3", name = "okhttp-jvm", version.ref = "okhttp" }
 io-github-std-uritemplate-std-uritemplate = { group = "io.github.std-uritemplate", name = "std-uritemplate", version = "2.0.0" }
 io-opentelemetry-opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api", version.ref = "opentelemetry" }
 io-opentelemetry-opentelemetry-context = { group = "io.opentelemetry", name = "opentelemetry-context", version.ref = "opentelemetry" }

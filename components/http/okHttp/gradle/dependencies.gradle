@@ -13,7 +13,7 @@ dependencies {
     implementation(libs.io.opentelemetry.opentelemetry.api)
     implementation(libs.io.opentelemetry.opentelemetry.context)
     implementation(libs.jakarta.annotation.jakarta.annotation.api)
-    api(libs.com.squareup.okhttp3.okhttp)
+    api(libs.com.squareup.okhttp3.okhttp.jvm)
 
     api project(':components:abstractions')
 }
