@@ -1,7 +1,13 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.ClientException;
 import com.microsoft.kiota.Compatibility;
@@ -76,5 +82,53 @@ class FactoryRegistryExceptionTest {
                             Compatibility.readAllBytes(writer.getSerializedContent()),
                             StandardCharsets.UTF_8));
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "APPLICATION/JSON",
+                "Application/Json; charset=utf-8",
+                "application/json ; charset=utf-8",
+                "  application/json ; charset=utf-8",
+                "Application/Vnd.Example+JSON ; charset=utf-8",
+            })
+    void parseNodeRegistryResolvesCaseInsensitiveAndWhitespacePaddedContentTypes(
+            final String inputContentType) {
+        var parser = new ParseNodeFactoryRegistry();
+        parser.contentTypeAssociatedFactories.put("application/json", new JsonParseNodeFactory());
+        var response = new ByteArrayInputStream("42".getBytes(StandardCharsets.UTF_8));
+        assertEquals(42, parser.getParseNode(inputContentType, response).getIntegerValue());
+    }
+
+    @Test
+    void parseNodeRegistryMatchesMixedCaseRegisteredFactoryKey() {
+        var parser = new ParseNodeFactoryRegistry();
+        var customFactory = mock(ParseNodeFactory.class);
+        var mockNode = mock(ParseNode.class);
+        when(customFactory.getParseNode(eq("Application/Custom"), any())).thenReturn(mockNode);
+        parser.contentTypeAssociatedFactories.put("Application/Custom", customFactory);
+
+        var response = new ByteArrayInputStream("data".getBytes(StandardCharsets.UTF_8));
+        var result = parser.getParseNode("application/custom ; version=1", response);
+        assertNotNull(result);
+        verify(customFactory).getParseNode(eq("Application/Custom"), eq(response));
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                ";",
+                ";;",
+                "; charset=utf-8",
+                "   ",
+                "   ; charset=utf-8",
+            })
+    void parseNodeRegistryThrowsClientExceptionForDelimiterOnlyOrBlankContentTypes(
+            final String inputContentType) {
+        var parser = new ParseNodeFactoryRegistry();
+        parser.contentTypeAssociatedFactories.put("application/json", new JsonParseNodeFactory());
+        var response = new ByteArrayInputStream("42".getBytes(StandardCharsets.UTF_8));
+        assertThrows(ClientException.class, () -> parser.getParseNode(inputContentType, response));
     }
 }
