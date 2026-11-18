@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.ClientException;
 import com.microsoft.kiota.Compatibility;
+import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -130,5 +131,76 @@ class FactoryRegistryExceptionTest {
         parser.contentTypeAssociatedFactories.put("application/json", new JsonParseNodeFactory());
         var response = new ByteArrayInputStream("42".getBytes(StandardCharsets.UTF_8));
         assertThrows(ClientException.class, () -> parser.getParseNode(inputContentType, response));
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "APPLICATION/JSON",
+                "Application/Json; charset=utf-8",
+                "application/json ; charset=utf-8",
+                "  application/json ; charset=utf-8",
+                "Application/Vnd.Example+JSON ; charset=utf-8",
+            })
+    void serializationWriterRegistryResolvesCaseInsensitiveAndWhitespacePaddedContentTypes(
+            final String inputContentType) throws Exception {
+        var writers = new SerializationWriterFactoryRegistry();
+        writers.contentTypeAssociatedFactories.put(
+                "application/json", new JsonSerializationWriterFactory());
+        try (var writer = writers.getSerializationWriter(inputContentType)) {
+            writer.writeIntegerValue(null, 42);
+            assertEquals(
+                    "42",
+                    new String(
+                            Compatibility.readAllBytes(writer.getSerializedContent()),
+                            StandardCharsets.UTF_8));
+        }
+    }
+
+    @Test
+    void serializationWriterRegistryMatchesMixedCaseKeyAndBackingStoreBypass() throws Exception {
+        var writers = new SerializationWriterFactoryRegistry();
+        var customFactory = mock(SerializationWriterFactory.class);
+        var mockWriter = mock(SerializationWriter.class);
+        when(customFactory.getSerializationWriter("Application/Custom")).thenReturn(mockWriter);
+        writers.contentTypeAssociatedFactories.put("Application/Custom", customFactory);
+
+        var result = writers.getSerializationWriter("application/custom ; version=1");
+        assertNotNull(result);
+        verify(customFactory).getSerializationWriter("Application/Custom");
+
+        var backingStoreRegistry = new SerializationWriterFactoryRegistry();
+        backingStoreRegistry.contentTypeAssociatedFactories.put(
+                "application/json",
+                new BackingStoreSerializationWriterProxyFactory(
+                        new JsonSerializationWriterFactory()));
+        try (var writer =
+                backingStoreRegistry.getSerializationWriter(
+                        "APPLICATION/JSON ; charset=utf-8", false)) {
+            assertNotNull(writer);
+            writer.writeIntegerValue(null, 7);
+            assertEquals(
+                    "7",
+                    new String(
+                            Compatibility.readAllBytes(writer.getSerializedContent()),
+                            StandardCharsets.UTF_8));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                ";",
+                ";;",
+                "; charset=utf-8",
+                "   ",
+                "   ; charset=utf-8",
+            })
+    void serializationWriterRegistryThrowsClientExceptionForDelimiterOnlyOrBlankContentTypes(
+            final String inputContentType) {
+        var writers = new SerializationWriterFactoryRegistry();
+        writers.contentTypeAssociatedFactories.put(
+                "application/json", new JsonSerializationWriterFactory());
+        assertThrows(ClientException.class, () -> writers.getSerializationWriter(inputContentType));
     }
 }
