@@ -8,7 +8,6 @@ dependencies {
     implementation(libs.io.opentelemetry.opentelemetry.api)
     implementation(libs.io.opentelemetry.opentelemetry.context)
     implementation(libs.jakarta.annotation.jakarta.annotation.api)
-    api(libs.javax.xml.stream.stax.api)
     api(libs.com.azure.azure.core)
 
     api project(':components:abstractions')
