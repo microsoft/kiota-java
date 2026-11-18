@@ -20,7 +20,7 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
      * @param gson the {@link Gson} instance to use for writing value types.
      */
     public JsonSerializationWriterFactory(@Nonnull Gson gson) {
-        Objects.requireNonNull(gson, "gson contentType cannot be null");
+        Objects.requireNonNull(gson, "parameter gson cannot be null");
         this.gson = gson;
     }
 
@@ -37,7 +37,7 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
         Objects.requireNonNull(contentType, "parameter contentType cannot be null");
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
-        } else if (!contentType.equals(validContentType)) {
+        } else if (!contentType.split(";", 2)[0].trim().equalsIgnoreCase(validContentType)) {
             throw new IllegalArgumentException("expected a " + validContentType + " content type");
         }
         return new JsonSerializationWriter(gson);
