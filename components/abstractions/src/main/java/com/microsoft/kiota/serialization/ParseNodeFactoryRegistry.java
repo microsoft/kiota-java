@@ -3,11 +3,8 @@ package com.microsoft.kiota.serialization;
 import com.microsoft.kiota.ClientException;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 import java.io.InputStream;
-import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +23,8 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
     public static final ParseNodeFactoryRegistry defaultInstance = new ParseNodeFactoryRegistry();
 
     /** List of factories that are registered by content type. */
-    @Nonnull public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories = new HashMap<>();
+    @Nonnull public final Map<String, ParseNodeFactory> contentTypeAssociatedFactories =
+            new CaseInsensitiveMap<>();
 
     @Nonnull public String getValidContentType() {
         throw new UnsupportedOperationException(
@@ -48,47 +46,23 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
         }
-        final String vendorSpecificContentType = contentType.split(";", 2)[0].trim();
+        final String vendorSpecificContentType =
+                contentType.split(";", 2)[0].trim().toLowerCase(Locale.ROOT);
         if (vendorSpecificContentType.isEmpty()) {
             throw new ClientException(
                     "Content type " + contentType + " does not have a factory to be parsed");
         }
-        final Map.Entry<String, ParseNodeFactory> vendorEntry =
-                getParseNodeFactoryEntry(vendorSpecificContentType);
-        if (vendorEntry != null) {
-            return vendorEntry.getValue().getParseNode(vendorEntry.getKey(), rawResponse);
+        ParseNodeFactory factory = contentTypeAssociatedFactories.get(vendorSpecificContentType);
+        if (factory != null) {
+            return factory.getParseNode(vendorSpecificContentType, rawResponse);
         }
         final String cleanedContentType =
                 contentTypeVendorCleanupPattern.matcher(vendorSpecificContentType).replaceAll("");
-        final Map.Entry<String, ParseNodeFactory> cleanedEntry =
-                getParseNodeFactoryEntry(cleanedContentType);
-        if (cleanedEntry != null) {
-            return cleanedEntry.getValue().getParseNode(cleanedEntry.getKey(), rawResponse);
+        factory = contentTypeAssociatedFactories.get(cleanedContentType);
+        if (factory != null) {
+            return factory.getParseNode(cleanedContentType, rawResponse);
         }
         throw new ClientException(
                 "Content type " + cleanedContentType + " does not have a factory to be parsed");
-    }
-
-    @Nullable private Map.Entry<String, ParseNodeFactory> getParseNodeFactoryEntry(
-            @Nonnull final String contentType) {
-        final ParseNodeFactory exactMatch = contentTypeAssociatedFactories.get(contentType);
-        if (exactMatch != null) {
-            return new AbstractMap.SimpleImmutableEntry<>(contentType, exactMatch);
-        }
-        final String lowerCaseContentType = contentType.toLowerCase(Locale.ROOT);
-        final ParseNodeFactory lowerMatch =
-                contentTypeAssociatedFactories.get(lowerCaseContentType);
-        if (lowerMatch != null) {
-            return new AbstractMap.SimpleImmutableEntry<>(lowerCaseContentType, lowerMatch);
-        }
-        for (final Map.Entry<String, ParseNodeFactory> entry :
-                contentTypeAssociatedFactories.entrySet()) {
-            final String key = entry.getKey();
-            final ParseNodeFactory factory = entry.getValue();
-            if (key != null && factory != null && key.equalsIgnoreCase(contentType)) {
-                return entry;
-            }
-        }
-        return null;
     }
 }

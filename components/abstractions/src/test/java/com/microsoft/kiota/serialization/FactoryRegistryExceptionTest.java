@@ -1,8 +1,10 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -107,13 +109,13 @@ class FactoryRegistryExceptionTest {
         var parser = new ParseNodeFactoryRegistry();
         var customFactory = mock(ParseNodeFactory.class);
         var mockNode = mock(ParseNode.class);
-        when(customFactory.getParseNode(eq("Application/Custom"), any())).thenReturn(mockNode);
+        when(customFactory.getParseNode(eq("application/custom"), any())).thenReturn(mockNode);
         parser.contentTypeAssociatedFactories.put("Application/Custom", customFactory);
 
         var response = new ByteArrayInputStream("data".getBytes(StandardCharsets.UTF_8));
         var result = parser.getParseNode("application/custom ; version=1", response);
         assertNotNull(result);
-        verify(customFactory).getParseNode(eq("Application/Custom"), eq(response));
+        verify(customFactory).getParseNode(eq("application/custom"), eq(response));
     }
 
     @ParameterizedTest
@@ -162,12 +164,12 @@ class FactoryRegistryExceptionTest {
         var writers = new SerializationWriterFactoryRegistry();
         var customFactory = mock(SerializationWriterFactory.class);
         var mockWriter = mock(SerializationWriter.class);
-        when(customFactory.getSerializationWriter("Application/Custom")).thenReturn(mockWriter);
+        when(customFactory.getSerializationWriter("application/custom")).thenReturn(mockWriter);
         writers.contentTypeAssociatedFactories.put("Application/Custom", customFactory);
 
         var result = writers.getSerializationWriter("application/custom ; version=1");
         assertNotNull(result);
-        verify(customFactory).getSerializationWriter("Application/Custom");
+        verify(customFactory).getSerializationWriter("application/custom");
 
         var backingStoreRegistry = new SerializationWriterFactoryRegistry();
         backingStoreRegistry.contentTypeAssociatedFactories.put(
@@ -202,5 +204,31 @@ class FactoryRegistryExceptionTest {
         writers.contentTypeAssociatedFactories.put(
                 "application/json", new JsonSerializationWriterFactory());
         assertThrows(ClientException.class, () -> writers.getSerializationWriter(inputContentType));
+    }
+
+    @Test
+    void caseInsensitiveMapNormalizesKeysOnAddingAndLookup() {
+        var map = new CaseInsensitiveMap<String>();
+        map.put("APPLICATION/JSON", "json");
+        map.put("Text/Plain ; Charset=UTF-8", "text");
+
+        assertTrue(map.containsKey("application/json"));
+        assertTrue(map.containsKey("APPLICATION/JSON"));
+        assertEquals("json", map.get("application/json"));
+        assertEquals("json", map.get("Application/Json"));
+        assertEquals("json", map.get("APPLICATION/JSON ; charset=utf-8"));
+
+        assertTrue(map.containsKey("text/plain"));
+        assertEquals("text", map.get("TEXT/PLAIN"));
+
+        map.putAll(java.util.Collections.singletonMap("IMAGE/PNG", "png"));
+        assertTrue(map.containsKey("image/png"));
+        assertEquals("png", map.get("IMAGE/PNG"));
+
+        assertEquals("default", map.getOrDefault("UNKNOWN/TYPE", "default"));
+        map.putIfAbsent("APPLICATION/XML", "xml");
+        assertTrue(map.containsKey("application/xml"));
+        assertEquals("xml", map.remove("Application/XML"));
+        assertFalse(map.containsKey("application/xml"));
     }
 }

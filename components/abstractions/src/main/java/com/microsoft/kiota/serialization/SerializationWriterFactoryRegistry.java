@@ -4,12 +4,9 @@ import com.microsoft.kiota.ClientException;
 import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -26,7 +23,7 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
 
     /** List of factories that are registered by content type. */
     @Nonnull public final HashMap<String, SerializationWriterFactory> contentTypeAssociatedFactories =
-            new HashMap<>();
+            new CaseInsensitiveMap<>();
 
     @Nonnull public String getValidContentType() {
         throw new UnsupportedOperationException(
@@ -55,25 +52,25 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
         if (contentType.isEmpty()) {
             throw new NullPointerException("contentType cannot be empty");
         }
-        String cleanedContentType = getVendorSpecificContentType(contentType);
+        String cleanedContentType =
+                getVendorSpecificContentType(contentType).toLowerCase(Locale.ROOT);
         if (cleanedContentType.isEmpty()) {
             throw new ClientException(
                     "Content type " + contentType + " does not have a factory to be serialized");
         }
-        Map.Entry<String, SerializationWriterFactory> entry =
-                getSerializationWriterFactoryEntry(cleanedContentType);
-        if (entry == null) {
+        SerializationWriterFactory factory = contentTypeAssociatedFactories.get(cleanedContentType);
+        String resolvedContentType = cleanedContentType;
+        if (factory == null) {
             cleanedContentType = getCleanedVendorSpecificContentType(cleanedContentType);
-            entry = getSerializationWriterFactoryEntry(cleanedContentType);
-            if (entry == null) {
+            factory = contentTypeAssociatedFactories.get(cleanedContentType);
+            if (factory == null) {
                 throw new ClientException(
                         "Content type "
                                 + contentType
                                 + " does not have a factory to be serialized");
             }
+            resolvedContentType = cleanedContentType;
         }
-        final String resolvedContentType = entry.getKey();
-        final SerializationWriterFactory factory = entry.getValue();
         if (!serializeOnlyChangedValues) {
             if (factory instanceof BackingStoreSerializationWriterProxyFactory) {
                 return ((BackingStoreSerializationWriterProxyFactory) factory)
@@ -81,35 +78,6 @@ public class SerializationWriterFactoryRegistry implements SerializationWriterFa
             }
         }
         return factory.getSerializationWriter(resolvedContentType);
-    }
-
-    /**
-     * Gets a SerializationWriterFactory entry that is mapped to a cleaned content type string
-     * @param contentType wrapper object carrying initial content type and result of parsing it
-     * @return the serialization writer factory entry or null if no mapped factory is found
-     */
-    @Nullable private Map.Entry<String, SerializationWriterFactory> getSerializationWriterFactoryEntry(
-            @Nonnull final String contentType) {
-        final SerializationWriterFactory exactMatch =
-                contentTypeAssociatedFactories.get(contentType);
-        if (exactMatch != null) {
-            return new AbstractMap.SimpleImmutableEntry<>(contentType, exactMatch);
-        }
-        final String lowerCaseContentType = contentType.toLowerCase(Locale.ROOT);
-        final SerializationWriterFactory lowerMatch =
-                contentTypeAssociatedFactories.get(lowerCaseContentType);
-        if (lowerMatch != null) {
-            return new AbstractMap.SimpleImmutableEntry<>(lowerCaseContentType, lowerMatch);
-        }
-        for (final Map.Entry<String, SerializationWriterFactory> entry :
-                contentTypeAssociatedFactories.entrySet()) {
-            final String key = entry.getKey();
-            final SerializationWriterFactory factory = entry.getValue();
-            if (key != null && factory != null && key.equalsIgnoreCase(contentType)) {
-                return entry;
-            }
-        }
-        return null;
     }
 
     /**
