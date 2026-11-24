@@ -126,6 +126,7 @@ public class AuthorizationHandler implements Interceptor {
                             challengedRequest
                                     .newBuilder()
                                     .removeHeader(AUTHORIZATION_HEADER)
+                                    .removeHeader(RetryHandler.RETRY_ATTEMPT_HEADER)
                                     .tag(Span.class, request.tag(Span.class))
                                     .build(),
                             additionalContext,

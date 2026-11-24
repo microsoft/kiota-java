@@ -291,6 +291,38 @@ class AuthorizationHandlerTest {
     }
 
     @Test
+    void testClaimsReplayStartsWithFreshRetryAttemptHeader()
+            throws IOException, InterruptedException {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(401)
+                            .setHeader("WWW-Authenticate", CLAIMS_CHALLENGE_HEADER_VALUE));
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse());
+            final OkHttpClient client =
+                    KiotaClientFactory.create(getMockAuthenticationProvider(server.url("/").host()))
+                            .build();
+            final Request request = new Request.Builder().url(server.url("/initial")).build();
+
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            }
+
+            assertEquals(5, server.getRequestCount());
+            assertNull(server.takeRequest().getHeader("Retry-Attempt"));
+            assertEquals("1", server.takeRequest().getHeader("Retry-Attempt"));
+            assertEquals("2", server.takeRequest().getHeader("Retry-Attempt"));
+            final RecordedRequest replay = server.takeRequest();
+            assertEquals("Bearer " + TOKEN_AFTER_CAE, replay.getHeader(AUTHORIZATION_HEADER));
+            assertNull(replay.getHeader("Retry-Attempt"));
+            assertEquals("1", server.takeRequest().getHeader("Retry-Attempt"));
+        }
+    }
+
+    @Test
     void testDifferentOriginDoesNotReceiveAuthorizationOrTriggerClaimsRetry() throws Exception {
         try (MockWebServer initial = new MockWebServer();
                 MockWebServer target = new MockWebServer()) {
