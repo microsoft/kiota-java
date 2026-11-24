@@ -113,7 +113,7 @@ In `pom.xml` in the `dependencies` section:
 
 The HTTP library's Gradle module metadata selects the OkHttp JVM or Android variant for the consuming platform. Maven consumers receive `okhttp-jvm` through the published POM.
 
-OkHttp 5.5.1's Android variant requires `compileSdk` 37 or later and AndroidX. Use Android Gradle Plugin 9.1.1 or later and set `android.useAndroidX=true` in `gradle.properties`. The Java 8 and Android minimum runtime versions are unchanged.
+OkHttp 5.5.1's Android variant requires `compileSdk` 37 or later and AndroidX. Use Android Gradle Plugin 9.1.1 or later with JDK 17 or later, and set `android.useAndroidX=true` in `gradle.properties`. The Java 8 and Android minimum runtime versions are unchanged.
 
 Android consumers should use a repository that serves Gradle module metadata. If only the Maven POM is available, exclude `okhttp-jvm` and add `okhttp-android` explicitly to avoid including both variants.
 
