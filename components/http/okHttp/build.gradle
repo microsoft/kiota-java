@@ -97,6 +97,14 @@ publishing {
             version = "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
             from components.java
             pom.withXml {
+                // Gradle selects an OkHttp variant from module metadata; Maven needs the JVM artifact.
+                def okHttpDependencies = asNode().dependencies.dependency.findAll {
+                    it.groupId.text() == 'com.squareup.okhttp3' && it.artifactId.text() == 'okhttp'
+                }
+                if (okHttpDependencies.size() != 1) {
+                    throw new GradleException('Expected exactly one OkHttp dependency in the Maven POM')
+                }
+                okHttpDependencies[0].artifactId[0].setValue('okhttp-jvm')
                 def pomFile = file("${project.buildDir}/generated-pom.xml")
                 writeTo(pomFile)
             }
@@ -108,6 +116,43 @@ publishing {
             url = layout.buildDirectory.dir("publishing-repository")
         }
     }
+}
+
+tasks.register('verifyOkHttpPublicationMetadata') {
+    dependsOn 'generatePomFileForMavenPublication', 'generateMetadataFileForMavenPublication'
+    doLast {
+        def okHttpModules = ['okhttp', 'okhttp-jvm', 'okhttp-android']
+        def expectedVersion = libs.versions.okhttp.get()
+        def pomFile = layout.buildDirectory.file('generated-pom.xml').get().asFile
+        def pom = new groovy.xml.XmlSlurper().parse(pomFile)
+        def pomDependencies = pom.dependencies.dependency.findAll {
+            it.groupId.text() == 'com.squareup.okhttp3' && it.artifactId.text() in okHttpModules
+        }
+        if (pomDependencies.size() != 1 ||
+            pomDependencies[0].artifactId.text() != 'okhttp-jvm' ||
+            pomDependencies[0].version.text() != expectedVersion ||
+            pomDependencies[0].scope.text() != 'compile' ||
+            !pomFile.getText('UTF-8').contains('do_not_remove: published-with-gradle-metadata')) {
+            throw new GradleException('Maven POM must expose okhttp-jvm and the Gradle metadata marker')
+        }
+
+        def moduleFile = layout.buildDirectory.file('publications/maven/module.json').get().asFile
+        def metadata = new groovy.json.JsonSlurper().parse(moduleFile)
+        ['apiElements', 'runtimeElements'].each { variantName ->
+            def variant = metadata.variants.find { it.name == variantName }
+            def dependencies = variant?.dependencies?.findAll {
+                it.group == 'com.squareup.okhttp3' && it.module in okHttpModules
+            }
+            if (dependencies == null || dependencies.size() != 1 ||
+                dependencies[0].module != 'okhttp' ||
+                dependencies[0].version.requires != expectedVersion) {
+                throw new GradleException("Gradle ${variantName} must expose the generic OkHttp dependency")
+            }
+        }
+    }
+}
+tasks.named('check') {
+    dependsOn 'verifyOkHttpPublicationMetadata'
 }
 
 signing {

@@ -125,7 +125,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204, 304})
-    void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
+    void sendStreamHandlesEmptyResponseByStatus(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
