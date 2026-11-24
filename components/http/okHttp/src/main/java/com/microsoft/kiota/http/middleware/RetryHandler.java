@@ -34,7 +34,7 @@ public class RetryHandler implements Interceptor {
     /**
      * Header name to track the retry attempt number
      */
-    private static final String RETRY_ATTEMPT_HEADER = "Retry-Attempt";
+    static final String RETRY_ATTEMPT_HEADER = "Retry-Attempt";
 
     /**
      * Header name for the retry after information

@@ -109,6 +109,16 @@ In `pom.xml` in the `dependencies` section:
     </dependency>
 ```
 
+### Default OkHttp middleware
+
+`KiotaClientFactory` applies URL replacement, query parameter name decoding, and User-Agent to the
+initial request, then follows redirects, retries each hop, and inspects headers for each send.
+The `Retry-Attempt` header is reset when following a redirect or replaying a claims challenge.
+Generated clients authenticate in the request adapter. For standalone OkHttp requests, pass an
+authentication provider to `KiotaClientFactory.create` to opt in to authorization after User-Agent
+and before redirects. Opt-in header inspection can capture sensitive headers such as `Authorization`.
+OkHttp handles transparent response decompression.
+
 ## Extra
 
 Third party tools and extensions:
