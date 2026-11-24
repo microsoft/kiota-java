@@ -14,26 +14,40 @@ import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
 import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
+import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
 import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class KiotaClientFactoryTest {
 
     @Test
     void testCreatesDefaultInterceptors() throws IOException {
         OkHttpClient client = KiotaClientFactory.create().build();
-        assertNotNull(client.interceptors());
-        assertEquals(6, client.interceptors().size());
+        assertEquals(
+                Arrays.asList(
+                        UrlReplaceHandler.class,
+                        ParametersNameDecodingHandler.class,
+                        UserAgentHandler.class,
+                        RedirectHandler.class,
+                        RetryHandler.class,
+                        HeadersInspectionHandler.class),
+                client.interceptors().stream().map(Object::getClass).collect(Collectors.toList()));
     }
 
     @Test
@@ -121,9 +135,16 @@ public class KiotaClientFactoryTest {
                                 options.toArray(new RequestOption[0]))
                         .build();
         List<Interceptor> clientInterceptors = client.interceptors();
-        assertNotNull(clientInterceptors);
-        // including the Authorization Handler
-        assertEquals(7, clientInterceptors.size());
+        assertEquals(
+                Arrays.asList(
+                        UrlReplaceHandler.class,
+                        ParametersNameDecodingHandler.class,
+                        UserAgentHandler.class,
+                        AuthorizationHandler.class,
+                        RedirectHandler.class,
+                        RetryHandler.class,
+                        HeadersInspectionHandler.class),
+                clientInterceptors.stream().map(Object::getClass).collect(Collectors.toList()));
         for (Interceptor interceptor : clientInterceptors) {
             if (interceptor instanceof RetryHandler) {
                 RetryHandlerOption handlerOption = ((RetryHandler) interceptor).getRetryOptions();
@@ -137,19 +158,33 @@ public class KiotaClientFactoryTest {
                 assertTrue(handlerOption.getReplacementPairs().isEmpty());
                 assertFalse(handlerOption.isEnabled());
             }
+        }
+    }
 
-            assertTrue(
-                    interceptor instanceof UrlReplaceHandler
-                            || interceptor instanceof RedirectHandler
-                            || interceptor instanceof RetryHandler
-                            || interceptor instanceof ParametersNameDecodingHandler
-                            || interceptor instanceof UserAgentHandler
-                            || interceptor instanceof HeadersInspectionHandler
-                            || interceptor instanceof ChaosHandler
-                            || interceptor instanceof AuthorizationHandler,
-                    "Array should contain instances of"
-                        + " UrlReplaceHandler,RedirectHandler,RetryHandler,ParametersNameDecodingHandler,UserAgentHandler,"
-                        + " HeadersInspectionHandler, and ChaosHandler");
+    @Test
+    void retriesOnlyTheRedirectedHopAndInspectsTheRetriedRequest() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(
+                    new MockResponse().setResponseCode(302).setHeader("Location", "/target"));
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse().setHeader("X-Result", "final"));
+            HeadersInspectionOption inspection = new HeadersInspectionOption(true, true);
+            Request request =
+                    new Request.Builder()
+                            .url(server.url("/initial"))
+                            .tag(HeadersInspectionOption.class, inspection)
+                            .build();
+
+            try (Response response =
+                    KiotaClientFactory.create().build().newCall(request).execute()) {
+                assertEquals(200, response.code());
+                assertTrue(inspection.getRequestHeaders().get("Retry-Attempt").contains("1"));
+                assertTrue(inspection.getResponseHeaders().get("X-Result").contains("final"));
+            }
+            assertEquals(3, server.getRequestCount());
+            assertEquals("/initial", server.takeRequest().getPath());
+            assertEquals("/target", server.takeRequest().getPath());
+            assertEquals("/target", server.takeRequest().getPath());
         }
     }
 

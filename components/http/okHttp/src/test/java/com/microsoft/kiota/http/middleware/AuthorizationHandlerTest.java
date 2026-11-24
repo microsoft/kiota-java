@@ -1,10 +1,13 @@
 package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.authentication.AccessTokenProvider;
@@ -17,6 +20,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -172,6 +178,77 @@ class AuthorizationHandlerTest {
                 NEW_AUTHORIZATION_HEADER_VALUE, response.request().header(AUTHORIZATION_HEADER));
     }
 
+    @Test
+    void testSameOriginClaimsChallengeReplaysOnlyTheRedirectedRequest() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(
+                    new MockResponse().setResponseCode(303).setHeader("Location", "/target"));
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(401)
+                            .setHeader("WWW-Authenticate", CLAIMS_CHALLENGE_HEADER_VALUE));
+            server.enqueue(new MockResponse());
+            final OkHttpClient client =
+                    KiotaClientFactory.create(getMockAuthenticationProvider(server.url("/").host()))
+                            .build();
+            final Request request =
+                    new Request.Builder()
+                            .url(server.url("/initial"))
+                            .post(RequestBody.create("test", null))
+                            .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            }
+            assertEquals(3, server.getRequestCount());
+            assertEquals("/initial", server.takeRequest().getPath());
+            final RecordedRequest firstHopToTarget = server.takeRequest();
+            assertEquals("/target", firstHopToTarget.getPath());
+            assertEquals(
+                    NEW_AUTHORIZATION_HEADER_VALUE,
+                    firstHopToTarget.getHeader(AUTHORIZATION_HEADER));
+            final RecordedRequest replay = server.takeRequest();
+            assertEquals("/target", replay.getPath());
+            assertEquals("GET", replay.getMethod());
+            assertEquals(
+                    Arrays.asList("Bearer " + TOKEN_AFTER_CAE),
+                    replay.getHeaders().values(AUTHORIZATION_HEADER));
+        }
+    }
+
+    @Test
+    void testDifferentOriginDoesNotReceiveAuthorizationOrTriggerClaimsRetry() throws Exception {
+        try (MockWebServer initial = new MockWebServer();
+                MockWebServer target = new MockWebServer()) {
+            initial.enqueue(
+                    new MockResponse()
+                            .setResponseCode(302)
+                            .setHeader("Location", target.url("/target")));
+            initial.enqueue(new MockResponse());
+            target.enqueue(
+                    new MockResponse()
+                            .setResponseCode(401)
+                            .setHeader("WWW-Authenticate", CLAIMS_CHALLENGE_HEADER_VALUE));
+            target.enqueue(new MockResponse());
+            final BaseBearerTokenAuthenticationProvider provider =
+                    getMockAuthenticationProvider(initial.url("/").host());
+            final OkHttpClient client = KiotaClientFactory.create(provider).build();
+            final Request request = new Request.Builder().url(initial.url("/initial")).build();
+
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(401, response.code());
+            }
+            assertEquals(1, initial.getRequestCount());
+            assertEquals(
+                    NEW_AUTHORIZATION_HEADER_VALUE,
+                    initial.takeRequest().getHeader(AUTHORIZATION_HEADER));
+            assertEquals(1, target.getRequestCount());
+            assertNull(target.takeRequest().getHeader(AUTHORIZATION_HEADER));
+            verify(provider.getAccessTokenProvider(), times(1))
+                    .getAuthorizationToken(any(URI.class), anyMap());
+        }
+    }
+
     private Chain getMockChain(Request mockRequest, Response mockResponse) throws IOException {
         Chain mockChain = mock(Chain.class);
         when(mockChain.request()).thenReturn(mockRequest);
@@ -189,9 +266,13 @@ class AuthorizationHandlerTest {
     }
 
     private BaseBearerTokenAuthenticationProvider getMockAuthenticationProvider() {
+        return getMockAuthenticationProvider("graph.microsoft.com");
+    }
+
+    private BaseBearerTokenAuthenticationProvider getMockAuthenticationProvider(
+            String allowedHost) {
         final AccessTokenProvider mockAccessTokenProvider = mock(AccessTokenProvider.class);
-        final AllowedHostsValidator allowedHostsValidator =
-                new AllowedHostsValidator("graph.microsoft.com");
+        final AllowedHostsValidator allowedHostsValidator = new AllowedHostsValidator(allowedHost);
         when(mockAccessTokenProvider.getAllowedHostsValidator()).thenReturn(allowedHostsValidator);
         when(mockAccessTokenProvider.getAuthorizationToken(any(URI.class), anyMap()))
                 .thenReturn(ACCESS_TOKEN_STRING, TOKEN_AFTER_CAE);
