@@ -111,8 +111,13 @@ public class RedirectHandler implements Interceptor {
         // Don't follow redirects to unsupported protocols.
         if (locationUrl == null) return null;
 
-        // Most redirects don't include a request body.
-        Request.Builder requestBuilder = userResponse.request().newBuilder().url(locationUrl);
+        // The retry count belongs to the previous hop.
+        Request.Builder requestBuilder =
+                userResponse
+                        .request()
+                        .newBuilder()
+                        .url(locationUrl)
+                        .removeHeader(RetryHandler.RETRY_ATTEMPT_HEADER);
 
         // Scrub sensitive headers before following the redirect
         java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =

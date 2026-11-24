@@ -51,7 +51,7 @@ public class AuthorizationHandler implements Interceptor {
     @SuppressWarnings("UnknownNullness")
     public @Nonnull Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
-        final Request request = chain.request();
+        final Request incomingRequest = chain.request();
 
         final Span span =
                 GlobalOpenTelemetry.getTracer(
@@ -65,6 +65,10 @@ public class AuthorizationHandler implements Interceptor {
         }
 
         try {
+            final Request request =
+                    span == null
+                            ? incomingRequest
+                            : incomingRequest.newBuilder().tag(Span.class, span).build();
             // Auth provider already added auth header
             if (request.headers().names().contains(AUTHORIZATION_HEADER)) {
                 if (span != null)

@@ -24,6 +24,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.jupiter.api.Test;
 
@@ -185,6 +186,38 @@ public class KiotaClientFactoryTest {
             assertEquals("/initial", server.takeRequest().getPath());
             assertEquals("/target", server.takeRequest().getPath());
             assertEquals("/target", server.takeRequest().getPath());
+        }
+    }
+
+    @Test
+    void clearsRetryAttemptWhenFollowingARedirect() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(
+                    new MockResponse().setResponseCode(302).setHeader("Location", "/target"));
+            server.enqueue(new MockResponse());
+            HeadersInspectionOption inspection = new HeadersInspectionOption(true, false);
+            Request request =
+                    new Request.Builder()
+                            .url(server.url("/initial"))
+                            .tag(HeadersInspectionOption.class, inspection)
+                            .build();
+
+            try (Response response =
+                    KiotaClientFactory.create().build().newCall(request).execute()) {
+                assertEquals(200, response.code());
+                assertFalse(inspection.getRequestHeaders().containsKey("Retry-Attempt"));
+            }
+            assertEquals(3, server.getRequestCount());
+            final RecordedRequest initial = server.takeRequest();
+            assertEquals("/initial", initial.getPath());
+            assertNull(initial.getHeader("Retry-Attempt"));
+            final RecordedRequest retry = server.takeRequest();
+            assertEquals("/initial", retry.getPath());
+            assertEquals("1", retry.getHeader("Retry-Attempt"));
+            final RecordedRequest target = server.takeRequest();
+            assertEquals("/target", target.getPath());
+            assertNull(target.getHeader("Retry-Attempt"));
         }
     }
 

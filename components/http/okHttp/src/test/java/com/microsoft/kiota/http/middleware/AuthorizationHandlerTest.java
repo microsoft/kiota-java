@@ -2,10 +2,14 @@ package com.microsoft.kiota.http.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +18,16 @@ import com.microsoft.kiota.authentication.AccessTokenProvider;
 import com.microsoft.kiota.authentication.AllowedHostsValidator;
 import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
 import com.microsoft.kiota.http.KiotaClientFactory;
+import com.microsoft.kiota.http.ObservabilityOptions;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 
 import okhttp3.Interceptor.Chain;
 import okhttp3.OkHttpClient;
@@ -25,6 +39,10 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -216,6 +234,62 @@ class AuthorizationHandlerTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testAuthorizationSpanParentsDownstreamRequests(boolean alreadyAuthenticated)
+            throws IOException {
+        try (MockWebServer server = new MockWebServer();
+                MockedStatic<GlobalOpenTelemetry> telemetry =
+                        mockStatic(GlobalOpenTelemetry.class)) {
+            final Tracer tracer = mock(Tracer.class);
+            final SpanBuilder otherBuilder = mock(SpanBuilder.class, RETURNS_SELF);
+            final SpanBuilder userAgentBuilder = mock(SpanBuilder.class, RETURNS_SELF);
+            final SpanBuilder authorizationBuilder = mock(SpanBuilder.class);
+            final SpanBuilder redirectBuilder = mock(SpanBuilder.class, RETURNS_SELF);
+            final Span userAgentSpan = createSpan("0000000000000001");
+            final Span authorizationSpan = createSpan("0000000000000002");
+            final Span redirectSpan = createSpan("0000000000000003");
+            telemetry.when(() -> GlobalOpenTelemetry.getTracer(anyString())).thenReturn(tracer);
+            when(tracer.spanBuilder(anyString())).thenReturn(otherBuilder);
+            when(tracer.spanBuilder("UserAgentHandler_Intercept")).thenReturn(userAgentBuilder);
+            when(tracer.spanBuilder("AuthorizationHandler_Intercept"))
+                    .thenReturn(authorizationBuilder);
+            when(tracer.spanBuilder("RedirectHandler_Intercept")).thenReturn(redirectBuilder);
+            when(userAgentBuilder.startSpan()).thenReturn(userAgentSpan);
+            when(authorizationBuilder.startSpan()).thenReturn(authorizationSpan);
+            when(redirectBuilder.startSpan()).thenReturn(redirectSpan);
+
+            if (!alreadyAuthenticated) {
+                server.enqueue(
+                        new MockResponse()
+                                .setResponseCode(401)
+                                .setHeader("WWW-Authenticate", CLAIMS_CHALLENGE_HEADER_VALUE));
+            }
+            server.enqueue(new MockResponse());
+            final OkHttpClient client =
+                    KiotaClientFactory.create(getMockAuthenticationProvider(server.url("/").host()))
+                            .build();
+            final Request.Builder request =
+                    new Request.Builder()
+                            .url(server.url("/initial"))
+                            .tag(ObservabilityOptions.class, new ObservabilityOptions());
+            if (alreadyAuthenticated) {
+                request.header(AUTHORIZATION_HEADER, PREV_AUTHORIZATION_HEADER_VALUE);
+            }
+
+            try (Response response = client.newCall(request.build()).execute()) {
+                assertEquals(200, response.code());
+            }
+            final int expectedRequests = alreadyAuthenticated ? 1 : 2;
+            assertEquals(expectedRequests, server.getRequestCount());
+            final ArgumentCaptor<Context> parents = ArgumentCaptor.forClass(Context.class);
+            verify(redirectBuilder, times(expectedRequests)).setParent(parents.capture());
+            for (Context parent : parents.getAllValues()) {
+                assertSame(authorizationSpan, Span.fromContext(parent));
+            }
+        }
+    }
+
     @Test
     void testDifferentOriginDoesNotReceiveAuthorizationOrTriggerClaimsRetry() throws Exception {
         try (MockWebServer initial = new MockWebServer();
@@ -247,6 +321,15 @@ class AuthorizationHandlerTest {
             verify(provider.getAccessTokenProvider(), times(1))
                     .getAuthorizationToken(any(URI.class), anyMap());
         }
+    }
+
+    private static Span createSpan(String spanId) {
+        return Span.wrap(
+                SpanContext.create(
+                        "00000000000000000000000000000001",
+                        spanId,
+                        TraceFlags.getSampled(),
+                        TraceState.getDefault()));
     }
 
     private Chain getMockChain(Request mockRequest, Response mockResponse) throws IOException {
