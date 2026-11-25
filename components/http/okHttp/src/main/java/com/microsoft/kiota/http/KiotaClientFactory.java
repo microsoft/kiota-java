@@ -17,6 +17,7 @@ import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
 import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -102,10 +103,8 @@ public class KiotaClientFactory {
     @Nonnull public static OkHttpClient.Builder create(
             @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider,
             @Nonnull final RequestOption[] requestOptions) {
-        ArrayList<Interceptor> interceptors =
-                new ArrayList<>(Arrays.asList(createDefaultInterceptors(requestOptions)));
-        interceptors.add(new AuthorizationHandler(authenticationProvider));
-        return create(interceptors);
+        Objects.requireNonNull(authenticationProvider, "AuthenticationProvider cannot be null");
+        return create(createDefaultInterceptors(requestOptions, authenticationProvider));
     }
 
     /**
@@ -123,6 +122,12 @@ public class KiotaClientFactory {
      */
     @Nonnull public static Interceptor[] createDefaultInterceptors(
             @Nonnull final RequestOption[] requestOptions) {
+        return createDefaultInterceptors(requestOptions, null);
+    }
+
+    @Nonnull private static Interceptor[] createDefaultInterceptors(
+            @Nonnull final RequestOption[] requestOptions,
+            @Nullable final BaseBearerTokenAuthenticationProvider authenticationProvider) {
         Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
 
         UrlReplaceHandlerOption uriReplacementOption = null;
@@ -151,25 +156,21 @@ public class KiotaClientFactory {
         }
 
         final List<Interceptor> handlers = new ArrayList<>();
-        // orders matter as they are executed in a chain
-        // interceptors that only modify the request should be added first
-        // interceptors that read the response should be added last
-        handlers.add(
-                userAgentHandlerOption != null
-                        ? new UserAgentHandler(userAgentHandlerOption)
-                        : new UserAgentHandler());
-        handlers.add(
-                parametersNameDecodingOption != null
-                        ? new ParametersNameDecodingHandler(parametersNameDecodingOption)
-                        : new ParametersNameDecodingHandler());
         handlers.add(
                 uriReplacementOption != null
                         ? new UrlReplaceHandler(uriReplacementOption)
                         : new UrlReplaceHandler());
         handlers.add(
-                headersInspectionHandlerOption != null
-                        ? new HeadersInspectionHandler(headersInspectionHandlerOption)
-                        : new HeadersInspectionHandler());
+                parametersNameDecodingOption != null
+                        ? new ParametersNameDecodingHandler(parametersNameDecodingOption)
+                        : new ParametersNameDecodingHandler());
+        handlers.add(
+                userAgentHandlerOption != null
+                        ? new UserAgentHandler(userAgentHandlerOption)
+                        : new UserAgentHandler());
+        if (authenticationProvider != null) {
+            handlers.add(new AuthorizationHandler(authenticationProvider));
+        }
         handlers.add(
                 redirectHandlerOption != null
                         ? new RedirectHandler(redirectHandlerOption)
@@ -178,6 +179,10 @@ public class KiotaClientFactory {
                 retryHandlerOption != null
                         ? new RetryHandler(retryHandlerOption)
                         : new RetryHandler());
+        handlers.add(
+                headersInspectionHandlerOption != null
+                        ? new HeadersInspectionHandler(headersInspectionHandlerOption)
+                        : new HeadersInspectionHandler());
 
         return handlers.toArray(new Interceptor[0]);
     }

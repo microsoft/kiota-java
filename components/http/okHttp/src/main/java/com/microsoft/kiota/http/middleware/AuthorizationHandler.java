@@ -14,6 +14,7 @@ import io.opentelemetry.context.Scope;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -50,7 +51,7 @@ public class AuthorizationHandler implements Interceptor {
     @SuppressWarnings("UnknownNullness")
     public @Nonnull Response intercept(final Chain chain) throws IOException {
         Objects.requireNonNull(chain, "parameter chain cannot be null");
-        final Request request = chain.request();
+        final Request incomingRequest = chain.request();
 
         final Span span =
                 GlobalOpenTelemetry.getTracer(
@@ -64,6 +65,10 @@ public class AuthorizationHandler implements Interceptor {
         }
 
         try {
+            final Request request =
+                    span == null
+                            ? incomingRequest
+                            : incomingRequest.newBuilder().tag(Span.class, span).build();
             // Auth provider already added auth header
             if (request.headers().names().contains(AUTHORIZATION_HEADER)) {
                 if (span != null)
@@ -78,7 +83,20 @@ public class AuthorizationHandler implements Interceptor {
                     authenticateRequest(request, additionalContext, span);
             final Response response = chain.proceed(authenticatedRequest);
 
-            if (response != null && response.code() != HttpURLConnection.HTTP_UNAUTHORIZED) {
+            if (response.code() != HttpURLConnection.HTTP_UNAUTHORIZED) {
+                return response;
+            }
+
+            // Handle a challenge only on the hop that retained the original authorization.
+            final Request challengedRequest = response.request();
+            final HttpUrl originalUrl = authenticatedRequest.url();
+            final HttpUrl challengedUrl = challengedRequest.url();
+            if (!originalUrl.scheme().equals(challengedUrl.scheme())
+                    || !originalUrl.host().equals(challengedUrl.host())
+                    || originalUrl.port() != challengedUrl.port()
+                    || !Objects.equals(
+                            authenticatedRequest.header(AUTHORIZATION_HEADER),
+                            challengedRequest.header(AUTHORIZATION_HEADER))) {
                 return response;
             }
 
@@ -92,7 +110,7 @@ public class AuthorizationHandler implements Interceptor {
                 span.addEvent("com.microsoft.kiota.handler.authorization.challenge_received");
 
             // We cannot replay one-shot requests after claims challenge
-            final RequestBody requestBody = request.body();
+            final RequestBody requestBody = challengedRequest.body();
             if (requestBody != null && requestBody.isOneShot()) {
                 return response;
             }
@@ -104,7 +122,15 @@ public class AuthorizationHandler implements Interceptor {
                 span.setAttribute(HTTP_REQUEST_RESEND_COUNT, 1);
             }
             final Request authenticatedRequestAfterCAE =
-                    authenticateRequest(request, additionalContext, span);
+                    authenticateRequest(
+                            challengedRequest
+                                    .newBuilder()
+                                    .removeHeader(AUTHORIZATION_HEADER)
+                                    .removeHeader(RetryHandler.RETRY_ATTEMPT_HEADER)
+                                    .tag(Span.class, request.tag(Span.class))
+                                    .build(),
+                            additionalContext,
+                            span);
             return chain.proceed(authenticatedRequestAfterCAE);
         } finally {
             if (scope != null) {

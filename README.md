@@ -116,6 +116,15 @@ The HTTP library's Gradle module metadata selects the OkHttp JVM or Android vari
 OkHttp 5.5.1's Android variant requires `compileSdk` 37 or later and AndroidX. Use Android Gradle Plugin 9.1.1 or later with JDK 17 or later, and set `android.useAndroidX=true` in `gradle.properties`. The Java 8 and Android minimum runtime versions are unchanged.
 
 Android consumers should use a repository that serves Gradle module metadata. If only the Maven POM is available, exclude `okhttp-jvm` and add `okhttp-android` explicitly to avoid including both variants.
+### Default OkHttp middleware
+
+`KiotaClientFactory` applies URL replacement, query parameter name decoding, and User-Agent to the
+initial request, then follows redirects, retries each hop, and inspects headers for each send.
+The `Retry-Attempt` header is reset when following a redirect or replaying a claims challenge.
+Generated clients authenticate in the request adapter. For standalone OkHttp requests, pass an
+authentication provider to `KiotaClientFactory.create` to opt in to authorization after User-Agent
+and before redirects. Opt-in header inspection can capture sensitive headers such as `Authorization`.
+OkHttp handles transparent response decompression.
 
 ## Extra
 
