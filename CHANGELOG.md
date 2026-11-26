@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0](https://github.com/microsoft/kiota-java/compare/v1.10.5...v1.11.0) (2026-11-26)
+
+
+### Features
+
+* add support for the HTTP QUERY verb (RFC 10008) ([7d8591e](https://github.com/microsoft/kiota-java/commit/7d8591e015640f2c4579303eaef8fa831c1dd540))
+* **http:** add option to retry only unprocessed mutations ([3559f2c](https://github.com/microsoft/kiota-java/commit/3559f2c07c2e96d5f7a88905c07822468444dd3e))
+* **http:** add option to retry only unprocessed mutations ([e79b4c3](https://github.com/microsoft/kiota-java/commit/e79b4c3212282d0e265f87eab8d2bd973c02c714))
+
+
+### Bug Fixes
+
+* **abstractions:** fold telemetry detection into iterable materialization and tighten enum serialization ([434f0f3](https://github.com/microsoft/kiota-java/commit/434f0f3ddc5cb8421b4bbc726d8b4fa4505b7f31))
+* **abstractions:** materialize one-shot iterables before telemetry and serialization ([9fd197f](https://github.com/microsoft/kiota-java/commit/9fd197f9008880d4626987fbfdb5edb5ee4889b3))
+* **abstractions:** serialize ordinary enums using enum name fallback ([17f7626](https://github.com/microsoft/kiota-java/commit/17f7626f50d0795f0e6035ff8b903d341a2fe69c))
+* **abstractions:** support double, byte array, and enum in scalar content serialization ([e874c32](https://github.com/microsoft/kiota-java/commit/e874c32523c55c02391956c2c74e3fadf8d2132f))
+* **abstractions:** tighten valued enum helper bound and verify leading-null collection span telemetry ([f1e6808](https://github.com/microsoft/kiota-java/commit/f1e68081c19c6ee8aefc1c0dc6fe258387190a0e))
+* **http:** align default middleware order ([45c041d](https://github.com/microsoft/kiota-java/commit/45c041da7fda357de55fec97eb430b96bff3ac77))
+* **http:** align default middleware order ([1317b1b](https://github.com/microsoft/kiota-java/commit/1317b1b565dc7f07c2e2730b7354a5340abd8b8c))
+* **http:** prevent infinite redirect loop when followup request cannot be resolved ([4391013](https://github.com/microsoft/kiota-java/commit/439101303ca00cd50aceb95b09756fabbbe4607f))
+* **http:** remove Proxy-Authorization on redirect when the proxy changes ([4d35313](https://github.com/microsoft/kiota-java/commit/4d35313e45d73bfdc6bcdfaa812a898ea55b075c))
+* **http:** remove Proxy-Authorization on redirect when the proxy changes ([e1d563f](https://github.com/microsoft/kiota-java/commit/e1d563fe96eebc71facd7f12742d77dd55453a67))
+* **http:** reset retry attempt for claims replay ([3353aef](https://github.com/microsoft/kiota-java/commit/3353aef2417f9b2ce40302adaceaba80e5089ff0))
+* **http:** reset retry headers and preserve authorization spans ([94468be](https://github.com/microsoft/kiota-java/commit/94468be5f8c8f99388ce602c425165ae6c215dd2))
+* **http:** resolve relative Location headers per RFC 3986 without path duplication ([8ca2791](https://github.com/microsoft/kiota-java/commit/8ca2791d0b244a11b525b048142074976da65285))
+* **http:** resolve relative Location headers via HttpUrl resolve without string concatenation ([9a007d5](https://github.com/microsoft/kiota-java/commit/9a007d535b3fd81b0c09606ae44c9045ca5ab5ec)), closes [#2244](https://github.com/microsoft/kiota-java/issues/2244)
+* **http:** treat blank Location headers as non-redirect in isRedirected ([067bb2f](https://github.com/microsoft/kiota-java/commit/067bb2feb1b98794b680e807cc901a8526c2a4fe))
+* **serialization:** handle enum sets with no recognized values ([a7d4d68](https://github.com/microsoft/kiota-java/commit/a7d4d68b1a6036d5aced0a760e873539c5a9644d))
+* **serialization:** handle enum sets with no recognized values ([a75c22a](https://github.com/microsoft/kiota-java/commit/a75c22a08efea261b8b77b954b52db2c8d321585))
+* **serialization:** support content-type parameters and case-insensitivity in form factories ([460d9b9](https://github.com/microsoft/kiota-java/commit/460d9b990c03090eecc9020ad5dcfbee01ebb200))
+* **serialization:** support content-type parameters and case-insensitivity in form factories ([03ea879](https://github.com/microsoft/kiota-java/commit/03ea87921eb674115382e5f13659c8df6d0d22cd))
+* treat QUERY as request with body ([4ad9560](https://github.com/microsoft/kiota-java/commit/4ad9560b9884af1c3f487ccb86f962f4be613b1d))
+
 ## [1.10.5](https://github.com/microsoft/kiota-java/compare/v1.10.4...v1.10.5) (2026-11-04)
 
 
