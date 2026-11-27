@@ -1,3 +1,5 @@
+import java.lang.module.ModuleFinder
+
 plugins {
     id "java-library"
     alias(libs.plugins.com.github.spotbugs)
@@ -10,3 +12,30 @@ repositories {
 
 group = project.property('mavenGroupId')
 version = "${mavenMajorVersion}.${mavenMinorVersion}.${mavenPatchVersion}${mavenCentralSnapshotArtifactSuffix}"
+
+if (!Boolean.parseBoolean(findProperty('android')?.toString()) &&
+        !Boolean.parseBoolean(findProperty('java8')?.toString())) {
+    def componentJars = files()
+    subprojects { component ->
+        component.plugins.withId('java-library') {
+            componentJars.from(component.tasks.named('jar', Jar).flatMap { it.archiveFile })
+        }
+    }
+
+    def checkModulePath = tasks.register('checkModulePath') {
+        description = 'Checks that all Kiota component JARs resolve together on the Java module path.'
+        group = 'verification'
+        inputs.files(componentJars)
+        doLast {
+            def finder = ModuleFinder.of(componentJars.files.collect { it.toPath() } as java.nio.file.Path[])
+            def moduleNames = finder.findAll().collect { it.descriptor().name() }
+            if (moduleNames.size() != componentJars.files.size()) {
+                throw new GradleException('Kiota component JARs must have distinct module names.')
+            }
+            ModuleLayer.boot().configuration().resolve(finder, ModuleFinder.of(), moduleNames)
+        }
+    }
+    tasks.named('check') {
+        dependsOn(checkModulePath)
+    }
+}

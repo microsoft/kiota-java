@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.microsoft.kiota.ClientException;
 import com.microsoft.kiota.Compatibility;
+import com.microsoft.kiota.serialization.json.JsonParseNodeFactory;
+import com.microsoft.kiota.serialization.json.JsonSerializationWriterFactory;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
