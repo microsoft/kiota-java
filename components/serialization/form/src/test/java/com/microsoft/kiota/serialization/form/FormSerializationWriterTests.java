@@ -1,0 +1,184 @@
+package com.microsoft.kiota.serialization.form;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.microsoft.kiota.PeriodAndDuration;
+import com.microsoft.kiota.serialization.ParseNode;
+import com.microsoft.kiota.serialization.form.mocks.TestEntity;
+import com.microsoft.kiota.serialization.form.mocks.TestEnum;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class FormSerializationWriterTests {
+    @Test
+    public void writesSampleObjectValue() throws IOException, UnsupportedEncodingException {
+        final var testEntity =
+                new TestEntity() {
+                    {
+                        setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
+                        setWorkDuration(PeriodAndDuration.parse("P1M"));
+                        setStartWorkTime(LocalTime.of(8, 0, 0));
+                        setBirthDay(LocalDate.of(2017, 9, 4));
+                        setDeviceNames(Arrays.asList("device1", "device2"));
+                    }
+                };
+        testEntity.getAdditionalData().put("mobilePhone", null);
+        testEntity.getAdditionalData().put("jobTitle", "Author");
+        testEntity.getAdditionalData().put("accountEnabled", false);
+        testEntity.getAdditionalData().put("createdDateTime", OffsetDateTime.MIN);
+        testEntity
+                .getAdditionalData()
+                .put("otherPhones", Arrays.asList(Arrays.asList("device1", "device2")));
+        try (final var serializationWriter = new FormSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, testEntity);
+            try (final var content = serializationWriter.getSerializedContent()) {
+                try (final var contentReader =
+                        new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
+                    String result = contentReader.lines().collect(Collectors.joining("\n"));
+                    final var expectedString =
+                            "id=48d31887-5fad-4d73-a9f5-3c356e68a038&"
+                                    + "birthDay=2017-09-04&"
+                                    + // Serializes dates
+                                    "workDuration=P1M&"
+                                    + // Serializes timespans
+                                    "startWorkTime=08%3A00%3A00&"
+                                    + // Serializes times
+                                    "deviceNames=device1&deviceNames=device2&"
+                                    + "mobilePhone=null&"
+                                    + // Serializes null values
+                                    "jobTitle=Author&"
+                                    + "createdDateTime=-999999999-01-01T00%3A00%3A00%2B18%3A00&"
+                                    + "otherPhones=device1&otherPhones=device2&"
+                                    + "accountEnabled=false";
+                    assertEquals(expectedString, result);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void writesSampleCollectionOfObjectValues() throws IOException {
+        final var testEntity =
+                new TestEntity() {
+                    {
+                        setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
+                        setWorkDuration(PeriodAndDuration.parse("P1M"));
+                        setStartWorkTime(LocalTime.of(8, 0, 0));
+                        setBirthDay(LocalDate.of(2017, 9, 4));
+                    }
+                };
+        final var entityList =
+                new ArrayList<TestEntity>() {
+                    {
+                        add(testEntity);
+                    }
+                };
+        try (final var serializationWriter = new FormSerializationWriter()) {
+            assertThrows(
+                    RuntimeException.class,
+                    () -> serializationWriter.writeCollectionOfObjectValues(null, entityList));
+        }
+    }
+
+    @Test
+    public void writesNestedObjectValuesInAdditionalData() throws IOException {
+        final var testEntity =
+                new TestEntity() {
+                    {
+                        setId("48d31887-5fad-4d73-a9f5-3c356e68a038");
+                        setWorkDuration(PeriodAndDuration.parse("P1M"));
+                        setStartWorkTime(LocalTime.of(8, 0, 0));
+                        setBirthDay(LocalDate.of(2017, 9, 4));
+                    }
+                };
+        testEntity
+                .getAdditionalData()
+                .put(
+                        "nestedEntity",
+                        new TestEntity() {
+                            {
+                                setId("foo");
+                            }
+                        });
+        try (final var serializationWriter = new FormSerializationWriter()) {
+            assertThrows(
+                    RuntimeException.class,
+                    () -> serializationWriter.writeObjectValue(null, testEntity));
+        }
+    }
+
+    @Test
+    public void writesDoubleAndByteArrayAndEnumInCollectionsAndAdditionalData()
+            throws IOException, UnsupportedEncodingException {
+        final var testEntity = new TestEntity();
+        testEntity.setId("test-id");
+        testEntity.getAdditionalData().put("rating", 4.5d);
+        testEntity.getAdditionalData().put("rawCert", new byte[] {1, 2, 3});
+        testEntity.getAdditionalData().put("status", TestEnum.VALUE1);
+
+        try (final var serializationWriter = new FormSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, testEntity);
+            serializationWriter.writeCollectionOfPrimitiveValues(
+                    "prices", Arrays.asList(1.5d, 2.5d));
+            serializationWriter.writeCollectionOfPrimitiveValues(
+                    "keys", Arrays.asList(new byte[] {1, 2}, new byte[] {3, 4}));
+            try (final var content = serializationWriter.getSerializedContent()) {
+                try (final var contentReader =
+                        new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
+                    String result = contentReader.lines().collect(Collectors.joining("\n"));
+                    assertTrue(result.contains("id=test-id"));
+                    assertTrue(result.contains("rating=4.5"));
+                    assertTrue(result.contains("rawCert=AQID"));
+                    assertTrue(result.contains("status=val1"));
+                    assertTrue(result.contains("prices=1.5&prices=2.5"));
+                    assertTrue(result.contains("keys=AQI%3D&keys=AwQ%3D"));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void roundTripsByteArrayCollectionWithBase64PlusAndNulls()
+            throws IOException, UnsupportedEncodingException {
+        final byte[] bytesWithPlus = new byte[] {(byte) 0xfb, (byte) 0xff};
+        final byte[] regularBytes = new byte[] {1, 2, 3};
+        final List<byte[]> originalList = Arrays.asList(bytesWithPlus, null, regularBytes);
+
+        String serialized;
+        try (final var writer = new FormSerializationWriter()) {
+            writer.writeCollectionOfPrimitiveValues("bytes", originalList);
+            try (final var content = writer.getSerializedContent()) {
+                try (final var reader =
+                        new BufferedReader(new InputStreamReader(content, "UTF-8"))) {
+                    serialized = reader.lines().collect(Collectors.joining("\n"));
+                }
+            }
+        }
+
+        final ParseNode node = new FormParseNode(serialized).getChildNode("bytes");
+        assertNotNull(node);
+        final List<byte[]> deserialized = node.getCollectionOfPrimitiveValues(byte[].class);
+        assertNotNull(deserialized);
+        assertEquals(3, deserialized.size());
+        assertArrayEquals(bytesWithPlus, deserialized.get(0));
+        assertNull(deserialized.get(1));
+        assertArrayEquals(regularBytes, deserialized.get(2));
+    }
+}

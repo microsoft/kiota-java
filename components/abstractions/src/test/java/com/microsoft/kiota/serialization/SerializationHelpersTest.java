@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.kiota.serialization.json.JsonSerializationWriterFactory;
 import com.microsoft.kiota.serialization.mocks.TestBackedModelEntity;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;

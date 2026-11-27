@@ -5,10 +5,10 @@
 	xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
 	<Match>
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
-		<Class name="com.microsoft.kiota.serialization.TextSerializationWriter" />
+		<Class name="com.microsoft.kiota.serialization.text.TextSerializationWriter" />
 	</Match>
 	<Match>
 		<Bug pattern="CT_CONSTRUCTOR_THROW" />
-		<Class name="com.microsoft.kiota.serialization.TextParseNode" />
+		<Class name="com.microsoft.kiota.serialization.text.TextParseNode" />
 	</Match>
 </FindBugsFilter>
