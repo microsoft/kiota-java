@@ -70,3 +70,8 @@ android {
 }
 
 apply from: "../gradle/dependencies.gradle"
+
+dependencies {
+    // Match the explicit StAX dependency required in Android apps.
+    implementation(libs.javax.xml.stream.stax.api)
+}
