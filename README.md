@@ -109,6 +109,19 @@ In `pom.xml` in the `dependencies` section:
     </dependency>
 ```
 
+### Azure authentication on Android
+
+If your Android app uses `microsoft-kiota-authentication-azure`, add StAX explicitly to the
+app's Gradle dependencies. Kiota no longer brings it in transitively:
+
+```groovy
+implementation 'javax.xml.stream:stax-api:1.0-2'
+```
+
+Android does not provide `javax.xml.stream`, which Azure's XML library requires. See
+[Azure's Android support note](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/serialization/azure-xml#android-support).
+Do not add this dependency to standard JVM projects; the JDK already provides StAX.
+
 ### Default OkHttp middleware
 
 `KiotaClientFactory` applies URL replacement, query parameter name decoding, and User-Agent to the
