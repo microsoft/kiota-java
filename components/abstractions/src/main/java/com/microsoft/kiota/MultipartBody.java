@@ -10,6 +10,7 @@ import jakarta.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -151,7 +152,8 @@ public class MultipartBody implements Parsable {
                         }
                     }
                 } else if (objectValue instanceof String) {
-                    writer.writeStringValue("", (String) objectValue);
+                    writer.writeByteArrayValue(
+                            "", ((String) objectValue).getBytes(StandardCharsets.UTF_8));
                 } else if (objectValue instanceof InputStream) {
                     final InputStream inputStream = (InputStream) objectValue;
                     if (inputStream.markSupported()) inputStream.reset();
