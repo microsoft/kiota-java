@@ -125,7 +125,7 @@ public class OkHttpRequestAdapterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 201, 202, 203, 204, 304})
-    void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
+    void sendStreamHandlesEmptyResponseByStatus(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
                 any(RequestInformation.class), any(Map.class));
@@ -136,7 +136,7 @@ public class OkHttpRequestAdapterTest {
                                 .message("OK")
                                 .protocol(Protocol.HTTP_1_1)
                                 .request(new Request.Builder().url("http://localhost").build())
-                                .body(null)
+                                .body(ResponseBody.create("", null))
                                 .build());
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);
@@ -149,7 +149,14 @@ public class OkHttpRequestAdapterTest {
                 };
         final var response =
                 requestAdapter.sendPrimitive(requestInformation, null, InputStream.class);
-        assertNull(response);
+        if (statusCode == 204 || statusCode == 304) {
+            assertNull(response);
+        } else {
+            assertNotNull(response);
+            try (var stream = response) {
+                assertEquals(-1, stream.read());
+            }
+        }
     }
 
     @ParameterizedTest
@@ -165,7 +172,7 @@ public class OkHttpRequestAdapterTest {
                                 .message("OK")
                                 .protocol(Protocol.HTTP_1_1)
                                 .request(new Request.Builder().url("http://localhost").build())
-                                .body(null)
+                                .body(ResponseBody.create("", null))
                                 .build());
         final var requestAdapter =
                 new OkHttpRequestAdapter(authenticationProviderMock, null, null, client);

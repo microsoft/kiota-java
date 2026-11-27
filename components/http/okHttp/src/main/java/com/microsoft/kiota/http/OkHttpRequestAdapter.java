@@ -378,9 +378,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         if (targetClass == InputStream.class) {
                             closeResponse = false;
                             final ResponseBody body = response.body();
-                            if (body == null) {
-                                return null;
-                            }
                             final InputStream rawInputStream = body.byteStream();
                             return (ModelType) rawInputStream;
                         }
@@ -599,10 +596,6 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         try (final Scope scope = span.makeCurrent()) {
             final ResponseBody body =
                     response.body(); // closing the response closes the body and stream
-            // https://square.github.io/okhttp/4.x/okhttp/okhttp3/-response-body/
-            if (body == null) {
-                return null;
-            }
             final InputStream rawInputStream = body.byteStream();
             final MediaType contentType = body.contentType();
             if (contentType == null) {
