@@ -12,10 +12,13 @@ import com.microsoft.kiota.RequestAdapter;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -108,6 +111,30 @@ class MultipartSerializationWriterTests {
                                     + "--",
                             strResult);
                 }
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2026-11-15T22:54:31.014Z", "", "caf\u00e9\r\n"})
+    void writesStringPartWithoutAddingNewlineToValue(final String value) throws IOException {
+        final MultipartBody multipartBody = new MultipartBody();
+        multipartBody.requestAdapter = mock(RequestAdapter.class);
+        multipartBody.addOrReplacePart("fileCreatedAt", "text/plain", value);
+        final String boundary = "--" + multipartBody.getBoundary();
+
+        try (final var serializationWriter = new MultipartSerializationWriter()) {
+            serializationWriter.writeObjectValue(null, multipartBody);
+            try (final var result = serializationWriter.getSerializedContent()) {
+                assertEquals(
+                        boundary
+                                + "\r\nContent-Type: text/plain\r\n"
+                                + "Content-Disposition: form-data; name=\"fileCreatedAt\"\r\n\r\n"
+                                + value
+                                + "\r\n"
+                                + boundary
+                                + "--\r\n",
+                        new String(Compatibility.readAllBytes(result), StandardCharsets.UTF_8));
             }
         }
     }
