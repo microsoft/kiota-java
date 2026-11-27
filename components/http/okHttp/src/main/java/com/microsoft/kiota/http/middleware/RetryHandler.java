@@ -1,5 +1,7 @@
 package com.microsoft.kiota.http.middleware;
 
+import static com.microsoft.kiota.http.TelemetrySemanticConventions.*;
+
 import com.microsoft.kiota.http.middleware.options.IShouldRetry;
 import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
 
@@ -32,7 +34,7 @@ public class RetryHandler implements Interceptor {
     /**
      * Header name to track the retry attempt number
      */
-    private static final String RETRY_ATTEMPT_HEADER = "Retry-Attempt";
+    static final String RETRY_ATTEMPT_HEADER = "Retry-Attempt";
 
     /**
      * Header name for the retry after information
@@ -57,7 +59,7 @@ public class RetryHandler implements Interceptor {
     /**
      * One second as milliseconds
      */
-    private static final long DELAY_MILLISECONDS = 1000;
+    private static final int DELAY_MILLISECONDS = 1000;
 
     /**
      * Initialize retry handler with retry option
@@ -82,7 +84,8 @@ public class RetryHandler implements Interceptor {
             @Nonnull final Response response,
             int executionCount,
             @Nonnull final Request request,
-            @Nonnull final RetryHandlerOption retryOption) {
+            @Nonnull final RetryHandlerOption retryOption,
+            @Nullable final Span span) {
 
         // Should retry option
         // Use should retry common for all requests
@@ -102,11 +105,15 @@ public class RetryHandler implements Interceptor {
                         && executionCount <= retryOption.maxRetries()
                         && checkStatus(statusCode)
                         && isBuffered(request)
+                        && isRetriableForMethod(request, statusCode, retryOption)
                         && shouldRetryCallback.shouldRetry(
                                 retryOption.delay(), executionCount, request, response);
 
         if (shouldRetry) {
             long retryInterval = getRetryAfter(response, retryOption.delay(), executionCount);
+            if (span != null) {
+                span.setAttribute(HTTP_REQUEST_RESEND_DELAY, Math.round(retryInterval / 1000f));
+            }
             try {
                 Thread.sleep(retryInterval);
             } catch (InterruptedException e) {
@@ -134,17 +141,37 @@ public class RetryHandler implements Interceptor {
         } else if (retryDelay == -1) {
             retryDelay = exponentialBackOffDelay(delay, executionCount);
         }
-        return (long) Math.min(retryDelay, RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
+        long result =
+                (long)
+                        Math.min(
+                                retryDelay,
+                                (double) RetryHandlerOption.MAX_DELAY * DELAY_MILLISECONDS);
+        // Ensure minimum delay if retry interval is negative
+        if (result < 0) {
+            result = 1 + (long) (Math.random() * 9); // Random delay between 1-10ms
+        }
+        return result;
     }
 
+    /**
+     * Return first positive value from the Retry-After header.
+     * @param retryAfterHeader The value of the Retry-After header. Sometimes it can contain multiple values separated by commas.
+     *                         For example: "31,120".
+     * @return Retry interval in milliseconds
+     */
     double tryParseTimeHeader(String retryAfterHeader) {
-        double retryDelay = -1;
-        try {
-            retryDelay = Integer.parseInt(retryAfterHeader) * DELAY_MILLISECONDS;
-        } catch (NumberFormatException e) {
-            return retryDelay;
+        String[] values = retryAfterHeader.split(",");
+        for (String value : values) {
+            try {
+                double parsedValue = Double.parseDouble(value.trim());
+                if (parsedValue > 0) {
+                    return parsedValue * DELAY_MILLISECONDS;
+                }
+            } catch (NumberFormatException e) {
+                // Continue to the next value
+            }
         }
-        return retryDelay;
+        return -1;
     }
 
     double tryParseDateHeader(String retryAfterHeader) {
@@ -176,16 +203,44 @@ public class RetryHandler implements Interceptor {
                 || statusCode == MSClientErrorCodeGatewayTimeout);
     }
 
+    /**
+     * Checks whether the response allows resending the request, given its method.
+     * With retryUnprocessedMutationsOnly set, POST and PATCH requests are retried only after a
+     * response showing the server didn't process them, because a 504 may arrive after the server
+     * already acted on the request.
+     * @param request the request that would be resent
+     * @param statusCode the status code of the response
+     * @param retryOption the retry options in use
+     * @return whether the request can be resent
+     */
+    boolean isRetriableForMethod(
+            @Nonnull final Request request,
+            int statusCode,
+            @Nonnull final RetryHandlerOption retryOption) {
+        if (!retryOption.retryUnprocessedMutationsOnly()) {
+            return true;
+        }
+        final String methodName = request.method();
+        if (!methodName.equalsIgnoreCase("POST") && !methodName.equalsIgnoreCase("PATCH")) {
+            return true;
+        }
+        // By common service convention, a 429 or 503 means the server didn't process the request,
+        // so resending it is treated as safe.
+        return statusCode == MSClientErrorCodeTooManyRequests
+                || statusCode == MSClientErrorCodeServiceUnavailable;
+    }
+
     boolean isBuffered(final Request request) {
         final String methodName = request.method();
 
-        final boolean isHTTPMethodPutPatchOrPost =
+        final boolean isHTTPMethodWithBody =
                 methodName.equalsIgnoreCase("POST")
                         || methodName.equalsIgnoreCase("PUT")
-                        || methodName.equalsIgnoreCase("PATCH");
+                        || methodName.equalsIgnoreCase("PATCH")
+                        || methodName.equalsIgnoreCase("QUERY");
 
         final RequestBody requestBody = request.body();
-        if (isHTTPMethodPutPatchOrPost && requestBody != null) {
+        if (isHTTPMethodWithBody && requestBody != null) {
             try {
                 return requestBody.contentLength() != -1L;
             } catch (IOException ex) {
@@ -234,17 +289,15 @@ public class RetryHandler implements Interceptor {
             }
 
             int executionCount = 1;
-            while (retryRequest(response, executionCount, request, retryOption)) {
+            while (retryRequest(
+                    response, executionCount, request, Objects.requireNonNull(retryOption), span)) {
                 final Request.Builder builder =
                         request.newBuilder()
-                                .addHeader(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
+                                .header(RETRY_ATTEMPT_HEADER, String.valueOf(executionCount));
                 if (span != null) {
                     builder.tag(Span.class, span);
                 }
                 request = builder.build();
-                if (request == null) {
-                    throw new IllegalArgumentException("request cannot be null");
-                }
                 executionCount++;
                 final ResponseBody body = response.body();
                 if (body != null) body.close();
@@ -254,9 +307,11 @@ public class RetryHandler implements Interceptor {
                                 request,
                                 "RetryHandler_Intercept - attempt " + executionCount,
                                 span);
-                retrySpan.setAttribute("http.retry_count", executionCount);
-                retrySpan.setAttribute("http.status_code", response.code());
-                retrySpan.end();
+                if (retrySpan != null) {
+                    retrySpan.setAttribute(HTTP_REQUEST_RESEND_COUNT, executionCount);
+                    retrySpan.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
+                    retrySpan.end();
+                }
                 response = chain.proceed(request);
                 if (response == null)
                     throw new RuntimeException("unable to get a response from the chain");

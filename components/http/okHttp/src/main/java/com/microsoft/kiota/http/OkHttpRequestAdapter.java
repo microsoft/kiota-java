@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** RequestAdapter implementation for OkHttp */
@@ -71,17 +70,24 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider.
+     *
+     * @param authenticationProvider the authentication provider to use for
+     *                               authenticating requests.
      */
     public OkHttpRequestAdapter(@Nonnull final AuthenticationProvider authenticationProvider) {
         this(authenticationProvider, null, null, null, null);
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, and the parse node factory.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, and the parse node factory.
+     *
+     * @param authenticationProvider the authentication provider to use for
+     *                               authenticating requests.
+     * @param parseNodeFactory       the parse node factory to use for parsing
+     *                               responses.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -91,10 +97,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, and the serialization writer factory.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
-     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, parse node factory, and the serialization writer factory.
+     *
+     * @param authenticationProvider     the authentication provider to use for
+     *                                   authenticating requests.
+     * @param parseNodeFactory           the parse node factory to use for parsing
+     *                                   responses.
+     * @param serializationWriterFactory the serialization writer factory to use for
+     *                                   serializing requests.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -105,11 +116,18 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, serialization writer factory, and the http client.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
-     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
-     * @param client the http client to use for sending requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, parse node factory, serialization writer factory, and the http
+     * client.
+     *
+     * @param authenticationProvider     the authentication provider to use for
+     *                                   authenticating requests.
+     * @param parseNodeFactory           the parse node factory to use for parsing
+     *                                   responses.
+     * @param serializationWriterFactory the serialization writer factory to use for
+     *                                   serializing requests.
+     * @param client                     the http client to use for sending
+     *                                   requests.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -121,12 +139,20 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     /**
-     * Instantiates a new OkHttp request adapter with the provided authentication provider, parse node factory, serialization writer factory, http client and observability options.
-     * @param authenticationProvider the authentication provider to use for authenticating requests.
-     * @param parseNodeFactory the parse node factory to use for parsing responses.
-     * @param serializationWriterFactory the serialization writer factory to use for serializing requests.
-     * @param client the http client to use for sending requests.
-     * @param observabilityOptions the observability options to use for sending requests.
+     * Instantiates a new OkHttp request adapter with the provided authentication
+     * provider, parse node factory, serialization writer factory, http client and
+     * observability options.
+     *
+     * @param authenticationProvider     the authentication provider to use for
+     *                                   authenticating requests.
+     * @param parseNodeFactory           the parse node factory to use for parsing
+     *                                   responses.
+     * @param serializationWriterFactory the serialization writer factory to use for
+     *                                   serializing requests.
+     * @param client                     the http client to use for sending
+     *                                   requests.
+     * @param observabilityOptions       the observability options to use for
+     *                                   sending requests.
      */
     @SuppressWarnings("LambdaLast")
     public OkHttpRequestAdapter(
@@ -256,7 +282,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 GlobalOpenTelemetry.getTracer(obsOptions.getTracerInstrumentationName())
                         .spanBuilder(methodName + " - " + cleanedUriTemplate)
                         .startSpan();
-        span.setAttribute("http.uri_template", decodedUriTemplate);
+        span.setAttribute(URL_TEMPLATE, decodedUriTemplate);
         return span;
     }
 
@@ -318,7 +344,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
     }
 
     private void closeResponse(boolean closeResponse, Response response) {
-        if (closeResponse && response.code() != 204) {
+        if (closeResponse
+                && response.code() != 204
+                && (response.code() < 300 || response.code() > 399)) {
             response.close();
         }
     }
@@ -588,10 +616,13 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
     private boolean shouldReturnNull(final Response response) {
         final int statusCode = response.code();
-        return statusCode == 204;
+        return statusCode == 204 || (statusCode > 299 && statusCode < 400);
     }
 
-    /** key used for the attribute when the error response has models mappings provided */
+    /**
+     * key used for the attribute when the error response has models mappings
+     * provided
+     */
     @Nonnull public static final String errorMappingFoundAttributeName =
             "com.microsoft.kiota.error_mapping_found";
 
@@ -615,6 +646,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             final int statusCode = response.code();
             final ResponseHeaders responseHeaders =
                     HeadersCompatibility.getResponseHeaders(response.headers());
+            if (statusCode >= 300 && statusCode < 400) return response;
             if (errorMappings == null
                     || !errorMappings.containsKey(statusCodeAsString)
                             && !(statusCode >= 400
@@ -726,12 +758,11 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             final String contentTypeHeaderValue = getHeaderValue(response, CONTENT_TYPE_HEADER_KEY);
             if (contentTypeHeaderValue != null && !contentTypeHeaderValue.isEmpty()) {
                 spanForAttributes.setAttribute(
-                        CUSTOM_HTTP_RESPONSE_CONTENT_TYPE, contentTypeHeaderValue);
+                        HTTP_RESPONSE_HEADER_CONTENT_TYPE, contentTypeHeaderValue);
             }
             spanForAttributes.setAttribute(HTTP_RESPONSE_STATUS_CODE, response.code());
             spanForAttributes.setAttribute(
-                    NETWORK_PROTOCOL_VERSION,
-                    response.protocol().toString().toUpperCase(Locale.ROOT));
+                    NETWORK_PROTOCOL_NAME, response.protocol().toString().toUpperCase(Locale.ROOT));
             return this.retryCAEResponseIfRequired(
                     response, requestInfo, span, spanForAttributes, claims);
         } catch (IOException | URISyntaxException ex) {
@@ -753,12 +784,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
         return null;
     }
 
-    private static final Pattern bearerPattern =
-            Pattern.compile("^Bearer\\s.*", Pattern.CASE_INSENSITIVE);
-    private static final Pattern claimsPattern =
-            Pattern.compile("\\s?claims=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-
-    /** Key used for events when an authentication challenge is returned by the API */
+    /**
+     * Key used for events when an authentication challenge is returned by the API
+     */
     @Nonnull public static final String authenticateChallengedEventKey =
             "com.microsoft.kiota.authenticate_challenge_received";
 
@@ -804,26 +832,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                 && (claims == null || claims.isEmpty())
                 && // we avoid infinite loops and retry only once
                 (requestInfo.content == null || requestInfo.content.markSupported())) {
-            final List<String> authenticateHeader = response.headers("WWW-Authenticate");
-            if (!authenticateHeader.isEmpty()) {
-                String rawHeaderValue = null;
-                for (final String authenticateEntry : authenticateHeader) {
-                    final Matcher matcher = bearerPattern.matcher(authenticateEntry);
-                    if (matcher.matches()) {
-                        rawHeaderValue = authenticateEntry.replaceFirst("^Bearer\\s", "");
-                        break;
-                    }
-                }
-                if (rawHeaderValue != null) {
-                    final String[] parameters = rawHeaderValue.split(",");
-                    for (final String parameter : parameters) {
-                        final Matcher matcher = claimsPattern.matcher(parameter);
-                        if (matcher.matches()) {
-                            return matcher.group(1);
-                        }
-                    }
-                }
-            }
+            return ContinuousAccessEvaluationClaims.getClaimsFromResponse(response);
         }
         return null;
     }
@@ -857,7 +866,7 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
      * @param spanForAttributes the span for the attributes.
      * @return the created request instance.
      * @throws URISyntaxException if the URI is invalid.
-     * @throws IOException if the URL is invalid.
+     * @throws IOException        if the URL is invalid.
      */
     protected @Nonnull Request getRequestFromRequestInformation(
             @Nonnull final RequestInformation requestInfo,
@@ -870,8 +879,12 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                         .setParent(Context.current().with(parentSpan))
                         .startSpan();
         try (final Scope scope = span.makeCurrent()) {
-            spanForAttributes.setAttribute(HTTP_REQUEST_METHOD, requestInfo.httpMethod.toString());
-            final URL requestURL = requestInfo.getUri().toURL();
+            final HttpMethod requestMethod =
+                    Objects.requireNonNull(requestInfo.httpMethod, "httpMethod cannot be null");
+            spanForAttributes.setAttribute(HTTP_REQUEST_METHOD, requestMethod.toString());
+            final java.net.URI requestUri =
+                    Objects.requireNonNull(requestInfo.getUri(), "request URI cannot be null");
+            final URL requestURL = requestUri.toURL();
             if (obsOptions.getIncludeEUIIAttributes()) {
                 spanForAttributes.setAttribute(URL_FULL, requestURL.toString());
             }
@@ -879,8 +892,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             spanForAttributes.setAttribute(SERVER_ADDRESS, requestURL.getHost());
             spanForAttributes.setAttribute(URL_SCHEME, requestURL.getProtocol());
 
+            final InputStream requestContent = requestInfo.content;
             RequestBody body =
-                    requestInfo.content == null
+                    requestContent == null
                             ? null
                             : new RequestBody() {
                                 @Override
@@ -894,9 +908,15 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                         final String contentType =
                                                 contentTypes.toArray(new String[] {})[0];
                                         spanForAttributes.setAttribute(
-                                                CUSTOM_HTTP_REQUEST_CONTENT_TYPE, contentType);
+                                                HTTP_REQUEST_HEADER_CONTENT_TYPE, contentType);
                                         return MediaType.parse(contentType);
                                     }
+                                }
+
+                                @Override
+                                public boolean isOneShot() {
+                                    return requestContent == null
+                                            || !requestContent.markSupported();
                                 }
 
                                 @Override
@@ -910,9 +930,9 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
                                     }
                                     // super.contentLength() is not relied on since it defaults to
                                     // -1L, causing wrong telemetry added to the attributes.
-                                    if (requestInfo.content instanceof ByteArrayInputStream) {
+                                    if (requestContent instanceof ByteArrayInputStream) {
                                         final ByteArrayInputStream contentStream =
-                                                (ByteArrayInputStream) requestInfo.content;
+                                                (ByteArrayInputStream) requestContent;
                                         // using available() on a byte-array backed input stream is
                                         // reliable because array size is defined.
                                         return contentStream.available();
@@ -922,7 +942,22 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
 
                                 @Override
                                 public void writeTo(@Nonnull BufferedSink sink) throws IOException {
-                                    sink.writeAll(Okio.source(requestInfo.content));
+                                    final long contentLength = contentLength();
+                                    if (contentLength > 0) {
+                                        requestContent.mark((int) contentLength);
+                                    }
+                                    sink.writeAll(Okio.source(requestContent));
+                                    if (!isOneShot()) {
+                                        try {
+                                            requestContent.reset();
+                                        } catch (Exception ex) {
+                                            spanForAttributes.recordException(ex);
+                                            // we don't want to fail the request if reset() fails
+                                            // reset() was a measure to prevent draining the request
+                                            // body by an interceptor before
+                                            // the final network request
+                                        }
+                                    }
                                 }
                             };
 
@@ -930,7 +965,8 @@ public class OkHttpRequestAdapter implements com.microsoft.kiota.RequestAdapter 
             if (body == null
                     && (requestInfo.httpMethod.equals(HttpMethod.POST)
                             || requestInfo.httpMethod.equals(HttpMethod.PATCH)
-                            || requestInfo.httpMethod.equals(HttpMethod.PUT))) {
+                            || requestInfo.httpMethod.equals(HttpMethod.PUT)
+                            || requestInfo.httpMethod.equals(HttpMethod.QUERY))) {
                 body = RequestBody.create(new byte[0]);
             }
             final Request.Builder requestBuilder =

@@ -14,12 +14,14 @@ import jakarta.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -90,7 +92,7 @@ public class RequestInformation {
     @Nullable public String urlTemplate;
 
     /** The path parameters for the current request */
-    @Nullable public Map<String, Object> pathParameters = new HashMap<>();
+    @Nonnull public Map<String, Object> pathParameters = new HashMap<>();
 
     private URI uri;
 
@@ -293,9 +295,7 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) {
-                    setRequestType(values[0], span);
-                }
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfObjectValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
@@ -352,6 +352,31 @@ public class RequestInformation {
         span.setAttribute("com.microsoft.kiota.request.type", result.getClass().getName());
     }
 
+    private <T> void setRequestTypeFromArray(final T[] values, final Span span) {
+        if (values == null || span == null) return;
+        for (final T value : values) {
+            if (value != null) {
+                setRequestType(value, span);
+                return;
+            }
+        }
+    }
+
+    private static void writeEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
+        if (value instanceof ValuedEnum) {
+            writeValuedEnumValue(writer, value);
+        } else {
+            writer.writeStringValue(null, value.name());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Enum<E> & ValuedEnum> void writeValuedEnumValue(
+            @Nonnull final SerializationWriter writer, @Nonnull final Enum<?> value) {
+        writer.writeEnumValue(null, (E) value);
+    }
+
     private <T> SerializationWriter getSerializationWriter(
             @Nonnull final RequestAdapter requestAdapter,
             @Nonnull final String contentType,
@@ -392,6 +417,8 @@ public class RequestInformation {
                     writer.writeShortValue(null, (Short) value);
                 else if (valueClass.equals(BigDecimal.class))
                     writer.writeBigDecimalValue(null, (BigDecimal) value);
+                else if (valueClass.equals(Double.class))
+                    writer.writeDoubleValue(null, (Double) value);
                 else if (valueClass.equals(Float.class))
                     writer.writeFloatValue(null, (Float) value);
                 else if (valueClass.equals(Long.class)) writer.writeLongValue(null, (Long) value);
@@ -406,6 +433,11 @@ public class RequestInformation {
                     writer.writeLocalTimeValue(null, (LocalTime) value);
                 else if (valueClass.equals(PeriodAndDuration.class))
                     writer.writePeriodAndDurationValue(null, (PeriodAndDuration) value);
+                else if (valueClass.equals(byte[].class))
+                    writer.writeByteArrayValue(null, (byte[]) value);
+                else if (value instanceof Enum<?>) writeEnumValue(writer, (Enum<?>) value);
+                else if (value instanceof ValuedEnum)
+                    writer.writeStringValue(null, ((ValuedEnum) value).getValue());
                 else {
                     final RuntimeException result =
                             new RuntimeException(
@@ -443,7 +475,7 @@ public class RequestInformation {
             try (final SerializationWriter writer =
                     getSerializationWriter(requestAdapter, contentType, values)) {
                 headers.tryAdd(CONTENT_TYPE_HEADER, contentType);
-                if (values.length > 0) setRequestType(values[0], span);
+                setRequestTypeFromArray(values, span);
                 writer.writeCollectionOfPrimitiveValues(null, Arrays.asList(values));
                 this.content = writer.getSerializedContent();
             } catch (IOException ex) {
@@ -461,18 +493,43 @@ public class RequestInformation {
             return null;
         }
         if (value.getClass().isArray()) {
-            if (((Object[]) value).length > 0 && ((Object[]) value)[0] instanceof ValuedEnum) {
-                final ArrayList<String> result = new ArrayList<>();
-                for (final Object item : (Object[]) value) {
-                    result.add(((ValuedEnum) item).getValue());
+            final int length = Array.getLength(value);
+            final ArrayList<String> result = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                final Object item = Array.get(value, i);
+                if (item != null && (item.getClass().isArray() || item instanceof Iterable<?>)) {
+                    throw new IllegalArgumentException("multidimensional arrays are not supported");
                 }
-                return result;
+                final Object sanitizedItem = getSanitizedValues(item);
+                if (sanitizedItem != null) {
+                    result.add(sanitizedItem.toString());
+                }
             }
-            return Arrays.asList((Object[]) value);
+            return result;
+        } else if (value instanceof Iterable<?>) {
+            final ArrayList<String> result = new ArrayList<>();
+            for (final Object item : (Iterable<?>) value) {
+                if (item != null && (item.getClass().isArray() || item instanceof Iterable<?>)) {
+                    throw new IllegalArgumentException("multidimensional arrays are not supported");
+                }
+                final Object sanitizedItem = getSanitizedValues(item);
+                if (sanitizedItem != null) {
+                    result.add(sanitizedItem.toString());
+                }
+            }
+            return result;
         } else if (value instanceof ValuedEnum) {
             return ((ValuedEnum) value).getValue();
         } else if (value instanceof UUID) {
             return value.toString();
+        } else if (value instanceof OffsetDateTime) {
+            return ((OffsetDateTime) value).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else if (value instanceof LocalDate) {
+            return ((LocalDate) value).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        } else if (value instanceof LocalTime) {
+            return ((LocalTime) value).format(DateTimeFormatter.ISO_LOCAL_TIME);
+        } else if (value instanceof PeriodAndDuration) {
+            return ((PeriodAndDuration) value).toString();
         } else {
             return value;
         }

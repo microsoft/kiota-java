@@ -1,0 +1,401 @@
+package com.microsoft.kiota.http.middleware;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
+
+import io.opentelemetry.api.trace.Span;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.util.stream.Stream;
+
+class RetryHandlerTest {
+
+    private static final double DELAY_MILLISECONDS = 1000.0;
+    private static final double DEFAULT_DELAY_MILLISECONDS = -1.0;
+    private static final double DELTA = 0.01;
+
+    private RetryHandler retryHandler;
+
+    @BeforeEach
+    void setUp() {
+        retryHandler = new RetryHandler();
+    }
+
+    private static Stream<Arguments> retryAfterHeaderValues() {
+        return Stream.of(
+                // Single values
+                Arguments.of("10", 10.0 * DELAY_MILLISECONDS),
+                Arguments.of("0", DEFAULT_DELAY_MILLISECONDS), // Zero should return default
+                Arguments.of("-5", DEFAULT_DELAY_MILLISECONDS), // Negative should return default
+
+                // Comma-separated values
+                Arguments.of("31,120", 31.0 * DELAY_MILLISECONDS), // First positive value
+                Arguments.of("0,45", 45.0 * DELAY_MILLISECONDS), // Skip zero, take next
+                Arguments.of("-10,25", 25.0 * DELAY_MILLISECONDS), // Skip negative, take next
+                Arguments.of("0,-5,60", 60.0 * DELAY_MILLISECONDS), // Skip multiple invalid
+
+                // Edge cases
+                Arguments.of("", DEFAULT_DELAY_MILLISECONDS), // Empty string
+                Arguments.of("  ", DEFAULT_DELAY_MILLISECONDS), // Whitespace only
+                Arguments.of("abc", DEFAULT_DELAY_MILLISECONDS), // Invalid number
+                Arguments.of("10,abc,20", 10.0 * DELAY_MILLISECONDS), // Mixed valid/invalid
+                Arguments.of("abc,20", 20.0 * DELAY_MILLISECONDS), // Invalid first, valid second
+                Arguments.of("0,0,0", DEFAULT_DELAY_MILLISECONDS), // All zeros
+                Arguments.of("-1,-2,-3", DEFAULT_DELAY_MILLISECONDS), // All negative
+
+                // Whitespace handling
+                Arguments.of(" 15 ", 15.0 * DELAY_MILLISECONDS), // Whitespace around value
+                Arguments.of("10, 20", 10.0 * DELAY_MILLISECONDS), // Whitespace after comma
+                Arguments.of(" 0 , 30 ", 30.0 * DELAY_MILLISECONDS) // Multiple whitespaces
+                );
+    }
+
+    @ParameterizedTest
+    @MethodSource("retryAfterHeaderValues")
+    void testTryParseTimeHeader(String headerValue, double expectedDelay) {
+        double result = retryHandler.tryParseTimeHeader(headerValue);
+        assertEquals(
+                expectedDelay, result, DELTA, "Failed for header value: '" + headerValue + "'");
+    }
+
+    @Test
+    void testGetRetryAfterHandlesNegativeValues() {
+        // Create a mock response with a Retry-After header that will fail parsing
+        Response mockResponse = mock(Response.class);
+        when(mockResponse.header("Retry-After")).thenReturn("invalid");
+        when(mockResponse.code()).thenReturn(429);
+
+        // getRetryAfter should return a value between 1-10ms when parsing fails
+        long retryAfter = retryHandler.getRetryAfter(mockResponse, 3, 1);
+        assertTrue(
+                retryAfter >= 1 && retryAfter <= 10,
+                "Expected retry interval between 1-10ms, got " + retryAfter);
+    }
+
+    @Test
+    void testRetryRequestHandlesNegativeRetryInterval() {
+        // Create mocks
+        Response mockResponse = mock(Response.class);
+        Request mockRequest = mock(Request.class);
+        RetryHandlerOption mockOption = mock(RetryHandlerOption.class);
+        Span mockSpan = mock(Span.class);
+
+        // Setup mock behaviors
+        when(mockResponse.code()).thenReturn(429);
+        when(mockResponse.header("Retry-After")).thenReturn("invalid");
+        when(mockRequest.method()).thenReturn("GET");
+        when(mockRequest.body()).thenReturn(null);
+        when(mockOption.maxRetries()).thenReturn(3);
+        when(mockOption.delay()).thenReturn(3L);
+        when(mockOption.shouldRetry())
+                .thenReturn(
+                        (delay, executionCount, request, response) ->
+                                true); // Always retry for this test
+
+        // Call retryRequest - it should not throw IllegalArgumentException
+        // The main goal is to verify no exception is thrown when retry interval is negative
+        boolean result =
+                retryHandler.retryRequest(mockResponse, 1, mockRequest, mockOption, mockSpan);
+
+        // Verify the method returned true (should retry)
+        assertTrue(result, "Expected retryRequest to return true");
+    }
+
+    @Test
+    void testRetryRequestWithNegativeRetryIntervalAppliesRandomDelay() {
+        // Create mocks
+        Response mockResponse = mock(Response.class);
+        Request mockRequest = mock(Request.class);
+        RetryHandlerOption mockOption = mock(RetryHandlerOption.class);
+        Span mockSpan = mock(Span.class);
+
+        // Setup mock behaviors to force negative retry interval
+        when(mockResponse.code()).thenReturn(503);
+        when(mockResponse.header("Retry-After")).thenReturn("invalid");
+        when(mockRequest.method()).thenReturn("POST");
+        when(mockRequest.body()).thenReturn(null);
+        when(mockOption.maxRetries()).thenReturn(5);
+        when(mockOption.delay()).thenReturn(1L);
+        when(mockOption.shouldRetry())
+                .thenReturn((delay, executionCount, request, response) -> true);
+
+        // Test multiple times to verify no exception is thrown
+        // This verifies the fix for negative retry intervals
+        for (int i = 0; i < 5; i++) {
+            boolean result =
+                    retryHandler.retryRequest(mockResponse, 1, mockRequest, mockOption, mockSpan);
+            // Verify each call succeeds without throwing IllegalArgumentException
+            assertTrue(result, "Expected retryRequest to return true on iteration " + i);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PUT", "PATCH", "QUERY"})
+    void isBufferedReturnsFalseForUnbufferedBody(String method) throws IOException {
+        Request mockRequest = mock(Request.class);
+        RequestBody mockBody = mock(RequestBody.class);
+        when(mockRequest.method()).thenReturn(method);
+        when(mockRequest.body()).thenReturn(mockBody);
+        when(mockBody.contentLength()).thenReturn(-1L);
+
+        assertFalse(retryHandler.isBuffered(mockRequest));
+    }
+
+    @Test
+    void interceptReplacesRetryAttemptHeaderOnSubsequentRetries() throws Exception {
+        try (var server = new MockWebServer()) {
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(429)
+                            .setHeader("Retry-After", "0")
+                            .setBody("retry1"));
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(429)
+                            .setHeader("Retry-After", "0")
+                            .setBody("retry2"));
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("ok"));
+
+            var retryOption =
+                    new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .addInterceptor(new RetryHandler(retryOption))
+                            .build();
+            final Request request = new Request.Builder().url(server.url("/test")).build();
+
+            try (var response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            }
+
+            assertEquals(3, server.getRequestCount());
+
+            final RecordedRequest initialRequest = server.takeRequest();
+            assertNull(initialRequest.getHeader("Retry-Attempt"));
+
+            final RecordedRequest firstRetry = server.takeRequest();
+            assertEquals("1", firstRetry.getHeader("Retry-Attempt"));
+            assertEquals(1, firstRetry.getHeaders().values("Retry-Attempt").size());
+
+            final RecordedRequest secondRetry = server.takeRequest();
+            assertEquals("2", secondRetry.getHeader("Retry-Attempt"));
+            assertEquals(1, secondRetry.getHeaders().values("Retry-Attempt").size());
+        }
+    }
+
+    @Test
+    void interceptExecutesCleanlyWhenObservabilitySpanIsNull() throws Exception {
+        try (var server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse().setResponseCode(200));
+
+            var retryOption =
+                    new RetryHandlerOption((delay, executionCount, req, resp) -> true, 2, 0);
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .addInterceptor(new RetryHandler(retryOption))
+                            .build();
+            final Request request =
+                    new Request.Builder().url(server.url("/test-null-span")).build();
+
+            try (var response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
+            }
+
+            server.takeRequest();
+            final RecordedRequest retry = server.takeRequest();
+            assertEquals("1", retry.getHeader("Retry-Attempt"));
+        }
+    }
+
+    private static RetryHandlerOption retryUnprocessedMutationsOnlyOption() {
+        return new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0, true);
+    }
+
+    private static int sendWithStatuses(
+            final RetryHandlerOption handlerOption,
+            final RetryHandlerOption requestOption,
+            final String method,
+            final int... statusCodes)
+            throws Exception {
+        try (var server = new MockWebServer()) {
+            for (final int statusCode : statusCodes) {
+                server.enqueue(
+                        new MockResponse()
+                                .setResponseCode(statusCode)
+                                .setHeader("Retry-After", "0"));
+            }
+            server.enqueue(new MockResponse().setResponseCode(200));
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .addInterceptor(new RetryHandler(handlerOption))
+                            .build();
+            final RequestBody body =
+                    method.equalsIgnoreCase("GET") || method.equalsIgnoreCase("DELETE")
+                            ? null
+                            : RequestBody.create("{\"message\":\"hello\"}", null);
+            final Request.Builder builder =
+                    new Request.Builder().url(server.url("/send")).method(method, body);
+            if (requestOption != null) {
+                builder.tag(RetryHandlerOption.class, requestOption);
+            }
+            client.newCall(builder.build()).execute().close();
+            return server.getRequestCount();
+        }
+    }
+
+    @Test
+    void retryUnprocessedMutationsOnlyDefaultsToFalse() {
+        assertFalse(new RetryHandlerOption().retryUnprocessedMutationsOnly());
+        assertFalse(
+                new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0)
+                        .retryUnprocessedMutationsOnly());
+        assertTrue(retryUnprocessedMutationsOnlyOption().retryUnprocessedMutationsOnly());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PATCH"})
+    void retriesNonIdempotentRequestOnGatewayTimeoutByDefault(String method) throws Exception {
+        final var option = new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+        assertEquals(2, sendWithStatuses(option, null, method, 504));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PATCH"})
+    void doesNotRetryNonIdempotentRequestOnGatewayTimeoutWhenRetryUnprocessedMutationsOnly(
+            String method) throws Exception {
+        assertEquals(1, sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, method, 504));
+    }
+
+    @Test
+    void matchesNonIdempotentMethodsIgnoringCase() {
+        final Request request =
+                new Request.Builder()
+                        .url("https://example.org/send")
+                        .method("post", RequestBody.create("{}", null))
+                        .build();
+        assertFalse(
+                retryHandler.isRetriableForMethod(
+                        request, 504, retryUnprocessedMutationsOnlyOption()));
+        assertTrue(
+                retryHandler.isRetriableForMethod(
+                        request, 503, retryUnprocessedMutationsOnlyOption()));
+    }
+
+    private static Stream<Arguments> nonIdempotentMethodsAndUnprocessedStatuses() {
+        return Stream.of(
+                Arguments.of("POST", 429),
+                Arguments.of("POST", 503),
+                Arguments.of("PATCH", 429),
+                Arguments.of("PATCH", 503));
+    }
+
+    @ParameterizedTest
+    @MethodSource("nonIdempotentMethodsAndUnprocessedStatuses")
+    void retriesNonIdempotentRequestWhenNotProcessedAndRetryUnprocessedMutationsOnly(
+            String method, int statusCode) throws Exception {
+        assertEquals(
+                2,
+                sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, method, statusCode));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "PUT", "DELETE", "QUERY"})
+    void retriesIdempotentRequestOnGatewayTimeoutWhenRetryUnprocessedMutationsOnly(String method)
+            throws Exception {
+        assertEquals(2, sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, method, 504));
+    }
+
+    @Test
+    void stopsRetryingNonIdempotentRequestWhenALaterResponseLeavesOutcomeUnknown()
+            throws Exception {
+        assertEquals(
+                2, sendWithStatuses(retryUnprocessedMutationsOnlyOption(), null, "POST", 503, 504));
+    }
+
+    @Test
+    void honoursRetryUnprocessedMutationsOnlyFromRequestOption() throws Exception {
+        final var handlerOption =
+                new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+        assertEquals(
+                1,
+                sendWithStatuses(
+                        handlerOption, retryUnprocessedMutationsOnlyOption(), "POST", 504));
+    }
+
+    private static String[] sendThroughRedirect(
+            final RetryHandlerOption handlerOption,
+            final RetryHandlerOption requestOption,
+            final int redirectStatus,
+            final int expectedStatus)
+            throws Exception {
+        try (var server = new MockWebServer()) {
+            server.enqueue(
+                    new MockResponse()
+                            .setResponseCode(redirectStatus)
+                            .setHeader("Location", server.url("/redirected")));
+            server.enqueue(new MockResponse().setResponseCode(504).setHeader("Retry-After", "0"));
+            server.enqueue(new MockResponse().setResponseCode(200));
+            final OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .followRedirects(false)
+                            .addInterceptor(new RedirectHandler())
+                            .addInterceptor(new RetryHandler(handlerOption))
+                            .build();
+            final Request.Builder builder =
+                    new Request.Builder()
+                            .url(server.url("/send"))
+                            .post(RequestBody.create("{\"message\":\"hello\"}", null));
+            if (requestOption != null) {
+                builder.tag(RetryHandlerOption.class, requestOption);
+            }
+            try (var response = client.newCall(builder.build()).execute()) {
+                assertEquals(expectedStatus, response.code());
+            }
+            final String[] methods = new String[server.getRequestCount()];
+            for (int i = 0; i < methods.length; i++) {
+                methods[i] = server.takeRequest().getMethod();
+            }
+            return methods;
+        }
+    }
+
+    @Test
+    void retriesPostRedirectedToGetWhenRetryUnprocessedMutationsOnly() throws Exception {
+        assertArrayEquals(
+                new String[] {"POST", "GET", "GET"},
+                sendThroughRedirect(retryUnprocessedMutationsOnlyOption(), null, 302, 200));
+    }
+
+    @Test
+    void doesNotRetryPostRedirectedAsPostWithRequestOption() throws Exception {
+        final var handlerOption =
+                new RetryHandlerOption((delay, executionCount, req, resp) -> true, 3, 0);
+        assertArrayEquals(
+                new String[] {"POST", "POST"},
+                sendThroughRedirect(
+                        handlerOption, retryUnprocessedMutationsOnlyOption(), 307, 504));
+    }
+}

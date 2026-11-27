@@ -1,0 +1,864 @@
+package com.microsoft.kiota.http.middleware;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.*;
+
+import com.microsoft.kiota.http.KiotaClientFactory;
+import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
+
+import okhttp3.*;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+
+import java.net.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@SuppressWarnings("resource")
+public class RedirectHandlerTests {
+    private static final MediaType REQUEST_MEDIA_TYPE =
+            MediaType.parse("application/json; charset=utf-8");
+    private static final String REQUEST_BODY = "{\"value\":\"test\"}";
+
+    @ParameterizedTest
+    @ValueSource(ints = {301, 302})
+    void postRedirectsToGetWithoutBodyOrBodyHeaders(int statusCode) throws Exception {
+        Request original = createRequest("POST");
+        Response redirect =
+                createRedirectResponse(original, statusCode, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("GET", result.method());
+        assertNull(result.body());
+        assertBodyHeadersRemoved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @Test
+    void seeOtherRedirectsNonGetOrHeadToGetWithoutBodyOrBodyHeaders() throws Exception {
+        Request original = createRequest("PUT");
+        Response redirect =
+                createRedirectResponse(original, 303, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("GET", result.method());
+        assertNull(result.body());
+        assertBodyHeadersRemoved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "HEAD"})
+    void seeOtherPreservesGetAndHead(String method) throws Exception {
+        Request original = createBodylessRequest(method);
+        Response redirect =
+                createRedirectResponse(original, 303, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals(method, result.method());
+        assertNull(result.body());
+        assertBodyHeadersPreserved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {307, 308})
+    void redirectsPreserveMethodBodyAndBodyHeaders(int statusCode) throws Exception {
+        Request original = createRequest("POST");
+        Response redirect =
+                createRedirectResponse(original, statusCode, "http://other.example.com/redirected");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("POST", result.method());
+        assertSame(original.body(), result.body());
+        assertBodyHeadersPreserved(result);
+        assertCrossOriginHeadersRemoved(result);
+    }
+
+    @Test
+    void redirectsAreFollowedByDefault() throws Exception {
+        var server = new MockWebServer();
+        server.enqueue(
+                new MockResponse().setResponseCode(301).setHeader("Location", server.url("/bar")));
+        server.enqueue(new MockResponse().setResponseCode(201));
+
+        var interceptors = new Interceptor[] {new RedirectHandler()};
+
+        final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
+        final Request request = new Request.Builder().url(server.url("/foo")).build();
+
+        // ACT
+        var response = client.newCall(request).execute();
+
+        server.takeRequest(); // discard first request
+        var request2 = server.takeRequest();
+
+        assertEquals("/bar", request2.getPath());
+        assertEquals(201, response.code());
+    }
+
+    @Test
+    void redirectsCanBeDisabled() throws Exception {
+        var server = new MockWebServer();
+        server.enqueue(
+                new MockResponse().setResponseCode(301).setHeader("Location", server.url("/bar")));
+
+        var ignoreRedirectsOption = new RedirectHandlerOption(0, response -> false);
+        var redirectHandler = new RedirectHandler(ignoreRedirectsOption);
+        var interceptors = new Interceptor[] {redirectHandler};
+
+        final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
+        final Request request = new Request.Builder().url(server.url("/foo")).build();
+
+        // ACT
+        var response = client.newCall(request).execute();
+
+        assertEquals(301, response.code());
+    }
+
+    @Test
+    void crossHostRedirectStripsAuthHeaders() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://evil.attacker.com/steal")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
+        assertNotNull(result);
+        assertEquals("evil.attacker.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped (good)
+        assertNull(result.header("Cookie")); // stripped (good)
+        assertNull(result.header("Proxy-Authorization")); // stripped because no proxy (good)
+    }
+
+    @Test
+    void endToEndProof() throws Exception {
+        var evil = new MockWebServer();
+        evil.start();
+        evil.enqueue(new MockResponse().setResponseCode(200));
+        var trusted = new MockWebServer();
+        trusted.start();
+        trusted.enqueue(
+                new MockResponse().setResponseCode(302).setHeader("Location", evil.url("/steal")));
+        OkHttpClient client =
+                KiotaClientFactory.create(new Interceptor[] {new RedirectHandler()}).build();
+        client.newCall(
+                        new Request.Builder()
+                                .url(trusted.url("/api"))
+                                .addHeader("Cookie", "session=SECRET")
+                                .build())
+                .execute();
+        trusted.takeRequest();
+        RecordedRequest captured = evil.takeRequest();
+        assertNull(captured.getHeader("Cookie"));
+        evil.shutdown();
+        trusted.shutdown();
+    }
+
+    @Test
+    void sameHostRedirectKeepsAllHeaders() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://trusted.example.com/other")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Setup proxy selector
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
+        when(proxySelector.select(any(URI.class))).thenReturn(Collections.singletonList(proxy));
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result =
+                new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("trusted.example.com", result.url().host());
+        assertNotNull(result.header("Authorization")); // kept (same host)
+        assertNotNull(result.header("Cookie")); // kept (same host)
+        assertNotNull(result.header("Proxy-Authorization")); // kept (proxy is active)
+    }
+
+    @Test
+    void crossHostRedirectWithProxyKeepsProxyAuth() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Setup proxy selector with active proxy
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
+        when(proxySelector.select(any(URI.class))).thenReturn(Collections.singletonList(proxy));
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result =
+                new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped (different host)
+        assertNull(result.header("Cookie")); // stripped (different host)
+        assertNotNull(
+                result.header("Proxy-Authorization")); // KEPT because proxy is still active (good)
+    }
+
+    @Test
+    void redirectToUrlWithDifferentProxyStripsProxyAuth() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Setup proxy selector with different proxies for different hosts
+        Proxy proxyA =
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-a.example.com", 8080));
+        Proxy proxyB =
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-b.example.com", 8080));
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        when(proxySelector.select(
+                        argThat(uri -> uri != null && "other.example.com".equals(uri.getHost()))))
+                .thenReturn(Collections.singletonList(proxyB));
+        when(proxySelector.select(
+                        argThat(uri -> uri != null && "trusted.example.com".equals(uri.getHost()))))
+                .thenReturn(Collections.singletonList(proxyA));
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result =
+                new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped (different host)
+        assertNull(result.header("Cookie")); // stripped (different host)
+        assertNull(
+                result.header(
+                        "Proxy-Authorization")); // stripped because proxy changed from proxyA to
+        // proxyB
+    }
+
+    @Test
+    void multiHopRedirectBackToOriginalProxyStripsIntermediateProxyAuth() throws Exception {
+        Request initialRequest =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token-a")
+                        .addHeader("Cookie", "session=A")
+                        .addHeader("Proxy-Authorization", "Basic proxy-a-secret")
+                        .build();
+
+        Proxy proxyA =
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-a.example.com", 8080));
+        Proxy proxyB =
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy-b.example.com", 8080));
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        when(proxySelector.select(
+                        argThat(
+                                uri ->
+                                        uri != null
+                                                && "intermediate.example.com"
+                                                        .equals(uri.getHost()))))
+                .thenReturn(Collections.singletonList(proxyB));
+        when(proxySelector.select(
+                        argThat(uri -> uri != null && "trusted.example.com".equals(uri.getHost()))))
+                .thenReturn(Collections.singletonList(proxyA));
+
+        Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+        when(mockChain.request()).thenReturn(initialRequest);
+
+        AtomicInteger hopCount = new AtomicInteger(0);
+        when(mockChain.proceed(any(Request.class)))
+                .thenAnswer(
+                        invocation -> {
+                            int hop = hopCount.incrementAndGet();
+                            Request currentRequest = invocation.getArgument(0);
+                            if (hop == 1) {
+                                return new Response.Builder()
+                                        .request(currentRequest)
+                                        .protocol(Protocol.HTTP_1_1)
+                                        .code(302)
+                                        .message("Found")
+                                        .header("Location", "http://intermediate.example.com/api")
+                                        .body(
+                                                ResponseBody.create(
+                                                        "", MediaType.parse("text/plain")))
+                                        .build();
+                            } else if (hop == 2) {
+                                // Simulate downstream proxy handler or authenticator attaching
+                                // proxy B's credentials to the request that executed through proxy
+                                // B
+                                Request reqWithProxyB =
+                                        currentRequest
+                                                .newBuilder()
+                                                .header(
+                                                        "Proxy-Authorization",
+                                                        "Basic proxy-b-secret")
+                                                .build();
+                                return new Response.Builder()
+                                        .request(reqWithProxyB)
+                                        .protocol(Protocol.HTTP_1_1)
+                                        .code(302)
+                                        .message("Found")
+                                        .header("Location", "http://trusted.example.com/api2")
+                                        .body(
+                                                ResponseBody.create(
+                                                        "", MediaType.parse("text/plain")))
+                                        .build();
+                            } else {
+                                return new Response.Builder()
+                                        .request(currentRequest)
+                                        .protocol(Protocol.HTTP_1_1)
+                                        .code(200)
+                                        .message("OK")
+                                        .body(
+                                                ResponseBody.create(
+                                                        "success", MediaType.parse("text/plain")))
+                                        .build();
+                            }
+                        });
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        RedirectHandler handler = new RedirectHandler(option, proxySelector);
+        Response response = handler.intercept(mockChain);
+
+        assertNotNull(response);
+        assertEquals(200, response.code());
+
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(mockChain, times(3)).proceed(requestCaptor.capture());
+        List<Request> capturedRequests = requestCaptor.getAllValues();
+
+        // 1st request (initial): sent to trusted.example.com with proxy A's credentials
+        assertEquals("trusted.example.com", capturedRequests.get(0).url().host());
+        assertEquals("Basic proxy-a-secret", capturedRequests.get(0).header("Proxy-Authorization"));
+
+        // 2nd request (redirect hop 1): sent to intermediate.example.com; proxy A credentials
+        // stripped
+        assertEquals("intermediate.example.com", capturedRequests.get(1).url().host());
+        assertNull(capturedRequests.get(1).header("Proxy-Authorization"));
+
+        // 3rd request (redirect hop 2): sent back to trusted.example.com; proxy B credentials
+        // stripped
+        assertEquals("trusted.example.com", capturedRequests.get(2).url().host());
+        assertEquals("/api2", capturedRequests.get(2).url().encodedPath());
+        assertNull(capturedRequests.get(2).header("Proxy-Authorization"));
+        assertNull(capturedRequests.get(2).header("Authorization"));
+        assertNull(capturedRequests.get(2).header("Cookie"));
+    }
+
+    @Test
+    void crossHostRedirectWithDirectProxyStripsProxyAuth() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Setup proxy selector with DIRECT proxy (no proxy)
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        when(proxySelector.select(any(URI.class)))
+                .thenReturn(Collections.singletonList(Proxy.NO_PROXY));
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result =
+                new RedirectHandler(option, proxySelector).getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped (different host)
+        assertNull(result.header("Cookie")); // stripped (different host)
+        assertNull(
+                result.header(
+                        "Proxy-Authorization")); // stripped because proxy is DIRECT/inactive (good)
+    }
+
+    @Test
+    void schemeChangeStripsAuthHeaders() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .addHeader("Proxy-Authorization", "Basic <secret>")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header(
+                                "Location",
+                                "http://trusted.example.com/other") // HTTPS -> HTTP (same host)
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("trusted.example.com", result.url().host());
+        assertEquals("http", result.url().scheme());
+        assertNull(result.header("Authorization")); // stripped (scheme changed)
+        assertNull(result.header("Cookie")); // stripped (scheme changed)
+        assertNull(result.header("Proxy-Authorization")); // stripped (no proxy)
+    }
+
+    @Test
+    void redirectWithDifferentPortRemovesAuthAndCookie() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://example.org:8080/foo")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(301)
+                        .message("Moved Permanently")
+                        .header("Location", "http://example.org:9090/bar")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("example.org", result.url().host());
+        assertEquals(9090, result.url().port());
+        assertNull(result.header("Authorization")); // stripped (port changed)
+        assertNull(result.header("Cookie")); // stripped (port changed)
+    }
+
+    @Test
+    void redirectWithSamePortKeepsAuthAndCookie() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://example.org:8080/foo")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://example.org:8080/bar")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        RedirectHandlerOption option = new RedirectHandlerOption();
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("example.org", result.url().host());
+        assertEquals(8080, result.url().port());
+        assertNotNull(result.header("Authorization")); // kept (same port)
+        assertNotNull(result.header("Cookie")); // kept (same port)
+    }
+
+    @Test
+    void customScrubberIsUsed() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("Cookie", "session=SECRET")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Custom scrubber that never removes headers
+        RedirectHandlerOption.IScrubSensitiveHeaders customScrubber =
+                (requestBuilder, originalUrl, proxyResolver) -> {
+                    // Don't remove any headers
+                };
+
+        RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNotNull(result.header("Authorization")); // KEPT by custom scrubber
+        assertNotNull(result.header("Cookie")); // KEPT by custom scrubber
+    }
+
+    @Test
+    void customScrubberRemovesCustomHeaders() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("http://trusted.example.com/api")
+                        .addHeader("Authorization", "Bearer token")
+                        .addHeader("X-Custom-Secret", "my-secret-value")
+                        .addHeader("X-Api-Key", "key-12345")
+                        .addHeader("X-Safe-Header", "keep-me")
+                        .build();
+        Response redirect =
+                new Response.Builder()
+                        .request(original)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "http://other.example.com/api")
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        // Custom scrubber that removes custom headers in addition to the defaults
+        RedirectHandlerOption.IScrubSensitiveHeaders customScrubber =
+                (requestBuilder, originalUrl, proxyResolver) -> {
+                    // Apply default scrubbing first
+                    RedirectHandlerOption.DEFAULT_SCRUB_SENSITIVE_HEADERS.scrubHeaders(
+                            requestBuilder, originalUrl, proxyResolver);
+                    // Also remove application-specific sensitive headers
+                    requestBuilder.removeHeader("X-Custom-Secret");
+                    requestBuilder.removeHeader("X-Api-Key");
+                };
+
+        RedirectHandlerOption option = new RedirectHandlerOption(5, null, customScrubber);
+        Request result = new RedirectHandler().getRedirect(original, redirect, option);
+
+        assertNotNull(result);
+        assertEquals("other.example.com", result.url().host());
+        assertNull(result.header("Authorization")); // stripped by default scrubber
+        assertNull(result.header("X-Custom-Secret")); // stripped by custom scrubber
+        assertNull(result.header("X-Api-Key")); // stripped by custom scrubber
+        assertNotNull(result.header("X-Safe-Header")); // kept (not in scrub list)
+    }
+
+    @Test
+    void relativeRedirectRootPathDoesNotDuplicateParentPath() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectRootPathWithTrailingSlashOriginalUrl() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users/").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectRelativePathResolvesAgainstParentDirectory() throws Exception {
+        Request original = new Request.Builder().url("https://example.com/v1.0/users/item").build();
+        Response redirect = createRedirectResponse(original, 302, "details");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v1.0/users/details", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectDropsOriginalQueryWhenRedirectLocationHasNoQuery() throws Exception {
+        Request original =
+                new Request.Builder().url("https://example.com/v1.0/users?top=10").build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectPreservesRedirectQueryParameters() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users?top=10&select=id")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users?top=20");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users?top=20", result.url().toString());
+    }
+
+    @Test
+    void relativeRedirectWithRelativePathAndQueryParameters() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users/list?filter=active")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "details?id=123");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v1.0/users/details?id=123", result.url().toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   "})
+    void isRedirectedReturnsFalseForBlankLocationHeader(String location) throws Exception {
+        Request request = new Request.Builder().url("https://example.com/api").build();
+        Response response =
+                new Response.Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", location)
+                        .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                        .build();
+
+        RedirectHandler handler = new RedirectHandler();
+        assertFalse(handler.isRedirected(request, response, 1, new RedirectHandlerOption()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "mailto:user@example.com", "javascript:void(0)"})
+    void getRedirectReturnsNullForBlankOrUnsupportedScheme(String location) throws Exception {
+        Request original = new Request.Builder().url("https://example.com/api").build();
+        Response redirect = createRedirectResponse(original, 302, location);
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNull(result);
+    }
+
+    @Test
+    void interceptWithUnsupportedRedirectSchemeReturnsOriginalResponseWithoutRetrying()
+            throws Exception {
+        Request request = new Request.Builder().url("https://example.com/api").build();
+        Response originalResponse =
+                new Response.Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(302)
+                        .message("Found")
+                        .header("Location", "mailto:user@example.com")
+                        .body(
+                                ResponseBody.create(
+                                        "unsupported-scheme-body", MediaType.parse("text/plain")))
+                        .build();
+
+        Interceptor.Chain mockChain = mock(Interceptor.Chain.class);
+        when(mockChain.request()).thenReturn(request);
+        when(mockChain.proceed(any(Request.class)))
+                .thenReturn(originalResponse)
+                .thenThrow(new AssertionError("chain.proceed() must not be called more than once"));
+
+        RedirectHandler handler = new RedirectHandler();
+        Response response = handler.intercept(mockChain);
+
+        assertNotNull(response);
+        assertSame(originalResponse, response);
+        assertEquals(302, response.code());
+        assertEquals("mailto:user@example.com", response.header("Location"));
+        assertEquals("unsupported-scheme-body", response.body().string());
+        verify(mockChain, times(1)).proceed(any(Request.class));
+    }
+
+    @Test
+    void relativeRedirectPreservesSensitiveHeadersOnSameOrigin() throws Exception {
+        Request original =
+                new Request.Builder()
+                        .url("https://example.com/v1.0/users")
+                        .addHeader("Authorization", "Bearer token123")
+                        .addHeader("Cookie", "session=SECRET456")
+                        .build();
+        Response redirect = createRedirectResponse(original, 302, "/v2.0/users");
+
+        Request result =
+                new RedirectHandler().getRedirect(original, redirect, new RedirectHandlerOption());
+
+        assertNotNull(result);
+        assertEquals("https://example.com/v2.0/users", result.url().toString());
+        assertEquals("Bearer token123", result.header("Authorization"));
+        assertEquals("session=SECRET456", result.header("Cookie"));
+    }
+
+    @Test
+    void relativeRedirectsAreFollowedEndToEnd() throws Exception {
+        var server = new MockWebServer();
+        server.enqueue(
+                new MockResponse().setResponseCode(302).setHeader("Location", "/v2/resource"));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("OK"));
+
+        var interceptors = new Interceptor[] {new RedirectHandler()};
+        final OkHttpClient client = KiotaClientFactory.create(interceptors).build();
+        final Request request = new Request.Builder().url(server.url("/v1/resource")).build();
+
+        var response = client.newCall(request).execute();
+
+        var initialRequest = server.takeRequest();
+        var redirectedRequest = server.takeRequest();
+
+        assertEquals("/v1/resource", initialRequest.getPath());
+        assertEquals("/v2/resource", redirectedRequest.getPath());
+        assertEquals(200, response.code());
+        server.shutdown();
+    }
+
+    private static Request createRequest(String method) {
+        RequestBody body = RequestBody.create(REQUEST_BODY, REQUEST_MEDIA_TYPE);
+        return new Request.Builder()
+                .url("http://trusted.example.com/api")
+                .method(method, body)
+                .headers(createRequestHeaders())
+                .build();
+    }
+
+    private static Request createBodylessRequest(String method) {
+        return new Request.Builder()
+                .url("http://trusted.example.com/api")
+                .method(method, null)
+                .headers(createRequestHeaders())
+                .build();
+    }
+
+    private static Headers createRequestHeaders() {
+        return new Headers.Builder()
+                .set("Content-Length", String.valueOf(REQUEST_BODY.length()))
+                .set("Transfer-Encoding", "chunked")
+                .set("Content-Type", REQUEST_MEDIA_TYPE.toString())
+                .set("Content-Encoding", "gzip")
+                .set("Content-Language", "en-US")
+                .set("Authorization", "Bearer secret")
+                .set("Cookie", "session=SECRET")
+                .build();
+    }
+
+    private static Response createRedirectResponse(
+            Request request, int statusCode, String location) {
+        return new Response.Builder()
+                .request(request)
+                .protocol(Protocol.HTTP_1_1)
+                .code(statusCode)
+                .message("Redirect")
+                .header("Location", location)
+                .body(ResponseBody.create("", MediaType.parse("text/plain")))
+                .build();
+    }
+
+    private static void assertBodyHeadersRemoved(Request request) {
+        assertNull(request.header("Content-Length"));
+        assertNull(request.header("Transfer-Encoding"));
+        assertNull(request.header("Content-Type"));
+        assertNull(request.header("Content-Encoding"));
+        assertNull(request.header("Content-Language"));
+    }
+
+    private static void assertBodyHeadersPreserved(Request request) {
+        assertEquals(String.valueOf(REQUEST_BODY.length()), request.header("Content-Length"));
+        assertEquals("chunked", request.header("Transfer-Encoding"));
+        assertEquals(REQUEST_MEDIA_TYPE.toString(), request.header("Content-Type"));
+        assertEquals("gzip", request.header("Content-Encoding"));
+        assertEquals("en-US", request.header("Content-Language"));
+    }
+
+    private static void assertCrossOriginHeadersRemoved(Request request) {
+        assertNull(request.header("Authorization"));
+        assertNull(request.header("Cookie"));
+    }
+}

@@ -11,8 +11,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -26,18 +26,16 @@ import java.util.function.Consumer;
 /** Serialization writer implementation for Multipart encoded payloads */
 public class MultipartSerializationWriter implements SerializationWriter {
     private final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    private final OutputStreamWriter writer;
+    private final OutputStreamWriter writer =
+            new OutputStreamWriter(this.stream, StandardCharsets.UTF_8);
 
     /** Instantiates a new MultipartSerializationWriter. */
-    public MultipartSerializationWriter() {
-        try {
-            this.writer = new OutputStreamWriter(this.stream, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("could not create writer", e);
-        }
-    }
+    public MultipartSerializationWriter() {}
 
     public void writeStringValue(@Nullable final String key, @Nullable final String value) {
+        if (key != null && !key.isEmpty() && value == null) {
+            return;
+        }
         try {
             if (key != null && !key.isEmpty()) writer.write(key);
             if (value != null && !value.isEmpty()) {

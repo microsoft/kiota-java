@@ -27,6 +27,20 @@ public class KiotaJsonSerialization {
     }
 
     /**
+     * Serializes the given value to a stream
+     * @param <T> the type of the value to serialize
+     * @param value the value to serialize
+     * @param serializeOnlyChangedValues whether to serialize all values in value if value is a BackedModel
+     * @return the serialized value as a stream
+     * @throws IOException when the stream cannot be closed or read.
+     */
+    @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
+            @Nonnull final T value, final boolean serializeOnlyChangedValues) throws IOException {
+        return KiotaSerialization.serializeAsStream(
+                CONTENT_TYPE, value, serializeOnlyChangedValues);
+    }
+
+    /**
      * Serializes the given value to a string
      * @param <T> the type of the value to serialize
      * @param value the value to serialize
@@ -36,6 +50,20 @@ public class KiotaJsonSerialization {
     @Nonnull public static <T extends Parsable> String serializeAsString(@Nonnull final T value)
             throws IOException {
         return KiotaSerialization.serializeAsString(CONTENT_TYPE, value);
+    }
+
+    /**
+     * Serializes the given value to a string
+     * @param <T> the type of the value to serialize
+     * @param value the value to serialize
+     * @param serializeOnlyChangedValues whether to serialize all values in value if value is a BackedModel
+     * @return the serialized value as a string
+     * @throws IOException when the stream cannot be closed or read.
+     */
+    @Nonnull public static <T extends Parsable> String serializeAsString(
+            @Nonnull final T value, final boolean serializeOnlyChangedValues) throws IOException {
+        return KiotaSerialization.serializeAsString(
+                CONTENT_TYPE, value, serializeOnlyChangedValues);
     }
 
     /**
@@ -51,6 +79,21 @@ public class KiotaJsonSerialization {
     }
 
     /**
+     * Serializes the given value to a stream
+     * @param <T> the type of the value to serialize
+     * @param values the values to serialize
+     * @param serializeOnlyChangedValues whether to serialize all values in value if value is a BackedModel
+     * @return the serialized value as a stream
+     * @throws IOException when the stream cannot be closed or read.
+     */
+    @Nonnull public static <T extends Parsable> InputStream serializeAsStream(
+            @Nonnull final Iterable<T> values, final boolean serializeOnlyChangedValues)
+            throws IOException {
+        return KiotaSerialization.serializeAsStream(
+                CONTENT_TYPE, values, serializeOnlyChangedValues);
+    }
+
+    /**
      * Serializes the given value to a string
      * @param <T> the type of the value to serialize
      * @param values the values to serialize
@@ -60,6 +103,21 @@ public class KiotaJsonSerialization {
     @Nonnull public static <T extends Parsable> String serializeAsString(@Nonnull final Iterable<T> values)
             throws IOException {
         return KiotaSerialization.serializeAsString(CONTENT_TYPE, values);
+    }
+
+    /**
+     * Serializes the given value to a string
+     * @param <T> the type of the value to serialize
+     * @param values the values to serialize
+     * @param serializeOnlyChangedValues whether to serialize all values in value if value is a BackedModel
+     * @return the serialized value as a string
+     * @throws IOException when the stream cannot be closed or read.
+     */
+    @Nonnull public static <T extends Parsable> String serializeAsString(
+            @Nonnull final Iterable<T> values, final boolean serializeOnlyChangedValues)
+            throws IOException {
+        return KiotaSerialization.serializeAsString(
+                CONTENT_TYPE, values, serializeOnlyChangedValues);
     }
 
     /**

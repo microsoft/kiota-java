@@ -1,0 +1,16 @@
+dependencies {
+    // Use JUnit Jupiter API for testing.
+    testImplementation(libs.org.junit.jupiter.junit.jupiter)
+    testRuntimeOnly(libs.org.junit.platform.junit.platform.launcher)
+
+    testImplementation(libs.org.mockito.mockito.core)
+
+    implementation(libs.jakarta.annotation.jakarta.annotation.api)
+
+    api project(':components:abstractions')
+    api project(':components:http:okHttp')
+    implementation project(':components:serialization:json')
+    implementation project(':components:serialization:text')
+    implementation project(':components:serialization:multipart')
+    implementation project(':components:serialization:form')
+}

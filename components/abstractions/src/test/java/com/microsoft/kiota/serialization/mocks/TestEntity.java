@@ -110,7 +110,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "workDuration",
                         (n) -> {
-                            setWorkDuration(n.getPeriodAndDurationValue());
+                            final var value = n.getPeriodAndDurationValue();
+                            if (value != null) {
+                                setWorkDuration(value);
+                            }
                         });
                 put(
                         "startWorkTime",

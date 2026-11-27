@@ -1,8 +1,5 @@
 package com.microsoft.kiota.http.middleware;
 
-import static okhttp3.internal.http.StatusLine.HTTP_PERM_REDIRECT;
-import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
-
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
@@ -28,13 +25,17 @@ import java.util.Objects;
  * Middleware that determines whether a redirect information should be followed or not, and follows it if necessary.
  */
 public class RedirectHandler implements Interceptor {
+    private static final int HTTP_TEMP_REDIRECT = 307;
+    private static final int HTTP_PERM_REDIRECT = 308;
+
     @Nonnull private final RedirectHandlerOption mRedirectOption;
+    @Nullable private final java.net.ProxySelector mProxySelector;
 
     /**
      * Initialize using default redirect options, default IShouldRedirect and max redirect value
      */
     public RedirectHandler() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -42,11 +43,24 @@ public class RedirectHandler implements Interceptor {
      * @param redirectOption pass instance of redirect options to be used
      */
     public RedirectHandler(@Nullable final RedirectHandlerOption redirectOption) {
+        this(redirectOption, null);
+    }
+
+    /**
+     * Initialize using custom redirect options and proxy selector.
+     * @param redirectOption pass instance of redirect options to be used
+     * @param proxySelector The ProxySelector to use for determining proxy configuration, or null to use the system default
+     */
+    public RedirectHandler(
+            @Nullable final RedirectHandlerOption redirectOption,
+            @Nullable final java.net.ProxySelector proxySelector) {
         if (redirectOption == null) {
             this.mRedirectOption = new RedirectHandlerOption();
         } else {
             this.mRedirectOption = redirectOption;
         }
+        this.mProxySelector =
+                proxySelector != null ? proxySelector : java.net.ProxySelector.getDefault();
     }
 
     boolean isRedirected(
@@ -63,7 +77,7 @@ public class RedirectHandler implements Interceptor {
 
         // Location header empty then don't redirect
         final String locationHeader = response.header("location");
-        if (locationHeader == null) return false;
+        if (locationHeader == null || locationHeader.trim().isEmpty()) return false;
 
         // If any of 301,302,303,307,308 then redirect
         final int statusCode = response.code();
@@ -81,46 +95,55 @@ public class RedirectHandler implements Interceptor {
         return false;
     }
 
-    Request getRedirect(final Request request, final Response userResponse)
+    Request getRedirect(
+            final Request request,
+            final Response userResponse,
+            final RedirectHandlerOption redirectOption)
             throws ProtocolException {
         String location = userResponse.header("Location");
-        if (location == null || location.length() == 0) return null;
+        if (location == null || location.trim().isEmpty()) return null;
+        location = location.trim();
 
-        // For relative URL in location header, the new url to redirect is relative to original
-        // request
-        if (location.startsWith("/")) {
-            if (request.url().toString().endsWith("/")) {
-                location = location.substring(1);
-            }
-            location = request.url() + location;
-        }
+        HttpUrl requestUrl = request.url();
 
-        HttpUrl requestUrl = userResponse.request().url();
-
-        HttpUrl locationUrl = userResponse.request().url().resolve(location);
+        HttpUrl locationUrl = request.url().resolve(location);
 
         // Don't follow redirects to unsupported protocols.
         if (locationUrl == null) return null;
 
-        // Most redirects don't include a request body.
-        Request.Builder requestBuilder = userResponse.request().newBuilder();
+        // The retry count belongs to the previous hop.
+        Request.Builder requestBuilder =
+                userResponse
+                        .request()
+                        .newBuilder()
+                        .url(locationUrl)
+                        .removeHeader(RetryHandler.RETRY_ATTEMPT_HEADER);
 
-        // When redirecting across hosts, drop all authentication headers. This
-        // is potentially annoying to the application layer since they have no
-        // way to retain them.
-        boolean sameScheme = locationUrl.scheme().equalsIgnoreCase(requestUrl.scheme());
-        boolean sameHost =
-                locationUrl.host().toString().equalsIgnoreCase(requestUrl.host().toString());
-        if (!sameScheme || !sameHost) {
-            requestBuilder.removeHeader("Authorization");
-        }
+        // Scrub sensitive headers before following the redirect
+        java.util.function.Function<HttpUrl, java.net.Proxy> proxyResolver =
+                RedirectHandlerOption.getProxyResolver(mProxySelector);
+        redirectOption
+                .scrubSensitiveHeaders()
+                .scrubHeaders(requestBuilder, requestUrl, proxyResolver);
 
-        // Response status code 303 See Other then POST changes to GET
-        if (userResponse.code() == HTTP_SEE_OTHER) {
+        final String method = request.method();
+        final int responseCode = userResponse.code();
+        final boolean redirectsToGet =
+                ((responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP)
+                                && "POST".equals(method))
+                        || (responseCode == HTTP_SEE_OTHER
+                                && !"GET".equals(method)
+                                && !"HEAD".equals(method));
+        if (redirectsToGet) {
             requestBuilder.method("GET", null);
+            requestBuilder.removeHeader("Content-Length");
+            requestBuilder.removeHeader("Transfer-Encoding");
+            requestBuilder.removeHeader("Content-Type");
+            requestBuilder.removeHeader("Content-Encoding");
+            requestBuilder.removeHeader("Content-Language");
         }
 
-        return requestBuilder.url(locationUrl).build();
+        return requestBuilder.build();
     }
 
     // Intercept request and response made to network
@@ -163,7 +186,8 @@ public class RedirectHandler implements Interceptor {
                         isRedirected(request, response, requestsCount, redirectOption)
                                 && redirectOption.shouldRedirect().shouldRedirect(response);
 
-                final Request followup = shouldRedirect ? getRedirect(request, response) : null;
+                final Request followup =
+                        shouldRedirect ? getRedirect(request, response, redirectOption) : null;
                 if (followup != null) {
                     response.close();
                     request = followup;
@@ -173,10 +197,14 @@ public class RedirectHandler implements Interceptor {
                                     request,
                                     "RedirectHandler_Intercept - redirect " + requestsCount,
                                     span);
-                    redirectSpan.setAttribute(
-                            "com.microsoft.kiota.handler.redirect.count", requestsCount);
-                    redirectSpan.setAttribute("http.status_code", response.code());
-                    redirectSpan.end();
+                    if (redirectSpan != null) {
+                        redirectSpan.setAttribute(
+                                "com.microsoft.kiota.handler.redirect.count", requestsCount);
+                        redirectSpan.setAttribute("http.status_code", response.code());
+                        redirectSpan.end();
+                    }
+                } else {
+                    shouldRedirect = false;
                 }
             } while (shouldRedirect);
         } finally {

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,17 +12,26 @@ import static org.mockito.Mockito.when;
 
 import com.microsoft.kiota.serialization.SerializationWriter;
 import com.microsoft.kiota.serialization.SerializationWriterFactory;
+import com.microsoft.kiota.serialization.ValuedEnum;
 import com.microsoft.kiota.serialization.mocks.TestEnum;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 class RequestInformationTest {
     @Test
@@ -44,11 +54,33 @@ class RequestInformationTest {
         requestInfo.urlTemplate = "{+baseurl}/users{?%24count}";
 
         // Act
+        assertNotNull(requestInfo.pathParameters);
         requestInfo.pathParameters.put("baseurl", "http://localhost");
 
         // Assert
         var result = assertDoesNotThrow(() -> requestInfo.getUri());
         assertEquals("http://localhost/users", result.toString());
+    }
+
+    @Test
+    void ThrowsIllegalArgumentWhenMultidimensionalQueryParameterIsSet() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "{+baseurl}/users{?datasetIds}";
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.parallelDatasetIds =
+                new UUID[][] {
+                    {UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")},
+                    {UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")}
+                };
+
+        // Assert
+        var exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> requestInfo.addQueryParameters(queryParameters));
+        assertTrue(exception.getMessage().contains("multidimensional arrays are not supported"));
     }
 
     @Test
@@ -71,6 +103,89 @@ class RequestInformationTest {
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertTrue(uriResult.toString().contains("fromDateTime='2022-08-01T00%3A00%3A00Z'"));
         assertTrue(uriResult.toString().contains("toDateTime='2022-08-02T00%3A00%3A00Z'"));
+    }
+
+    @Test
+    void SetsPathParametersOfLocalDateType() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate =
+                "http://localhost/getCalendarView(startLocalDate='{startLocalDate}',endLocalDate='{endLocalDate}')";
+
+        final LocalDate startLocalDate = LocalDate.of(2022, 8, 1);
+        final LocalDate endLocalDate = LocalDate.of(2022, 8, 2);
+
+        requestInfo.pathParameters.put("startLocalDate", startLocalDate);
+        requestInfo.pathParameters.put("endLocalDate", endLocalDate);
+
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("startLocalDate='2022-08-01'"));
+        assertTrue(uriResult.toString().contains("endLocalDate='2022-08-02'"));
+    }
+
+    @Test
+    void SetsPathParametersOfLocalTimeType() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate =
+                "http://localhost/getDailyCalendarView(startTime='{startTime}',endTime='{endTime}')";
+
+        // Act
+        final LocalTime startLocalTime = LocalTime.of(0, 1, 1);
+        final LocalTime endLocalTime = LocalTime.of(2, 2, 0);
+        requestInfo.pathParameters.put("startTime", startLocalTime);
+        requestInfo.pathParameters.put("endTime", endLocalTime);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("startTime='00%3A01%3A01'"));
+        assertTrue(uriResult.toString().contains("endTime='02%3A02%3A00'"));
+    }
+
+    @Test
+    void SetsPathParametersOfPeriodAndDurationType() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate =
+                "http://localhost/getRestaurantSeating(mealDuration='{mealDuration}',seatingDuration='{seatingDuration}')";
+
+        // Act
+        final PeriodAndDuration startLocalTime =
+                PeriodAndDuration.of(Period.of(1, 2, 3), Duration.ofHours(10));
+        final PeriodAndDuration endLocalTime = PeriodAndDuration.parse("PT30M");
+        requestInfo.pathParameters.put("mealDuration", startLocalTime);
+        requestInfo.pathParameters.put("seatingDuration", endLocalTime);
+
+        // Assert
+        var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
+        assertTrue(uriResult.toString().contains("mealDuration='P1Y2M3DT10H'"));
+        assertTrue(uriResult.toString().contains("seatingDuration='PT30M'"));
+    }
+
+    @Test
+    void SetsQueryParametersOfPeriodAndDurationTypedArray()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?periods}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.messageAges =
+                new PeriodAndDuration[] {
+                    PeriodAndDuration.parse("PT30M"),
+                    PeriodAndDuration.parse("PT20M"),
+                    PeriodAndDuration.parse("PT1H20M")
+                };
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?periods=PT30M,PT20M,PT1H20M", uri.toString());
     }
 
     @Test
@@ -150,6 +265,24 @@ class RequestInformationTest {
     }
 
     @Test
+    void SetsQueryParametersOfBooleanTypedArray() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?expandChildren}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.expandChildren = new Boolean[] {true, false, true, true};
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?expandChildren=true,false,true,true", uri.toString());
+    }
+
+    @Test
     void SetsPathParametersOfUUIDType() {
         // Arrange as the request builders would
         final RequestInformation requestInfo = new RequestInformation();
@@ -179,6 +312,30 @@ class RequestInformationTest {
         // Assert
         var uriResult = assertDoesNotThrow(() -> requestInfo.getUri());
         assertTrue(uriResult.toString().contains("?id=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"));
+    }
+
+    @Test
+    void SetsQueryParametersOfUUIDTypedArray() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasetIds}";
+
+        final GetQueryParameters queryParameters = new GetQueryParameters();
+        queryParameters.datasetIds =
+                new UUID[] {
+                    UUID.fromString("f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e"),
+                    UUID.fromString("a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e")
+                };
+
+        // Act
+        requestInfo.addQueryParameters(queryParameters);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals(
+                "http://localhost/?datasetIds=f0f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e,a2f351e7-8e5f-4d0e-8f2a-7b5e4b6f4f3e",
+                uri.toString());
     }
 
     @Test
@@ -227,6 +384,60 @@ class RequestInformationTest {
         verify(writerMock, times(1)).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
 
+    private static void setupMockTelemetry(
+            final MockedStatic<GlobalOpenTelemetry> otelMock, final Span mockSpan) {
+        final Tracer mockTracer = mock(Tracer.class);
+        final SpanBuilder mockSpanBuilder = mock(SpanBuilder.class);
+        final Scope mockScope = mock(Scope.class);
+
+        otelMock.when(() -> GlobalOpenTelemetry.getTracer(anyString())).thenReturn(mockTracer);
+        when(mockTracer.spanBuilder(anyString())).thenReturn(mockSpanBuilder);
+        when(mockSpanBuilder.startSpan()).thenReturn(mockSpan);
+        when(mockSpan.makeCurrent()).thenReturn(mockScope);
+    }
+
+    @Test
+    void SetsScalarContentCollectionWithLeadingNullElement() {
+        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
+            final Span mockSpan = mock(Span.class);
+            setupMockTelemetry(otelMock, mockSpan);
+
+            final RequestInformation requestInfo = new RequestInformation();
+            requestInfo.httpMethod = HttpMethod.POST;
+            requestInfo.urlTemplate = "http://localhost/users";
+            final SerializationWriter writerMock = mock(SerializationWriter.class);
+            final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+            final String[] scalars = new String[] {null, "foo"};
+            requestInfo.setContentFromScalarCollection(
+                    requestAdapterMock, "application/json", scalars);
+
+            verify(mockSpan, times(1))
+                    .setAttribute("com.microsoft.kiota.request.type", String.class.getName());
+            verify(writerMock, times(1))
+                    .writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+        }
+    }
+
+    @Test
+    void SetsParsableContentCollectionWithLeadingNullElement() {
+        try (MockedStatic<GlobalOpenTelemetry> otelMock = mockStatic(GlobalOpenTelemetry.class)) {
+            final Span mockSpan = mock(Span.class);
+            setupMockTelemetry(otelMock, mockSpan);
+
+            final RequestInformation requestInfo = new RequestInformation();
+            requestInfo.httpMethod = HttpMethod.POST;
+            requestInfo.urlTemplate = "http://localhost/users";
+            final SerializationWriter writerMock = mock(SerializationWriter.class);
+            final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+            final TestEntity[] entities = new TestEntity[] {null, new TestEntity()};
+            requestInfo.setContentFromParsable(requestAdapterMock, "application/json", entities);
+
+            verify(mockSpan, times(1))
+                    .setAttribute("com.microsoft.kiota.request.type", TestEntity.class.getName());
+            verify(writerMock, times(1)).writeCollectionOfObjectValues(any(), any(Iterable.class));
+        }
+    }
+
     @Test
     void SetsScalarContent() {
         // Arrange as the request builders would
@@ -238,6 +449,79 @@ class RequestInformationTest {
         requestInfo.setContentFromScalar(requestAdapterMock, "application/json", "foo");
 
         verify(writerMock, times(1)).writeStringValue(any(), anyString());
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsDoubleScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", 123.456d);
+
+        verify(writerMock, times(1)).writeDoubleValue(null, 123.456d);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsByteArrayScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final byte[] rawBytes = new byte[] {0x01, 0x02, 0x03};
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/octet-stream", rawBytes);
+
+        verify(writerMock, times(1)).writeByteArrayValue(null, rawBytes);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", TestEnum.First);
+
+        verify(writerMock, times(1)).writeEnumValue(null, TestEnum.First);
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    private enum TestPlainEnum {
+        First,
+        Second
+    }
+
+    @Test
+    void SetsPlainEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        requestInfo.setContentFromScalar(requestAdapterMock, "text/plain", TestPlainEnum.First);
+
+        verify(writerMock, times(1)).writeStringValue(null, "First");
+        verify(writerMock, never()).writeEnumValue(any(), any());
+        verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
+    }
+
+    @Test
+    void SetsValuedEnumScalarContent() {
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.POST;
+        requestInfo.urlTemplate = "http://localhost/users";
+        final SerializationWriter writerMock = mock(SerializationWriter.class);
+        final RequestAdapter requestAdapterMock = createMockRequestAdapter(writerMock);
+        final ValuedEnum valuedEnumMock = () -> "custom_value";
+        requestInfo.setContentFromScalar(requestAdapterMock, "application/json", valuedEnumMock);
+
+        verify(writerMock, times(1)).writeStringValue(null, "custom_value");
         verify(writerMock, never()).writeCollectionOfPrimitiveValues(any(), any(Iterable.class));
     }
 
@@ -327,6 +611,110 @@ class RequestInformationTest {
         assertEquals("http://localhost/1,2", uri.toString());
     }
 
+    @Test
+    void ReplacesEnumCollectionQueryParameters() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        // Act
+        requestInfo.addQueryParameter("datasets", Arrays.asList(TestEnum.First, TestEnum.Second));
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+
+    @Test
+    void ReplacesEnumCollectionPathParameters() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{datasets}";
+
+        // Act
+        requestInfo.pathParameters.put("datasets", Arrays.asList(TestEnum.First, TestEnum.Second));
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/1,2", uri.toString());
+    }
+
+    @Test
+    void HandlesArrayWithNullElementsInQueryParameters()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        // Act
+        requestInfo.addQueryParameter(
+                "datasets", new TestEnum[] {null, TestEnum.First, null, TestEnum.Second});
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+
+    @Test
+    void HandlesCollectionWithNullElementsInQueryParameters()
+            throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?datasets}";
+
+        final ArrayList<TestEnum> list = new ArrayList<>();
+        list.add(null);
+        list.add(TestEnum.First);
+        list.add(null);
+        list.add(TestEnum.Second);
+
+        // Act
+        requestInfo.addQueryParameter("datasets", list);
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?datasets=1,2", uri.toString());
+    }
+
+    @Test
+    void ThrowsIllegalArgumentWhenMultidimensionalCollectionQueryParameterIsSet() {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "{+baseurl}/users{?datasetIds}";
+
+        // Assert
+        final IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                requestInfo.addQueryParameter(
+                                        "datasetIds",
+                                        Arrays.asList(
+                                                Arrays.asList(UUID.randomUUID()),
+                                                Arrays.asList(UUID.randomUUID()))));
+        assertTrue(exception.getMessage().contains("multidimensional arrays are not supported"));
+    }
+
+    @Test
+    void SetsPrimitiveIntArrayQueryParameters() throws IllegalStateException, URISyntaxException {
+        // Arrange as the request builders would
+        final RequestInformation requestInfo = new RequestInformation();
+        requestInfo.httpMethod = HttpMethod.GET;
+        requestInfo.urlTemplate = "http://localhost/{?ids}";
+
+        // Act
+        requestInfo.addQueryParameter("ids", new int[] {1, 2, 3});
+
+        // Assert
+        final URI uri = requestInfo.getUri();
+        assertEquals("http://localhost/?ids=1,2,3", uri.toString());
+    }
+
     public final SerializationWriterFactory createMockSerializationWriterFactory(
             SerializationWriter writer) {
         final SerializationWriterFactory factoryMock = mock(SerializationWriterFactory.class);
@@ -357,12 +745,31 @@ class GetQueryParameters implements QueryParameters {
 
     @jakarta.annotation.Nullable public TestEnum[] datasets;
 
+    @jakarta.annotation.Nullable public UUID[] datasetIds;
+
+    /**
+     * Search by dataset ids in parallel (or something like that)
+     */
+    @jakarta.annotation.Nullable public UUID[][] parallelDatasetIds;
+
+    /** Per-dataset boolean indicating whether to resolve its child datasets */
+    @jakarta.annotation.Nullable public Boolean[] expandChildren;
+
+    /**
+     * Minimum message ages as duration, per dataset
+     */
+    @jakarta.annotation.Nullable public PeriodAndDuration[] messageAges;
+
     @jakarta.annotation.Nonnull public Map<String, Object> toQueryParameters() {
-        final Map<String, Object> allQueryParams = new HashMap();
+        final Map<String, Object> allQueryParams = new HashMap<>();
         allQueryParams.put("%24select", select);
         allQueryParams.put("%24search", search);
         allQueryParams.put("dataset", dataset);
         allQueryParams.put("datasets", datasets);
+        allQueryParams.put("datasetIds", datasetIds);
+        allQueryParams.put("parallelDatasetIds", parallelDatasetIds);
+        allQueryParams.put("expandChildren", expandChildren);
+        allQueryParams.put("periods", messageAges);
         return allQueryParams;
     }
 }

@@ -14,7 +14,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -54,25 +53,41 @@ public class HeadersInspectionHandler implements Interceptor {
         Scope scope = null;
         if (span != null) {
             scope = span.makeCurrent();
-            span.setAttribute("com.microsoft.kiota.handler.headersInspection.enable", true);
+            span.setAttribute(
+                    "com.microsoft.kiota.handler.headersInspection.enable",
+                    inspectionOption.getInspectRequestHeaders()
+                            || inspectionOption.getInspectResponseHeaders());
         }
         try {
             if (span != null) {
                 request = request.newBuilder().tag(Span.class, span).build();
             }
             if (inspectionOption.getInspectRequestHeaders()) {
-                for (final Pair<? extends String, ? extends String> header : request.headers()) {
-                    HashSet<String> value = new HashSet<>();
-                    value.add(header.getSecond());
-                    inspectionOption.getRequestHeaders().put(header.getFirst(), value);
+                synchronized (inspectionOption) {
+                    inspectionOption.getRequestHeaders().clear();
+                    for (final Pair<? extends String, ? extends String> header :
+                            request.headers()) {
+                        inspectionOption
+                                .getRequestHeaders()
+                                .add(header.getFirst(), header.getSecond());
+                    }
+                }
+            }
+            if (inspectionOption.getInspectResponseHeaders()) {
+                synchronized (inspectionOption) {
+                    inspectionOption.getResponseHeaders().clear();
                 }
             }
             final Response response = chain.proceed(request);
             if (inspectionOption.getInspectResponseHeaders()) {
-                for (final Pair<? extends String, ? extends String> header : response.headers()) {
-                    HashSet<String> value = new HashSet<>();
-                    value.add(header.getSecond());
-                    inspectionOption.getResponseHeaders().put(header.getFirst(), value);
+                synchronized (inspectionOption) {
+                    inspectionOption.getResponseHeaders().clear();
+                    for (final Pair<? extends String, ? extends String> header :
+                            response.headers()) {
+                        inspectionOption
+                                .getResponseHeaders()
+                                .add(header.getFirst(), header.getSecond());
+                    }
                 }
             }
             return response;

@@ -4,13 +4,13 @@
 
 The Kiota Java Libraries for Java are:
 
-- [abstractions] Defining the basic constructs Kiota projects need once an SDK has been generated from an OpenAPI definition
-- [authentication/azure] Implementing Azure authentication mechanisms
-- [http/okHttp] Implementing a default OkHttp client
-- [serialization/form] Implementing default serialization for forms
-- [serialization/json] Implementing default serialization for json
-- [serialization/text] Implementing default serialization for text
-- [serialization/multipart] Implementing default serialization for multipart
+- [abstractions](./components/abstractions) Defining the basic constructs Kiota projects need once an SDK has been generated from an OpenAPI definition
+- [authentication/azure](./components/authentication/azure) Implementing Azure authentication mechanisms
+- [http/okHttp](./components/http/okHttp) Implementing a default OkHttp client
+- [serialization/form](./components/serialization/form) Implementing default serialization for forms
+- [serialization/json](./components/serialization/json) Implementing default serialization for json
+- [serialization/text](./components/serialization/text) Implementing default serialization for text
+- [serialization/multipart](./components/serialization/multipart) Implementing default serialization for multipart
 
 Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README.md).
 
@@ -21,13 +21,30 @@ Read more about Kiota [here](https://github.com/microsoft/kiota/blob/main/README
 In `build.gradle` in the `dependencies` section:
 
 ```Groovy
-implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:1.1.14'
-implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.1.14'
-implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:1.1.14'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:1.1.14'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:1.1.14'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:1.1.14'
-implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:1.1.14'
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-abstractions:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-authentication-azure:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-http-okHttp:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-json:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-text:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-form:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-serialization-multipart:1.11.0'
+// x-release-please-end
+// x-release-please-start-version
+implementation 'com.microsoft.kiota:microsoft-kiota-bundle:1.11.0'
+// x-release-please-end
 implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 ```
 
@@ -39,37 +56,51 @@ In `pom.xml` in the `dependencies` section:
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-abstractions</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-authentication-azure</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-http-okHttp</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-json</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-text</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-form</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>com.microsoft.kiota</groupId>
       <artifactId>microsoft-kiota-serialization-multipart</artifactId>
-      <version>1.1.14</version>
+      <!--x-release-please-start-version-->
+      <version>1.11.0</version>
+      <!--x-release-please-end-->
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
@@ -77,6 +108,16 @@ In `pom.xml` in the `dependencies` section:
       <version>2.1.1</version>
     </dependency>
 ```
+
+### Default OkHttp middleware
+
+`KiotaClientFactory` applies URL replacement, query parameter name decoding, and User-Agent to the
+initial request, then follows redirects, retries each hop, and inspects headers for each send.
+The `Retry-Attempt` header is reset when following a redirect or replaying a claims challenge.
+Generated clients authenticate in the request adapter. For standalone OkHttp requests, pass an
+authentication provider to `KiotaClientFactory.create` to opt in to authorization after User-Agent
+and before redirects. Opt-in header inspection can capture sensitive headers such as `Authorization`.
+OkHttp handles transparent response decompression.
 
 ## Extra
 

@@ -139,7 +139,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "workDuration",
                         (n) -> {
-                            setWorkDuration(n.getPeriodAndDurationValue());
+                            final var value = n.getPeriodAndDurationValue();
+                            if (value != null) {
+                                setWorkDuration(value);
+                            }
                         });
                 put(
                         "startWorkTime",
@@ -159,7 +162,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "enumCollection",
                         (n) -> {
-                            setEnumCollection(n.getCollectionOfEnumValues(MyEnum::forValue));
+                            final var value = n.getCollectionOfEnumValues(MyEnum::forValue);
+                            if (value != null) {
+                                setEnumCollection(value);
+                            }
                         });
                 put(
                         "createdDateTime",
@@ -169,7 +175,10 @@ public class TestEntity implements Parsable, AdditionalDataHolder {
                 put(
                         "phones",
                         (n) -> {
-                            setPhones(n.getCollectionOfPrimitiveValues(String.class));
+                            final var value = n.getCollectionOfPrimitiveValues(String.class);
+                            if (value != null) {
+                                setPhones(value);
+                            }
                         });
             }
         };

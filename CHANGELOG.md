@@ -5,7 +5,299 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.11.0](https://github.com/microsoft/kiota-java/compare/v1.10.5...v1.11.0) (2026-11-26)
+
+
+### Features
+
+* add support for the HTTP QUERY verb (RFC 10008) ([7d8591e](https://github.com/microsoft/kiota-java/commit/7d8591e015640f2c4579303eaef8fa831c1dd540))
+* **http:** add option to retry only unprocessed mutations ([3559f2c](https://github.com/microsoft/kiota-java/commit/3559f2c07c2e96d5f7a88905c07822468444dd3e))
+* **http:** add option to retry only unprocessed mutations ([e79b4c3](https://github.com/microsoft/kiota-java/commit/e79b4c3212282d0e265f87eab8d2bd973c02c714))
+
+
+### Bug Fixes
+
+* **abstractions:** fold telemetry detection into iterable materialization and tighten enum serialization ([434f0f3](https://github.com/microsoft/kiota-java/commit/434f0f3ddc5cb8421b4bbc726d8b4fa4505b7f31))
+* **abstractions:** materialize one-shot iterables before telemetry and serialization ([9fd197f](https://github.com/microsoft/kiota-java/commit/9fd197f9008880d4626987fbfdb5edb5ee4889b3))
+* **abstractions:** serialize ordinary enums using enum name fallback ([17f7626](https://github.com/microsoft/kiota-java/commit/17f7626f50d0795f0e6035ff8b903d341a2fe69c))
+* **abstractions:** support double, byte array, and enum in scalar content serialization ([e874c32](https://github.com/microsoft/kiota-java/commit/e874c32523c55c02391956c2c74e3fadf8d2132f))
+* **abstractions:** tighten valued enum helper bound and verify leading-null collection span telemetry ([f1e6808](https://github.com/microsoft/kiota-java/commit/f1e68081c19c6ee8aefc1c0dc6fe258387190a0e))
+* **http:** align default middleware order ([45c041d](https://github.com/microsoft/kiota-java/commit/45c041da7fda357de55fec97eb430b96bff3ac77))
+* **http:** align default middleware order ([1317b1b](https://github.com/microsoft/kiota-java/commit/1317b1b565dc7f07c2e2730b7354a5340abd8b8c))
+* **http:** prevent infinite redirect loop when followup request cannot be resolved ([4391013](https://github.com/microsoft/kiota-java/commit/439101303ca00cd50aceb95b09756fabbbe4607f))
+* **http:** remove Proxy-Authorization on redirect when the proxy changes ([4d35313](https://github.com/microsoft/kiota-java/commit/4d35313e45d73bfdc6bcdfaa812a898ea55b075c))
+* **http:** remove Proxy-Authorization on redirect when the proxy changes ([e1d563f](https://github.com/microsoft/kiota-java/commit/e1d563fe96eebc71facd7f12742d77dd55453a67))
+* **http:** reset retry attempt for claims replay ([3353aef](https://github.com/microsoft/kiota-java/commit/3353aef2417f9b2ce40302adaceaba80e5089ff0))
+* **http:** reset retry headers and preserve authorization spans ([94468be](https://github.com/microsoft/kiota-java/commit/94468be5f8c8f99388ce602c425165ae6c215dd2))
+* **http:** resolve relative Location headers per RFC 3986 without path duplication ([8ca2791](https://github.com/microsoft/kiota-java/commit/8ca2791d0b244a11b525b048142074976da65285))
+* **http:** resolve relative Location headers via HttpUrl resolve without string concatenation ([9a007d5](https://github.com/microsoft/kiota-java/commit/9a007d535b3fd81b0c09606ae44c9045ca5ab5ec)), closes [#2244](https://github.com/microsoft/kiota-java/issues/2244)
+* **http:** treat blank Location headers as non-redirect in isRedirected ([067bb2f](https://github.com/microsoft/kiota-java/commit/067bb2feb1b98794b680e807cc901a8526c2a4fe))
+* **serialization:** handle enum sets with no recognized values ([a7d4d68](https://github.com/microsoft/kiota-java/commit/a7d4d68b1a6036d5aced0a760e873539c5a9644d))
+* **serialization:** handle enum sets with no recognized values ([a75c22a](https://github.com/microsoft/kiota-java/commit/a75c22a08efea261b8b77b954b52db2c8d321585))
+* **serialization:** support content-type parameters and case-insensitivity in form factories ([460d9b9](https://github.com/microsoft/kiota-java/commit/460d9b990c03090eecc9020ad5dcfbee01ebb200))
+* **serialization:** support content-type parameters and case-insensitivity in form factories ([03ea879](https://github.com/microsoft/kiota-java/commit/03ea87921eb674115382e5f13659c8df6d0d22cd))
+* treat QUERY as request with body ([4ad9560](https://github.com/microsoft/kiota-java/commit/4ad9560b9884af1c3f487ccb86f962f4be613b1d))
+
+## [1.10.5](https://github.com/microsoft/kiota-java/compare/v1.10.4...v1.10.5) (2026-11-04)
+
+
+### Bug Fixes
+
+* **abstractions:** support collection sanitization and null safety in RequestInformation ([c180e33](https://github.com/microsoft/kiota-java/commit/c180e331abbc9ad1ee6f80317583ed2310cd6665))
+* **abstractions:** support collection sanitization and null safety in RequestInformation ([acfe31e](https://github.com/microsoft/kiota-java/commit/acfe31e3e926ee8f5a03da2264531c07a88b99ba))
+* **http:** guard retrySpan against null when observability is not configured ([7959539](https://github.com/microsoft/kiota-java/commit/79595398177d8c896581ed317460e5900d446a83))
+* **http:** replace Retry-Attempt header on retry and guard retry span against null ([8d45187](https://github.com/microsoft/kiota-java/commit/8d4518711bfe745833735e1d23823786c59e7d05))
+* **http:** replace Retry-Attempt header on retry instead of accumulating duplicates ([fa78908](https://github.com/microsoft/kiota-java/commit/fa78908aff58f43908a53a35e45b1d84db3b1a07))
+* **multipart:** omit null header string values and revert additionalValuesToMerge ([fd7c48e](https://github.com/microsoft/kiota-java/commit/fd7c48e2b9d13a3ea35f57a37e3797b91e3ea5ce))
+* **multipart:** omit null header string values in writeStringValue ([9be49ef](https://github.com/microsoft/kiota-java/commit/9be49ef8b2681dde73f0780f6737518baba5bc07))
+* **multipart:** support content-type parameters and case-insensitivity in MultipartSerializationWriterFactory ([337a7e8](https://github.com/microsoft/kiota-java/commit/337a7e86577cda918ee503b472ed2be69e3f594c))
+* **multipart:** support content-type parameters and case-insensitivity in MultipartSerializationWriterFactory ([c3b8095](https://github.com/microsoft/kiota-java/commit/c3b8095ae7c096b88b3d7816edda30d2e0352575))
+* **serialization:** preserve equals signs and padding in FormParseNode values ([bb91b8b](https://github.com/microsoft/kiota-java/commit/bb91b8b0e57a2353571f3ba572dfeb92c35257c7))
+* **serialization:** preserve equals signs and padding in FormParseNode values ([61b7c91](https://github.com/microsoft/kiota-java/commit/61b7c91804c8309f3fd4b5dc3463bd48fa79a8bd))
+* **serialization:** prevent double URL decoding and recognize null marker in byte array collections ([1b3e217](https://github.com/microsoft/kiota-java/commit/1b3e217fd2c18ba64e640437ba2693b29dad7205))
+* **serialization:** support byte array and enum in FormSerializationWriter writeAnyValue ([cae35a7](https://github.com/microsoft/kiota-java/commit/cae35a76429f2870cf2f8730a0a762c020311b89))
+* **serialization:** support byte array in FormParseNode convertPrimitiveValue ([d5d947b](https://github.com/microsoft/kiota-java/commit/d5d947bd5c0cc1b54bcf819cae3645e17f904e00))
+* **serialization:** support content-type parameters and case-insensitivity in text factories ([395e40f](https://github.com/microsoft/kiota-java/commit/395e40fa98592a40cb5e48f96caeef13c588fc59))
+* **serialization:** support content-type parameters and case-insensitivity in text factories ([fc18926](https://github.com/microsoft/kiota-java/commit/fc189262ece9b49c6d4f9183a43eb0baeb0e4789))
+* **serialization:** support double in FormSerializationWriter writeAnyValue ([4bdb875](https://github.com/microsoft/kiota-java/commit/4bdb875d844870e838b218a4882c1972d374b94e))
+* **serialization:** support double, byte array, and enum in form serialization ([fd72de3](https://github.com/microsoft/kiota-java/commit/fd72de34bcd463e5f296662be534419053d8f662))
+
+
+### Reverts
+
+* remove pluginManagement repository configuration from settings.gradle ([ec3352c](https://github.com/microsoft/kiota-java/commit/ec3352c2b660041cd3cc044f080671790974ec45))
+
+## [1.10.4](https://github.com/microsoft/kiota-java/compare/v1.10.3...v1.10.4) (2026-10-27)
+
+
+### Bug Fixes
+
+* **abstractions:** add null checks and reject userinfo in AllowedHostsValidator ([ab6fae4](https://github.com/microsoft/kiota-java/commit/ab6fae4a228d73d2229d0dbdc755924c5fb6a2ae))
+* **abstractions:** add null checks and reject userinfo in AllowedHostsValidator ([86313fd](https://github.com/microsoft/kiota-java/commit/86313fda247849f3f1abd90fa2124083dd2f403c))
+* **abstractions:** retain @Nonnull constraint on isUrlHostValid and fail-fast with Objects.requireNonNull ([2d75b3f](https://github.com/microsoft/kiota-java/commit/2d75b3f693bd1f4d634ecdcd76131c66296ac99e))
+* **http:** enclose proceed in handler span lifecycle and propagate span in UserAgent and UrlReplace handlers ([d60b103](https://github.com/microsoft/kiota-java/commit/d60b103dffcdf1fa1ecab947a3cc22a43c88e620))
+* **http:** enclose proceed in handler span lifecycle and propagate span in UserAgent and UrlReplace handlers ([c6a74f9](https://github.com/microsoft/kiota-java/commit/c6a74f9331ae1ef0f7df889a9b1da7061768e276))
+* **serialization:** fix quote stripping bounds in TextParseNode ([266ced8](https://github.com/microsoft/kiota-java/commit/266ced8602c05b21fecff31c757b815026eea8e4))
+* **serialization:** fix quote stripping bounds in TextParseNode and add tests ([6022367](https://github.com/microsoft/kiota-java/commit/60223675e1c9c470ce74ab600c62cba58ceb76a7))
+
+## [1.10.3](https://github.com/microsoft/kiota-java/compare/v1.10.2...v1.10.3) (2026-10-21)
+
+
+### Bug Fixes
+
+* **http:** clear response headers before populating to prevent overlapping response mixing ([e4bdf52](https://github.com/microsoft/kiota-java/commit/e4bdf52a51b6f5d6d6c391e0c736421e844cb56d))
+* **http:** remove redundant response headers clear after proceed ([6633617](https://github.com/microsoft/kiota-java/commit/66336170214a9d0308919f9cd8199f7701a3dbc5))
+* **http:** support multi-valued headers and request isolation in HeadersInspectionHandler ([496f5cf](https://github.com/microsoft/kiota-java/commit/496f5cfc294f169df5d72b94e595eb564f813669))
+* **http:** support multi-valued headers, synchronize shared capture, and prevent stale response headers ([9dbe0f7](https://github.com/microsoft/kiota-java/commit/9dbe0f71ae3a0faae516fe75f3e5e41a53313202))
+
+## [1.10.2](https://github.com/microsoft/kiota-java/compare/v1.10.1...v1.10.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* stop using okhttp3.internal StatusLine constants ([6df4401](https://github.com/microsoft/kiota-java/commit/6df4401845fc9f42f72c8c39496fb42e63679d21))
+* stop using okhttp3.internal StatusLine constants ([#2127](https://github.com/microsoft/kiota-java/issues/2127)) ([71a310d](https://github.com/microsoft/kiota-java/commit/71a310dc21d01405f7d49d155a9af43d91c03536))
+
+## [1.10.1](https://github.com/microsoft/kiota-java/compare/v1.10.0...v1.10.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* expose unsupported content types as client exceptions ([8712aa7](https://github.com/microsoft/kiota-java/commit/8712aa7973e4dc6bae75bc69be835a4a7864f4e9))
+* expose unsupported content types as client exceptions ([c828613](https://github.com/microsoft/kiota-java/commit/c8286139c7fcc3db68fe390f0b08af5c980dc4cf))
+* Fixing redirect 301 handling ([e1c1055](https://github.com/microsoft/kiota-java/commit/e1c10555fed4b604c42245d5e53392440d9fd95f))
+* serialize Gson elements in additional data ([a61c76c](https://github.com/microsoft/kiota-java/commit/a61c76ca3a88c322aef0d653e61093a14428e6bd))
+* serialize Gson elements in additional data ([7a7b176](https://github.com/microsoft/kiota-java/commit/7a7b176039d8c9163a79fbe721c27d43ac0e2a95))
+
+## [1.10.0](https://github.com/microsoft/kiota-java/compare/v1.9.3...v1.10.0) (2026-08-31)
+
+
+### Features
+
+* adds support for wildcard host validation ([#2170](https://github.com/microsoft/kiota-java/issues/2170)) ([1040330](https://github.com/microsoft/kiota-java/commit/104033053ccb82f5952194799a4048dd6b1b67c2))
+
+
+### Bug Fixes
+
+* replace SpotBugs suppressions with code-level test fixes ([9b8f89c](https://github.com/microsoft/kiota-java/commit/9b8f89c7680c771f59373ea58f3c3c55743156ef))
+
+## [1.9.3](https://github.com/microsoft/kiota-java/compare/v1.9.2...v1.9.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* null reference handling and spotbug infringements ([47ea6b3](https://github.com/microsoft/kiota-java/commit/47ea6b393c904c0c0d954f46749b4b6df468b25b))
+
+## [1.9.2](https://github.com/microsoft/kiota-java/compare/v1.9.1...v1.9.2) (2026-03-17)
+
+
+### Bug Fixes
+
+* reduce parse node allocations when deserializing primitive types ([#2094](https://github.com/microsoft/kiota-java/issues/2094)) ([0a0cf2f](https://github.com/microsoft/kiota-java/commit/0a0cf2fc539aea05af692b64bc2bd9d6fc905dce))
+
+## [1.9.1](https://github.com/microsoft/kiota-java/compare/v1.9.0...v1.9.1) (2026-03-02)
+
+
+### Bug Fixes
+
+* check for port changes on redirect ([5746c34](https://github.com/microsoft/kiota-java/commit/5746c345691d550ee2373c1f217aad37f1bb6c38))
+* **security:** vulnerability where all headers are passed on redirect ([38e45c9](https://github.com/microsoft/kiota-java/commit/38e45c916dc2f7d883d80af25812d927bee3c9e4))
+
+## [1.9.0](https://github.com/microsoft/kiota-java/compare/v1.8.12...v1.9.0) (2025-11-20)
+
+
+### Features
+
+* allows customization of JSON serialization through GSON TypeAdapters ([41d7c77](https://github.com/microsoft/kiota-java/commit/41d7c77b4f3a90bb9ab5b61ff602c4b20280e750))
+
+## [1.8.12](https://github.com/microsoft/kiota-java/compare/v1.8.11...v1.8.12) (2025-11-18)
+
+
+### Bug Fixes
+
+* allow arrays of all supported types in getSanitizedValues ([96f9f31](https://github.com/microsoft/kiota-java/commit/96f9f311b4f16766bd95776341597c9b3d5a5d74))
+* mitigate illegal substitution exceptions ([b21e82f](https://github.com/microsoft/kiota-java/commit/b21e82faf1269173f22c3fbcd3ddaed3c87671fb))
+
+## [1.8.11](https://github.com/microsoft/kiota-java/compare/v1.8.10...v1.8.11) (2025-11-14)
+
+
+### Bug Fixes
+
+* handle negative retry interval in RetryHandler ([f79bc62](https://github.com/microsoft/kiota-java/commit/f79bc626b2c51efa06fc7eef5f0b9ff2ee1e5048))
+* prevent negative timeout in RetryHandler causing IllegalArgumentException ([dd0be6c](https://github.com/microsoft/kiota-java/commit/dd0be6c80398bd1a80f17da18e04c57cc6c79281))
+
+## [1.8.10](https://github.com/microsoft/kiota-java/compare/v1.8.9...v1.8.10) (2025-09-08)
+
+
+### Bug Fixes
+
+* deserialization of `List<Double>` in JSON parse node ([737591e](https://github.com/microsoft/kiota-java/commit/737591e5118be4dcc68544e73f755f26fc9a4cb2))
+
+## [1.8.9](https://github.com/microsoft/kiota-java/compare/v1.8.8...v1.8.9) (2025-08-07)
+
+
+### Bug Fixes
+
+* Patch RetryHandler.tryParseTimeHeader to support comma separated values returned by the server ([77a52a0](https://github.com/microsoft/kiota-java/commit/77a52a0629bfe722f582e0666d060b01ac064f1b))
+
+## [1.8.8](https://github.com/microsoft/kiota-java/compare/v1.8.7...v1.8.8) (2025-07-04)
+
+
+### Bug Fixes
+
+* Ensure 304 response code does not throw exceptions ([5a03f1a](https://github.com/microsoft/kiota-java/commit/5a03f1a736f190e534e77a577c30dadbcf9c6c4b))
+
+## [1.8.7](https://github.com/microsoft/kiota-java/compare/v1.8.6...v1.8.7) (2025-07-02)
+
+
+### Bug Fixes
+
+* bumps azure core to avoid jar confusion on jwks-rsa-java ([6384963](https://github.com/microsoft/kiota-java/commit/63849637068adcfa5c3f1937760194639f8638d8))
+* bumps azure core to avoid jar confusion on jwks-rsa-java ([cc98340](https://github.com/microsoft/kiota-java/commit/cc98340c8b449e6369c4a16042a8867ba27eedb6))
+
+## [1.8.6](https://github.com/microsoft/kiota-java/compare/v1.8.5...v1.8.6) (2025-06-23)
+
+
+### Bug Fixes
+
+* sanity release due to pipeline migration ([aa03b3d](https://github.com/microsoft/kiota-java/commit/aa03b3dac8cbd87fcf2875853b3c70aa1415fe92))
+
+## [1.8.5](https://github.com/microsoft/kiota-java/compare/v1.8.4...v1.8.5) (2025-06-13)
+
+
+### Bug Fixes
+
+* Ensure redirects are handled by middleware.RedirectHandler ([#1909](https://github.com/microsoft/kiota-java/issues/1909)) ([141d17d](https://github.com/microsoft/kiota-java/commit/141d17de53bd3b3a3249ef7126698b389818c585))
+
+## [1.8.4](https://github.com/microsoft/kiota-java/compare/v1.8.3...v1.8.4) (2025-02-25)
+
+
+### Bug Fixes
+
+* resolve build errors for azure authentication package on android ([43a3a84](https://github.com/microsoft/kiota-java/commit/43a3a84670116492b7191f07081fb9c5fa405038))
+* resolve build errors for azure authentication package on android ([5fda34b](https://github.com/microsoft/kiota-java/commit/5fda34b2edceb9e100cfe72b8488e6a0c0b6e1ae))
+
+## [1.8.3](https://github.com/microsoft/kiota-java/compare/v1.8.2...v1.8.3) (2025-02-20)
+
+
+### Bug Fixes
+
+* Ensure 3XX responses without location header do not throw ([214a624](https://github.com/microsoft/kiota-java/commit/214a6245cc80d1d3593d1f1098f9d37d6e700f6e))
+* Ensure 3XX responses without location header do not throw ([214a624](https://github.com/microsoft/kiota-java/commit/214a6245cc80d1d3593d1f1098f9d37d6e700f6e))
+* Ensures 3XX responses without location header do not throw ([214a624](https://github.com/microsoft/kiota-java/commit/214a6245cc80d1d3593d1f1098f9d37d6e700f6e))
+
+## [1.8.2](https://github.com/microsoft/kiota-java/compare/v1.8.1...v1.8.2) (2024-12-23)
+
+
+### Bug Fixes
+
+* Handle failure to reset request body streams after writing request body ([ae47a97](https://github.com/microsoft/kiota-java/commit/ae47a97d0f4b20017cfa7c10077f900362c5eb6a))
+
+## [1.8.1](https://github.com/microsoft/kiota-java/compare/v1.8.0...v1.8.1) (2024-12-19)
+
+
+### Bug Fixes
+
+* aligns http attributes names with latest open telemetry specification ([d38411a](https://github.com/microsoft/kiota-java/commit/d38411a5d4351b2b0ed5f59180d278ee16813064))
+* aligns retry handler attributes with latest open telemetry specification ([2e15fa5](https://github.com/microsoft/kiota-java/commit/2e15fa54b50dfd6eedc552a20d477e1d551527e7))
+
+## [1.8.0](https://github.com/microsoft/kiota-java/compare/v1.7.0...v1.8.0) (2024-11-14)
+
+
+### Features
+
+* Support overriding default interceptor options when creating OkHttp clients with authentication enabled ([7876bab](https://github.com/microsoft/kiota-java/commit/7876bab5e1a5652b6e35d3f98ec2dae669690de0))
+
+## [1.7.0](https://github.com/microsoft/kiota-java/compare/v1.6.0...v1.7.0) (2024-10-11)
+
+
+### Features
+
+* adds the ability to pass options to default interceptors ([d1c97c1](https://github.com/microsoft/kiota-java/commit/d1c97c13347d607933040fb22db73fe40a69b036))
+
+## [1.6.0](https://github.com/microsoft/kiota-java/compare/v1.5.1...v1.6.0) (2024-10-08)
+
+
+### Features
+
+* Adds overload to serialization proxy factories to configure serialization of all values in backed models ([867953c](https://github.com/microsoft/kiota-java/commit/867953cbd0523cd8d146a5f3a522cd8652ccd924))
+* Adds overloads to serialization helper methods with backing store serialization configuration options ([0006ff8](https://github.com/microsoft/kiota-java/commit/0006ff8538e2c26692c4e2f3238fadaec1436027))
+
+## [1.5.1](https://github.com/microsoft/kiota-java/compare/v1.5.0...v1.5.1) (2024-10-03)
+
+
+### Bug Fixes
+
+* attempt to trigger release ([954b8e5](https://github.com/microsoft/kiota-java/commit/954b8e5b1a86058c93d226b2d19755b87943140c))
+* attempt to trigger release ([8914f9c](https://github.com/microsoft/kiota-java/commit/8914f9c81764fd7e52cc20af4a630c66248ca5f6))
+* upgrades to std uri template and additional date formats management ([df6208a](https://github.com/microsoft/kiota-java/commit/df6208a518744e2b41353219f295dc6941e51147))
+
+## [1.5.0] - 2024-09-30
+
+### Added
+- Adds an `AuthorizationHandler` that authenticates requests using a provided `BaseBearerTokenAuthenticationProvider`. Opting in to use this middleware can be done
+via `KiotaClientFactory.create(authProvider)`.
+
+
+## [1.4.0] - 2024-09-11
+
+### Changed
+
+- Fix InMemoryBackingStore by preventing updates to underlying store's Map while iterating over it [#2106](https://github.com/microsoftgraph/msgraph-sdk-java/issues/2106)
+- Use concurrent HashMap for In memory backing store registry to avoid race conditions.
+
+## [1.3.0] - 2024-08-22
+
+### Changed
+
+- Ensure interceptors don't drain request body stream before network call [#2037](https://github.com/microsoftgraph/msgraph-sdk-java/issues/2037)
+
+## [1.2.0] - 2024-08-09
+
+### Changed
+
+- Adds bundle package for Kiota [#1420](https://github.com/microsoft/kiota-java/issues/1420).
+- Continuous Access Evaluation is now enabled by default for Azure Identity.
 
 ## [1.1.14] - 2024-06-10
 

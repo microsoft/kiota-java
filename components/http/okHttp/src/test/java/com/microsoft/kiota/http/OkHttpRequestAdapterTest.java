@@ -6,8 +6,10 @@ import static org.mockito.Mockito.*;
 
 import com.microsoft.kiota.ApiException;
 import com.microsoft.kiota.HttpMethod;
+import com.microsoft.kiota.NativeResponseHandler;
 import com.microsoft.kiota.RequestInformation;
 import com.microsoft.kiota.authentication.AuthenticationProvider;
+import com.microsoft.kiota.http.middleware.MockResponseHandler;
 import com.microsoft.kiota.serialization.Parsable;
 import com.microsoft.kiota.serialization.ParsableFactory;
 import com.microsoft.kiota.serialization.ParseNode;
@@ -25,7 +27,10 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 
+import okio.Buffer;
 import okio.Okio;
 
 import org.junit.jupiter.api.Test;
@@ -46,10 +51,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class OkHttpRequestAdapterTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
     @ParameterizedTest
     @EnumSource(
             value = HttpMethod.class,
-            names = {"PUT", "POST", "PATCH"})
+            names = {"PUT", "POST", "PATCH", "QUERY"})
     void postRequestsShouldHaveEmptyBody(HttpMethod method)
             throws Exception { // Unexpected exception thrown: java.lang.IllegalArgumentException:
         // method POST must have a request body.
@@ -115,7 +124,7 @@ public class OkHttpRequestAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {200, 201, 202, 203, 204})
+    @ValueSource(ints = {200, 201, 202, 203, 204, 304})
     void sendStreamReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
@@ -144,7 +153,7 @@ public class OkHttpRequestAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {200, 201, 202, 203, 204, 205})
+    @ValueSource(ints = {200, 201, 202, 203, 204, 205, 304})
     void sendReturnsNullOnNoContent(int statusCode) throws Exception {
         final var authenticationProviderMock = mock(AuthenticationProvider.class);
         authenticationProviderMock.authenticateRequest(
@@ -401,6 +410,209 @@ public class OkHttpRequestAdapterTest {
         assertEquals(0, request.body().contentLength());
     }
 
+    @Test
+    void buildsNativeRequestSupportingMultipleWrites() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var requestInformation = new RequestInformation();
+        requestInformation.setUri(new URI("https://localhost"));
+        var requestBodyJson = "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}";
+        ByteArrayInputStream content =
+                new ByteArrayInputStream(requestBodyJson.getBytes(StandardCharsets.UTF_8));
+        requestInformation.setStreamContent(content, "application/json");
+        requestInformation.httpMethod = HttpMethod.PUT;
+
+        final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+        final var request =
+                adapter.getRequestFromRequestInformation(
+                        requestInformation, mock(Span.class), mock(Span.class));
+
+        final var requestBody = request.body();
+        assertNotNull(requestBody);
+        var buffer = new Buffer();
+        requestBody.writeTo(buffer);
+        assertEquals(requestBodyJson, buffer.readUtf8());
+
+        // Second write to the buffer to ensure the body is not consumed
+        buffer = new Buffer();
+        requestBody.writeTo(buffer);
+        assertEquals(requestBodyJson, buffer.readUtf8());
+    }
+
+    @Test
+    void buildsNativeRequestSupportingOneShotWrite() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        final var testFile = new File("./src/test/resources/helloWorld.txt");
+        final var requestInformation = new RequestInformation();
+
+        requestInformation.setUri(new URI("https://localhost"));
+        requestInformation.httpMethod = HttpMethod.PUT;
+        final var contentLength = testFile.length();
+        requestInformation.headers.add("Content-Length", String.valueOf(contentLength));
+        try (FileInputStream content = new FileInputStream(testFile)) {
+            requestInformation.setStreamContent(content, "application/octet-stream");
+
+            final var adapter = new OkHttpRequestAdapter(authenticationProviderMock);
+            final var request =
+                    adapter.getRequestFromRequestInformation(
+                            requestInformation, mock(Span.class), mock(Span.class));
+
+            final var requestBody = request.body();
+            assertNotNull(requestBody);
+            var buffer = new Buffer();
+            requestBody.writeTo(buffer);
+            assertEquals(contentLength, buffer.size());
+
+            // Second write to the buffer to ensure the body is not consumed
+            buffer = new Buffer();
+            requestBody.writeTo(buffer);
+            assertEquals(0, buffer.size());
+        }
+    }
+
+    @Test
+    void loggingInterceptorDoesNotDrainRequestBodyForMarkableStreams() throws Exception {
+        var loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(Level.BODY);
+
+        var okHttpClient =
+                KiotaClientFactory.create()
+                        .addInterceptor(loggingInterceptor)
+                        .addInterceptor(new MockResponseHandler())
+                        .build();
+
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, null, null, okHttpClient);
+
+        final var requestInformation = new RequestInformation();
+        requestInformation.setUri(new URI("https://localhost"));
+        var requestBodyJson = "{\"name\":\"value\",\"array\":[\"1\",\"2\",\"3\"]}";
+        ByteArrayInputStream content =
+                new ByteArrayInputStream(requestBodyJson.getBytes(StandardCharsets.UTF_8));
+        requestInformation.setStreamContent(content, "application/json");
+        requestInformation.httpMethod = HttpMethod.PUT;
+        var nativeResponseHandler = new NativeResponseHandler();
+        requestInformation.setResponseHandler(nativeResponseHandler);
+
+        var mockEntity = creatMockEntity();
+        requestAdapter.send(requestInformation, null, node -> mockEntity);
+        var nativeResponse = (Response) nativeResponseHandler.getValue();
+        assertNotNull(nativeResponse);
+        assertEquals(requestBodyJson, nativeResponse.body().source().readUtf8());
+    }
+
+    @Test
+    void loggingInterceptorDoesNotDrainRequestBodyForNonMarkableStreams() throws Exception {
+        var loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(Level.BODY);
+
+        var okHttpClient =
+                KiotaClientFactory.create()
+                        .addInterceptor(loggingInterceptor)
+                        .addInterceptor(new MockResponseHandler())
+                        .build();
+
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, null, null, okHttpClient);
+
+        final var requestInformation = new RequestInformation();
+        requestInformation.setUri(new URI("https://localhost"));
+        requestInformation.httpMethod = HttpMethod.PUT;
+        var nativeResponseHandler = new NativeResponseHandler();
+        requestInformation.setResponseHandler(nativeResponseHandler);
+
+        final var testFile = new File("./src/test/resources/helloWorld.txt");
+        final var contentLength = testFile.length();
+
+        try (FileInputStream content = new FileInputStream(testFile)) {
+            requestInformation.setStreamContent(content, "application/octet-stream");
+            var mockEntity = creatMockEntity();
+            requestAdapter.send(requestInformation, null, node -> mockEntity);
+            var nativeResponse = (Response) nativeResponseHandler.getValue();
+            assertNotNull(nativeResponse);
+            assertEquals(contentLength, nativeResponse.body().source().readByteArray().length);
+        }
+    }
+
+    @Test
+    void testHandle3XXResponseWithoutLocationHeader() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        final var client =
+                getMockClient(
+                        new Response.Builder()
+                                .code(301)
+                                .message("Moved Permanently")
+                                .protocol(Protocol.HTTP_1_1)
+                                .request(new Request.Builder().url("http://localhost").build())
+                                .body(
+                                        ResponseBody.create(
+                                                "test".getBytes("UTF-8"),
+                                                MediaType.parse("application/json")))
+                                .build());
+        final var requestInformation =
+                new RequestInformation() {
+                    {
+                        setUri(new URI("https://localhost"));
+                        httpMethod = HttpMethod.GET;
+                    }
+                };
+        final var mockEntity = creatMockEntity();
+        final var mockParseNode = creatMockParseNode(mockEntity);
+        final var mockFactory = creatMockParseNodeFactory(mockParseNode, "application/json");
+
+        final var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
+        var nativeResponseHandler = new NativeResponseHandler();
+        requestAdapter.send(requestInformation, null, node -> mockEntity);
+        var nativeResponse = (Response) nativeResponseHandler.getValue();
+        assertNull(nativeResponse);
+    }
+
+    @Test
+    void handle3XXResponseWithLocationHeader() throws Exception {
+        final var authenticationProviderMock = mock(AuthenticationProvider.class);
+        authenticationProviderMock.authenticateRequest(
+                any(RequestInformation.class), any(Map.class));
+        final var client =
+                getMockClient(
+                        new Response.Builder()
+                                .code(301)
+                                .message("Moved Permanently")
+                                .protocol(Protocol.HTTP_1_1)
+                                .request(new Request.Builder().url("http://localhost").build())
+                                .header("Location", "https://newlocation")
+                                .body(
+                                        ResponseBody.create(
+                                                "test".getBytes("UTF-8"),
+                                                MediaType.parse("application/json")))
+                                .build());
+        final var requestInformation =
+                new RequestInformation() {
+                    {
+                        setUri(new URI("https://localhost"));
+                        httpMethod = HttpMethod.GET;
+                    }
+                };
+        final var mockEntity = creatMockEntity();
+        final var mockParseNode = creatMockParseNode(mockEntity);
+        final var mockFactory = creatMockParseNodeFactory(mockParseNode, "application/json");
+
+        final var requestAdapter =
+                new OkHttpRequestAdapter(authenticationProviderMock, mockFactory, null, client);
+        var nativeResponseHandler = new NativeResponseHandler();
+        requestAdapter.send(requestInformation, null, node -> mockEntity);
+        // Should throw an exception
+        var nativeResponse = (Response) nativeResponseHandler.getValue();
+        assertNull(nativeResponse);
+    }
+
     public static OkHttpClient getMockClient(final Response response) throws IOException {
         final OkHttpClient mockClient = mock(OkHttpClient.class);
         final Call remoteCall = mock(Call.class);
@@ -410,7 +622,7 @@ public class OkHttpRequestAdapterTest {
                         (Answer<Void>)
                                 invocation -> {
                                     Callback callback = invocation.getArgument(0);
-                                    callback.onResponse(null, response);
+                                    callback.onResponse(nullValue(), response);
                                     return null;
                                 })
                 .when(remoteCall)

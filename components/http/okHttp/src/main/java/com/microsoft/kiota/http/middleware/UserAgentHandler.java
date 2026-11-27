@@ -73,6 +73,10 @@ public class UserAgentHandler implements Interceptor {
             } else if (!currentValue.contains(valueToAppend)) {
                 builder.header(USER_AGENT_HEADER_NAME, currentValue + " " + valueToAppend);
             }
+            if (span != null) {
+                builder.tag(Span.class, span);
+            }
+            return chain.proceed(builder.build());
         } finally {
             if (scope != null) {
                 scope.close();
@@ -81,6 +85,5 @@ public class UserAgentHandler implements Interceptor {
                 span.end();
             }
         }
-        return chain.proceed(builder.build());
     }
 }

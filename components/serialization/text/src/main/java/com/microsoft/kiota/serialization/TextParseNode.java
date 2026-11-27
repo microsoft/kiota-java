@@ -27,13 +27,14 @@ public class TextParseNode implements ParseNode {
 
     /**
      * Initializes a new instance of the {@link TextParseNode} class.
+     * Enclosing double quotes are stripped when the string length is at least 2.
      * @param rawText the raw text to parse.
      */
     public TextParseNode(@Nonnull final String rawText) {
         Objects.requireNonNull(rawText, "parameter node cannot be null");
         text =
-                rawText.startsWith("\"") && rawText.endsWith("\"")
-                        ? rawText.substring(1, rawText.length() - 2)
+                rawText.length() >= 2 && rawText.startsWith("\"") && rawText.endsWith("\"")
+                        ? rawText.substring(1, rawText.length() - 1)
                         : rawText;
     }
 
@@ -78,7 +79,8 @@ public class TextParseNode implements ParseNode {
     }
 
     @Nullable public UUID getUUIDValue() {
-        return UUID.fromString(this.getStringValue());
+        final String value = this.getStringValue();
+        return value != null ? UUID.fromString(value) : null;
     }
 
     @Nullable public OffsetDateTime getOffsetDateTimeValue() {
@@ -104,7 +106,8 @@ public class TextParseNode implements ParseNode {
     }
 
     @Nullable public PeriodAndDuration getPeriodAndDurationValue() {
-        return PeriodAndDuration.parse(this.getStringValue());
+        final String value = this.getStringValue();
+        return value != null ? PeriodAndDuration.parse(value) : null;
     }
 
     @Nullable public <T> List<T> getCollectionOfPrimitiveValues(@Nonnull final Class<T> targetClass) {

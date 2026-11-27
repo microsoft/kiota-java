@@ -355,3 +355,8 @@ MigrationBackup/
 
 # build file
 build/
+
+local.properties
+
+*.gpg
+*.zip

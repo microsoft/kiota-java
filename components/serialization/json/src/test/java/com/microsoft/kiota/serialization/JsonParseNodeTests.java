@@ -1,8 +1,18 @@
 package com.microsoft.kiota.serialization;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.microsoft.kiota.serialization.mocks.MyEnum;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
@@ -12,8 +22,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.util.EnumSet;
 
 class JsonParseNodeTests {
     private static final JsonParseNodeFactory _parseNodeFactory = new JsonParseNodeFactory();
@@ -66,6 +81,44 @@ class JsonParseNodeTests {
                 + "    }\r\n"
                 + "}";
 
+    public static final DateTimeFormatter customFormatter =
+            new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    .parseLenient()
+                    .appendOffset("+HHmm", "+0000")
+                    .parseStrict()
+                    .toFormatter();
+
+    public static final Gson customGson =
+            DefaultGsonBuilder.getDefaultBuilder()
+                    .registerTypeAdapter(
+                            OffsetDateTime.class,
+                            new TypeAdapter<OffsetDateTime>() {
+                                @Override
+                                public OffsetDateTime read(JsonReader in) throws IOException {
+                                    String stringValue = in.nextString();
+                                    try {
+                                        return customFormatter.parse(
+                                                stringValue, OffsetDateTime::from);
+                                    } catch (DateTimeParseException ex) {
+                                        throw new JsonSyntaxException(
+                                                "Failed parsing '"
+                                                        + stringValue
+                                                        + "' as LocalDate; at path "
+                                                        + in.getPreviousPath(),
+                                                ex);
+                                    }
+                                }
+
+                                @Override
+                                public void write(JsonWriter out, OffsetDateTime value)
+                                        throws IOException {
+                                    out.value(customFormatter.format(value));
+                                }
+                            }.nullSafe())
+                    .create();
+
     @Test
     void itDDoesNotFailForGetChildElementOnMissingKey() throws UnsupportedEncodingException {
         final var initialString = "{displayName\": \"Microsoft Teams Meeting\"}";
@@ -76,10 +129,28 @@ class JsonParseNodeTests {
     }
 
     @Test
+    void returnsNullWhenEnumSetHasNoKnownValues() {
+        final var parseNode = new JsonParseNode(new JsonPrimitive("UNKNOWN1,UNKNOWN2"));
+
+        assertNull(parseNode.getEnumSetValue(MyEnum::forValue));
+    }
+
+    @Test
+    void retainsKnownEnumSetValuesWhenOthersAreUnknown() {
+        final var parseNode = new JsonParseNode(new JsonPrimitive("VALUE1,UNKNOWN,VALUE2"));
+
+        assertEquals(
+                EnumSet.of(MyEnum.MY_VALUE1, MyEnum.MY_VALUE2),
+                parseNode.getEnumSetValue(MyEnum::forValue));
+    }
+
+    @Test
     void testParsesDateTimeOffset() {
         final var dateTimeOffsetString = "2024-02-12T19:47:39+02:00";
         final var jsonElement = JsonParser.parseString("\"" + dateTimeOffsetString + "\"");
-        final var result = new JsonParseNode(jsonElement).getOffsetDateTimeValue();
+        final var result =
+                new JsonParseNode(jsonElement, DefaultGsonBuilder.getDefaultInstance())
+                        .getOffsetDateTimeValue();
         assertEquals(dateTimeOffsetString, result.toString());
     }
 
@@ -87,7 +158,9 @@ class JsonParseNodeTests {
     void testParsesDateTimeStringWithoutOffsetToDateTimeOffset() {
         final var dateTimeString = "2024-02-12T19:47:39";
         final var jsonElement = JsonParser.parseString("\"" + dateTimeString + "\"");
-        final var result = new JsonParseNode(jsonElement).getOffsetDateTimeValue();
+        final var result =
+                new JsonParseNode(jsonElement, DefaultGsonBuilder.getDefaultInstance())
+                        .getOffsetDateTimeValue();
         assertEquals(dateTimeString + "Z", result.toString());
     }
 
@@ -96,11 +169,21 @@ class JsonParseNodeTests {
     void testInvalidOffsetDateTimeStringThrowsException(final String dateTimeString) {
         final var jsonElement = JsonParser.parseString("\"" + dateTimeString + "\"");
         try {
-            new JsonParseNode(jsonElement).getOffsetDateTimeValue();
+            new JsonParseNode(jsonElement, DefaultGsonBuilder.getDefaultInstance())
+                    .getOffsetDateTimeValue();
         } catch (final Exception ex) {
-            assertInstanceOf(DateTimeParseException.class, ex);
+            assertInstanceOf(JsonSyntaxException.class, ex);
             assertTrue(ex.getMessage().contains(dateTimeString));
         }
+    }
+
+    @Test
+    void testNonStandardOffsetDateTimeParsing() {
+        final var dateTimeString = "2024-02-12T19:47:39+0000";
+        final var jsonElement = JsonParser.parseString("\"" + dateTimeString + "\"");
+        final var parsedOffsetDateTime =
+                new JsonParseNode(jsonElement, customGson).getOffsetDateTimeValue();
+        assertEquals(OffsetDateTime.parse("2024-02-12T19:47:39+00:00"), parsedOffsetDateTime);
     }
 
     @Test
@@ -171,5 +254,20 @@ class JsonParseNodeTests {
                 assertNotNull(rowItem); // The values are UntypedInteger
             }
         }
+    }
+
+    @Test
+    void getCollectionOfPrimitiveDoubleValues() throws UnsupportedEncodingException {
+        final var initialString = "{\"values\":[1.1,2.2,3.3]}";
+        final var rawResponse = new ByteArrayInputStream(initialString.getBytes("UTF-8"));
+        final var parseNode = _parseNodeFactory.getParseNode(contentType, rawResponse);
+        final var valuesNode = parseNode.getChildNode("values");
+        assertNotNull(valuesNode);
+        final var doubles = valuesNode.getCollectionOfPrimitiveValues(Double.class);
+        assertNotNull(doubles);
+        assertEquals(3, doubles.size());
+        assertEquals(1.1, doubles.get(0), 0.000001);
+        assertEquals(2.2, doubles.get(1), 0.000001);
+        assertEquals(3.3, doubles.get(2), 0.000001);
     }
 }

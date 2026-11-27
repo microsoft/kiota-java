@@ -12,21 +12,25 @@ import com.microsoft.kiota.serialization.SerializationWriter;
 import org.junit.jupiter.api.Test;
 
 class MultiPartBodyTest {
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
     @Test
     void defensive() {
         final MultipartBody multipartBody = new MultipartBody();
         assertThrows(
                 IllegalArgumentException.class,
-                () -> multipartBody.addOrReplacePart(null, "foo", "bar"));
+                () -> multipartBody.addOrReplacePart(nullValue(), "foo", "bar"));
         assertThrows(
                 IllegalArgumentException.class,
-                () -> multipartBody.addOrReplacePart("foo", null, "bar"));
+                () -> multipartBody.addOrReplacePart("foo", nullValue(), "bar"));
         assertThrows(
                 NullPointerException.class,
-                () -> multipartBody.addOrReplacePart("foo", "bar", null));
-        assertThrows(IllegalArgumentException.class, () -> multipartBody.getPartValue(null));
-        assertThrows(IllegalArgumentException.class, () -> multipartBody.removePart(null));
-        assertThrows(NullPointerException.class, () -> multipartBody.serialize(null));
+                () -> multipartBody.addOrReplacePart("foo", "bar", nullValue()));
+        assertThrows(IllegalArgumentException.class, () -> multipartBody.getPartValue(nullValue()));
+        assertThrows(IllegalArgumentException.class, () -> multipartBody.removePart(nullValue()));
+        assertThrows(NullPointerException.class, () -> multipartBody.serialize(nullValue()));
         assertThrows(
                 UnsupportedOperationException.class, () -> multipartBody.getFieldDeserializers());
     }

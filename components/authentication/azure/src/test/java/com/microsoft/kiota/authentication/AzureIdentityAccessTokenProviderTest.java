@@ -32,7 +32,8 @@ public class AzureIdentityAccessTokenProviderTest {
         var tokenCredential = mock(TokenCredential.class);
         when(tokenCredential.getTokenSync(any(TokenRequestContext.class)))
                 .thenReturn(new AccessToken("token", null));
-        var accessTokenProvider = new AzureIdentityAccessTokenProvider(tokenCredential, null, "");
+        var accessTokenProvider =
+                new AzureIdentityAccessTokenProvider(tokenCredential, new String[] {}, "");
         assertEquals(
                 "token",
                 accessTokenProvider.getAuthorizationToken(new URI(urlString), new HashMap<>()));
@@ -42,7 +43,8 @@ public class AzureIdentityAccessTokenProviderTest {
     @ValueSource(strings = {"http://graph.microsoft.com/me"})
     void testNonLocalhostHttpUrlIsInvalid(String urlString) {
         var tokenCredential = mock(TokenCredential.class);
-        var accessTokenProvider = new AzureIdentityAccessTokenProvider(tokenCredential, null, "");
+        var accessTokenProvider =
+                new AzureIdentityAccessTokenProvider(tokenCredential, new String[] {}, "");
         assertThrows(
                 IllegalArgumentException.class,
                 () ->

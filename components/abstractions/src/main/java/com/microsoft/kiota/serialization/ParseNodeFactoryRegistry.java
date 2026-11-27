@@ -1,5 +1,7 @@
 package com.microsoft.kiota.serialization;
 
+import com.microsoft.kiota.ClientException;
+
 import jakarta.annotation.Nonnull;
 
 import java.io.InputStream;
@@ -32,6 +34,9 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
     private static final Pattern contentTypeVendorCleanupPattern =
             Pattern.compile("[^/]+\\+", Pattern.CASE_INSENSITIVE);
 
+    /** {@inheritDoc}
+     * @throws ClientException when no factory is registered for the content type
+     */
     @Override
     @Nonnull public ParseNode getParseNode(
             @Nonnull final String contentType, @Nonnull final InputStream rawResponse) {
@@ -53,7 +58,7 @@ public class ParseNodeFactoryRegistry implements ParseNodeFactory {
                     .get(cleanedContentType)
                     .getParseNode(cleanedContentType, rawResponse);
         }
-        throw new RuntimeException(
+        throw new ClientException(
                 "Content type " + cleanedContentType + " does not have a factory to be parsed");
     }
 }

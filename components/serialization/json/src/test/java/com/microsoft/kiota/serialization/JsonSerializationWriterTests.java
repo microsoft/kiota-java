@@ -1,21 +1,59 @@
 package com.microsoft.kiota.serialization;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.google.gson.JsonParser;
 import com.microsoft.kiota.Compatibility;
+import com.microsoft.kiota.PeriodAndDuration;
 import com.microsoft.kiota.serialization.mocks.MyEnum;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
 import com.microsoft.kiota.serialization.mocks.UntypedTestEntity;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 class JsonSerializationWriterTests {
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "{\"@odata.type\":\"#CustomSecurityAttributeValue\",\"ids\":[\"123\",\"321\"],\"nested\":{\"nil\":null}}",
+                "[1,false,null,{\"name\":\"test\"}]",
+                "\"quoted \\\" text\"",
+                "false",
+                "123456789012345678901234567890",
+                "null",
+                "{}",
+                "[]"
+            })
+    void serializesJsonElementsInAdditionalData(String json) throws IOException {
+        var entity = new TestEntity();
+        entity.getAdditionalData().put("extra", JsonParser.parseString(json));
+        try (var serializer = new JsonSerializationWriter()) {
+            serializer.writeObjectValue(null, entity);
+            var actual =
+                    new String(
+                            Compatibility.readAllBytes(serializer.getSerializedContent()), "UTF-8");
+            assertEquals(
+                    JsonParser.parseString("{\"extra\":" + json + "}"),
+                    JsonParser.parseString(actual));
+        }
+    }
 
     @Test
     void writesSampleObjectValueWithPrimitivesInAdditionalData() throws IOException {
@@ -53,15 +91,34 @@ class JsonSerializationWriterTests {
                 .getAdditionalData()
                 .put("aliases", aliases); // place a collection in the additional data
 
-        var jsonSerializer = new JsonSerializationWriter();
-        jsonSerializer.writeObjectValue("", testEntity);
-        var contentStream = jsonSerializer.getSerializedContent();
-        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
-        // Assert
-        var expectedString =
-                "{\"aliases\":[\"alias1\",\"alias2\"],\"nickName\":\"Peter"
-                    + " Pan\",\"hasDependents\":true,\"accountBalance\":330.7,\"reportsCount\":4,\"averageScore\":78.142}";
-        assertEquals(expectedString, serializedJsonString);
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance())) {
+            jsonSerializer.writeObjectValue("", testEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+            // Assert
+            var expectedString =
+                    "{\"aliases\":[\"alias1\",\"alias2\"],\"nickName\":\"Peter"
+                        + " Pan\",\"hasDependents\":true,\"accountBalance\":330.7,\"reportsCount\":4,\"averageScore\":78.142}";
+            assertEquals(expectedString, serializedJsonString);
+        }
+    }
+
+    @Test
+    void useNonStandardOffsetDateTimeFormat() throws IOException {
+        var testEntity = new TestEntity();
+        testEntity.setCreatedDateTime(OffsetDateTime.parse("2024-02-12T19:47:39+00:00"));
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(JsonParseNodeTests.customGson)) {
+            jsonSerializer.writeObjectValue("", testEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+            // Assert
+            var expectedString = "{\"createdDateTime\":\"2024-02-12T19:47:39+0000\"}";
+            assertEquals(expectedString, serializedJsonString);
+        }
     }
 
     @Test
@@ -79,14 +136,17 @@ class JsonSerializationWriterTests {
                 .getAdditionalData()
                 .put("manager", managerAdditionalData); // place a parsable in the addtionaldata
 
-        var jsonSerializer = new JsonSerializationWriter();
-        jsonSerializer.writeObjectValue("", testEntity);
-        var contentStream = jsonSerializer.getSerializedContent();
-        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
-        // Assert
-        var expectedString =
-                "{\"id\":\"test_id\",\"phones\":[\"123456789\"],\"manager\":{\"id\":\"manager_id\",\"myEnum\":\"VALUE1\"}}";
-        assertEquals(expectedString, serializedJsonString);
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance())) {
+            jsonSerializer.writeObjectValue("", testEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+            // Assert
+            var expectedString =
+                    "{\"id\":\"test_id\",\"phones\":[\"123456789\"],\"manager\":{\"id\":\"manager_id\",\"myEnum\":\"VALUE1\"}}";
+            assertEquals(expectedString, serializedJsonString);
+        }
     }
 
     @Test
@@ -182,21 +242,86 @@ class JsonSerializationWriterTests {
                                     }
                                 }));
 
-        var jsonSerializer = new JsonSerializationWriter();
-        jsonSerializer.writeObjectValue("", untypedTestEntity);
-        var contentStream = jsonSerializer.getSerializedContent();
-        var serializedJsonString = new String(Compatibility.readAllBytes(contentStream), "UTF-8");
+        try (final var jsonSerializer =
+                new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance())) {
+            jsonSerializer.writeObjectValue("", untypedTestEntity);
+            var contentStream = jsonSerializer.getSerializedContent();
+            var serializedJsonString =
+                    new String(Compatibility.readAllBytes(contentStream), "UTF-8");
 
-        // Assert
-        var expectedString =
-                "{\"id\":\"1\","
-                    + "\"location\":{\"hasReception\":true,\"address\":{\"state\":\"Washington\",\"city\":\"Redmond\",\"street\":\"NE"
-                    + " 36th St\",\"postalCode\":\"98052\"},\"displayName\":\"Microsoft Building"
-                    + " 92\",\"floorCount\":50,\"contact\":null,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222}},"
-                    + "\"keywords\":["
-                    + "{\"wssId\":345345345,\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\",\"created\":\"2023-07-26T10:41:26Z\"},"
-                    + "{\"wssId\":345345345,\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\",\"created\":\"2023-07-26T10:51:26Z\"}],"
-                    + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
-        assertEquals(expectedString, serializedJsonString);
+            // Assert
+            var expectedString =
+                    "{\"id\":\"1\","
+                        + "\"location\":{\"hasReception\":true,\"coordinates\":{\"latitude\":47.641942,\"longitude\":-122.127222},"
+                        + "\"address\":{\"state\":\"Washington\",\"city\":\"Redmond\",\"street\":\"NE"
+                        + " 36th St\",\"postalCode\":\"98052\"},\"displayName\":\"Microsoft"
+                        + " Building 92\",\"floorCount\":50,\"contact\":null},\"keywords\":["
+                        + "{\"wssId\":345345345,\"label\":\"Keyword1\",\"termGuid\":\"10e9cc83-b5a4-4c8d-8dab-4ada1252dd70\",\"created\":\"2023-07-26T10:41:26Z\"},"
+                        + "{\"wssId\":345345345,\"label\":\"Keyword2\",\"termGuid\":\"2cae6c6a-9bb8-4a78-afff-81b88e735fef\",\"created\":\"2023-07-26T10:51:26Z\"}],"
+                        + "\"extra\":{\"createdDateTime\":\"2024-01-15T00:00:00+00:00\"}}";
+            assertEquals(expectedString, serializedJsonString);
+        }
+    }
+
+    @Test
+    void parseWrittenValues() throws IOException {
+        writeAndParse(
+                ParseNode::getStringValue, SerializationWriter::writeStringValue, "just a string");
+        writeAndParse(ParseNode::getBooleanValue, SerializationWriter::writeBooleanValue, true);
+        writeAndParse(ParseNode::getByteValue, SerializationWriter::writeByteValue, (byte) 3);
+        writeAndParse(ParseNode::getShortValue, SerializationWriter::writeShortValue, (short) 42);
+        writeAndParse(
+                ParseNode::getBigDecimalValue,
+                SerializationWriter::writeBigDecimalValue,
+                new BigDecimal(123456789L));
+        writeAndParse(ParseNode::getIntegerValue, SerializationWriter::writeIntegerValue, 54321);
+        writeAndParse(
+                ParseNode::getFloatValue, SerializationWriter::writeFloatValue, (float) 67.89);
+        writeAndParse(ParseNode::getDoubleValue, SerializationWriter::writeDoubleValue, 3245.12356);
+        writeAndParse(ParseNode::getLongValue, SerializationWriter::writeLongValue, -543219876L);
+        writeAndParse(
+                ParseNode::getUUIDValue, SerializationWriter::writeUUIDValue, UUID.randomUUID());
+        writeAndParse(
+                ParseNode::getOffsetDateTimeValue,
+                SerializationWriter::writeOffsetDateTimeValue,
+                OffsetDateTime.now());
+        writeAndParse(
+                ParseNode::getLocalDateValue,
+                SerializationWriter::writeLocalDateValue,
+                LocalDate.now());
+        writeAndParse(
+                ParseNode::getLocalTimeValue,
+                SerializationWriter::writeLocalTimeValue,
+                LocalTime.now());
+        writeAndParse(
+                ParseNode::getPeriodAndDurationValue,
+                SerializationWriter::writePeriodAndDurationValue,
+                PeriodAndDuration.of(Period.ofYears(3), Duration.ofHours(6)));
+        writeAndParse(
+                ParseNode::getByteArrayValue,
+                SerializationWriter::writeByteArrayValue,
+                new byte[] {8, 10, 127, -50, 0});
+    }
+
+    private <T> void writeAndParse(
+            TestParsable.ParseMethod<T> parseMethod,
+            TestParsable.WriteMethod<T> writeMethod,
+            T value)
+            throws IOException {
+        var testParsable = new TestParsable<>(parseMethod, writeMethod, value);
+        var writer = new JsonSerializationWriter(DefaultGsonBuilder.getDefaultInstance());
+        writer.writeObjectValue(null, testParsable);
+
+        var parseNodeFactory = new JsonParseNodeFactory(DefaultGsonBuilder.getDefaultInstance());
+        var parseNode =
+                parseNodeFactory.getParseNode("application/json", writer.getSerializedContent());
+        var result = parseNode.getObjectValue(TestParsable.factory(parseMethod, writeMethod));
+        if (value instanceof byte[] bytea) {
+            assertArrayEquals(bytea, (byte[]) result.getRealValue());
+        } else {
+            assertEquals(value, result.getRealValue());
+        }
+        assertNull(result.getNullValue());
+        writer.close();
     }
 }

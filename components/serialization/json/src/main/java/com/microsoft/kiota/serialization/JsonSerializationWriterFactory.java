@@ -1,13 +1,28 @@
 package com.microsoft.kiota.serialization;
 
+import com.google.gson.Gson;
+
 import jakarta.annotation.Nonnull;
 
 import java.util.Objects;
 
 /** Creates new Json serialization writers. */
 public class JsonSerializationWriterFactory implements SerializationWriterFactory {
+    private final Gson gson;
+
     /** Creates a new factory */
-    public JsonSerializationWriterFactory() {}
+    public JsonSerializationWriterFactory() {
+        this(DefaultGsonBuilder.getDefaultInstance());
+    }
+
+    /**
+     * Creates a new factory
+     * @param gson the {@link Gson} instance to use for writing value types.
+     */
+    public JsonSerializationWriterFactory(@Nonnull Gson gson) {
+        Objects.requireNonNull(gson, "gson contentType cannot be null");
+        this.gson = gson;
+    }
 
     /** {@inheritDoc} */
     @Nonnull public String getValidContentType() {
@@ -25,6 +40,6 @@ public class JsonSerializationWriterFactory implements SerializationWriterFactor
         } else if (!contentType.equals(validContentType)) {
             throw new IllegalArgumentException("expected a " + validContentType + " content type");
         }
-        return new JsonSerializationWriter();
+        return new JsonSerializationWriter(gson);
     }
 }

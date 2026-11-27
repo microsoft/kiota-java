@@ -47,12 +47,13 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
 		<Class name="com.microsoft.kiota.serialization.SerializationHelpersTest" />
 	</Match>
     <Match>
-		<Bug pattern="EI_EXPOSE_REP" />
-		<Class name="com.microsoft.kiota.serialization.mocks.TestEntity" />
-	</Match>
-    <Match>
         <Bug pattern="EI_EXPOSE_REP" />
-        <Class name="com.microsoft.kiota.TestEntity" />
+        <Or>
+            <Class name="com.microsoft.kiota.serialization.mocks.TestEntity" />
+            <Class name="com.microsoft.kiota.serialization.mocks.TestBackedModelEntity" />
+            <Class name="com.microsoft.kiota.TestEntity" />
+            <Class name="com.microsoft.kiota.BaseCollectionPaginationCountResponse" />
+        </Or>
     </Match>
     <Match>
         <Bug pattern="NP_LOAD_OF_KNOWN_NULL_VALUE" />
@@ -65,5 +66,24 @@ xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubu
     <Match>
         <Bug pattern="SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR" />
         <Class name="com.microsoft.kiota.store.BackingStoreFactorySingleton" />
+    </Match>
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+        <Or>
+            <Class name="com.microsoft.kiota.ApiExceptionBuilder" />
+            <Class name="com.microsoft.kiota.BaseRequestBuilder" />
+            <Class name="com.microsoft.kiota.Headers" />
+            <Class name="com.microsoft.kiota.RequestInformation" />
+            <Class name="com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider" />
+            <Class name="com.microsoft.kiota.authentication.BasicAccessAuthenticationProvider" />
+            <Class name="com.microsoft.kiota.serialization.ParseNodeProxyFactory" />
+            <Class name="com.microsoft.kiota.serialization.SerializationWriterProxyFactory" />
+        </Or>
+    </Match>
+    <!-- These calls deliberately violate nullability to verify argument validation. -->
+    <Match>
+        <Bug pattern="NP_NONNULL_PARAM_VIOLATION" />
+        <Class name="com.microsoft.kiota.serialization.FactoryRegistryExceptionTest" />
+        <Method name="~lambda\$invalidArgumentsKeepTheirValidationExceptions\$.*" />
     </Match>
 </FindBugsFilter>

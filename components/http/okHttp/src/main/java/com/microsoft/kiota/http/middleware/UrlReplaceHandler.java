@@ -61,6 +61,10 @@ public class UrlReplaceHandler implements Interceptor {
         }
         try {
             request = replaceRequestUrl(request, replaceOption.getReplacementPairs());
+            if (span != null) {
+                request = request.newBuilder().tag(Span.class, span).build();
+            }
+            return chain.proceed(request);
         } finally {
             if (scope != null) {
                 scope.close();
@@ -69,7 +73,6 @@ public class UrlReplaceHandler implements Interceptor {
                 span.end();
             }
         }
-        return chain.proceed(request);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.microsoft.kiota.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,38 +10,57 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.kiota.serialization.mocks.TestBackedModelEntity;
 import com.microsoft.kiota.serialization.mocks.TestEntity;
+import com.microsoft.kiota.store.BackingStoreSerializationWriterProxyFactory;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class SerializationHelpersTest {
     private static final String _jsonContentType = "application/json";
     private static final String _charset = "utf-8";
 
+    private static <T> T nullValue() {
+        return java.util.Collections.<String, T>emptyMap().get("missing");
+    }
+
+    private static String nullString() {
+        return nullValue();
+    }
+
+    private static Parsable nullParsable() {
+        return nullValue();
+    }
+
+    private static Iterable<Parsable> nullParsableCollection() {
+        return nullValue();
+    }
+
     @Test
     void defensive() {
         assertThrows(
                 NullPointerException.class,
-                () -> KiotaSerialization.serializeAsStream(null, (Parsable) null));
+                () -> KiotaSerialization.serializeAsStream(nullString(), nullParsable()));
         assertThrows(
                 NullPointerException.class,
-                () -> KiotaSerialization.serializeAsStream(_jsonContentType, (Parsable) null));
+                () -> KiotaSerialization.serializeAsStream(_jsonContentType, nullParsable()));
     }
 
     @Test
     void defensiveCollection() {
         assertThrows(
                 NullPointerException.class,
-                () -> KiotaSerialization.serializeAsStream(null, (Iterable<Parsable>) null));
+                () -> KiotaSerialization.serializeAsStream(nullString(), nullParsableCollection()));
         assertThrows(
                 NullPointerException.class,
                 () ->
                         KiotaSerialization.serializeAsStream(
-                                _jsonContentType, (Iterable<Parsable>) null));
+                                _jsonContentType, nullParsableCollection()));
     }
 
     @Test
@@ -90,5 +110,84 @@ class SerializationHelpersTest {
                         });
         assertEquals("[{'id':'123'}]", result);
         verify(mockSerializationWriter, times(1)).writeCollectionOfObjectValues(eq(""), any());
+    }
+
+    @Test
+    void serializesAllValuesInBackedModel() throws IOException {
+        final BackingStoreSerializationWriterProxyFactory
+                backingStoreSerializationWriterProxyFactory =
+                        new BackingStoreSerializationWriterProxyFactory(
+                                new JsonSerializationWriterFactory());
+        SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
+                _jsonContentType, backingStoreSerializationWriterProxyFactory);
+
+        final TestBackedModelEntity entity = new TestBackedModelEntity();
+        entity.setId("123");
+        entity.setOfficeLocation("Nairobi");
+
+        // Sets the backing store to be initialized. No properties are dirty
+        entity.getBackingStore().setIsInitializationCompleted(true);
+
+        final String result = KiotaJsonSerialization.serializeAsString(entity, false);
+
+        assertFalse(entity.getBackingStore().getReturnOnlyChangedValues());
+        assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", result);
+
+        final String collectionResult =
+                KiotaJsonSerialization.serializeAsString(
+                        new ArrayList<>(Arrays.asList(entity)), false);
+
+        assertEquals("[{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}]", collectionResult);
+    }
+
+    @Test
+    void serializesChangedValuesInBackedModel() throws IOException {
+        final BackingStoreSerializationWriterProxyFactory
+                backingStoreSerializationWriterProxyFactory =
+                        new BackingStoreSerializationWriterProxyFactory(
+                                new JsonSerializationWriterFactory());
+        SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
+                _jsonContentType, backingStoreSerializationWriterProxyFactory);
+
+        final TestBackedModelEntity entity = new TestBackedModelEntity();
+        entity.setId("123");
+        entity.setOfficeLocation("Nairobi");
+        entity.getBackingStore().setIsInitializationCompleted(true);
+
+        final String result = KiotaJsonSerialization.serializeAsString(entity, true);
+
+        assertFalse(entity.getBackingStore().getReturnOnlyChangedValues());
+        assertEquals("{}", result);
+
+        final String collectionResult =
+                KiotaJsonSerialization.serializeAsString(
+                        new ArrayList<>(Arrays.asList(entity)), true);
+        assertEquals("[{}]", collectionResult);
+    }
+
+    @Test
+    void cleansContentType() throws IOException {
+        final BackingStoreSerializationWriterProxyFactory
+                backingStoreSerializationWriterProxyFactory =
+                        new BackingStoreSerializationWriterProxyFactory(
+                                new JsonSerializationWriterFactory());
+        SerializationWriterFactoryRegistry.defaultInstance.contentTypeAssociatedFactories.put(
+                _jsonContentType, backingStoreSerializationWriterProxyFactory);
+
+        final TestBackedModelEntity entity = new TestBackedModelEntity();
+        entity.setId("123");
+        entity.setOfficeLocation("Nairobi");
+
+        final String result =
+                KiotaSerialization.serializeAsString(
+                        "application/json;odata.metadata=minimal", entity);
+        assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", result);
+
+        // Because onAfterObjectSerialization, returnOnlyChangedValues is set to false &
+        // initialization is completed
+        entity.getBackingStore().setIsInitializationCompleted(false);
+        final String otherResult =
+                KiotaSerialization.serializeAsString("application/vnd.github.raw+json", entity);
+        assertEquals("{\"id\":\"123\",\"officeLocation\":\"Nairobi\"}", otherResult);
     }
 }

@@ -1,10 +1,20 @@
 package com.microsoft.kiota.http;
 
+import com.microsoft.kiota.RequestOption;
+import com.microsoft.kiota.authentication.BaseBearerTokenAuthenticationProvider;
+import com.microsoft.kiota.http.middleware.AuthorizationHandler;
 import com.microsoft.kiota.http.middleware.HeadersInspectionHandler;
 import com.microsoft.kiota.http.middleware.ParametersNameDecodingHandler;
 import com.microsoft.kiota.http.middleware.RedirectHandler;
 import com.microsoft.kiota.http.middleware.RetryHandler;
+import com.microsoft.kiota.http.middleware.UrlReplaceHandler;
 import com.microsoft.kiota.http.middleware.UserAgentHandler;
+import com.microsoft.kiota.http.middleware.options.HeadersInspectionOption;
+import com.microsoft.kiota.http.middleware.options.ParametersNameDecodingOption;
+import com.microsoft.kiota.http.middleware.options.RedirectHandlerOption;
+import com.microsoft.kiota.http.middleware.options.RetryHandlerOption;
+import com.microsoft.kiota.http.middleware.options.UrlReplaceHandlerOption;
+import com.microsoft.kiota.http.middleware.options.UserAgentHandlerOption;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -13,6 +23,10 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /** This class is used to build the HttpClient instance used by the core service. */
 public class KiotaClientFactory {
@@ -23,7 +37,17 @@ public class KiotaClientFactory {
      * @return an OkHttpClient Builder instance.
      */
     @Nonnull public static OkHttpClient.Builder create() {
-        return create(null);
+        return create(createDefaultInterceptors());
+    }
+
+    /**
+     * Creates an OkHttpClient Builder with the default configuration and middleware options.
+     * @param requestOptions The request options to use for the interceptors.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(@Nonnull final RequestOption[] requestOptions) {
+        Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
+        return create(createDefaultInterceptors(requestOptions));
     }
 
     /**
@@ -31,21 +55,56 @@ public class KiotaClientFactory {
      * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
      * @return an OkHttpClient Builder instance.
      */
-    @Nonnull public static OkHttpClient.Builder create(@Nullable final Interceptor[] interceptors) {
+    @Nonnull public static OkHttpClient.Builder create(@Nonnull final Interceptor[] interceptors) {
+        Objects.requireNonNull(interceptors, "parameter interceptors cannot be null");
         final OkHttpClient.Builder builder =
                 new OkHttpClient.Builder()
+                        .followRedirects(
+                                false) // Redirects handled by .middleware.RedirectHandler rather
+                        // than okhttp
                         .connectTimeout(Duration.ofSeconds(100))
                         .readTimeout(Duration.ofSeconds(100))
                         .callTimeout(
                                 Duration.ofSeconds(
                                         100)); // TODO configure the default client options.
 
-        final Interceptor[] interceptorsOrDefault =
-                interceptors != null ? interceptors : createDefaultInterceptors();
-        for (final Interceptor interceptor : interceptorsOrDefault) {
+        for (final Interceptor interceptor : interceptors) {
             builder.addInterceptor(interceptor);
         }
         return builder;
+    }
+
+    /**
+     * Creates an OkHttpClient Builder with the default configuration and middleware.
+     * @param interceptors The interceptors to add to the client. Will default to createDefaultInterceptors() if null.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(@Nonnull final List<Interceptor> interceptors) {
+        Objects.requireNonNull(interceptors, "parameter interceptors cannot be null");
+        return create((new ArrayList<>(interceptors)).toArray(new Interceptor[0]));
+    }
+
+    /**
+     * Creates an OkHttpClient Builder with the default configuration and middleware including the AuthorizationHandler.
+     * @param authenticationProvider authentication provider to use for the AuthorizationHandler.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(
+            @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider) {
+        return create(authenticationProvider, new RequestOption[0]);
+    }
+
+    /**
+     * Creates an OkHttpClient Builder with the Authorization handler and optional custom default middleware configurations
+     * @param authenticationProvider authentication provider to use for the AuthorizationHandler.
+     * @param requestOptions The request options to use for the interceptors.
+     * @return an OkHttpClient Builder instance.
+     */
+    @Nonnull public static OkHttpClient.Builder create(
+            @Nonnull final BaseBearerTokenAuthenticationProvider authenticationProvider,
+            @Nonnull final RequestOption[] requestOptions) {
+        Objects.requireNonNull(authenticationProvider, "AuthenticationProvider cannot be null");
+        return create(createDefaultInterceptors(requestOptions, authenticationProvider));
     }
 
     /**
@@ -53,12 +112,88 @@ public class KiotaClientFactory {
      * @return an array of interceptors.
      */
     @Nonnull public static Interceptor[] createDefaultInterceptors() {
-        return new Interceptor[] {
-            new RedirectHandler(),
-            new RetryHandler(),
-            new ParametersNameDecodingHandler(),
-            new UserAgentHandler(),
-            new HeadersInspectionHandler()
-        };
+        return createDefaultInterceptors(new RequestOption[0]);
+    }
+
+    /**
+     * Creates the default interceptors for the client.
+     * @param requestOptions The request options to use for the interceptors.
+     * @return an array of interceptors.
+     */
+    @Nonnull public static Interceptor[] createDefaultInterceptors(
+            @Nonnull final RequestOption[] requestOptions) {
+        return createDefaultInterceptors(requestOptions, null);
+    }
+
+    @Nonnull private static Interceptor[] createDefaultInterceptors(
+            @Nonnull final RequestOption[] requestOptions,
+            @Nullable final BaseBearerTokenAuthenticationProvider authenticationProvider) {
+        Objects.requireNonNull(requestOptions, "parameter requestOptions cannot be null");
+
+        UrlReplaceHandlerOption uriReplacementOption = null;
+        UserAgentHandlerOption userAgentHandlerOption = null;
+        RetryHandlerOption retryHandlerOption = null;
+        RedirectHandlerOption redirectHandlerOption = null;
+        ParametersNameDecodingOption parametersNameDecodingOption = null;
+        HeadersInspectionOption headersInspectionHandlerOption = null;
+
+        for (final RequestOption option : requestOptions) {
+            if (uriReplacementOption == null && option instanceof UrlReplaceHandlerOption) {
+                uriReplacementOption = (UrlReplaceHandlerOption) option;
+            } else if (retryHandlerOption == null && option instanceof RetryHandlerOption) {
+                retryHandlerOption = (RetryHandlerOption) option;
+            } else if (redirectHandlerOption == null && option instanceof RedirectHandlerOption) {
+                redirectHandlerOption = (RedirectHandlerOption) option;
+            } else if (parametersNameDecodingOption == null
+                    && option instanceof ParametersNameDecodingOption) {
+                parametersNameDecodingOption = (ParametersNameDecodingOption) option;
+            } else if (userAgentHandlerOption == null && option instanceof UserAgentHandlerOption) {
+                userAgentHandlerOption = (UserAgentHandlerOption) option;
+            } else if (headersInspectionHandlerOption == null
+                    && option instanceof HeadersInspectionOption) {
+                headersInspectionHandlerOption = (HeadersInspectionOption) option;
+            }
+        }
+
+        final List<Interceptor> handlers = new ArrayList<>();
+        handlers.add(
+                uriReplacementOption != null
+                        ? new UrlReplaceHandler(uriReplacementOption)
+                        : new UrlReplaceHandler());
+        handlers.add(
+                parametersNameDecodingOption != null
+                        ? new ParametersNameDecodingHandler(parametersNameDecodingOption)
+                        : new ParametersNameDecodingHandler());
+        handlers.add(
+                userAgentHandlerOption != null
+                        ? new UserAgentHandler(userAgentHandlerOption)
+                        : new UserAgentHandler());
+        if (authenticationProvider != null) {
+            handlers.add(new AuthorizationHandler(authenticationProvider));
+        }
+        handlers.add(
+                redirectHandlerOption != null
+                        ? new RedirectHandler(redirectHandlerOption)
+                        : new RedirectHandler());
+        handlers.add(
+                retryHandlerOption != null
+                        ? new RetryHandler(retryHandlerOption)
+                        : new RetryHandler());
+        handlers.add(
+                headersInspectionHandlerOption != null
+                        ? new HeadersInspectionHandler(headersInspectionHandlerOption)
+                        : new HeadersInspectionHandler());
+
+        return handlers.toArray(new Interceptor[0]);
+    }
+
+    /**
+     * Creates the default interceptors for the client.
+     * @return an array of interceptors.
+     * @deprecated Use {@link #createDefaultInterceptors()} instead.
+     */
+    @Deprecated
+    @Nonnull public static List<Interceptor> createDefaultInterceptorsAsList() {
+        return new ArrayList<>(Arrays.asList(createDefaultInterceptors()));
     }
 }
